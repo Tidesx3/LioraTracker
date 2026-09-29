@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.domain.clockDigits
+import app.liora.core.domain.clockDigitsText
 import app.liora.core.domain.parseClockDigits
 import app.liora.core.domain.parseDecimalInput
 import app.liora.core.model.RepRange
@@ -97,7 +98,7 @@ internal fun ClockTargetField(
             digits = seconds?.let(::clockDigits).orEmpty()
         }
     }
-    val text = clockText(digits)
+    val text = clockDigitsText(digits)
     TargetField(
         value = TextFieldValue(text, TextRange(text.length)),
         onValueChange = { typed ->
@@ -112,13 +113,6 @@ internal fun ClockTargetField(
         keyboardType = KeyboardType.Number,
         modifier = modifier,
     )
-}
-
-/** Digits as they're typed, shown as m:ss without rolling over yet ("90" shows 0:90 until the next digit). */
-private fun clockText(digits: String): String {
-    if (digits.isEmpty()) return ""
-    val padded = digits.padStart(MIN_CLOCK_TEXT_DIGITS, '0')
-    return padded.dropLast(2).trimStart('0').ifEmpty { "0" } + ":" + padded.takeLast(2)
 }
 
 @Composable
@@ -177,6 +171,3 @@ internal fun RepRange?.withMax(max: Int?): RepRange? {
 
 private const val MAX_REP_DIGITS = 3
 private const val MAX_CLOCK_DIGITS = 5
-
-/** "5" shows as 0:05: at least one minute digit and two second digits. */
-private const val MIN_CLOCK_TEXT_DIGITS = 3

@@ -60,17 +60,17 @@ import app.liora.core.model.RoutineExercise
 import app.liora.core.model.RoutineSet
 import app.liora.core.model.SetType
 import app.liora.core.model.TrackingType
-import app.liora.core.ui.SetTypeBadge
+import app.liora.core.ui.RestTimePicker
+import app.liora.core.ui.SetTypeMenu
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.distanceInKilometers
-import app.liora.core.ui.label
+import app.liora.core.ui.restLabel
 import app.liora.core.ui.setNumbers
 import app.liora.feature.train.resources.Res
 import app.liora.feature.train.resources.cd_close
 import app.liora.feature.train.resources.cd_more
 import app.liora.feature.train.resources.cd_remove_set
 import app.liora.feature.train.resources.cd_reorder
-import app.liora.feature.train.resources.dialog_cancel
 import app.liora.feature.train.resources.editor_add_exercises
 import app.liora.feature.train.resources.editor_add_note
 import app.liora.feature.train.resources.editor_add_set
@@ -93,14 +93,9 @@ import app.liora.feature.train.resources.editor_notes
 import app.liora.feature.train.resources.editor_remove_exercise
 import app.liora.feature.train.resources.editor_reps_max_hint
 import app.liora.feature.train.resources.editor_rest
-import app.liora.feature.train.resources.editor_rest_default
-import app.liora.feature.train.resources.editor_rest_off
 import app.liora.feature.train.resources.editor_save
 import app.liora.feature.train.resources.editor_superset_next
 import app.liora.feature.train.resources.editor_superset_remove
-import app.liora.feature.train.resources.rest_default
-import app.liora.feature.train.resources.rest_off
-import app.liora.feature.train.resources.rest_value
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableCollectionItemScope
@@ -381,7 +376,7 @@ private fun ReorderableCollectionItemScope.ExerciseEditorCard(
         }
     }
     if (choosingRest) {
-        RestDialog(
+        RestTimePicker(
             current = planned.restSeconds,
             onChoose = {
                 choosingRest = false
@@ -391,14 +386,6 @@ private fun ReorderableCollectionItemScope.ExerciseEditorCard(
         )
     }
 }
-
-@Composable
-private fun restLabel(seconds: Int?): String =
-    when (seconds) {
-        null -> stringResource(Res.string.rest_default)
-        0 -> stringResource(Res.string.rest_off)
-        else -> stringResource(Res.string.rest_value, seconds.seconds.formatAsClock())
-    }
 
 @Composable
 private fun ExerciseMenu(
@@ -498,7 +485,7 @@ private fun SetEditorRow(
         horizontalArrangement = Arrangement.spacedBy(FIELD_GAP),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        SetTypePicker(set.type, number, onPick = { type -> onChange { copy(type = type) } })
+        SetTypeMenu(set.type, number, onPick = { type -> onChange { copy(type = type) } })
         if (trackingType.usesWeight) {
             DecimalTargetField(
                 value = set.weight?.kilograms,
@@ -543,68 +530,6 @@ private fun SetEditorRow(
         LioraIconButton(LioraIcons.Close, stringResource(Res.string.cd_remove_set), onRemove)
     }
 }
-
-@Composable
-private fun SetTypePicker(
-    type: SetType,
-    number: Int,
-    onPick: (SetType) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var expanded by rememberSaveable { mutableStateOf(false) }
-    Box(modifier) {
-        SetTypeBadge(type, number, Modifier.clickable { expanded = true })
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            SetType.entries.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(stringResource(option.label)) },
-                    onClick = {
-                        expanded = false
-                        onPick(option)
-                    },
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun RestDialog(
-    current: Int?,
-    onChoose: (Int?) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.editor_rest)) },
-        text = {
-            LazyColumn(Modifier.selectableGroup()) {
-                items(REST_CHOICES) { seconds ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth().clickable { onChoose(seconds) }.padding(vertical = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        RadioButton(selected = seconds == current, onClick = { onChoose(seconds) })
-                        Text(
-                            text =
-                                when (seconds) {
-                                    null -> stringResource(Res.string.editor_rest_default)
-                                    0 -> stringResource(Res.string.editor_rest_off)
-                                    else -> seconds.seconds.formatAsClock()
-                                },
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.dialog_cancel)) } },
-    )
-}
-
-/** Null keeps the exercise's own default; 0 turns the timer off for this exercise. */
-private val REST_CHOICES: List<Int?> = listOf(null, 0, 30, 45, 60, 90, 120, 150, 180, 240, 300)
 
 private val BADGE_WIDTH = 32.dp
 private val WEIGHT_WIDTH = 72.dp

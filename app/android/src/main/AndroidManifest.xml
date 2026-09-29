@@ -4,6 +4,17 @@
   <!-- Exercise images load from the public exercise dataset; everything else works offline. -->
   <uses-permission android:name="android.permission.INTERNET" />
 
+  <!-- The live workout notification, promoted to a Live Update on Android 16. -->
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
+  <!-- The end-of-rest alert has to come on time, locked and dozing: an exact alarm, like a kitchen timer. -->
+  <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+  <uses-permission
+    android:name="android.permission.SCHEDULE_EXACT_ALARM"
+    android:maxSdkVersion="32" />
+  <!-- Brings a workout's notification and rest alarm back after a reboot. -->
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
   <!-- System backup is off: backups go through Liora's own export and sync, which know how to merge. -->
   <application
     android:name=".LioraApplication"
@@ -16,16 +27,33 @@
 
     <!-- Folding, unfolding and resizing only change the window size: Compose re-lays out in place
          instead of recreating the activity, so typed values, focus and running animations survive.
-         Locale and night-mode changes still recreate, which the per-app language switch relies on. -->
+         Locale and night-mode changes still recreate, which the per-app language switch relies on.
+         singleTop: tapping the workout notification opens the logger in the running activity. -->
     <activity
       android:name=".MainActivity"
       android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|density"
       android:exported="true"
+      android:launchMode="singleTop"
       android:windowSoftInputMode="adjustResize">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+
+    <receiver
+      android:name=".workout.WorkoutActionReceiver"
+      android:exported="false" />
+    <receiver
+      android:name=".workout.RestAlarmReceiver"
+      android:exported="false" />
+    <receiver
+      android:name=".workout.WorkoutRestoreReceiver"
+      android:exported="false">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+        <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+      </intent-filter>
+    </receiver>
   </application>
 </manifest>

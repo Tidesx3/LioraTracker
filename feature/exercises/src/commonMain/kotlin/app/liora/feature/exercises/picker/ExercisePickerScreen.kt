@@ -46,6 +46,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun ExercisePickerScreen(
     viewModel: ExercisePickerViewModel,
+    multiple: Boolean,
     onClose: () -> Unit,
     onDone: (List<String>) -> Unit,
     onCreateExercise: (name: String) -> Unit,
@@ -59,7 +60,7 @@ internal fun ExercisePickerScreen(
         query = viewModel.query,
         uiState = uiState,
         onQueryChange = viewModel::onQueryChange,
-        onToggle = viewModel::toggle,
+        onToggle = { id -> if (multiple) viewModel.toggle(id) else onDone(listOf(id)) },
         onClose = onClose,
         onDone = { onDone(uiState.selected) },
         onCreateExercise = { name -> name?.let(onCreateExercise) },

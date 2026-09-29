@@ -4,6 +4,8 @@ import app.liora.core.designsystem.resources.Res
 import app.liora.core.designsystem.resources.ic_add
 import app.liora.core.designsystem.resources.ic_arrow_back
 import app.liora.core.designsystem.resources.ic_arrow_drop_down
+import app.liora.core.designsystem.resources.ic_arrow_forward
+import app.liora.core.designsystem.resources.ic_backspace
 import app.liora.core.designsystem.resources.ic_check
 import app.liora.core.designsystem.resources.ic_chevron_right
 import app.liora.core.designsystem.resources.ic_close
@@ -16,14 +18,19 @@ import app.liora.core.designsystem.resources.ic_folder
 import app.liora.core.designsystem.resources.ic_history
 import app.liora.core.designsystem.resources.ic_keyboard_arrow_down
 import app.liora.core.designsystem.resources.ic_keyboard_arrow_up
+import app.liora.core.designsystem.resources.ic_keyboard_hide
 import app.liora.core.designsystem.resources.ic_link
 import app.liora.core.designsystem.resources.ic_menu_book
 import app.liora.core.designsystem.resources.ic_monitor_weight
 import app.liora.core.designsystem.resources.ic_monitoring
 import app.liora.core.designsystem.resources.ic_more_vert
 import app.liora.core.designsystem.resources.ic_play_arrow
+import app.liora.core.designsystem.resources.ic_remove
+import app.liora.core.designsystem.resources.ic_reorder
 import app.liora.core.designsystem.resources.ic_search
 import app.liora.core.designsystem.resources.ic_settings
+import app.liora.core.designsystem.resources.ic_skip_next
+import app.liora.core.designsystem.resources.ic_swap_horiz
 import app.liora.core.designsystem.resources.ic_timer
 import app.liora.core.designsystem.resources.ic_visibility_off
 import org.jetbrains.compose.resources.DrawableResource
@@ -56,4 +63,11 @@ object LioraIcons {
     val DragHandle: DrawableResource = Res.drawable.ic_drag_indicator
     val Folder: DrawableResource = Res.drawable.ic_folder
     val Superset: DrawableResource = Res.drawable.ic_link
+    val Backspace: DrawableResource = Res.drawable.ic_backspace
+    val Decrease: DrawableResource = Res.drawable.ic_remove
+    val HideKeyboard: DrawableResource = Res.drawable.ic_keyboard_hide
+    val Next: DrawableResource = Res.drawable.ic_arrow_forward
+    val Replace: DrawableResource = Res.drawable.ic_swap_horiz
+    val Reorder: DrawableResource = Res.drawable.ic_reorder
+    val Skip: DrawableResource = Res.drawable.ic_skip_next
 }

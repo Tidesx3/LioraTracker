@@ -57,9 +57,6 @@
     <item quantity="other">%1$d Sätze</item>
   </plurals>
   <string name="superset">Supersatz</string>
-  <string name="rest_value">Pause %1$s</string>
-  <string name="rest_default">Pause: Standard der Übung</string>
-  <string name="rest_off">Kein Pausentimer</string>
 
   <string name="editor_new_title">Neue Routine</string>
   <string name="editor_edit_title">Routine bearbeiten</string>
@@ -79,8 +76,6 @@
   <string name="editor_add_note">Notiz hinzufügen</string>
   <string name="editor_note_hint">Notiz zu dieser Übung</string>
   <string name="editor_remove_exercise">Übung entfernen</string>
-  <string name="editor_rest_default">Standard der Übung</string>
-  <string name="editor_rest_off">Aus</string>
   <string name="editor_discard_title">Änderungen verwerfen?</string>
   <string name="editor_discard_body">Deine Änderungen an dieser Routine gehen verloren.</string>
   <string name="editor_discard">Verwerfen</string>

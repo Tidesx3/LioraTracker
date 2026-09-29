@@ -61,4 +61,12 @@
     <item quantity="one">%1$s Wdh.</item>
     <item quantity="other">%1$s Wdh.</item>
   </plurals>
+
+  <string name="rest_value">Pause %1$s</string>
+  <string name="rest_default">Pause: Standard der Übung</string>
+  <string name="rest_off">Kein Pausentimer</string>
+  <string name="rest_picker_title">Pausentimer</string>
+  <string name="rest_picker_default">Standard der Übung</string>
+  <string name="rest_picker_off">Aus</string>
+  <string name="rest_picker_cancel">Abbrechen</string>
 </resources>

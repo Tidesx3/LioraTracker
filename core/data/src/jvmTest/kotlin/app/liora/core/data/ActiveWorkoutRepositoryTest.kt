@@ -5,6 +5,7 @@ import app.liora.core.common.HybridLogicalClock
 import app.liora.core.common.IdGenerator
 import app.liora.core.data.routine.OfflineRoutineRepository
 import app.liora.core.data.sync.SyncStamper
+import app.liora.core.data.workout.LocalRestTimerRepository
 import app.liora.core.data.workout.OfflineActiveWorkoutRepository
 import app.liora.core.database.TransactionRunner
 import app.liora.core.database.inMemoryLioraDatabase
@@ -40,6 +41,7 @@ class ActiveWorkoutRepositoryTest {
         OfflineActiveWorkoutRepository(
             workoutDao = database.workoutDao(),
             routines = routines,
+            restTimer = LocalRestTimerRepository(database.localMetaDao(), clock),
             transactions = TransactionRunner(database),
             ids = ids,
             stamper = stamper,

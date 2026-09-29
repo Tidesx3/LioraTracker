@@ -5,7 +5,7 @@
   <string name="logger_stat_volume">Volume</string>
   <string name="logger_stat_sets">Sets</string>
   <string name="logger_empty_title">No exercises yet</string>
-  <string name="logger_empty_body">Adding exercises and logging sets arrives in the next build.</string>
+  <string name="logger_empty_body">Add the first exercise and log your sets.</string>
   <string name="logger_no_workout_title">No workout in progress</string>
   <string name="logger_no_workout_body">Start one from the Train tab.</string>
   <string name="logger_discard">Discard workout</string>
@@ -13,5 +13,52 @@
   <string name="logger_discard_body">Everything logged in this session will be lost.</string>
   <string name="logger_discard_confirm">Discard</string>
   <string name="logger_discard_cancel">Keep logging</string>
+  <string name="logger_add_exercises">Add exercises</string>
+  <string name="logger_add_set">Add set</string>
   <string name="cd_minimize">Minimize workout</string>
+  <string name="cd_rename">Rename workout</string>
+  <string name="cd_more">More options</string>
+  <string name="cd_complete_set">Log set</string>
+  <string name="cd_reopen_set">Undo logged set</string>
+  <string name="cd_remove_set">Remove set</string>
+
+  <string name="col_set">Set</string>
+  <string name="col_previous">Previous</string>
+  <string name="col_reps">Reps</string>
+  <string name="col_time">Time</string>
+  <string name="col_kg" translatable="false">kg</string>
+  <string name="col_km" translatable="false">km</string>
+  <string name="col_m" translatable="false">m</string>
+  <string name="superset">Superset</string>
+
+  <string name="menu_replace">Replace exercise</string>
+  <string name="menu_reorder">Reorder exercises</string>
+  <string name="menu_superset_next">Superset with next</string>
+  <string name="menu_superset_remove">Remove from superset</string>
+  <string name="menu_rest">Rest timer</string>
+  <string name="menu_add_note">Add note</string>
+  <string name="menu_remove">Remove exercise</string>
+  <string name="note_hint">Note for this exercise</string>
+
+  <string name="rest_title">Rest</string>
+  <string name="rest_minus" translatable="false">−15 s</string>
+  <string name="rest_plus" translatable="false">+15 s</string>
+  <string name="rest_skip">Skip</string>
+
+  <string name="pad_backspace">Delete</string>
+  <string name="pad_decrease">Decrease</string>
+  <string name="pad_increase">Increase</string>
+  <string name="pad_hide">Hide keypad</string>
+  <string name="pad_next">Next field</string>
+
+  <string name="rename_title">Workout name</string>
+  <string name="dialog_save">Save</string>
+  <string name="dialog_cancel">Cancel</string>
+  <string name="reorder_done">Done</string>
+
+  <string name="focus_set">Set %1$d of %2$d</string>
+  <string name="focus_previous">Last time: %1$s</string>
+  <string name="focus_log">Log set</string>
+  <string name="focus_all_done">All sets done</string>
+  <string name="focus_all_done_body">Add an exercise or a set, or finish the workout.</string>
 </resources>

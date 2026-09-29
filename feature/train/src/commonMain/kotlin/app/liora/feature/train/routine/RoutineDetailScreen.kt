@@ -50,6 +50,7 @@ import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
 import app.liora.core.ui.SetTypeBadge
 import app.liora.core.ui.currentLanguage
+import app.liora.core.ui.restLabel
 import app.liora.core.ui.setNumbers
 import app.liora.core.ui.setSummary
 import app.liora.feature.train.resources.Res
@@ -58,8 +59,6 @@ import app.liora.feature.train.resources.cd_more
 import app.liora.feature.train.resources.detail_exercises
 import app.liora.feature.train.resources.detail_sets
 import app.liora.feature.train.resources.detail_start
-import app.liora.feature.train.resources.rest_off
-import app.liora.feature.train.resources.rest_value
 import app.liora.feature.train.resources.routine_copy_name
 import app.liora.feature.train.resources.routine_delete
 import app.liora.feature.train.resources.routine_duplicate
@@ -252,12 +251,7 @@ private fun PlannedExercise(
             Text(exercise?.name.orEmpty(), style = MaterialTheme.typography.titleMedium)
             planned.restSeconds?.let { seconds ->
                 Text(
-                    text =
-                        if (seconds == 0) {
-                            stringResource(Res.string.rest_off)
-                        } else {
-                            stringResource(Res.string.rest_value, seconds.seconds.formatAsClock())
-                        },
+                    text = restLabel(seconds),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

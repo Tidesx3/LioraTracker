@@ -45,4 +45,12 @@ class DecimalInputTest {
         }
         assertEquals("130", clockDigits(90))
     }
+
+    @Test
+    fun clockDigitsShowAsTheyAreTyped() {
+        assertEquals("0:09", clockDigitsText("9"))
+        assertEquals("1:30", clockDigitsText("130"))
+        assertEquals("0:90", clockDigitsText("90"))
+        assertEquals("", clockDigitsText(""))
+    }
 }

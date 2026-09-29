@@ -78,15 +78,23 @@ fun EntryProviderScope<NavKey>.exercisesEntries(navigator: Navigator) {
             },
         )
     }
-    // Full screen rather than a pane: it is opened from editors, which it replaces while picking.
+    pickerEntry(navigator)
+}
+
+// Full screen rather than a pane: it is opened from editors, which it replaces while picking.
+private fun EntryProviderScope<NavKey>.pickerEntry(navigator: Navigator) {
     entry<ExercisePickerRoute> { route ->
         val viewModel: ExercisePickerViewModel = koinViewModel(key = route.requestKey)
         val createdKey = route.requestKey + CREATED_SUFFIX
-        NavigationResultEffect<String>(navigator.results, createdKey, viewModel::onExerciseCreated)
+        val onDone = { ids: List<String> -> navigator.goBackWithResult(route.requestKey, ids) }
+        NavigationResultEffect<String>(navigator.results, createdKey) { id ->
+            if (route.multiple) viewModel.onExerciseCreated(id) else onDone(listOf(id))
+        }
         ExercisePickerScreen(
             viewModel = viewModel,
+            multiple = route.multiple,
             onClose = navigator::goBack,
-            onDone = { ids -> navigator.goBackWithResult(route.requestKey, ids) },
+            onDone = onDone,
             onCreateExercise = { name ->
                 navigator.navigate(ExerciseEditorRoute(initialName = name, resultKey = createdKey))
             },

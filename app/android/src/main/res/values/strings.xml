@@ -5,4 +5,23 @@
   <string name="tab_history">History</string>
   <string name="tab_progress">Progress</string>
   <string name="tab_exercises">Exercises</string>
+
+  <string name="notif_channel_workout">Workout in progress</string>
+  <string name="notif_channel_workout_desc">The workout you’re logging: the next set and the rest countdown.</string>
+  <string name="notif_channel_rest">Rest over</string>
+  <string name="notif_channel_rest_desc">Lets you know when your rest is up.</string>
+  <string name="notif_workout_default_title">Workout</string>
+  <string name="notif_rest_title">Rest</string>
+  <string name="notif_rest_over_title">Rest over</string>
+  <string name="notif_next">Next: %1$s</string>
+  <string name="notif_set_of">Set %1$d of %2$d</string>
+  <string name="notif_set_short" translatable="false">%1$d/%2$d</string>
+  <string name="notif_all_done">All sets done</string>
+  <string name="notif_action_log_set">Log set</string>
+  <string name="notif_action_add_rest" translatable="false">+30 s</string>
+  <string name="notif_action_skip_rest">Skip rest</string>
+  <plurals name="notif_reps">
+    <item quantity="one">%1$s rep</item>
+    <item quantity="other">%1$s reps</item>
+  </plurals>
 </resources>

@@ -57,9 +57,6 @@
     <item quantity="other">%1$d sets</item>
   </plurals>
   <string name="superset">Superset</string>
-  <string name="rest_value">Rest %1$s</string>
-  <string name="rest_default">Rest: exercise default</string>
-  <string name="rest_off">No rest timer</string>
 
   <string name="editor_new_title">New routine</string>
   <string name="editor_edit_title">Edit routine</string>
@@ -82,8 +79,6 @@
   <string name="editor_add_note">Add note</string>
   <string name="editor_note_hint">Note for this exercise</string>
   <string name="editor_remove_exercise">Remove exercise</string>
-  <string name="editor_rest_default">Exercise default</string>
-  <string name="editor_rest_off">Off</string>
   <string name="editor_discard_title">Discard changes?</string>
   <string name="editor_discard_body">Your edits to this routine will be lost.</string>
   <string name="editor_discard">Discard</string>

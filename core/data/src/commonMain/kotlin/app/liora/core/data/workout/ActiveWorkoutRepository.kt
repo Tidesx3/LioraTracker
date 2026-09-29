@@ -10,26 +10,26 @@ import app.liora.core.database.model.WorkoutExerciseEntity
 import app.liora.core.database.model.WorkoutSetEntity
 import app.liora.core.model.ActiveWorkout
 import app.liora.core.model.LoggedSet
-import app.liora.core.model.Mass
-import app.liora.core.model.RepRange
 import app.liora.core.model.Routine
-import app.liora.core.model.WorkoutExercise
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.Instant
+import kotlinx.coroutines.flow.map
 
 /**
  * Owns the single in-progress workout. It lives in the database from the first tap, so it survives
- * the app being killed, the phone rebooting or the battery dying mid-session.
+ * the app being killed, the phone rebooting or the battery dying mid-session. Editing its exercises
+ * and logging sets go through [WorkoutEditor] and [SetLogger].
  */
 interface ActiveWorkoutRepository {
     /** The workout in progress with its exercises and sets, or null. */
     val activeWorkout: Flow<ActiveWorkout?>
+
+    /** Last session's completed sets for each exercise of the workout in progress, by exercise id. */
+    val previousSets: Flow<Map<String, List<LoggedSet>>>
 
     /** Starts an empty workout, or returns the one already in progress. */
     suspend fun startEmptyWorkout(): ActiveWorkout
@@ -40,6 +40,9 @@ interface ActiveWorkoutRepository {
      */
     suspend fun startFromRoutine(routineId: String): ActiveWorkout
 
+    /** Names the workout; blank goes back to the default name. */
+    suspend fun rename(name: String)
+
     suspend fun finish()
 
     suspend fun discard()
@@ -48,6 +51,7 @@ interface ActiveWorkoutRepository {
 internal class OfflineActiveWorkoutRepository(
     private val workoutDao: WorkoutDao,
     private val routines: RoutineRepository,
+    private val restTimer: RestTimerRepository,
     private val transactions: TransactionRunner,
     private val ids: IdGenerator,
     private val stamper: SyncStamper,
@@ -69,15 +73,36 @@ internal class OfflineActiveWorkoutRepository(
                 }
             }.distinctUntilChanged()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val previousSets: Flow<Map<String, List<LoggedSet>>> =
+        activeWorkout
+            .map { workout ->
+                workout
+                    ?.exercises
+                    ?.map { it.exerciseId }
+                    ?.distinct()
+                    ?.sorted()
+                    .orEmpty()
+            }.distinctUntilChanged()
+            .flatMapLatest { exerciseIds ->
+                if (exerciseIds.isEmpty()) {
+                    flowOf(emptyMap())
+                } else {
+                    workoutDao.observeLastSessionSets(exerciseIds).map { rows ->
+                        rows.groupBy({ it.exerciseId }, { it.set.toLoggedSet() })
+                    }
+                }
+            }.distinctUntilChanged()
+
     override suspend fun startEmptyWorkout(): ActiveWorkout =
         transactions.inTransaction {
-            workoutDao.getActive()?.toActiveWorkout() ?: newWorkout(name = null, routineId = null).toActiveWorkout()
+            workoutDao.activeRows()?.toModel() ?: newWorkout(name = null, routineId = null).toActiveWorkout()
         }
 
     override suspend fun startFromRoutine(routineId: String): ActiveWorkout {
         val routine = requireNotNull(routines.get(routineId)) { "No routine $routineId" }
         return transactions.inTransaction {
-            workoutDao.getActive()?.toActiveWorkout() ?: run {
+            workoutDao.activeRows()?.toModel() ?: run {
                 val workout = newWorkout(name = routine.name, routineId = routine.id)
                 val (exercises, sets) = plannedRows(workout.id, routine)
                 workoutDao.upsertExercises(exercises)
@@ -87,10 +112,23 @@ internal class OfflineActiveWorkoutRepository(
         }
     }
 
+    override suspend fun rename(name: String) {
+        transactions.inTransaction {
+            val workout = workoutDao.getActive() ?: return@inTransaction
+            val trimmed = name.trim().ifEmpty { null }
+            if (trimmed !=
+                workout.name
+            ) {
+                workoutDao.upsert(workout.copy(name = trimmed, sync = stamper.touch(workout.sync)))
+            }
+        }
+    }
+
     override suspend fun finish() {
         transactions.inTransaction {
             val workout = workoutDao.getActive() ?: return@inTransaction
             workoutDao.upsert(workout.copy(endedAt = stamper.nowMillis(), sync = stamper.touch(workout.sync)))
+            restTimer.stop()
         }
     }
 
@@ -98,6 +136,7 @@ internal class OfflineActiveWorkoutRepository(
         transactions.inTransaction {
             val workout = workoutDao.getActive() ?: return@inTransaction
             workoutDao.upsert(workout.copy(sync = stamper.tombstone(workout.sync)))
+            restTimer.stop()
         }
     }
 
@@ -164,40 +203,3 @@ internal class OfflineActiveWorkoutRepository(
         return exercises to sets
     }
 }
-
-private fun WorkoutEntity.toActiveWorkout(
-    exercises: List<WorkoutExerciseEntity> = emptyList(),
-    sets: List<WorkoutSetEntity> = emptyList(),
-): ActiveWorkout {
-    val setsByExercise = sets.groupBy { it.workoutExerciseId }
-    return ActiveWorkout(
-        id = id,
-        name = name,
-        startedAt = Instant.fromEpochMilliseconds(startedAt),
-        routineId = routineId,
-        exercises =
-            exercises.sortedBy { it.position }.map { exercise ->
-                WorkoutExercise(
-                    id = exercise.id,
-                    exerciseId = exercise.exerciseId,
-                    supersetGroup = exercise.supersetGroup,
-                    restSeconds = exercise.restSeconds,
-                    notes = exercise.notes,
-                    sets = setsByExercise[exercise.id].orEmpty().sortedBy { it.position }.map { it.toLoggedSet() },
-                )
-            },
-    )
-}
-
-private fun WorkoutSetEntity.toLoggedSet() =
-    LoggedSet(
-        id = id,
-        type = setType,
-        weight = weightKg?.let(::Mass),
-        reps = reps,
-        duration = durationSeconds?.seconds,
-        distanceMeters = distanceMeters,
-        rpe = rpe,
-        completedAt = completedAt?.let(Instant::fromEpochMilliseconds),
-        targetReps = RepRange.of(targetRepsMin, targetRepsMax),
-    )

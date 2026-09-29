@@ -1,5 +1,10 @@
 package app.liora.android.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -19,12 +24,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
@@ -62,10 +74,21 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun LioraApp(
     modifier: Modifier = Modifier,
+    openLogger: Boolean = false,
+    onOpenLoggerHandle: () -> Unit = {},
     viewModel: LioraAppViewModel = koinViewModel(),
 ) {
     val navigator = viewModel.navigator
     val activeWorkout by viewModel.activeWorkout.collectAsStateWithLifecycle()
+    // From the workout notification.
+    val currentOnOpenLoggerHandle by rememberUpdatedState(onOpenLoggerHandle)
+    LaunchedEffect(openLogger) {
+        if (openLogger) {
+            navigator.navigate(LoggerRoute)
+            currentOnOpenLoggerHandle()
+        }
+    }
+    AskForNotificationsDuringWorkouts(workoutRunning = activeWorkout != null)
     val layout = currentWindowLayout()
     val showRail = layout.navigationRail && navigator.currentRoute != LoggerRoute
     val showBottomChrome = !layout.navigationRail && navigator.currentRoute in TopLevelDestination.routes
@@ -113,6 +136,26 @@ fun LioraApp(
                         settingsEntries(navigator)
                     },
             )
+        }
+    }
+}
+
+/**
+ * The live workout notification needs permission on Android 13 and up. It's asked for when it matters,
+ * as the first workout starts, and once per app session at most.
+ */
+@Composable
+private fun AskForNotificationsDuringWorkouts(workoutRunning: Boolean) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+    val context = LocalContext.current
+    var asked by rememberSaveable { mutableStateOf(false) }
+    val request = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
+    LaunchedEffect(workoutRunning) {
+        val permission = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+        val granted = permission == PackageManager.PERMISSION_GRANTED
+        if (workoutRunning && !asked && !granted) {
+            asked = true
+            request.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 }

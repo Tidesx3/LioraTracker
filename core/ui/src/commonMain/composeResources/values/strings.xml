@@ -61,4 +61,12 @@
     <item quantity="one">%1$s rep</item>
     <item quantity="other">%1$s reps</item>
   </plurals>
+
+  <string name="rest_value">Rest %1$s</string>
+  <string name="rest_default">Rest: exercise default</string>
+  <string name="rest_off">No rest timer</string>
+  <string name="rest_picker_title">Rest timer</string>
+  <string name="rest_picker_default">Exercise default</string>
+  <string name="rest_picker_off">Off</string>
+  <string name="rest_picker_cancel">Cancel</string>
 </resources>

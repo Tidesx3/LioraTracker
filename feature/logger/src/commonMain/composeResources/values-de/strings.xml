@@ -5,7 +5,7 @@
   <string name="logger_stat_volume">Volumen</string>
   <string name="logger_stat_sets">Sätze</string>
   <string name="logger_empty_title">Noch keine Übungen</string>
-  <string name="logger_empty_body">Übungen hinzufügen und Sätze loggen kommt mit dem nächsten Build.</string>
+  <string name="logger_empty_body">Füge die erste Übung hinzu und logge deine Sätze.</string>
   <string name="logger_no_workout_title">Kein laufendes Training</string>
   <string name="logger_no_workout_body">Starte eines im Tab Training.</string>
   <string name="logger_discard">Training verwerfen</string>
@@ -13,5 +13,47 @@
   <string name="logger_discard_body">Alles, was du in dieser Einheit geloggt hast, geht verloren.</string>
   <string name="logger_discard_confirm">Verwerfen</string>
   <string name="logger_discard_cancel">Weiter loggen</string>
+  <string name="logger_add_exercises">Übungen hinzufügen</string>
+  <string name="logger_add_set">Satz hinzufügen</string>
   <string name="cd_minimize">Training minimieren</string>
+  <string name="cd_rename">Training umbenennen</string>
+  <string name="cd_more">Weitere Optionen</string>
+  <string name="cd_complete_set">Satz abhaken</string>
+  <string name="cd_reopen_set">Satz wieder öffnen</string>
+  <string name="cd_remove_set">Satz entfernen</string>
+
+  <string name="col_set">Satz</string>
+  <string name="col_previous">Vorher</string>
+  <string name="col_reps">Wdh.</string>
+  <string name="col_time">Zeit</string>
+  <string name="superset">Supersatz</string>
+
+  <string name="menu_replace">Übung ersetzen</string>
+  <string name="menu_reorder">Übungen neu anordnen</string>
+  <string name="menu_superset_next">Supersatz mit nächster Übung</string>
+  <string name="menu_superset_remove">Aus Supersatz lösen</string>
+  <string name="menu_rest">Pausentimer</string>
+  <string name="menu_add_note">Notiz hinzufügen</string>
+  <string name="menu_remove">Übung entfernen</string>
+  <string name="note_hint">Notiz zu dieser Übung</string>
+
+  <string name="rest_title">Pause</string>
+  <string name="rest_skip">Überspringen</string>
+
+  <string name="pad_backspace">Löschen</string>
+  <string name="pad_decrease">Verringern</string>
+  <string name="pad_increase">Erhöhen</string>
+  <string name="pad_hide">Tastenfeld ausblenden</string>
+  <string name="pad_next">Nächstes Feld</string>
+
+  <string name="rename_title">Name des Trainings</string>
+  <string name="dialog_save">Speichern</string>
+  <string name="dialog_cancel">Abbrechen</string>
+  <string name="reorder_done">Fertig</string>
+
+  <string name="focus_set">Satz %1$d von %2$d</string>
+  <string name="focus_previous">Letztes Mal: %1$s</string>
+  <string name="focus_log">Satz abhaken</string>
+  <string name="focus_all_done">Alle Sätze erledigt</string>
+  <string name="focus_all_done_body">Füge eine Übung oder einen Satz hinzu, oder beende das Training.</string>
 </resources>

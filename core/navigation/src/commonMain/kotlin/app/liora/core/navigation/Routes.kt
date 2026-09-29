@@ -46,10 +46,14 @@ data class ExerciseEditorRoute(
     val resultKey: String? = null,
 ) : NavKey
 
-/** Choose one or more exercises; their ids come back, in the order picked, under [requestKey]. */
+/**
+ * Choose exercises; their ids come back, in the order picked, under [requestKey]. Without [multiple],
+ * the first tap picks and returns (e.g. to replace an exercise).
+ */
 @Serializable
 data class ExercisePickerRoute(
     val requestKey: String,
+    val multiple: Boolean = true,
 ) : NavKey
 
 @Serializable

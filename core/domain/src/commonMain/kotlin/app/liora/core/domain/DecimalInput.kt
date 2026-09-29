@@ -32,5 +32,15 @@ fun clockDigits(seconds: Int): String {
     return if (minutes == 0) rest.toString() else "$minutes${rest.toString().padStart(2, '0')}"
 }
 
+/** Clock digits as they're being typed, shown as m:ss before they roll over ("90" shows 0:90 until the next digit). */
+fun clockDigitsText(digits: String): String {
+    if (digits.isEmpty()) return ""
+    val padded = digits.padStart(MIN_CLOCK_TEXT_DIGITS, '0')
+    return padded.dropLast(2).trimStart('0').ifEmpty { "0" } + ":" + padded.takeLast(2)
+}
+
 private const val MAX_CLOCK_DIGITS = 5
 private const val SECONDS_PER_MINUTE = 60
+
+/** "5" shows as 0:05: at least one minute digit and two second digits. */
+private const val MIN_CLOCK_TEXT_DIGITS = 3

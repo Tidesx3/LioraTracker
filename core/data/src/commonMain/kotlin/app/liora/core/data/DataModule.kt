@@ -10,8 +10,15 @@ import app.liora.core.data.seed.ExerciseCatalogSeeder
 import app.liora.core.data.sync.DeviceIdentity
 import app.liora.core.data.sync.SyncStamper
 import app.liora.core.data.workout.ActiveWorkoutRepository
+import app.liora.core.data.workout.LocalRestTimerRepository
 import app.liora.core.data.workout.OfflineActiveWorkoutRepository
+import app.liora.core.data.workout.OfflineSetLogger
+import app.liora.core.data.workout.OfflineWorkoutEditor
+import app.liora.core.data.workout.RestTimerRepository
+import app.liora.core.data.workout.SetLogger
+import app.liora.core.data.workout.WorkoutEditor
 import app.liora.core.database.databaseModule
+import app.liora.core.domain.RestDefaults
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -34,6 +41,11 @@ val dataModule =
         singleOf(::OfflineExerciseRepository) bind ExerciseRepository::class
         singleOf(::OfflineRoutineRepository) bind RoutineRepository::class
         singleOf(::OfflineActiveWorkoutRepository) bind ActiveWorkoutRepository::class
+        singleOf(::OfflineWorkoutEditor) bind WorkoutEditor::class
+        singleOf(::OfflineSetLogger) bind SetLogger::class
+        singleOf(::LocalRestTimerRepository) bind RestTimerRepository::class
+        // Until Settings make them adjustable.
+        single { RestDefaults() }
     }
 
 /** Work that runs once per process start, off the main thread. */
