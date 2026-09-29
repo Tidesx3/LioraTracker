@@ -79,7 +79,7 @@ fun LioraApp(
                     trainEntries(navigator)
                     historyEntries()
                     progressEntries(navigator)
-                    exercisesEntries()
+                    exercisesEntries(navigator)
                     loggerEntries(navigator)
                     bodyEntries(navigator)
                     settingsEntries(navigator)

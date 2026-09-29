@@ -24,6 +24,7 @@ coroutines = "1.11.0"
 serialization = "1.11.0"
 datetime = "0.8.0"
 kermit = "2.2.0"
+coil = "3.6.3"
 
 # Testing
 junit4 = "4.13.2"
@@ -80,6 +81,8 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 
 junit4 = { module = "junit:junit", version.ref = "junit4" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }

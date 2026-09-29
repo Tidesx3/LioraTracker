@@ -19,6 +19,8 @@ class CmpFeatureConventionPlugin : Plugin<Project> {
                 implementation(project(":core:data"))
                 implementation(project(":core:navigation"))
                 implementation(project(":core:designsystem"))
+                implementation(project(":core:ui"))
+                implementation(project(":core:domain"))
 
                 implementation(libs.lib("jb-lifecycle-runtime-compose"))
                 implementation(libs.lib("jb-lifecycle-viewmodel-compose"))

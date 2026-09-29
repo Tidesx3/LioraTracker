@@ -28,3 +28,16 @@ data object BodyRoute : NavKey
 
 @Serializable
 data object SettingsRoute : NavKey
+
+@Serializable
+data class ExerciseDetailRoute(
+    val exerciseId: String,
+) : NavKey
+
+/** Create (no id) or edit a custom exercise; optionally as a variation of a built-in or with a name typed in search. */
+@Serializable
+data class ExerciseEditorRoute(
+    val exerciseId: String? = null,
+    val variationOf: String? = null,
+    val initialName: String? = null,
+) : NavKey

@@ -12,6 +12,7 @@ GUI, and AI features on top.
 - **Your data.** No paywalls or limits, full export at any time, local-first, and sync to storage you control.
 - **Never lose a workout.** The active session is persisted on every change.
 - **Clean foundations.** Kotlin Multiplatform modules that the Android app, the server and the web client share.
+- **Made for foldables too.** Adaptive layouts for phones and foldables such as the Galaxy Z Fold 7: two panes on the inner screen, and a tabletop logger.
 
 ## Stack
 

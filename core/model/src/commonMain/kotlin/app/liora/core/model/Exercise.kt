@@ -13,7 +13,8 @@ data class Exercise(
     val primaryMuscles: Set<Muscle>,
     val secondaryMuscles: Set<Muscle>,
     val instructions: List<String>,
-    val imagePaths: List<String>,
+    /** Loadable image URLs (remote for built-ins, local for custom photos), start position first. */
+    val imageUrls: List<String>,
     val isCustom: Boolean,
     /** For custom variations: the built-in exercise this one was derived from. */
     val variationOf: String?,

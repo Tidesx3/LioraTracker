@@ -8,7 +8,8 @@ complexity:
   LongMethod:
     ignoreAnnotated: ['Composable']
   TooManyFunctions:
-    excludes: ['**/test/**', '**/commonTest/**', '**/jvmTest/**', '**/androidHostTest/**', '**/androidDeviceTest/**']
+    # DAOs are lists of queries; splitting them would only scatter related SQL.
+    excludes: ['**/dao/**', '**/test/**', '**/commonTest/**', '**/jvmTest/**', '**/androidHostTest/**', '**/androidDeviceTest/**']
 
 naming:
   FunctionNaming:

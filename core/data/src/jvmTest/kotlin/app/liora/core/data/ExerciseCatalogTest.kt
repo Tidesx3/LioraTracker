@@ -1,8 +1,11 @@
 package app.liora.core.data
 
+import app.liora.core.common.HybridLogicalClock
+import app.liora.core.common.IdGenerator
 import app.liora.core.data.exercise.OfflineExerciseRepository
 import app.liora.core.data.seed.ExerciseCatalogSeeder
 import app.liora.core.data.seed.ExerciseSeedSource
+import app.liora.core.data.sync.SyncStamper
 import app.liora.core.database.TransactionRunner
 import app.liora.core.database.inMemoryLioraDatabase
 import app.liora.core.model.Muscle
@@ -27,7 +30,13 @@ class ExerciseCatalogTest {
             transactions = TransactionRunner(database),
             clock = Clock.System,
         )
-    private val repository = OfflineExerciseRepository(database.exerciseDao())
+    private val repository =
+        OfflineExerciseRepository(
+            exerciseDao = database.exerciseDao(),
+            transactions = TransactionRunner(database),
+            ids = IdGenerator(Clock.System),
+            stamper = SyncStamper(HybridLogicalClock { "test-device" }, Clock.System),
+        )
 
     @AfterTest
     fun tearDown() = database.close()

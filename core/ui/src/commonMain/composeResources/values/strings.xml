@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="muscle_chest">Chest</string>
+  <string name="muscle_shoulders">Shoulders</string>
+  <string name="muscle_triceps">Triceps</string>
+  <string name="muscle_biceps">Biceps</string>
+  <string name="muscle_forearms">Forearms</string>
+  <string name="muscle_lats">Lats</string>
+  <string name="muscle_middle_back">Middle back</string>
+  <string name="muscle_lower_back">Lower back</string>
+  <string name="muscle_traps">Traps</string>
+  <string name="muscle_neck">Neck</string>
+  <string name="muscle_abdominals">Abs</string>
+  <string name="muscle_quadriceps">Quads</string>
+  <string name="muscle_hamstrings">Hamstrings</string>
+  <string name="muscle_glutes">Glutes</string>
+  <string name="muscle_adductors">Adductors</string>
+  <string name="muscle_abductors">Abductors</string>
+  <string name="muscle_calves">Calves</string>
+
+  <string name="equipment_barbell">Barbell</string>
+  <string name="equipment_dumbbell">Dumbbell</string>
+  <string name="equipment_kettlebell">Kettlebell</string>
+  <string name="equipment_machine">Machine</string>
+  <string name="equipment_cable">Cable</string>
+  <string name="equipment_ez_bar">EZ bar</string>
+  <string name="equipment_band">Band</string>
+  <string name="equipment_bodyweight">Bodyweight</string>
+  <string name="equipment_medicine_ball">Medicine ball</string>
+  <string name="equipment_exercise_ball">Exercise ball</string>
+  <string name="equipment_foam_roll">Foam roller</string>
+  <string name="equipment_other">Other</string>
+
+  <string name="tracking_weight_reps">Weight × reps</string>
+  <string name="tracking_weight_reps_example">Bench press, curls, leg press</string>
+  <string name="tracking_bodyweight_reps">Reps</string>
+  <string name="tracking_bodyweight_reps_example">Push-ups, crunches, pull-ups</string>
+  <string name="tracking_weighted_bodyweight">Bodyweight + added weight</string>
+  <string name="tracking_weighted_bodyweight_example">Weighted pull-ups, dips with a belt</string>
+  <string name="tracking_assisted_bodyweight">Assisted bodyweight</string>
+  <string name="tracking_assisted_bodyweight_example">Assisted pull-up machine; less assistance is harder</string>
+  <string name="tracking_duration">Duration</string>
+  <string name="tracking_duration_example">Plank, dead hang, wall sit</string>
+  <string name="tracking_duration_weight">Duration + weight</string>
+  <string name="tracking_duration_weight_example">Plate pinch, weighted carries on the spot</string>
+  <string name="tracking_distance_duration">Distance + duration</string>
+  <string name="tracking_distance_duration_example">Running, rowing machine, ski erg</string>
+  <string name="tracking_weight_distance">Weight + distance</string>
+  <string name="tracking_weight_distance_example">Farmer’s walk, sled push</string>
+
+  <string name="badge_custom">Custom</string>
+</resources>

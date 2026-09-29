@@ -1,6 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="exercises_title">Übungen</string>
-  <string name="exercises_empty_title">Deine Übungsbibliothek</string>
-  <string name="exercises_empty_body">Hunderte Übungen mit Zielmuskeln und Equipment, dein Verlauf pro Übung und unbegrenzt eigene Übungen.</string>
+  <string name="exercises_search_hint">Übungen suchen</string>
+  <string name="exercises_filter_muscle">Muskel</string>
+  <string name="exercises_filter_equipment">Equipment</string>
+  <string name="exercises_filter_custom">Eigene</string>
+  <string name="exercises_filter_reset">Zurücksetzen</string>
+  <string name="exercises_filter_done">Fertig</string>
+  <plurals name="exercises_count">
+    <item quantity="one">%1$d Übung</item>
+    <item quantity="other">%1$d Übungen</item>
+  </plurals>
+  <string name="exercises_show_hidden">Ausgeblendete anzeigen</string>
+  <string name="exercises_hide_hidden">Ausgeblendete verbergen</string>
+  <string name="exercises_new_custom">Eigene Übung</string>
+  <string name="exercises_no_results_title">Keine Übung gefunden</string>
+  <string name="exercises_no_results_body">Versuch einen anderen Namen oder leg sie als eigene Übung an.</string>
+  <string name="exercises_create_named">„%1$s“ anlegen</string>
+  <string name="exercises_hidden_badge">Ausgeblendet</string>
+  <string name="cd_more">Weitere Optionen</string>
+  <string name="cd_clear_search">Suche löschen</string>
+  <string name="cd_edit">Bearbeiten</string>
+  <string name="cd_close">Schließen</string>
+
+  <string name="detail_muscles">Muskeln</string>
+  <string name="detail_primary">Primär</string>
+  <string name="detail_secondary">Sekundär</string>
+  <string name="detail_instructions">Ausführung</string>
+  <string name="detail_notes">Notizen</string>
+  <string name="detail_history">Verlauf</string>
+  <string name="detail_history_empty">Noch nicht trainiert. Verlauf, Rekorde und Diagramme erscheinen hier nach deinen ersten Sätzen.</string>
+  <string name="detail_variation_of">Variante von %1$s</string>
+  <string name="detail_create_variation">Variante erstellen</string>
+  <string name="detail_hide">In der Bibliothek ausblenden</string>
+  <string name="detail_unhide">In der Bibliothek einblenden</string>
+  <string name="detail_delete">Löschen</string>
+  <string name="detail_delete_title">Übung löschen?</string>
+  <string name="detail_delete_body">Diese eigene Übung wird entfernt.</string>
+  <string name="detail_cancel">Abbrechen</string>
+  <string name="detail_in_use_title">Übung kann nicht gelöscht werden</string>
+  <string name="detail_in_use_body">Sie steckt in deinem Verlauf oder einer Routine. Blende sie stattdessen aus, deine Rekorde bleiben erhalten.</string>
+  <string name="detail_in_use_hide">Ausblenden</string>
+
+  <string name="editor_new_title">Neue Übung</string>
+  <string name="editor_edit_title">Übung bearbeiten</string>
+  <string name="editor_save">Speichern</string>
+  <string name="editor_name">Name</string>
+  <string name="editor_tracking">Erfassung</string>
+  <string name="editor_tracking_locked">Gesperrt, weil bereits Sätze mit dieser Erfassung geloggt sind.</string>
+  <string name="editor_equipment">Equipment</string>
+  <string name="editor_primary">Hauptmuskeln</string>
+  <string name="editor_secondary">Nebenmuskeln</string>
+  <string name="editor_notes">Notizen</string>
+  <string name="editor_notes_hint">Sitzhöhe, Griff, Hinweise …</string>
+  <string name="editor_variation_name">%1$s (Variante)</string>
 </resources>

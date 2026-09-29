@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="muscle_chest">Brust</string>
+  <string name="muscle_shoulders">Schultern</string>
+  <string name="muscle_triceps">Trizeps</string>
+  <string name="muscle_biceps">Bizeps</string>
+  <string name="muscle_forearms">Unterarme</string>
+  <string name="muscle_lats">Latissimus</string>
+  <string name="muscle_middle_back">Mittlerer Rücken</string>
+  <string name="muscle_lower_back">Unterer Rücken</string>
+  <string name="muscle_traps">Trapez</string>
+  <string name="muscle_neck">Nacken</string>
+  <string name="muscle_abdominals">Bauch</string>
+  <string name="muscle_quadriceps">Quadrizeps</string>
+  <string name="muscle_hamstrings">Beinbeuger</string>
+  <string name="muscle_glutes">Gesäß</string>
+  <string name="muscle_adductors">Adduktoren</string>
+  <string name="muscle_abductors">Abduktoren</string>
+  <string name="muscle_calves">Waden</string>
+
+  <string name="equipment_barbell">Langhantel</string>
+  <string name="equipment_dumbbell">Kurzhantel</string>
+  <string name="equipment_kettlebell">Kettlebell</string>
+  <string name="equipment_machine">Maschine</string>
+  <string name="equipment_cable">Kabelzug</string>
+  <string name="equipment_ez_bar">SZ-Stange</string>
+  <string name="equipment_band">Widerstandsband</string>
+  <string name="equipment_bodyweight">Körpergewicht</string>
+  <string name="equipment_medicine_ball">Medizinball</string>
+  <string name="equipment_exercise_ball">Gymnastikball</string>
+  <string name="equipment_foam_roll">Faszienrolle</string>
+  <string name="equipment_other">Sonstiges</string>
+
+  <string name="tracking_weight_reps">Gewicht × Wiederholungen</string>
+  <string name="tracking_weight_reps_example">Bankdrücken, Curls, Beinpresse</string>
+  <string name="tracking_bodyweight_reps">Wiederholungen</string>
+  <string name="tracking_bodyweight_reps_example">Liegestütze, Crunches, Klimmzüge</string>
+  <string name="tracking_weighted_bodyweight">Körpergewicht + Zusatzgewicht</string>
+  <string name="tracking_weighted_bodyweight_example">Klimmzüge oder Dips mit Gewichtsgürtel</string>
+  <string name="tracking_assisted_bodyweight">Körpergewicht mit Unterstützung</string>
+  <string name="tracking_assisted_bodyweight_example">Klimmzugmaschine; weniger Unterstützung ist schwerer</string>
+  <string name="tracking_duration">Dauer</string>
+  <string name="tracking_duration_example">Unterarmstütz, Dead Hang, Wandsitzen</string>
+  <string name="tracking_duration_weight">Dauer + Gewicht</string>
+  <string name="tracking_duration_weight_example">Scheiben-Pinch-Griff, Halten mit Gewicht</string>
+  <string name="tracking_distance_duration">Distanz + Dauer</string>
+  <string name="tracking_distance_duration_example">Laufen, Rudergerät, Ski-Ergometer</string>
+  <string name="tracking_weight_distance">Gewicht + Distanz</string>
+  <string name="tracking_weight_distance_example">Farmer’s Walk, Schlitten schieben</string>
+
+  <string name="badge_custom">Eigene</string>
+</resources>

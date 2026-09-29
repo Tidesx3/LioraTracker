@@ -4,6 +4,8 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 import app.liora.core.database.model.WorkoutEntity
+import app.liora.core.database.model.WorkoutExerciseEntity
+import app.liora.core.database.model.WorkoutSetEntity
 import kotlinx.coroutines.flow.Flow
 
 private const val ACTIVE_WORKOUT =
@@ -22,4 +24,10 @@ interface WorkoutDao {
 
     @Upsert
     suspend fun upsert(workout: WorkoutEntity)
+
+    @Upsert
+    suspend fun upsertExercise(exercise: WorkoutExerciseEntity)
+
+    @Upsert
+    suspend fun upsertSet(set: WorkoutSetEntity)
 }

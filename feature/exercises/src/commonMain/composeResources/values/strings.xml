@@ -1,6 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="exercises_title">Exercises</string>
-  <string name="exercises_empty_title">Your exercise library</string>
-  <string name="exercises_empty_body">Hundreds of exercises with target muscles and equipment, your history for each one, and unlimited custom exercises.</string>
+  <string name="exercises_search_hint">Search exercises</string>
+  <string name="exercises_filter_muscle">Muscle</string>
+  <string name="exercises_filter_equipment">Equipment</string>
+  <string name="exercises_filter_custom">Custom</string>
+  <string name="exercises_filter_reset">Reset</string>
+  <string name="exercises_filter_done">Done</string>
+  <plurals name="exercises_count">
+    <item quantity="one">%1$d exercise</item>
+    <item quantity="other">%1$d exercises</item>
+  </plurals>
+  <string name="exercises_show_hidden">Show hidden exercises</string>
+  <string name="exercises_hide_hidden">Hide hidden exercises</string>
+  <string name="exercises_new_custom">Custom exercise</string>
+  <string name="exercises_no_results_title">No exercise found</string>
+  <string name="exercises_no_results_body">Try another name, or create it as your own exercise.</string>
+  <string name="exercises_create_named">Create “%1$s”</string>
+  <string name="exercises_hidden_badge">Hidden</string>
+  <string name="cd_more">More options</string>
+  <string name="cd_clear_search">Clear search</string>
+  <string name="cd_edit">Edit</string>
+  <string name="cd_close">Close</string>
+
+  <string name="detail_muscles">Muscles</string>
+  <string name="detail_primary">Primary</string>
+  <string name="detail_secondary">Secondary</string>
+  <string name="detail_instructions">How to</string>
+  <string name="detail_notes">Notes</string>
+  <string name="detail_history">History</string>
+  <string name="detail_history_empty">Not trained yet. History, records and charts show up here after your first sets.</string>
+  <string name="detail_variation_of">Variation of %1$s</string>
+  <string name="detail_create_variation">Create variation</string>
+  <string name="detail_hide">Hide from library</string>
+  <string name="detail_unhide">Show in library</string>
+  <string name="detail_delete">Delete</string>
+  <string name="detail_delete_title">Delete exercise?</string>
+  <string name="detail_delete_body">This custom exercise will be removed.</string>
+  <string name="detail_cancel">Cancel</string>
+  <string name="detail_in_use_title">Can’t delete this exercise</string>
+  <string name="detail_in_use_body">It’s part of your history or a routine. Hide it instead; your records stay intact.</string>
+  <string name="detail_in_use_hide">Hide</string>
+
+  <string name="editor_new_title">New exercise</string>
+  <string name="editor_edit_title">Edit exercise</string>
+  <string name="editor_save">Save</string>
+  <string name="editor_name">Name</string>
+  <string name="editor_tracking">Tracking</string>
+  <string name="editor_tracking_locked">Locked, because sets are already logged with this tracking.</string>
+  <string name="editor_equipment">Equipment</string>
+  <string name="editor_primary">Primary muscles</string>
+  <string name="editor_secondary">Secondary muscles</string>
+  <string name="editor_notes">Notes</string>
+  <string name="editor_notes_hint">Seat height, grip, cues…</string>
+  <string name="editor_variation_name">%1$s (variation)</string>
 </resources>

@@ -103,7 +103,7 @@ class ExerciseSearchTest {
         primaryMuscles = emptySet(),
         secondaryMuscles = emptySet(),
         instructions = emptyList(),
-        imagePaths = emptyList(),
+        imageUrls = emptyList(),
         isCustom = false,
         variationOf = null,
         notes = null,

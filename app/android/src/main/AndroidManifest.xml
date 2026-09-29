@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+  <!-- Exercise images load from the public exercise dataset; everything else works offline. -->
+  <uses-permission android:name="android.permission.INTERNET" />
+
   <!-- System backup is off: backups go through Liora's own export and sync, which know how to merge. -->
   <application
     android:name=".LioraApplication"
