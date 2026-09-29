@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="train_title">Train</string>
+  <string name="train_quick_start">Quick start</string>
+  <string name="train_quick_start_body">Log freely and add exercises as you go.</string>
+  <string name="train_start_empty">Start empty workout</string>
+  <string name="train_resume">Resume workout</string>
+  <string name="train_routines">Routines</string>
+  <string name="train_routines_empty_title">No routines yet</string>
+  <string name="train_routines_empty_body">Save your splits as routines and start them with one tap.</string>
+  <string name="cd_settings">Settings</string>
+</resources>

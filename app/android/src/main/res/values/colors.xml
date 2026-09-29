@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- Window background shown before Compose draws; matches the theme surface to avoid a flash. -->
+  <color name="liora_window_background">#FFF7F9FB</color>
+  <color name="ic_launcher_background">#FF0D1014</color>
+</resources>

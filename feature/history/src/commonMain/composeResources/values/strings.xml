@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="history_title">History</string>
+  <string name="history_empty_title">No workouts yet</string>
+  <string name="history_empty_body">Finished workouts land here, along with a calendar of your training days.</string>
+</resources>

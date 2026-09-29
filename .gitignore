@@ -1,0 +1,25 @@
+# Gradle / build
+.gradle/
+.kotlin/
+build/
+!**/src/**/build/
+local.properties
+
+# IDE
+.idea/
+*.iml
+.fleet/
+.vscode/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets / signing
+*.jks
+*.keystore
+keystore.properties
+google-services.json

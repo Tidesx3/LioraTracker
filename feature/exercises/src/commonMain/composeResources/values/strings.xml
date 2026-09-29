@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="exercises_title">Exercises</string>
+  <string name="exercises_empty_title">Your exercise library</string>
+  <string name="exercises_empty_body">Hundreds of exercises with target muscles and equipment, your history for each one, and unlimited custom exercises.</string>
+</resources>

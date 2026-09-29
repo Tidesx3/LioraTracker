@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="logger_finish">Finish</string>
+  <string name="logger_stat_duration">Duration</string>
+  <string name="logger_stat_volume">Volume</string>
+  <string name="logger_stat_sets">Sets</string>
+  <string name="logger_empty_title">No exercises yet</string>
+  <string name="logger_empty_body">Adding exercises and logging sets arrives in the next build.</string>
+  <string name="logger_no_workout_title">No workout in progress</string>
+  <string name="logger_no_workout_body">Start one from the Train tab.</string>
+  <string name="logger_discard">Discard workout</string>
+  <string name="logger_discard_title">Discard this workout?</string>
+  <string name="logger_discard_body">Everything logged in this session will be lost.</string>
+  <string name="logger_discard_confirm">Discard</string>
+  <string name="logger_discard_cancel">Keep logging</string>
+  <string name="cd_minimize">Minimize workout</string>
+</resources>

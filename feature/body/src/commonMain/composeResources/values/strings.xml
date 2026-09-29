@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="body_title">Body</string>
+  <string name="body_empty_title">Track your body</string>
+  <string name="body_empty_body">Log bodyweight, measurements and progress photos. No limits, no paywall.</string>
+</resources>

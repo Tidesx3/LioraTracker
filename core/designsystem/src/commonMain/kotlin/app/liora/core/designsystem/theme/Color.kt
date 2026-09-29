@@ -1,0 +1,88 @@
+package app.liora.core.designsystem.theme
+
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.ui.graphics.Color
+
+// Liora palette: a luminous teal brand on cool, near-neutral surfaces, with a warm amber accent
+// reserved for achievements (PRs, streaks). Dark is the primary design target.
+
+internal val LioraDarkColorScheme =
+    darkColorScheme(
+        primary = Color(0xFF4FE0C8),
+        onPrimary = Color(0xFF00382F),
+        primaryContainer = Color(0xFF0F5247),
+        onPrimaryContainer = Color(0xFFA6F5E6),
+        inversePrimary = Color(0xFF006B5E),
+        secondary = Color(0xFFB4C6E0),
+        onSecondary = Color(0xFF1E3046),
+        secondaryContainer = Color(0xFF2A3A50),
+        onSecondaryContainer = Color(0xFFD4E3FA),
+        tertiary = Color(0xFFFFB870),
+        onTertiary = Color(0xFF4A2800),
+        tertiaryContainer = Color(0xFF6A3C00),
+        onTertiaryContainer = Color(0xFFFFDCBE),
+        error = Color(0xFFFFB4AB),
+        onError = Color(0xFF690005),
+        errorContainer = Color(0xFF93000A),
+        onErrorContainer = Color(0xFFFFDAD6),
+        background = Color(0xFF0D1014),
+        onBackground = Color(0xFFE3E6EB),
+        surface = Color(0xFF0D1014),
+        onSurface = Color(0xFFE3E6EB),
+        surfaceVariant = Color(0xFF232830),
+        onSurfaceVariant = Color(0xFFA9B0BB),
+        surfaceTint = Color(0xFF4FE0C8),
+        inverseSurface = Color(0xFFE3E6EB),
+        inverseOnSurface = Color(0xFF2A2F36),
+        outline = Color(0xFF737B87),
+        outlineVariant = Color(0xFF343A44),
+        scrim = Color(0xFF000000),
+        surfaceBright = Color(0xFF2C323B),
+        surfaceDim = Color(0xFF0D1014),
+        surfaceContainerLowest = Color(0xFF080A0D),
+        surfaceContainerLow = Color(0xFF12161B),
+        surfaceContainer = Color(0xFF161A20),
+        surfaceContainerHigh = Color(0xFF1D2229),
+        surfaceContainerHighest = Color(0xFF252B33),
+    )
+
+internal val LioraLightColorScheme =
+    lightColorScheme(
+        primary = Color(0xFF006B5E),
+        onPrimary = Color(0xFFFFFFFF),
+        primaryContainer = Color(0xFF9EF2E2),
+        onPrimaryContainer = Color(0xFF00201B),
+        inversePrimary = Color(0xFF4FE0C8),
+        secondary = Color(0xFF4A5F7A),
+        onSecondary = Color(0xFFFFFFFF),
+        secondaryContainer = Color(0xFFD2E4FF),
+        onSecondaryContainer = Color(0xFF041C33),
+        tertiary = Color(0xFF8A5100),
+        onTertiary = Color(0xFFFFFFFF),
+        tertiaryContainer = Color(0xFFFFDCBE),
+        onTertiaryContainer = Color(0xFF2C1600),
+        error = Color(0xFFBA1A1A),
+        onError = Color(0xFFFFFFFF),
+        errorContainer = Color(0xFFFFDAD6),
+        onErrorContainer = Color(0xFF410002),
+        background = Color(0xFFF7F9FB),
+        onBackground = Color(0xFF171C21),
+        surface = Color(0xFFF7F9FB),
+        onSurface = Color(0xFF171C21),
+        surfaceVariant = Color(0xFFDDE3EA),
+        onSurfaceVariant = Color(0xFF414850),
+        surfaceTint = Color(0xFF006B5E),
+        inverseSurface = Color(0xFF2C3136),
+        inverseOnSurface = Color(0xFFEEF1F5),
+        outline = Color(0xFF717880),
+        outlineVariant = Color(0xFFC1C7CF),
+        scrim = Color(0xFF000000),
+        surfaceBright = Color(0xFFF7F9FB),
+        surfaceDim = Color(0xFFD7DBDF),
+        surfaceContainerLowest = Color(0xFFFFFFFF),
+        surfaceContainerLow = Color(0xFFF1F4F7),
+        surfaceContainer = Color(0xFFEBEEF2),
+        surfaceContainerHigh = Color(0xFFE5E9ED),
+        surfaceContainerHighest = Color(0xFFDFE3E8),
+    )
