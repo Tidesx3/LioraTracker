@@ -12,5 +12,8 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.koin.android)
         }
+        jvmTest.dependencies {
+            implementation(libs.room.testing)
+        }
     }
 }

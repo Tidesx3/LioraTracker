@@ -44,6 +44,12 @@
   <string name="detail_in_use_body">Sie steckt in deinem Verlauf oder einer Routine. Blende sie stattdessen aus, deine Rekorde bleiben erhalten.</string>
   <string name="detail_in_use_hide">Ausblenden</string>
 
+  <string name="picker_title">Übungen hinzufügen</string>
+  <plurals name="picker_add">
+    <item quantity="one">%1$d Übung hinzufügen</item>
+    <item quantity="other">%1$d Übungen hinzufügen</item>
+  </plurals>
+
   <string name="editor_new_title">Neue Übung</string>
   <string name="editor_edit_title">Übung bearbeiten</string>
   <string name="editor_save">Speichern</string>

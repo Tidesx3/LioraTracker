@@ -28,6 +28,8 @@ serialization = "1.11.0"
 datetime = "0.8.0"
 kermit = "2.2.0"
 coil = "3.6.3"
+# Drag to reorder in lazy lists (Compose Multiplatform, incl. wasm)
+reorderable = "3.1.0"
 
 # Testing
 junit4 = "4.13.2"
@@ -68,6 +70,7 @@ androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runt
 
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version.ref = "sqlite" }
 datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }
@@ -86,6 +89,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 
 junit4 = { module = "junit:junit", version.ref = "junit4" }

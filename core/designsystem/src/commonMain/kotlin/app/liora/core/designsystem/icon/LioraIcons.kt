@@ -8,12 +8,15 @@ import app.liora.core.designsystem.resources.ic_check
 import app.liora.core.designsystem.resources.ic_chevron_right
 import app.liora.core.designsystem.resources.ic_close
 import app.liora.core.designsystem.resources.ic_delete
+import app.liora.core.designsystem.resources.ic_drag_indicator
 import app.liora.core.designsystem.resources.ic_edit
 import app.liora.core.designsystem.resources.ic_exercise
 import app.liora.core.designsystem.resources.ic_fitness_center
+import app.liora.core.designsystem.resources.ic_folder
 import app.liora.core.designsystem.resources.ic_history
 import app.liora.core.designsystem.resources.ic_keyboard_arrow_down
 import app.liora.core.designsystem.resources.ic_keyboard_arrow_up
+import app.liora.core.designsystem.resources.ic_link
 import app.liora.core.designsystem.resources.ic_menu_book
 import app.liora.core.designsystem.resources.ic_monitor_weight
 import app.liora.core.designsystem.resources.ic_monitoring
@@ -50,4 +53,7 @@ object LioraIcons {
     val More: DrawableResource = Res.drawable.ic_more_vert
     val DropDown: DrawableResource = Res.drawable.ic_arrow_drop_down
     val Hidden: DrawableResource = Res.drawable.ic_visibility_off
+    val DragHandle: DrawableResource = Res.drawable.ic_drag_indicator
+    val Folder: DrawableResource = Res.drawable.ic_folder
+    val Superset: DrawableResource = Res.drawable.ic_link
 }

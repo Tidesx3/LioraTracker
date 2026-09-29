@@ -17,6 +17,8 @@ data class LoggedSet(
     val rpe: Double? = null,
     /** When the set was ticked off; null while it is only planned. */
     val completedAt: Instant? = null,
+    /** The routine's rep target for this set, shown as a hint while logging. */
+    val targetReps: RepRange? = null,
 ) {
     val isCompleted: Boolean get() = completedAt != null
 

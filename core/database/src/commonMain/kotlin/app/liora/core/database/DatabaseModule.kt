@@ -14,5 +14,6 @@ val databaseModule =
         single { TransactionRunner(get()) }
         single { get<LioraDatabase>().exerciseDao() }
         single { get<LioraDatabase>().workoutDao() }
+        single { get<LioraDatabase>().routineDao() }
         single { get<LioraDatabase>().localMetaDao() }
     }

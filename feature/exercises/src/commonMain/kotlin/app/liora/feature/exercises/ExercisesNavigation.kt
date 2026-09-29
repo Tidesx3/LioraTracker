@@ -10,8 +10,10 @@ import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.navigation.ExerciseDetailRoute
 import app.liora.core.navigation.ExerciseEditorRoute
+import app.liora.core.navigation.ExercisePickerRoute
 import app.liora.core.navigation.ExercisesRoute
 import app.liora.core.navigation.ListDetail
+import app.liora.core.navigation.NavigationResultEffect
 import app.liora.core.navigation.Navigator
 import app.liora.core.ui.currentLanguage
 import app.liora.feature.exercises.detail.ExerciseDetailScreen
@@ -20,6 +22,8 @@ import app.liora.feature.exercises.editor.ExerciseEditorScreen
 import app.liora.feature.exercises.editor.ExerciseEditorViewModel
 import app.liora.feature.exercises.library.ExerciseLibraryScreen
 import app.liora.feature.exercises.library.ExerciseLibraryViewModel
+import app.liora.feature.exercises.picker.ExercisePickerScreen
+import app.liora.feature.exercises.picker.ExercisePickerViewModel
 import app.liora.feature.exercises.resources.Res
 import app.liora.feature.exercises.resources.exercises_pick_body
 import app.liora.feature.exercises.resources.exercises_pick_title
@@ -69,13 +73,34 @@ fun EntryProviderScope<NavKey>.exercisesEntries(navigator: Navigator) {
         ExerciseEditorScreen(
             viewModel = koinViewModel(key = route.toString()) { parametersOf(route, language) },
             onClose = navigator::goBack,
+            onSaveComplete = { id ->
+                route.resultKey?.let { navigator.goBackWithResult(it, id) } ?: navigator.goBack()
+            },
+        )
+    }
+    // Full screen rather than a pane: it is opened from editors, which it replaces while picking.
+    entry<ExercisePickerRoute> { route ->
+        val viewModel: ExercisePickerViewModel = koinViewModel(key = route.requestKey)
+        val createdKey = route.requestKey + CREATED_SUFFIX
+        NavigationResultEffect<String>(navigator.results, createdKey, viewModel::onExerciseCreated)
+        ExercisePickerScreen(
+            viewModel = viewModel,
+            onClose = navigator::goBack,
+            onDone = { ids -> navigator.goBackWithResult(route.requestKey, ids) },
+            onCreateExercise = { name ->
+                navigator.navigate(ExerciseEditorRoute(initialName = name, resultKey = createdKey))
+            },
         )
     }
 }
 
+/** Where the picker hears back about an exercise created from its search. */
+private const val CREATED_SUFFIX = ".created"
+
 val exercisesModule =
     module {
         viewModelOf(::ExerciseLibraryViewModel)
+        viewModelOf(::ExercisePickerViewModel)
         viewModel { (exerciseId: String) -> ExerciseDetailViewModel(exerciseId, get()) }
         viewModel { (route: ExerciseEditorRoute, language: String) -> ExerciseEditorViewModel(route, language, get()) }
     }

@@ -1,5 +1,6 @@
 package app.liora.core.database
 
+import androidx.room.AutoMigration
 import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -11,6 +12,7 @@ import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.liora.core.database.dao.ExerciseDao
 import app.liora.core.database.dao.LocalMetaDao
+import app.liora.core.database.dao.RoutineDao
 import app.liora.core.database.dao.WorkoutDao
 import app.liora.core.database.model.ExerciseEntity
 import app.liora.core.database.model.ExerciseNameEntity
@@ -46,7 +48,11 @@ import kotlinx.coroutines.IO
         PreferenceEntity::class,
         LocalMetaEntity::class,
     ],
-    version = 1,
+    version = 2,
+    autoMigrations = [
+        // v2: workout_set.target_reps_min/max, so a workout started from a routine keeps its rep targets.
+        AutoMigration(from = 1, to = 2),
+    ],
 )
 @ConstructedBy(LioraDatabaseConstructor::class)
 @TypeConverters(Converters::class)
@@ -54,6 +60,8 @@ abstract class LioraDatabase : RoomDatabase() {
     abstract fun exerciseDao(): ExerciseDao
 
     abstract fun workoutDao(): WorkoutDao
+
+    abstract fun routineDao(): RoutineDao
 
     abstract fun localMetaDao(): LocalMetaDao
 }

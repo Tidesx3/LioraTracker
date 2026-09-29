@@ -60,11 +60,13 @@ import org.jetbrains.compose.resources.stringResource
 internal fun ExerciseEditorScreen(
     viewModel: ExerciseEditorViewModel,
     onClose: () -> Unit,
+    onSaveComplete: (exerciseId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val currentOnClose by rememberUpdatedState(onClose)
-    LaunchedEffect(uiState.savedId) { if (uiState.savedId != null) currentOnClose() }
+    // Close once the save has landed; leaving earlier would cancel it.
+    val currentOnSaveComplete by rememberUpdatedState(onSaveComplete)
+    LaunchedEffect(uiState.savedId) { uiState.savedId?.let(currentOnSaveComplete) }
 
     Scaffold(
         modifier = modifier,

@@ -5,7 +5,8 @@ an offline-first Android app now, then sync to your own Google Drive, a self-hos
 GUI, and AI features on top.
 
 **Status:** Phase 1 (the offline MVP) is in progress. The database, domain logic, exercise library with
-custom exercises, German, and the foldable layouts are done. Routines are next, then the logger.
+custom exercises, German, the foldable layouts, and routines with folders and supersets are done. The
+logger is next.
 
 ## Principles
 
@@ -51,8 +52,9 @@ build-logic        Gradle convention plugins (liora.kmp.library, liora.cmp.featu
 
 0. Scaffold, design system, app shell ✅
 1. Offline MVP: exercise library with unlimited custom exercises, routines, the active logger with
-   rest timer, history, progress charts and PRs, body metrics and photos, JSON/CSV export,
-   Hevy/Strong import, and English + German
+   rest timer and a live workout notification (next set, rest countdown, lock-screen actions),
+   history, progress charts and PRs, body metrics and photos, JSON/CSV export, Hevy/Strong import,
+   and English + German
 2. Google Drive (appDataFolder) sync and Health Connect
 3. Self-hosted Ktor + PostgreSQL server (Docker)
 4. Web GUI, programs with auto-progression, Wear OS

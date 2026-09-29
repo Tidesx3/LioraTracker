@@ -49,4 +49,16 @@
   <string name="tracking_weight_distance_example">Farmer’s Walk, Schlitten schieben</string>
 
   <string name="badge_custom">Eigene</string>
+
+  <string name="set_type_warmup">Aufwärmsatz</string>
+  <string name="set_type_normal">Normal</string>
+  <string name="set_type_drop">Dropsatz</string>
+  <string name="set_type_failure">Bis zum Muskelversagen</string>
+  <string name="set_badge_warmup">W</string>
+  <string name="set_badge_drop">D</string>
+  <string name="set_badge_failure">F</string>
+  <plurals name="reps_count">
+    <item quantity="one">%1$s Wdh.</item>
+    <item quantity="other">%1$s Wdh.</item>
+  </plurals>
 </resources>

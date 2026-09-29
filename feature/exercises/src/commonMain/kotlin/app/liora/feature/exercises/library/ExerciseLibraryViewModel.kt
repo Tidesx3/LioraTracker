@@ -12,15 +12,11 @@ import app.liora.core.model.Equipment
 import app.liora.core.model.Exercise
 import app.liora.core.model.Muscle
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 data class LibraryFilters(
@@ -61,7 +57,6 @@ data class ExerciseLibraryUiState(
     val loading: Boolean = true,
 )
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class ExerciseLibraryViewModel(
     repository: ExerciseRepository,
 ) : ViewModel() {
@@ -72,13 +67,7 @@ class ExerciseLibraryViewModel(
     private val language = MutableStateFlow<String?>(null)
     private val filters = MutableStateFlow(LibraryFilters())
 
-    private val searchIndex: StateFlow<ExerciseSearch?> =
-        language
-            .filterNotNull()
-            .flatMapLatest { repository.observeExercises(it) }
-            .map(::ExerciseSearch)
-            .flowOn(Dispatchers.Default)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    private val searchIndex: StateFlow<ExerciseSearch?> = repository.searchIndex(language, viewModelScope)
 
     val uiState: StateFlow<ExerciseLibraryUiState> =
         combine(searchIndex, snapshotFlow { query }, filters) { index, text, activeFilters ->

@@ -16,6 +16,7 @@ class CmpFeatureConventionPlugin : Plugin<Project> {
         extensions.configure<KotlinMultiplatformExtension> {
             sourceSets.commonMain.dependencies {
                 implementation(project(":core:model"))
+                implementation(project(":core:common"))
                 implementation(project(":core:data"))
                 implementation(project(":core:navigation"))
                 implementation(project(":core:designsystem"))

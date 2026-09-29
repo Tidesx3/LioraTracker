@@ -2,11 +2,87 @@
 <resources>
   <string name="train_title">Training</string>
   <string name="train_quick_start">Schnellstart</string>
-  <string name="train_quick_start_body">Frei loggen und Übungen nach Bedarf hinzufügen.</string>
+  <string name="train_quick_start_body">Frei loggen und Übungen unterwegs hinzufügen.</string>
   <string name="train_start_empty">Leeres Training starten</string>
   <string name="train_resume">Training fortsetzen</string>
   <string name="train_routines">Routinen</string>
   <string name="train_routines_empty_title">Noch keine Routinen</string>
-  <string name="train_routines_empty_body">Speichere deinen Trainingsplan als Routinen und starte sie mit einem Tipp.</string>
+  <string name="train_routines_empty_body">Speichere deine Splits als Routinen und starte sie mit einem Tipp.</string>
+  <string name="train_my_routines">Meine Routinen</string>
+  <string name="train_new_routine">Neue Routine</string>
+  <string name="train_new_folder">Neuer Ordner</string>
+  <string name="train_start">Starten</string>
+  <string name="train_routine_no_exercises">Noch keine Übungen</string>
+  <string name="train_folder_empty">Dieser Ordner ist noch leer.</string>
+  <string name="train_pick_title">Routine auswählen</string>
+  <string name="train_pick_body">Hier erscheinen ihre Übungen und Sätze.</string>
   <string name="cd_settings">Einstellungen</string>
+  <string name="cd_more">Weitere Optionen</string>
+  <string name="cd_edit">Bearbeiten</string>
+  <string name="cd_close">Schließen</string>
+  <string name="cd_reorder">Zum Verschieben ziehen</string>
+  <string name="cd_remove_set">Satz entfernen</string>
+
+  <string name="routine_edit">Bearbeiten</string>
+  <string name="routine_duplicate">Duplizieren</string>
+  <string name="routine_move">In Ordner verschieben</string>
+  <string name="routine_delete">Löschen</string>
+  <string name="routine_copy_name">%1$s (Kopie)</string>
+  <string name="folder_new_routine">Neue Routine hier</string>
+  <string name="folder_rename">Umbenennen</string>
+  <string name="folder_delete">Ordner löschen</string>
+
+  <string name="dialog_cancel">Abbrechen</string>
+  <string name="dialog_create">Anlegen</string>
+  <string name="dialog_save">Speichern</string>
+  <string name="dialog_delete">Löschen</string>
+  <string name="folder_name">Ordnername</string>
+  <string name="folder_delete_title">Ordner löschen?</string>
+  <string name="folder_delete_body">Die Routinen darin bleiben erhalten und wandern zu Meine Routinen.</string>
+  <string name="routine_delete_title">Routine löschen?</string>
+  <string name="routine_delete_body">Bereits geloggte Trainings damit bleiben in deinem Verlauf.</string>
+  <string name="move_title">In Ordner verschieben</string>
+  <string name="move_no_folder">Kein Ordner</string>
+  <string name="in_progress_title">Training läuft</string>
+  <string name="in_progress_body">Beende oder verwirf das laufende Training, bevor du ein neues startest.</string>
+  <string name="in_progress_resume">Fortsetzen</string>
+
+  <string name="detail_start">Training starten</string>
+  <plurals name="detail_exercises">
+    <item quantity="one">%1$d Übung</item>
+    <item quantity="other">%1$d Übungen</item>
+  </plurals>
+  <plurals name="detail_sets">
+    <item quantity="one">%1$d Satz</item>
+    <item quantity="other">%1$d Sätze</item>
+  </plurals>
+  <string name="superset">Supersatz</string>
+  <string name="rest_value">Pause %1$s</string>
+  <string name="rest_default">Pause: Standard der Übung</string>
+  <string name="rest_off">Kein Pausentimer</string>
+
+  <string name="editor_new_title">Neue Routine</string>
+  <string name="editor_edit_title">Routine bearbeiten</string>
+  <string name="editor_save">Speichern</string>
+  <string name="editor_name">Name der Routine</string>
+  <string name="editor_notes">Notizen</string>
+  <string name="editor_add_exercises">Übungen hinzufügen</string>
+  <string name="editor_empty">Füge die Übungen dieser Routine hinzu. Am Griff ziehen ändert die Reihenfolge.</string>
+  <string name="editor_add_set">Satz hinzufügen</string>
+  <string name="editor_col_set">Satz</string>
+  <string name="editor_col_reps">Wdh.</string>
+  <string name="editor_col_time">Zeit</string>
+  <string name="editor_reps_max_hint">max</string>
+  <string name="editor_superset_next">Supersatz mit nächster Übung</string>
+  <string name="editor_superset_remove">Aus Supersatz lösen</string>
+  <string name="editor_rest">Pausentimer</string>
+  <string name="editor_add_note">Notiz hinzufügen</string>
+  <string name="editor_note_hint">Notiz zu dieser Übung</string>
+  <string name="editor_remove_exercise">Übung entfernen</string>
+  <string name="editor_rest_default">Standard der Übung</string>
+  <string name="editor_rest_off">Aus</string>
+  <string name="editor_discard_title">Änderungen verwerfen?</string>
+  <string name="editor_discard_body">Deine Änderungen an dieser Routine gehen verloren.</string>
+  <string name="editor_discard">Verwerfen</string>
+  <string name="editor_keep_editing">Weiter bearbeiten</string>
 </resources>

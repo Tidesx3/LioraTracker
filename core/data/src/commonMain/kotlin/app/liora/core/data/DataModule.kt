@@ -4,6 +4,8 @@ import app.liora.core.common.HybridLogicalClock
 import app.liora.core.common.IdGenerator
 import app.liora.core.data.exercise.ExerciseRepository
 import app.liora.core.data.exercise.OfflineExerciseRepository
+import app.liora.core.data.routine.OfflineRoutineRepository
+import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.seed.ExerciseCatalogSeeder
 import app.liora.core.data.sync.DeviceIdentity
 import app.liora.core.data.sync.SyncStamper
@@ -30,6 +32,7 @@ val dataModule =
         singleOf(::ExerciseCatalogSeeder)
         singleOf(::AppStartup)
         singleOf(::OfflineExerciseRepository) bind ExerciseRepository::class
+        singleOf(::OfflineRoutineRepository) bind RoutineRepository::class
         singleOf(::OfflineActiveWorkoutRepository) bind ActiveWorkoutRepository::class
     }
 

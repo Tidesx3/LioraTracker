@@ -29,6 +29,9 @@ class Navigator(
     var topLevelRoute: NavKey by mutableStateOf(startRoute)
         private set
 
+    /** Values screens hand back to the screen that opened them. */
+    val results = NavigationResults()
+
     val backStack: List<NavKey> by derivedStateOf {
         val start = stacks.getValue(startRoute)
         if (topLevelRoute == startRoute) start.toList() else start + stacks.getValue(topLevelRoute)
@@ -69,6 +72,15 @@ class Navigator(
         val listIndex = stack.lastIndexOf(list)
         if (listIndex >= 0) stack.removeRange(listIndex + 1, stack.size)
         navigate(route)
+    }
+
+    /** Hands [value] back to whoever asked under [key], then closes the current screen. */
+    fun goBackWithResult(
+        key: String,
+        value: Any,
+    ) {
+        results.set(key, value)
+        goBack()
     }
 
     fun goBack() {

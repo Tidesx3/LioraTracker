@@ -212,7 +212,7 @@ private fun ExerciseLibraryContent(
 }
 
 @Composable
-private fun SearchField(
+internal fun SearchField(
     query: String,
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -309,7 +309,7 @@ private fun ResultList(
 }
 
 @Composable
-private fun NoResults(
+internal fun NoResults(
     query: String,
     onCreate: (String?) -> Unit,
     modifier: Modifier = Modifier,

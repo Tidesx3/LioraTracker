@@ -13,3 +13,9 @@ data class SyncMetadata(
     @ColumnInfo(name = "deleted_at") val deletedAt: Long? = null,
     @ColumnInfo(name = "dirty") val dirty: Boolean = true,
 )
+
+/** A synced row with its own id, so repositories can diff and stamp rows generically. */
+interface SyncedRow {
+    val id: String
+    val sync: SyncMetadata
+}

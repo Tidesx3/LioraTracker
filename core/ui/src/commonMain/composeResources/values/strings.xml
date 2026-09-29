@@ -49,4 +49,16 @@
   <string name="tracking_weight_distance_example">Farmer’s walk, sled push</string>
 
   <string name="badge_custom">Custom</string>
+
+  <string name="set_type_warmup">Warm-up</string>
+  <string name="set_type_normal">Normal</string>
+  <string name="set_type_drop">Drop set</string>
+  <string name="set_type_failure">To failure</string>
+  <string name="set_badge_warmup">W</string>
+  <string name="set_badge_drop">D</string>
+  <string name="set_badge_failure">F</string>
+  <plurals name="reps_count">
+    <item quantity="one">%1$s rep</item>
+    <item quantity="other">%1$s reps</item>
+  </plurals>
 </resources>

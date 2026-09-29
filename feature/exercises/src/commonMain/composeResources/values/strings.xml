@@ -44,6 +44,12 @@
   <string name="detail_in_use_body">It’s part of your history or a routine. Hide it instead; your records stay intact.</string>
   <string name="detail_in_use_hide">Hide</string>
 
+  <string name="picker_title">Add exercises</string>
+  <plurals name="picker_add">
+    <item quantity="one">Add %1$d exercise</item>
+    <item quantity="other">Add %1$d exercises</item>
+  </plurals>
+
   <string name="editor_new_title">New exercise</string>
   <string name="editor_edit_title">Edit exercise</string>
   <string name="editor_save">Save</string>

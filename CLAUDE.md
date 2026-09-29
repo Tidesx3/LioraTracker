@@ -22,6 +22,7 @@ The JDK isn't on PATH in every shell. Export it first when needed:
   - `XNavigation.kt` exposes `fun EntryProviderScope<NavKey>.xEntries(navigator)` and a Koin `xModule`.
   - To add a feature: register its entries in `LioraApp.kt` and its module in `LioraApplication.kt`.
   - **List-detail:** tag a list entry with `metadata = ListDetail.listPane { placeholder }` and what it opens with `ListDetail.detailPane()`. Open items with `navigator.openFromList(listRoute, route)`, so the detail pane shows one item and back returns to the list. `LocalPaneRole` tells a screen whether it sits beside its list (no back arrow, highlight the selection).
+  - **Results across features:** a screen that hands a value back (e.g. `ExercisePickerRoute`) takes a request key in its route and closes with `navigator.goBackWithResult(key, value)`. The caller's entry collects it with `NavigationResultEffect(navigator.results, key)`, which also delivers a result that arrived while the caller was off screen.
 - **Pure core modules** (model, common, domain, database, data) use `liora.kmp.library` (Android and JVM targets). They must stay Android-free so the Ktor server can reuse them.
 - **UI modules** use `liora.cmp.library` or `liora.cmp.feature` (Compose Multiplatform, Android target only for now). Keep UI code in `commonMain`, because a wasmJs target gets added for the web GUI.
 
