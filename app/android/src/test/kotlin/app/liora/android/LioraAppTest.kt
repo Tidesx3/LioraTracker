@@ -12,6 +12,7 @@ import app.liora.android.ui.LioraApp
 import app.liora.core.data.AppStartup
 import app.liora.core.data.exercise.ExerciseRepository
 import app.liora.core.designsystem.theme.LioraTheme
+import app.liora.core.domain.ExerciseSearch
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -121,6 +122,21 @@ class LioraAppTest {
             assertTrue("expected the full catalog, got ${exercises.size}", exercises.size > 700)
             assertEquals("Bankdrücken (Langhantel)", exercises.getValue("fedb.Barbell_Bench_Press_-_Medium_Grip").name)
             assertEquals("Ski-Ergometer", exercises.getValue("liora.ski_erg").name)
+
+            // Search against the real catalog, where many variants compete for the same words.
+            val search = ExerciseSearch(exercises.values.toList())
+
+            fun top(query: String) = search.search(query).first().id
+            assertEquals("fedb.Barbell_Deadlift", top("Kreuzheben"))
+            assertEquals("fedb.Barbell_Deadlift", top("kreuzhebn"))
+            assertEquals("fedb.Barbell_Bench_Press_-_Medium_Grip", top("bankdrucken"))
+            assertEquals("fedb.Barbell_Squat", top("Kniebeuge"))
+            assertEquals("fedb.Pullups", top("Klimmzug"))
+            assertEquals("fedb.Wide-Grip_Lat_Pulldown", top("Latzug (Kabel)"))
+            assertEquals("fedb.Seated_Leg_Curl", top("Beinbeugen sitzend"))
+            assertEquals("fedb.Calf_Press", top("Wadenpressen (Maschine)"))
+            assertEquals("liora.ski_erg", top("Ski Erg"))
+            assertEquals("fedb.Barbell_Bench_Press_-_Medium_Grip", top("bench"))
         }
 
     private fun setApp(darkTheme: Boolean) {

@@ -41,6 +41,7 @@ dependencies {
     implementation(projects.core.model)
     implementation(projects.core.data)
     implementation(projects.core.database)
+    implementation(projects.core.domain)
     implementation(projects.core.navigation)
     implementation(projects.core.designsystem)
 
