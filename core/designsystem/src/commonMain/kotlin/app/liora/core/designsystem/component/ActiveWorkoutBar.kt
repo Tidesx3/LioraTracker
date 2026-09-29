@@ -6,11 +6,13 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.liora.core.designsystem.icon.LioraIcons
@@ -80,6 +84,43 @@ fun ActiveWorkoutBar(
             Icon(
                 painter = painterResource(LioraIcons.ExpandUp),
                 contentDescription = stringResource(Res.string.cd_open_workout),
+            )
+        }
+    }
+}
+
+/**
+ * The workout in progress on wide screens, where it heads the navigation rail instead of sitting above
+ * the bottom bar: a FAB-sized button with a live dot and the elapsed time. Tapping it reopens the logger.
+ */
+@Composable
+fun ActiveWorkoutRailButton(
+    startedAt: Instant,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val elapsed = rememberElapsedTime(startedAt)
+    val description = stringResource(Res.string.cd_open_workout)
+    Surface(
+        onClick = onClick,
+        modifier = modifier.semantics { contentDescription = description },
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    ) {
+        Column(
+            modifier = Modifier.width(64.dp).padding(vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Box {
+                Icon(painter = painterResource(LioraIcons.Train), contentDescription = null)
+                LiveDot(Modifier.align(Alignment.TopEnd).offset(x = 4.dp, y = (-2).dp))
+            }
+            Text(
+                text = elapsed.formatAsClock(),
+                style = MaterialTheme.typography.labelLarge.tabularNumbers(),
+                maxLines = 1,
             )
         }
     }

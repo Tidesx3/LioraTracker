@@ -48,8 +48,11 @@ import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.model.Exercise
 import app.liora.core.model.Muscle
+import app.liora.core.navigation.LocalPaneRole
+import app.liora.core.navigation.PaneRole
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.customExerciseBadge
 import app.liora.core.ui.label
@@ -160,7 +163,8 @@ private fun ExerciseDetailContent(
         topBar = {
             LioraTopAppBar(
                 title = "",
-                navigationIcon = { BackButton(onClick = onBack) },
+                // Beside the list there is nothing to go back to; the list is right there.
+                navigationIcon = { if (LocalPaneRole.current != PaneRole.Detail) BackButton(onClick = onBack) },
                 actions = {
                     if (exercise.isCustom) {
                         LioraIconButton(LioraIcons.Edit, stringResource(Res.string.cd_edit), onEdit)
@@ -170,7 +174,10 @@ private fun ExerciseDetailContent(
             )
         },
     ) { padding ->
-        LazyColumn(contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 32.dp)) {
+        LazyColumn(
+            modifier = Modifier.readableWidth(),
+            contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 32.dp),
+        ) {
             if (exercise.imageUrls.isNotEmpty()) {
                 item { ExerciseImages(exercise.imageUrls, Modifier.padding(horizontal = 16.dp)) }
             }

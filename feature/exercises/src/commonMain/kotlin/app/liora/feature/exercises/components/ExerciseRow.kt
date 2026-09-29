@@ -17,6 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -28,19 +30,31 @@ import app.liora.feature.exercises.resources.exercises_hidden_badge
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.stringResource
 
-/** One exercise in a list: thumbnail, name, target muscles and equipment. Also used by pickers. */
+/**
+ * One exercise in a list: thumbnail, name, target muscles and equipment. Also used by pickers.
+ * [selected] marks the exercise open in the detail pane beside the list.
+ */
 @Composable
 fun ExerciseRow(
     exercise: Exercise,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    selected: Boolean = false,
     trailing: @Composable () -> Unit = {},
 ) {
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
-                .clickable(onClick = onClick)
+                .then(
+                    if (selected) {
+                        Modifier
+                            .background(MaterialTheme.colorScheme.secondaryContainer)
+                            .semantics { this.selected = true }
+                    } else {
+                        Modifier
+                    },
+                ).clickable(onClick = onClick)
                 .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),

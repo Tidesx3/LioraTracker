@@ -56,6 +56,21 @@ class Navigator(
         stacks.getValue(topLevelRoute).add(route)
     }
 
+    /**
+     * Opens [route] from the list at [list], replacing whatever the list had opened before. In a
+     * list-detail layout the detail pane shows one thing at a time, and back returns to the list rather
+     * than through every item looked at.
+     */
+    fun openFromList(
+        list: NavKey,
+        route: NavKey,
+    ) {
+        val stack = stacks.getValue(topLevelRoute)
+        val listIndex = stack.lastIndexOf(list)
+        if (listIndex >= 0) stack.removeRange(listIndex + 1, stack.size)
+        navigate(route)
+    }
+
     fun goBack() {
         val stack = stacks.getValue(topLevelRoute)
         when {

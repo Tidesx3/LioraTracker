@@ -18,6 +18,8 @@
   <string name="exercises_no_results_body">Versuch einen anderen Namen oder leg sie als eigene Übung an.</string>
   <string name="exercises_create_named">„%1$s“ anlegen</string>
   <string name="exercises_hidden_badge">Ausgeblendet</string>
+  <string name="exercises_pick_title">Übung auswählen</string>
+  <string name="exercises_pick_body">Hier erscheinen Muskeln, Ausführung und dein Verlauf mit der Übung.</string>
   <string name="cd_more">Weitere Optionen</string>
   <string name="cd_clear_search">Suche löschen</string>
   <string name="cd_edit">Bearbeiten</string>

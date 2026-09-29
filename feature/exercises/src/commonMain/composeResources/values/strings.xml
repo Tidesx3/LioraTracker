@@ -18,6 +18,8 @@
   <string name="exercises_no_results_body">Try another name, or create it as your own exercise.</string>
   <string name="exercises_create_named">Create “%1$s”</string>
   <string name="exercises_hidden_badge">Hidden</string>
+  <string name="exercises_pick_title">Pick an exercise</string>
+  <string name="exercises_pick_body">Its muscles, instructions and your history with it show up here.</string>
   <string name="cd_more">More options</string>
   <string name="cd_clear_search">Clear search</string>
   <string name="cd_edit">Edit</string>

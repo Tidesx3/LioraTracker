@@ -48,6 +48,8 @@ import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.model.Equipment
 import app.liora.core.model.Exercise
 import app.liora.core.model.Muscle
+import app.liora.core.navigation.LocalPaneRole
+import app.liora.core.navigation.PaneRole
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.label
 import app.liora.feature.exercises.components.ExerciseRow
@@ -76,6 +78,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 internal fun ExerciseLibraryScreen(
+    selectedId: String?,
     onOpenExercise: (String) -> Unit,
     onCreateExercise: (initialName: String?) -> Unit,
     modifier: Modifier = Modifier,
@@ -88,6 +91,8 @@ internal fun ExerciseLibraryScreen(
     ExerciseLibraryContent(
         query = viewModel.query,
         uiState = uiState,
+        // Only a list with its detail pane beside it has a selection to show.
+        selectedId = selectedId.takeIf { LocalPaneRole.current == PaneRole.List },
         actions =
             LibraryActions(
                 onQueryChange = viewModel::onQueryChange,
@@ -112,6 +117,7 @@ private enum class FilterSheet { Muscles, Equipment }
 private fun ExerciseLibraryContent(
     query: String,
     uiState: ExerciseLibraryUiState,
+    selectedId: String?,
     actions: LibraryActions,
     modifier: Modifier = Modifier,
 ) {
@@ -165,6 +171,7 @@ private fun ExerciseLibraryContent(
             } else {
                 ResultList(
                     results = uiState.results,
+                    selectedId = selectedId,
                     listState = listState,
                     bottomPadding = padding.calculateBottomPadding(),
                     onOpenExercise = actions.onOpenExercise,
@@ -279,6 +286,7 @@ private fun DropdownChip(
 @Composable
 private fun ResultList(
     results: List<Exercise>,
+    selectedId: String?,
     listState: androidx.compose.foundation.lazy.LazyListState,
     bottomPadding: androidx.compose.ui.unit.Dp,
     onOpenExercise: (String) -> Unit,
@@ -291,7 +299,11 @@ private fun ResultList(
         contentPadding = PaddingValues(bottom = bottomPadding + FAB_CLEARANCE),
     ) {
         items(results, key = { it.id }) { exercise ->
-            ExerciseRow(exercise = exercise, onClick = { onOpenExercise(exercise.id) })
+            ExerciseRow(
+                exercise = exercise,
+                onClick = { onOpenExercise(exercise.id) },
+                selected = exercise.id == selectedId,
+            )
         }
     }
 }

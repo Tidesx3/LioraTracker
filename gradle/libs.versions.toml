@@ -6,6 +6,9 @@ ksp = "2.3.12"
 composeMultiplatform = "1.12.1"
 # CMP material3 1.9.0 maps to androidx material3 1.4.0, the version in the stable compose-bom 2026.09.00
 composeMaterial3 = "1.9.0"
+# Window size classes and fold posture. The list-detail scene is our own (core:navigation), because
+# adaptive-navigation3 is only a release candidate (1.3.0-rc01).
+composeAdaptive = "1.2.0"
 composeBom = "2026.09.00"
 
 # AndroidX / JetBrains-multiplatform AndroidX
@@ -46,6 +49,7 @@ compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMul
 compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "composeMaterial3" }
+compose-material3-adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", version.ref = "composeAdaptive" }
 
 # Jetpack Compose (Android-only artifacts: tooling + tests)
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }

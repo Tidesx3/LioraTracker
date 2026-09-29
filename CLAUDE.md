@@ -21,6 +21,7 @@ The JDK isn't on PATH in every shell. Export it first when needed:
   - Each screen is a stateful `XScreen(viewModel = koinViewModel())` wrapping a stateless private `XContent(uiState, callbacks)`.
   - `XNavigation.kt` exposes `fun EntryProviderScope<NavKey>.xEntries(navigator)` and a Koin `xModule`.
   - To add a feature: register its entries in `LioraApp.kt` and its module in `LioraApplication.kt`.
+  - **List-detail:** tag a list entry with `metadata = ListDetail.listPane { placeholder }` and what it opens with `ListDetail.detailPane()`. Open items with `navigator.openFromList(listRoute, route)`, so the detail pane shows one item and back returns to the list. `LocalPaneRole` tells a screen whether it sits beside its list (no back arrow, highlight the selection).
 - **Pure core modules** (model, common, domain, database, data) use `liora.kmp.library` (Android and JVM targets). They must stay Android-free so the Ktor server can reuse them.
 - **UI modules** use `liora.cmp.library` or `liora.cmp.feature` (Compose Multiplatform, Android target only for now). Keep UI code in `commonMain`, because a wasmJs target gets added for the web GUI.
 
@@ -71,9 +72,9 @@ The JDK isn't on PATH in every shell. Export it first when needed:
 - **Translations:** `verifyTranslations` (part of `check`) fails when a `values/` string has no `values-de/` counterpart, or when a German string is stale. `translatable="false"` opts a string out.
 - **Personal data:** `sample/` holds the user's real exports (e.g. Hevy) and is gitignored. Tests use synthetic fixtures only.
 - **Foldables:** the Galaxy Z Fold 7 is the reference device. Its cover screen is about 411 dp wide (compact); the inner screen is about 984 × 1092 dp (expanded).
-  - Layouts follow window size classes, never device checks.
-  - Wide screens get a navigation rail and list-detail panes. Reading-heavy content is capped at about 600 dp.
-  - State must survive fold and unfold.
+  - Layouts follow window size classes, never device checks. `currentWindowLayout()` (designsystem) holds the breakpoints: navigation rail from 600 dp, two panes from 840 dp.
+  - Wide screens get a navigation rail and list-detail panes. Reading-heavy content is capped at about 600 dp with `Modifier.readableWidth()`.
+  - State must survive fold and unfold. `MainActivity` handles size changes itself (`configChanges`), so folding re-lays out instead of recreating. `FoldableLayoutTest` simulates a fold with Robolectric.
   - The logger supports tabletop posture.
   - New screens get screenshot tests at cover and inner sizes (Robolectric qualifiers `w411dp-h960dp` and `w984dp-h1092dp`).
 
@@ -84,4 +85,5 @@ The JDK isn't on PATH in every shell. Export it first when needed:
 - **Material3 version:** CMP `material3` is pinned to 1.9.0 (= androidx material3 1.4.0, the stable BOM version), not the alpha that ships alongside CMP 1.12.
 - **Compose string resources** (`composeResources/**/strings.xml`) do not unescape `\'` the way Android `res/` does; the backslash shows up in the UI. Write a typographic apostrophe (`’`) instead.
 - **Escaping in shell edits:** shell heredocs and sed here mangle backslashes and quotes. Make escaping-sensitive edits with the file edit tools, or with a script file, not inline shell text.
+- **Navigation 3 metadata** is stored under each `NavMetadataKey`'s `toString()`, so keys override it with a namespaced name (see `ListDetail.kt`).
 - **Pinned versions:** `androidx.navigation3:navigation3-runtime` stays at 1.1.7 to match JB `navigation3-ui` 1.1.2, and `sqlite-bundled` stays at 2.6.2 to match Room 2.8.5. Lint's "newer version available" warnings on these two are expected.

@@ -4,7 +4,8 @@ A workout tracker that is fast to log with, owned by its user, and built to grow
 an offline-first Android app now, then sync to your own Google Drive, a self-hosted server with a web
 GUI, and AI features on top.
 
-**Status:** Phase 0 is done. The scaffold, design system and app shell are in place. Phase 1 (the offline MVP) is next.
+**Status:** Phase 1 (the offline MVP) is in progress. The database, domain logic, exercise library with
+custom exercises, German, and the foldable layouts are done. Routines are next, then the logger.
 
 ## Principles
 

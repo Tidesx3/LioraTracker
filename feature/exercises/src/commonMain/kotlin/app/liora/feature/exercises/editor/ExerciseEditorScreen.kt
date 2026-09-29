@@ -34,6 +34,7 @@ import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.model.Equipment
 import app.liora.core.model.ExerciseDraft
 import app.liora.core.model.Muscle
@@ -107,7 +108,7 @@ private fun EditorForm(
     modifier: Modifier = Modifier,
 ) {
     val draft = state.draft
-    LazyColumn(modifier = modifier, contentPadding = contentPadding) {
+    LazyColumn(modifier = modifier.readableWidth(), contentPadding = contentPadding) {
         item {
             OutlinedTextField(
                 value = draft.name,

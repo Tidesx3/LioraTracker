@@ -10,7 +10,7 @@ import app.liora.core.navigation.ProgressRoute
 import app.liora.core.navigation.TrainRoute
 import org.jetbrains.compose.resources.DrawableResource
 
-/** The bottom-navigation tabs, in display order. */
+/** The navigation tabs (bottom bar or rail), in display order. */
 enum class TopLevelDestination(
     val route: NavKey,
     @param:StringRes val label: Int,

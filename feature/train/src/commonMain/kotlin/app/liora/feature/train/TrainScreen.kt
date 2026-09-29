@@ -27,6 +27,7 @@ import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.layout.readableWidth
 import app.liora.feature.train.resources.Res
 import app.liora.feature.train.resources.cd_settings
 import app.liora.feature.train.resources.train_quick_start
@@ -85,6 +86,7 @@ private fun TrainContent(
         },
     ) { padding ->
         LazyColumn(
+            modifier = Modifier.readableWidth(),
             contentPadding =
                 PaddingValues(
                     top = padding.calculateTopPadding(),

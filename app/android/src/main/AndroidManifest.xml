@@ -14,8 +14,12 @@
     android:supportsRtl="true"
     android:theme="@style/Theme.Liora">
 
+    <!-- Folding, unfolding and resizing only change the window size: Compose re-lays out in place
+         instead of recreating the activity, so typed values, focus and running animations survive.
+         Locale and night-mode changes still recreate, which the per-app language switch relies on. -->
     <activity
       android:name=".MainActivity"
+      android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|density"
       android:exported="true"
       android:windowSoftInputMode="adjustResize">
       <intent-filter>
