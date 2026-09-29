@@ -5,8 +5,9 @@ an offline-first Android app now, then sync to your own Google Drive, a self-hos
 GUI, and AI features on top.
 
 **Status:** Phase 1 (the offline MVP) is in progress. The database, domain logic, exercise library with
-custom exercises, German, the foldable layouts, and routines with folders and supersets are done. The
-logger is next.
+custom exercises, German, the foldable layouts, routines with folders and supersets, and the logger
+(number pad, rest timer, live workout notification, personal records, tabletop mode) are done. History
+is next.
 
 ## Principles
 

@@ -14,6 +14,8 @@ composeBom = "2026.09.00"
 # AndroidX / JetBrains-multiplatform AndroidX
 androidxActivity = "1.13.0"
 androidxCore = "1.19.1"
+# Matches the androidx.window that material3-adaptive brings in; the testing artifact fakes fold postures.
+androidxWindow = "1.5.0"
 jbLifecycle = "2.11.0"
 jbNavigation3 = "1.1.2"
 androidxNavigation3 = "1.1.7"
@@ -61,6 +63,7 @@ androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-mani
 
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxActivity" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
+androidx-window-testing = { module = "androidx.window:window-testing", version.ref = "androidxWindow" }
 
 jb-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jbLifecycle" }
 jb-lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jbLifecycle" }

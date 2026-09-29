@@ -56,4 +56,18 @@
   <string name="focus_log">Satz abhaken</string>
   <string name="focus_all_done">Alle Sätze erledigt</string>
   <string name="focus_all_done_body">Füge eine Übung oder einen Satz hinzu, oder beende das Training.</string>
+
+  <string name="finish_title">Training beenden?</string>
+  <string name="finish_empty_title">Noch nichts geloggt</string>
+  <string name="finish_empty_body">Logge zuerst einen Satz oder verwirf dieses Training.</string>
+  <plurals name="finish_records">
+    <item quantity="one">%1$d persönlicher Rekord</item>
+    <item quantity="other">%1$d persönliche Rekorde</item>
+  </plurals>
+  <plurals name="finish_open_sets">
+    <item quantity="one">%1$d geplanter Satz wurde nicht geloggt und wird nicht gespeichert.</item>
+    <item quantity="other">%1$d geplante Sätze wurden nicht geloggt und werden nicht gespeichert.</item>
+  </plurals>
+  <string name="finish_update_routine">„%1$s“ mit den heutigen Gewichten und Wiederholungen aktualisieren</string>
+  <string name="cd_personal_record">Persönlicher Rekord</string>
 </resources>

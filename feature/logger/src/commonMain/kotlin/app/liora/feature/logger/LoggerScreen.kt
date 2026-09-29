@@ -113,7 +113,11 @@ internal fun LoggerScreen(
     var dialog by rememberSaveable { mutableStateOf<LoggerDialog?>(null) }
     LoggerContent(
         state = state as? LoggerUiState.Active,
-        actions = loggerActions(viewModel, navigation) { dialog = it },
+        actions =
+            loggerActions(viewModel, navigation) {
+                viewModel.closePad()
+                dialog = it
+            },
         modifier = modifier,
     )
     (state as? LoggerUiState.Active)?.let { active ->
@@ -125,6 +129,7 @@ internal fun LoggerScreen(
                     onRename = viewModel::rename,
                     onDiscard = viewModel::discard,
                     onReorder = viewModel::reorder,
+                    onFinish = viewModel::finish,
                     onDismiss = { dialog = null },
                 ),
         )
@@ -139,7 +144,6 @@ internal class LoggerActions(
     val pad: PadActions,
     val rest: RestActions,
     val onShowDialog: (LoggerDialog) -> Unit,
-    val onFinish: () -> Unit,
 )
 
 internal class PadActions(
@@ -190,7 +194,6 @@ private fun loggerActions(
         ),
     rest = RestActions(onAdjust = viewModel::adjustRest, onSkip = viewModel::skipRest),
     onShowDialog = onShowDialog,
-    onFinish = viewModel::finish,
 )
 
 @Composable
@@ -218,7 +221,10 @@ private fun LoggerContent(
                             stringResource(Res.string.cd_rename),
                             { actions.onShowDialog(LoggerDialog.Rename) },
                         )
-                        Button(onClick = actions.onFinish, modifier = Modifier.padding(end = 8.dp)) {
+                        Button(
+                            onClick = { actions.onShowDialog(LoggerDialog.Finish) },
+                            modifier = Modifier.padding(end = 8.dp),
+                        ) {
                             Text(stringResource(Res.string.logger_finish))
                         }
                     }
@@ -238,14 +244,23 @@ private fun LoggerContent(
         Column(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
             WorkoutStats(state, Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            if (currentWindowLayout().twoPane) {
-                Row(Modifier.weight(1f)) {
-                    WorkoutList(state, actions, Modifier.weight(1f).fillMaxHeight())
-                    VerticalDivider()
-                    FocusPane(state, actions, Modifier.width(FocusPaneWidth).fillMaxHeight())
+            val layout = currentWindowLayout()
+            when {
+                layout.tabletop -> {
+                    TabletopLogger(state, actions, Modifier.weight(1f))
                 }
-            } else {
-                CompactLogger(state, actions, Modifier.weight(1f))
+
+                layout.twoPane -> {
+                    Row(Modifier.weight(1f)) {
+                        WorkoutList(state, actions, Modifier.weight(1f).fillMaxHeight())
+                        VerticalDivider()
+                        FocusPane(state, actions, Modifier.width(FocusPaneWidth).fillMaxHeight())
+                    }
+                }
+
+                else -> {
+                    CompactLogger(state, actions, Modifier.weight(1f))
+                }
             }
         }
     }
@@ -296,7 +311,7 @@ internal fun PadFor(
 }
 
 @Composable
-private fun WorkoutList(
+internal fun WorkoutList(
     state: LoggerUiState.Active,
     actions: LoggerActions,
     modifier: Modifier = Modifier,
@@ -418,4 +433,6 @@ private val FocusPaneWidth = 360.dp
 object LoggerTags {
     const val CELL = "logger.cell"
     const val PAD = "logger.pad"
+    const val TABLETOP = "logger.tabletop"
+    const val FINISH_CONFIRM = "logger.finish.confirm"
 }

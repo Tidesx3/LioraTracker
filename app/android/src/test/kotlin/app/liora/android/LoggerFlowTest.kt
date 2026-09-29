@@ -20,6 +20,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.window.testing.layout.FoldingFeature
+import androidx.window.testing.layout.TestWindowLayoutInfo
+import androidx.window.testing.layout.WindowLayoutInfoPublisherRule
 import app.liora.core.data.AppStartup
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
@@ -33,6 +36,7 @@ import app.liora.feature.logger.LoggerTags
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -54,6 +58,9 @@ import org.robolectric.annotation.GraphicsMode
 class LoggerFlowTest {
     @get:Rule
     val composeRule = createEmptyComposeRule()
+
+    @get:Rule
+    val windowLayout = WindowLayoutInfoPublisherRule()
 
     @Before
     fun seed() =
@@ -84,6 +91,74 @@ class LoggerFlowTest {
 
         composeRule.onNodeWithText("Skip").performClick()
         composeRule.waitUntil(TIMEOUT_MS) { !nodeExists(hasText("Skip")) }
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun beatLastTimeThenFinishAndUpdateTheRoutine() {
+        logLastSession()
+        launch()
+        waitForText("Start")
+        composeRule.onNodeWithText("Start").performClick()
+        waitForText("Finish")
+
+        // 85 kg for 10 where last time was 80: a personal record, marked on the set.
+        composeRule.onAllNodesWithTag(LoggerTags.CELL)[0].performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasTestTag(LoggerTags.PAD)) }
+        listOf("8", "5").forEach { padKey(it).performClick() }
+        padButton("Next field").performClick()
+        listOf("1", "0").forEach { padKey(it).performClick() }
+        padButton("Log set").performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasContentDescription("Personal record")) }
+        // The second set like last time, the third not at all.
+        composeRule.onAllNodesWithContentDescription("Log set").onFirst().performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { loggedSets() == 2 }
+
+        composeRule.onNodeWithText("Finish").performClick()
+        waitForText("Finish workout?")
+        composeRule.onNodeWithText("3 personal records").assertIsDisplayed()
+        composeRule.onNodeWithText("$BENCH: Heaviest weight, Best estimated 1RM, Best set volume").assertIsDisplayed()
+        composeRule.onNodeWithText("1 planned set wasn’t logged and won’t be saved.").assertIsDisplayed()
+        composeRule.onNodeWithText("Update “Push” with today’s weights and reps").assertIsDisplayed()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/logger_finish_dark.png")
+
+        composeRule.onNode(hasTestTag(LoggerTags.FINISH_CONFIRM)).performClick()
+        waitForText("Start empty workout")
+        val routine = runBlocking { GlobalContext.get().get<RoutineRepository>().get(PUSH.id)!! }
+        assertEquals(
+            listOf(Mass(85.0), Mass(80.0)),
+            routine.exercises
+                .single()
+                .sets
+                .map { it.weight },
+        )
+    }
+
+    @Test
+    @Config(qualifiers = TABLETOP_SIZE)
+    fun tabletop_theTimerStandsUpAndThePadLiesFlat() {
+        logLastSession()
+        val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
+        waitForText("Start")
+        composeRule.onNodeWithText("Start").performClick()
+        waitForText("Finish")
+        // Half fold it once the logger is showing: posture updates reach only screens already listening.
+        windowLayout.overrideWindowLayoutInfo(
+            TestWindowLayoutInfo(
+                listOf(
+                    FoldingFeature(
+                        activity = activity,
+                        state = androidx.window.layout.FoldingFeature.State.HALF_OPENED,
+                        orientation = androidx.window.layout.FoldingFeature.Orientation.HORIZONTAL,
+                    ),
+                ),
+            ),
+        )
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasTestTag(LoggerTags.TABLETOP)) }
+        waitForText("Set 1 of 3")
+        composeRule.onNode(hasText("Log set") and !hasAnyAncestor(hasTestTag(LoggerTags.PAD))).performClick()
+        waitForText("Skip")
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/fold_tabletop_logger_dark.png")
     }
 
     @Test
@@ -188,6 +263,9 @@ class LoggerFlowTest {
     private companion object {
         const val COVER = "w411dp-h960dp-night-xxhdpi"
         const val INNER = "w984dp-h1092dp-night-xhdpi"
+
+        /** The inner screen turned sideways, so the hinge runs across. */
+        const val TABLETOP_SIZE = "w1092dp-h984dp-night-xhdpi"
         const val BENCH = "Barbell Bench Press"
         const val TIMEOUT_MS = 10_000L
 

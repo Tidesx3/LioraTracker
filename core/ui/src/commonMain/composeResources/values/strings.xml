@@ -69,4 +69,14 @@
   <string name="rest_picker_default">Exercise default</string>
   <string name="rest_picker_off">Off</string>
   <string name="rest_picker_cancel">Cancel</string>
+
+  <string name="record_heaviest_weight">Heaviest weight</string>
+  <string name="record_least_assistance">Least assistance</string>
+  <string name="record_estimated_1rm">Best estimated 1RM</string>
+  <string name="record_best_set_volume">Best set volume</string>
+  <string name="record_rep_max">%1$d-rep max</string>
+  <string name="record_most_reps">Most reps</string>
+  <string name="record_longest_duration">Longest time</string>
+  <string name="record_longest_distance">Longest distance</string>
+  <string name="record_best_pace">Best pace</string>
 </resources>

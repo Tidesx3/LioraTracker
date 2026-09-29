@@ -61,4 +61,18 @@
   <string name="focus_log">Log set</string>
   <string name="focus_all_done">All sets done</string>
   <string name="focus_all_done_body">Add an exercise or a set, or finish the workout.</string>
+
+  <string name="finish_title">Finish workout?</string>
+  <string name="finish_empty_title">Nothing logged yet</string>
+  <string name="finish_empty_body">Log a set first, or discard this workout.</string>
+  <plurals name="finish_records">
+    <item quantity="one">%1$d personal record</item>
+    <item quantity="other">%1$d personal records</item>
+  </plurals>
+  <plurals name="finish_open_sets">
+    <item quantity="one">%1$d planned set wasn’t logged and won’t be saved.</item>
+    <item quantity="other">%1$d planned sets weren’t logged and won’t be saved.</item>
+  </plurals>
+  <string name="finish_update_routine">Update “%1$s” with today’s weights and reps</string>
+  <string name="cd_personal_record">Personal record</string>
 </resources>

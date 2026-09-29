@@ -50,6 +50,7 @@ import app.liora.core.ui.distanceInKilometers
 import app.liora.core.ui.setSummary
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.cd_complete_set
+import app.liora.feature.logger.resources.cd_personal_record
 import app.liora.feature.logger.resources.cd_remove_set
 import app.liora.feature.logger.resources.cd_reopen_set
 import app.liora.feature.logger.resources.col_kg
@@ -77,6 +78,8 @@ internal class SetRowState(
 internal class SetHints(
     val previous: LoggedSet?,
     val placeholder: LoggedSet,
+    /** Whether the set broke a personal record. */
+    val isRecord: Boolean = false,
 )
 
 internal class SetRowActions(
@@ -196,6 +199,14 @@ internal fun SetRow(
             Box {
                 SetTypeMenu(set.type, state.number, onPick = { actions.onTypeChange(set.id, it) })
                 if (state.isCurrent && !set.isCompleted) CurrentMarker(Modifier.align(Alignment.CenterStart))
+            }
+            if (state.hints.isRecord) {
+                Icon(
+                    painter = painterResource(LioraIcons.Record),
+                    contentDescription = stringResource(Res.string.cd_personal_record),
+                    tint = LioraTheme.colors.personalRecord,
+                    modifier = Modifier.size(18.dp),
+                )
             }
             Text(
                 text = previousText(state, numbers),

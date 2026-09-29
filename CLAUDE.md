@@ -23,6 +23,7 @@ The JDK isn't on PATH in every shell. Export it first when needed:
   - To add a feature: register its entries in `LioraApp.kt` and its module in `LioraApplication.kt`.
   - **List-detail:** tag a list entry with `metadata = ListDetail.listPane { placeholder }` and what it opens with `ListDetail.detailPane()`. Open items with `navigator.openFromList(listRoute, route)`, so the detail pane shows one item and back returns to the list. `LocalPaneRole` tells a screen whether it sits beside its list (no back arrow, highlight the selection).
   - **Results across features:** a screen that hands a value back (e.g. `ExercisePickerRoute`) takes a request key in its route and closes with `navigator.goBackWithResult(key, value)`. The caller's entry collects it with `NavigationResultEffect(navigator.results, key)`, which also delivers a result that arrived while the caller was off screen.
+- **The workout in progress:** `ActiveWorkoutRepository` (start, finish), `WorkoutEditor` (exercises) and `SetLogger` (sets, ticking off) in `core/data` serve both the logger and the live workout notification in `app/android/.../workout/`. Both read the same Room state, so they never disagree. The logging rules (next set, superset rounds, rest, placeholders) live in `core/domain/WorkoutProgress.kt`.
 - **Pure core modules** (model, common, domain, database, data) use `liora.kmp.library` (Android and JVM targets). They must stay Android-free so the Ktor server can reuse them.
 - **UI modules** use `liora.cmp.library` or `liora.cmp.feature` (Compose Multiplatform, Android target only for now). Keep UI code in `commonMain`, because a wasmJs target gets added for the web GUI.
 
@@ -35,7 +36,7 @@ The JDK isn't on PATH in every shell. Export it first when needed:
   - Never hard-delete synced rows.
   - Synced tables have no foreign-key constraints. Repositories keep references consistent and cascade tombstones.
   - `ownerId` is a server-side concept, added in Phase 3. The local DB belongs to one user.
-- **Local-only tables:** `local_meta` (device id, seed version) and `exercise_name` (search index, rebuilt from the seed).
+- **Local-only tables:** `local_meta` (device id, seed version, the running rest timer) and `exercise_name` (search index, rebuilt from the seed).
 - **Derived data:** PRs and stats caches are recomputed locally and never synced.
 - **Schema:** Room schemas are exported to `core/database/schemas/` and committed. Schema v1 is live on devices, so every change needs a version bump plus a migration (or `AutoMigration`) and a migration test.
 - **Writes must outlive the screen:** don't pop a screen right after launching a write in its `viewModelScope`. Leaving the screen clears the ViewModel and cancels the write. Close in reaction to the new data instead (see `LoggerScreen`).

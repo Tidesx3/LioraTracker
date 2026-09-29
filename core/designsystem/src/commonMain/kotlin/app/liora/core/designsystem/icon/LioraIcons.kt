@@ -32,6 +32,7 @@ import app.liora.core.designsystem.resources.ic_settings
 import app.liora.core.designsystem.resources.ic_skip_next
 import app.liora.core.designsystem.resources.ic_swap_horiz
 import app.liora.core.designsystem.resources.ic_timer
+import app.liora.core.designsystem.resources.ic_trophy
 import app.liora.core.designsystem.resources.ic_visibility_off
 import org.jetbrains.compose.resources.DrawableResource
 
@@ -70,4 +71,5 @@ object LioraIcons {
     val Replace: DrawableResource = Res.drawable.ic_swap_horiz
     val Reorder: DrawableResource = Res.drawable.ic_reorder
     val Skip: DrawableResource = Res.drawable.ic_skip_next
+    val Record: DrawableResource = Res.drawable.ic_trophy
 }

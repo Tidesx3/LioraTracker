@@ -47,6 +47,17 @@ private const val LAST_SESSION_SETS =
     ORDER BY we.position, s.position
     """
 
+/** Every completed set of these exercises in finished workouts: the history personal records come from. */
+private const val HISTORY_SETS =
+    """
+    SELECT we.exercise_id AS exercise_id, s.* FROM workout_set s
+    JOIN workout_exercise we ON we.id = s.workout_exercise_id
+    JOIN workout w ON w.id = we.workout_id
+    WHERE we.exercise_id IN (:exerciseIds)
+      AND s.completed_at IS NOT NULL AND s.deleted_at IS NULL AND we.deleted_at IS NULL
+      AND w.ended_at IS NOT NULL AND w.deleted_at IS NULL
+    """
+
 /** A set together with the exercise it was logged for. */
 data class ExerciseSetRow(
     @ColumnInfo(name = "exercise_id") val exerciseId: String,
@@ -81,6 +92,9 @@ interface WorkoutDao {
 
     @Query(LAST_SESSION_SETS)
     suspend fun lastSessionSets(exerciseIds: List<String>): List<ExerciseSetRow>
+
+    @Query(HISTORY_SETS)
+    fun observeHistorySets(exerciseIds: List<String>): Flow<List<ExerciseSetRow>>
 
     @Upsert
     suspend fun upsert(workout: WorkoutEntity)

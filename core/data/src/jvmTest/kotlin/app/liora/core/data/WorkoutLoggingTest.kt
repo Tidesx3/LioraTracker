@@ -18,6 +18,10 @@ import app.liora.core.model.Equipment
 import app.liora.core.model.ExerciseDraft
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.Mass
+import app.liora.core.model.RepRange
+import app.liora.core.model.Routine
+import app.liora.core.model.RoutineExercise
+import app.liora.core.model.RoutineSet
 import app.liora.core.model.SetType
 import app.liora.core.model.TrackingType
 import kotlinx.coroutines.flow.first
@@ -41,10 +45,11 @@ class WorkoutLoggingTest {
     private val stamper = SyncStamper(HybridLogicalClock(clock) { "test-device" }, clock)
     private val exercises = OfflineExerciseRepository(database.exerciseDao(), transactions, ids, stamper)
     private val restTimer = LocalRestTimerRepository(database.localMetaDao(), clock)
+    private val routines = OfflineRoutineRepository(database.routineDao(), transactions, ids, stamper)
     private val workouts =
         OfflineActiveWorkoutRepository(
             workoutDao = database.workoutDao(),
-            routines = OfflineRoutineRepository(database.routineDao(), transactions, ids, stamper),
+            routines = routines,
             restTimer = restTimer,
             transactions = transactions,
             ids = ids,
@@ -257,6 +262,53 @@ class WorkoutLoggingTest {
             restTimer.start(1.minutes)
             restTimer.stop()
             assertNull(restTimer.timer.first())
+        }
+
+    @Test
+    fun finishingKeepsWhatWasDoneAndCanUpdateTheRoutine() =
+        runTest {
+            val bench = exercise("Bench", TrackingType.WeightReps)
+            val fly = exercise("Fly", TrackingType.WeightReps)
+            routines.save(
+                Routine(
+                    id = "push",
+                    name = "Push",
+                    exercises =
+                        listOf(
+                            RoutineExercise(
+                                "rb",
+                                bench,
+                                sets = List(3) { RoutineSet("rb$it", weight = Mass(80.0), reps = RepRange(8, 12)) },
+                            ),
+                            RoutineExercise("rf", fly, sets = listOf(RoutineSet("rf0", reps = RepRange(12)))),
+                        ),
+                ),
+            )
+            val workout = workouts.startFromRoutine("push")
+            val (first, second) = workout.exercises.first().sets
+            logger.updateSet(first.id) { copy(weight = Mass(85.0), reps = 10) }
+            logger.completeSet(first.id)
+            clock.advance(1.minutes)
+            logger.updateSet(second.id) { copy(weight = Mass(85.0), reps = 9) }
+            logger.completeSet(second.id)
+
+            workouts.finish(updateRoutine = true)
+
+            // History keeps what happened: two bench sets; the third set and the flyes were never done.
+            val dao = database.workoutDao()
+            assertEquals(listOf(bench), dao.exercisesOf(workout.id).map { it.exerciseId })
+            assertEquals(listOf(10, 9), dao.setsOf(workout.id).map { it.reps })
+            assertNull(restTimer.current())
+            // Next time starts from today: 85 kg, still aiming for 8–12.
+            val routine = routines.get("push")!!
+            assertEquals(listOf(bench), routine.exercises.map { it.exerciseId })
+            assertEquals(
+                List(2) { Mass(85.0) to RepRange(8, 12) },
+                routine.exercises.single().sets.map {
+                    it.weight to
+                        it.reps
+                },
+            )
         }
 
     private suspend fun current(): ActiveWorkout = workouts.activeWorkout.first()!!

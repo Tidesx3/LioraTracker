@@ -3,12 +3,16 @@ package app.liora.feature.logger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.exercise.ExerciseRepository
+import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.RestTimerRepository
 import app.liora.core.data.workout.SetCompletion
 import app.liora.core.data.workout.SetLogger
 import app.liora.core.data.workout.WorkoutEditor
+import app.liora.core.domain.RecordKey
 import app.liora.core.domain.RestDefaults
+import app.liora.core.domain.RoutineUpdate
+import app.liora.core.domain.SessionRecords
 import app.liora.core.domain.SetField
 import app.liora.core.domain.SetPlaceholders
 import app.liora.core.domain.SetRef
@@ -20,16 +24,20 @@ import app.liora.core.model.ActiveWorkout
 import app.liora.core.model.Exercise
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.RestTimer
+import app.liora.core.model.Routine
 import app.liora.core.model.SetType
 import app.liora.core.model.TrackingType
+import app.liora.core.ui.headlineRecords
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -63,6 +71,10 @@ sealed interface LoggerUiState {
         val exercises: Map<String, Exercise>,
         /** Last session's completed sets per exercise id. */
         val previous: Map<String, List<LoggedSet>>,
+        /** Every earlier completed set per exercise id, which today's records are measured against. */
+        val history: Map<String, List<LoggedSet>>,
+        /** The routine the workout was started from, if any. */
+        val routine: Routine?,
         val restTimer: RestTimer?,
         val restDefaults: RestDefaults,
         val edit: CellEdit?,
@@ -76,6 +88,38 @@ sealed interface LoggerUiState {
 
         val volumeKg: Double =
             workout.exercises.sumOf { exercise -> volumeOf(trackingTypeOf(exercise.exerciseId), exercise.sets) }
+
+        /** The personal records each of today's sets broke, by set id. */
+        val newRecords: Map<String, Set<RecordKey>> =
+            workout.exercises
+                .groupBy { it.exerciseId }
+                .flatMap { (exerciseId, instances) ->
+                    SessionRecords
+                        .of(
+                            trackingTypeOf(exerciseId),
+                            history[exerciseId].orEmpty(),
+                            instances.flatMap { it.sets },
+                        ).entries
+                }.associate { it.key to it.value }
+
+        /** What finishing now would keep, and what it would change. */
+        fun finishSummary(): FinishSummary {
+            val updated = routine?.let { RoutineUpdate.fromWorkout(it, workout) { "" } }
+            return FinishSummary(
+                completedSets = completedSets,
+                openSets = workout.exercises.sumOf { exercise -> exercise.sets.count { !it.isCompleted } },
+                volumeKg = volumeKg,
+                records =
+                    workout.exercises.mapNotNull { exercise ->
+                        val keys = exercise.sets.flatMap { newRecords[it.id].orEmpty() }
+                        headlineRecords(keys).takeIf { it.isNotEmpty() }?.let {
+                            exercises[exercise.exerciseId]?.name.orEmpty() to
+                                it
+                        }
+                    },
+                routineToUpdate = routine?.name?.takeIf { updated != null && RoutineUpdate.changes(routine, updated) },
+            )
+        }
 
         fun trackingTypeOf(exerciseId: String): TrackingType =
             exercises[exerciseId]?.trackingType ?: TrackingType.WeightReps
@@ -98,6 +142,18 @@ sealed interface LoggerUiState {
     }
 }
 
+/** The finish sheet's summary. */
+data class FinishSummary(
+    val completedSets: Int,
+    /** Planned sets that weren't done; finishing drops them. */
+    val openSets: Int,
+    val volumeKg: Double,
+    /** Exercise names with the records they broke today, in workout order. */
+    val records: List<Pair<String, List<RecordKey>>>,
+    /** The routine's name, when updating it with today's values would change it. */
+    val routineToUpdate: String?,
+)
+
 /** Where the logger hears back from the exercise picker. */
 internal object PickerKeys {
     const val ADD = "logger.add"
@@ -112,6 +168,7 @@ class LoggerViewModel(
     private val restTimers: RestTimerRepository,
     private val restDefaults: RestDefaults,
     exerciseRepository: ExerciseRepository,
+    routines: RoutineRepository,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
     private val edit = MutableStateFlow<CellEdit?>(null)
@@ -132,21 +189,40 @@ class LoggerViewModel(
 
     private val editing = combine(edit, invalid) { cell, error -> cell to error }
 
-    val uiState: StateFlow<LoggerUiState> =
+    private val sessions =
         combine(
             activeWorkouts.activeWorkout,
             activeWorkouts.previousSets,
+            activeWorkouts.exerciseHistory,
+        ) { workout, previous, history ->
+            Session(workout, previous, history)
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val routine =
+        activeWorkouts.activeWorkout
+            .map { it?.routineId }
+            .distinctUntilChanged()
+            .flatMapLatest { id -> id?.let(routines::observeRoutine) ?: flowOf(null) }
+
+    val uiState: StateFlow<LoggerUiState> =
+        combine(
+            sessions,
             exercises,
             restTimers.timer,
             editing,
-        ) { workout, previous, byId, timer, (cell, error) ->
+            routine,
+        ) { session, byId, timer, (cell, error), fromRoutine ->
+            val workout = session.workout
             if (workout == null) {
                 LoggerUiState.NoWorkout
             } else {
                 LoggerUiState.Active(
                     workout = workout,
                     exercises = byId,
-                    previous = previous,
+                    previous = session.previous,
+                    history = session.history,
+                    routine = fromRoutine,
                     restTimer = timer,
                     restDefaults = restDefaults,
                     // A cell whose set was removed meanwhile is no longer being edited.
@@ -154,7 +230,16 @@ class LoggerViewModel(
                     invalid = error?.takeIf { workout.find(it.setId) != null },
                 )
             }
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LoggerUiState.Loading)
+        }
+            // Records are measured against the whole history; keep that off the main thread.
+            .flowOn(Dispatchers.Default)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LoggerUiState.Loading)
+
+    private class Session(
+        val workout: ActiveWorkout?,
+        val previous: Map<String, List<LoggedSet>>,
+        val history: Map<String, List<LoggedSet>>,
+    )
 
     private val active: LoggerUiState.Active? get() = uiState.value as? LoggerUiState.Active
 
@@ -334,7 +419,7 @@ class LoggerViewModel(
 
     fun skipRest() = launch { restTimers.stop() }
 
-    fun finish() = launch { activeWorkouts.finish() }
+    fun finish(updateRoutine: Boolean) = launch { activeWorkouts.finish(updateRoutine) }
 
     fun discard() = launch { activeWorkouts.discard() }
 

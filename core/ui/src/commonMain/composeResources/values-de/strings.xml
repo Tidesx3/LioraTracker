@@ -69,4 +69,14 @@
   <string name="rest_picker_default">Standard der Übung</string>
   <string name="rest_picker_off">Aus</string>
   <string name="rest_picker_cancel">Abbrechen</string>
+
+  <string name="record_heaviest_weight">Höchstes Gewicht</string>
+  <string name="record_least_assistance">Wenigste Unterstützung</string>
+  <string name="record_estimated_1rm">Bestes geschätztes 1RM</string>
+  <string name="record_best_set_volume">Bestes Satzvolumen</string>
+  <string name="record_rep_max">Bestwert für %1$d Wdh.</string>
+  <string name="record_most_reps">Meiste Wiederholungen</string>
+  <string name="record_longest_duration">Längste Zeit</string>
+  <string name="record_longest_distance">Längste Distanz</string>
+  <string name="record_best_pace">Beste Pace</string>
 </resources>

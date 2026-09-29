@@ -74,6 +74,9 @@ class LioraAppTest {
         composeRule.onNodeWithContentDescription("Open workout").performClick()
         waitForText("Finish")
         composeRule.onNodeWithText("Finish").performClick()
+        // Nothing was logged, so finishing offers to discard instead.
+        waitForText("Nothing logged yet")
+        composeRule.onNodeWithText("Discard").performClick()
         waitForText("Start empty workout")
     }
 

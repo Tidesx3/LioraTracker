@@ -141,6 +141,7 @@ internal fun ExerciseCard(
                                 SetHints(
                                     previous = state.previousFor(ref),
                                     placeholder = state.placeholderFor(ref),
+                                    isRecord = set.id in state.newRecords,
                                 ),
                             isCurrent = state.current == ref,
                             edit = state.edit?.takeIf { it.cell.setId == set.id },
