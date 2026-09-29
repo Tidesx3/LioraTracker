@@ -1,30 +1,39 @@
 package app.liora.android
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import app.liora.android.ui.LioraApp
+import app.liora.core.data.AppStartup
+import app.liora.core.data.exercise.ExerciseRepository
 import app.liora.core.designsystem.theme.LioraTheme
 import com.github.takahirom.roborazzi.captureRoboImage
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.context.GlobalContext
 import org.koin.core.context.stopKoin
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * Drives the real app shell (Koin graph from [LioraApplication], real navigation) on the JVM.
+ * Drives the real app (Koin graph, Room, navigation) on the JVM with an in-memory database.
  * `./gradlew :app:android:recordRoborazziDebug` refreshes the screenshots in src/test/screenshots.
  */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(sdk = [36], qualifiers = "w411dp-h891dp-xxhdpi")
+@Config(sdk = [36], qualifiers = "w411dp-h891dp-xxhdpi", application = TestLioraApplication::class)
 class LioraAppTest {
     @get:Rule
     val composeRule = createComposeRule()
@@ -53,17 +62,18 @@ class LioraAppTest {
         setApp(darkTheme = true)
 
         composeRule.onNodeWithText("Start empty workout").performClick()
-        composeRule.onNodeWithText("Finish").assertIsDisplayed()
+        waitForText("Finish")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/logger_dark.png")
 
         composeRule.onNodeWithContentDescription("Minimize workout").performClick()
-        composeRule.onNodeWithContentDescription("Open workout").assertIsDisplayed()
-        composeRule.onNodeWithText("Resume workout").assertIsDisplayed()
+        waitForContentDescription("Open workout")
+        waitForText("Resume workout")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/train_active_workout_dark.png")
 
         composeRule.onNodeWithContentDescription("Open workout").performClick()
+        waitForText("Finish")
         composeRule.onNodeWithText("Finish").performClick()
-        composeRule.onNodeWithText("Start empty workout").assertIsDisplayed()
+        waitForText("Start empty workout")
     }
 
     @Test
@@ -82,11 +92,55 @@ class LioraAppTest {
         composeRule.onNodeWithText("No workouts yet").assertIsDisplayed()
     }
 
+    @Test
+    @Config(qualifiers = "de-w411dp-h891dp-xxhdpi")
+    fun germanTrainAndLogger() {
+        setApp(darkTheme = true)
+        composeRule.onNodeWithText("Leeres Training starten").assertIsDisplayed()
+        composeRule.onNodeWithText("Fortschritt").assertIsDisplayed()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/de_train_dark.png")
+
+        composeRule.onNodeWithText("Leeres Training starten").performClick()
+        waitForText("Beenden")
+        composeRule.onNodeWithText("Training verwerfen").assertIsDisplayed()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/de_logger_dark.png")
+    }
+
+    @Test
+    fun bundledCatalogIsSeededWithGermanNames() =
+        runBlocking {
+            val koin = GlobalContext.get()
+            koin.get<AppStartup>().run()
+            val exercises =
+                koin
+                    .get<ExerciseRepository>()
+                    .observeExercises("de")
+                    .first()
+                    .associateBy { it.id }
+
+            assertTrue("expected the full catalog, got ${exercises.size}", exercises.size > 700)
+            assertEquals("Bankdrücken (Langhantel)", exercises.getValue("fedb.Barbell_Bench_Press_-_Medium_Grip").name)
+            assertEquals("Ski-Ergometer", exercises.getValue("liora.ski_erg").name)
+        }
+
     private fun setApp(darkTheme: Boolean) {
         composeRule.setContent {
             LioraTheme(darkTheme = darkTheme) {
                 LioraApp()
             }
         }
+    }
+
+    // Room emits on a background dispatcher that Compose's idling doesn't track, so wait explicitly.
+    private fun waitForText(text: String) =
+        composeRule.waitUntil(TIMEOUT_MS) { composeRule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty() }
+
+    private fun waitForContentDescription(description: String) =
+        composeRule.waitUntil(TIMEOUT_MS) {
+            composeRule.onAllNodesWithContentDescription(description).fetchSemanticsNodes().isNotEmpty()
+        }
+
+    private companion object {
+        const val TIMEOUT_MS = 5_000L
     }
 }

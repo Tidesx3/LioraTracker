@@ -13,14 +13,17 @@ internal fun Project.configureQuality() {
     val ktlintVersion = libs.version("ktlint")
     val composeRules = libs.lib("composeRules-ktlint").get().toString()
 
+    // Targets are rooted in src/ and the build script: a project-wide glob would walk build/, which
+    // parallel tasks are writing to (flaky on Windows).
+    val sources = fileTree("src") { include("**/*.kt") }
+    val buildScript = file("build.gradle.kts")
     extensions.configure<SpotlessExtension> {
         kotlin {
-            target("src/**/*.kt")
-            targetExclude("**/build/**")
+            target(sources)
             ktlint(ktlintVersion).customRuleSets(listOf(composeRules))
         }
         kotlinGradle {
-            target("*.gradle.kts")
+            target(buildScript)
             ktlint(ktlintVersion)
         }
     }

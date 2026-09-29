@@ -15,8 +15,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -30,6 +33,7 @@ import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.designsystem.util.rememberElapsedTime
+import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.designsystem.util.workoutDisplayName
 import app.liora.core.model.ActiveWorkout
 import app.liora.feature.logger.resources.Res
@@ -56,18 +60,26 @@ internal fun LoggerScreen(
     modifier: Modifier = Modifier,
     viewModel: LoggerViewModel = koinViewModel(),
 ) {
-    val workout by viewModel.activeWorkout.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Close once the database confirms the workout ended. Closing right away would clear this
+    // ViewModel and cancel the finish/discard write before it lands.
+    var hadWorkout by remember { mutableStateOf(false) }
+    val currentOnClose by rememberUpdatedState(onClose)
+    LaunchedEffect(uiState) {
+        when (uiState) {
+            is LoggerUiState.Active -> hadWorkout = true
+            LoggerUiState.NoWorkout -> if (hadWorkout) currentOnClose()
+            LoggerUiState.Loading -> Unit
+        }
+    }
+
+    if (uiState == LoggerUiState.Loading) return
     LoggerContent(
-        workout = workout,
+        workout = (uiState as? LoggerUiState.Active)?.workout,
         onMinimize = onClose,
-        onFinish = {
-            viewModel.finish()
-            onClose()
-        },
-        onDiscard = {
-            viewModel.discard()
-            onClose()
-        },
+        onFinish = viewModel::finish,
+        onDiscard = viewModel::discard,
         modifier = modifier,
     )
 }
@@ -172,14 +184,15 @@ private fun WorkoutStats(
     modifier: Modifier = Modifier,
 ) {
     val elapsed = rememberElapsedTime(workout.startedAt)
+    val numbers = rememberNumberFormatter()
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Stat(label = stringResource(Res.string.logger_stat_duration), value = elapsed.formatAsClock(), highlight = true)
         // Volume and set counts become live once set logging lands.
-        Stat(label = stringResource(Res.string.logger_stat_volume), value = "0 kg")
-        Stat(label = stringResource(Res.string.logger_stat_sets), value = "0")
+        Stat(label = stringResource(Res.string.logger_stat_volume), value = "${numbers.format(0)} kg")
+        Stat(label = stringResource(Res.string.logger_stat_sets), value = numbers.format(0))
     }
 }
 

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="exercises_title">Übungen</string>
+  <string name="exercises_empty_title">Deine Übungsbibliothek</string>
+  <string name="exercises_empty_body">Hunderte Übungen mit Zielmuskeln und Equipment, dein Verlauf pro Übung und unbegrenzt eigene Übungen.</string>
+</resources>

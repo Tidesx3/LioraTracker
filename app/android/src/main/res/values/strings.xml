@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Liora</string>
+  <string name="app_name" translatable="false">Liora</string>
   <string name="tab_train">Train</string>
   <string name="tab_history">History</string>
   <string name="tab_progress">Progress</string>

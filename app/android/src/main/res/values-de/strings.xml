@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="tab_train">Training</string>
+  <string name="tab_history">Verlauf</string>
+  <string name="tab_progress">Fortschritt</string>
+  <string name="tab_exercises">Übungen</string>
+</resources>

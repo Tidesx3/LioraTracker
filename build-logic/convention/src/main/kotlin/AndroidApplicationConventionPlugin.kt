@@ -1,6 +1,7 @@
 import app.liora.buildlogic.LioraConfig
 import app.liora.buildlogic.configureHostTests
 import app.liora.buildlogic.configureQuality
+import app.liora.buildlogic.configureTranslationCheck
 import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -13,6 +14,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
         pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
         configureQuality()
         configureHostTests()
+        configureTranslationCheck("src/main/res")
 
         extensions.configure<ApplicationExtension> {
             compileSdk = LioraConfig.COMPILE_SDK

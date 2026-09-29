@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="train_title">Training</string>
+  <string name="train_quick_start">Schnellstart</string>
+  <string name="train_quick_start_body">Frei loggen und Übungen nach Bedarf hinzufügen.</string>
+  <string name="train_start_empty">Leeres Training starten</string>
+  <string name="train_resume">Training fortsetzen</string>
+  <string name="train_routines">Routinen</string>
+  <string name="train_routines_empty_title">Noch keine Routinen</string>
+  <string name="train_routines_empty_body">Speichere deinen Trainingsplan als Routinen und starte sie mit einem Tipp.</string>
+  <string name="cd_settings">Einstellungen</string>
+</resources>

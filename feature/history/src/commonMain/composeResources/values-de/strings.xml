@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="history_title">Verlauf</string>
+  <string name="history_empty_title">Noch keine Trainings</string>
+  <string name="history_empty_body">Abgeschlossene Trainings landen hier, zusammen mit einem Kalender deiner Trainingstage.</string>
+</resources>

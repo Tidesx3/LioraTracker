@@ -64,6 +64,7 @@ androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runt
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+sqlite-framework = { module = "androidx.sqlite:sqlite-framework", version.ref = "sqlite" }
 datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastore" }
 
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin" }

@@ -4,8 +4,13 @@ plugins {
 }
 
 kotlin {
-    sourceSets.commonMain.dependencies {
-        implementation(projects.core.model)
-        implementation(projects.core.common)
+    sourceSets {
+        commonMain.dependencies {
+            api(projects.core.model)
+            implementation(projects.core.common)
+        }
+        androidMain.dependencies {
+            implementation(libs.koin.android)
+        }
     }
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="progress_title">Fortschritt</string>
+  <string name="progress_empty_title">Noch nichts auszuwerten</string>
+  <string name="progress_empty_body">Logge ein paar Trainings, um Kraftverläufe, persönliche Rekorde und wöchentliche Sätze pro Muskel zu sehen.</string>
+  <string name="progress_body_title">Körper</string>
+  <string name="progress_body_subtitle">Körpergewicht, Maße und Fortschrittsfotos</string>
+</resources>

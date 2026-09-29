@@ -48,8 +48,9 @@ build-logic        Gradle convention plugins (liora.kmp.library, liora.cmp.featu
 ## Roadmap
 
 0. Scaffold, design system, app shell ✅
-1. Offline MVP: exercise library, routines, the active logger with rest timer, history, progress
-   charts and PRs, body metrics and photos, JSON/CSV export, Hevy/Strong import
+1. Offline MVP: exercise library with unlimited custom exercises, routines, the active logger with
+   rest timer, history, progress charts and PRs, body metrics and photos, JSON/CSV export,
+   Hevy/Strong import, and English + German
 2. Google Drive (appDataFolder) sync and Health Connect
 3. Self-hosted Ktor + PostgreSQL server (Docker)
 4. Web GUI, programs with auto-progression, Wear OS

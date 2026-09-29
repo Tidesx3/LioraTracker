@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="logger_finish">Beenden</string>
+  <string name="logger_stat_duration">Dauer</string>
+  <string name="logger_stat_volume">Volumen</string>
+  <string name="logger_stat_sets">Sätze</string>
+  <string name="logger_empty_title">Noch keine Übungen</string>
+  <string name="logger_empty_body">Übungen hinzufügen und Sätze loggen kommt mit dem nächsten Build.</string>
+  <string name="logger_no_workout_title">Kein laufendes Training</string>
+  <string name="logger_no_workout_body">Starte eines im Tab Training.</string>
+  <string name="logger_discard">Training verwerfen</string>
+  <string name="logger_discard_title">Dieses Training verwerfen?</string>
+  <string name="logger_discard_body">Alles, was du in dieser Einheit geloggt hast, geht verloren.</string>
+  <string name="logger_discard_confirm">Verwerfen</string>
+  <string name="logger_discard_cancel">Weiter loggen</string>
+  <string name="cd_minimize">Training minimieren</string>
+</resources>

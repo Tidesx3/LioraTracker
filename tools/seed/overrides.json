@@ -1,0 +1,1288 @@
+{
+  "$comment": "Curation on top of free-exercise-db. Keys are the dataset's original English names.",
+  "renameEn": {
+    "Barbell Bench Press - Medium Grip": "Barbell Bench Press",
+    "Barbell Incline Bench Press - Medium Grip": "Incline Barbell Bench Press",
+    "Pullups": "Pull-Up",
+    "Pushups": "Push-Up",
+    "Crunches": "Crunch",
+    "Leg Extensions": "Leg Extension",
+    "Lying Leg Curls": "Lying Leg Curl",
+    "Hammer Curls": "Hammer Curl",
+    "Dips - Triceps Version": "Triceps Dip",
+    "Dips - Chest Version": "Chest Dip",
+    "Hyperextensions (Back Extensions)": "Back Extension",
+    "Thigh Abductor": "Hip Abduction (Machine)",
+    "Thigh Adductor": "Hip Adduction (Machine)",
+    "Standing Calf Raises": "Standing Calf Raise (Machine)",
+    "Seated Calf Raise": "Seated Calf Raise (Machine)",
+    "Seated Cable Rows": "Seated Cable Row",
+    "Running, Treadmill": "Running (Treadmill)",
+    "Walking, Treadmill": "Walking (Treadmill)",
+    "Jogging, Treadmill": "Jogging (Treadmill)",
+    "Bicycling, Stationary": "Stationary Bike",
+    "Bicycling": "Cycling",
+    "Rowing, Stationary": "Rowing Machine",
+    "Rope Jumping": "Jump Rope",
+    "Box Jump (Multiple Response)": "Box Jump",
+    "Ab Roller": "Ab Wheel Rollout",
+    "Butterfly": "Pec Deck (Butterfly)",
+    "Reverse Machine Flyes": "Reverse Pec Deck",
+    "Standing Military Press": "Overhead Press (Barbell)",
+    "Rack Pulls": "Rack Pull",
+    "Leverage Chest Press": "Chest Press (Machine)",
+    "Leverage Shoulder Press": "Shoulder Press (Machine, Leverage)",
+    "Machine Shoulder (Military) Press": "Shoulder Press (Machine)",
+    "T-Bar Row with Handle": "T-Bar Row",
+    "Concentration Curls": "Concentration Curl",
+    "Dumbbell Lunges": "Dumbbell Lunge",
+    "Zercher Squats": "Zercher Squat",
+    "Mountain Climbers": "Mountain Climber"
+  },
+  "aliases": {
+    "Barbell Bench Press - Medium Grip": {
+      "en": [
+        "Bench Press",
+        "Flat Bench Press"
+      ],
+      "de": [
+        "Bankdrücken"
+      ]
+    },
+    "Barbell Squat": {
+      "en": [
+        "Back Squat",
+        "Squat"
+      ],
+      "de": [
+        "Kniebeuge",
+        "Kniebeugen"
+      ]
+    },
+    "Barbell Deadlift": {
+      "en": [
+        "Deadlift",
+        "Conventional Deadlift"
+      ],
+      "de": [
+        "Kreuzheben"
+      ]
+    },
+    "Standing Military Press": {
+      "en": [
+        "OHP",
+        "Military Press",
+        "Shoulder Press"
+      ],
+      "de": [
+        "Military Press",
+        "Schulterdrücken"
+      ]
+    },
+    "Pullups": {
+      "en": [
+        "Pull Up",
+        "Pullup"
+      ],
+      "de": [
+        "Klimmzüge"
+      ]
+    },
+    "Chin-Up": {
+      "en": [
+        "Chinup"
+      ],
+      "de": [
+        "Klimmzüge Untergriff"
+      ]
+    },
+    "Pushups": {
+      "en": [
+        "Push Up",
+        "Pushup"
+      ],
+      "de": [
+        "Liegestütze"
+      ]
+    },
+    "Wide-Grip Lat Pulldown": {
+      "en": [
+        "Lat Pulldown"
+      ],
+      "de": [
+        "Latziehen",
+        "Latzug",
+        "Latzug (Kabel)",
+        "Latzug (Kabelzug)"
+      ]
+    },
+    "One-Arm Dumbbell Row": {
+      "en": [
+        "Dumbbell Row"
+      ],
+      "de": [
+        "Kurzhantelrudern"
+      ]
+    },
+    "Bent Over Barbell Row": {
+      "en": [
+        "Barbell Row"
+      ],
+      "de": [
+        "Langhantelrudern"
+      ]
+    },
+    "Side Lateral Raise": {
+      "en": [
+        "Lateral Raise",
+        "Dumbbell Lateral Raise"
+      ],
+      "de": [
+        "Seitheben"
+      ]
+    },
+    "Barbell Hip Thrust": {
+      "en": [
+        "Hip Thrust"
+      ],
+      "de": [
+        "Hüftstoß"
+      ]
+    },
+    "Romanian Deadlift": {
+      "en": [
+        "RDL"
+      ],
+      "de": [
+        "RDL"
+      ]
+    },
+    "Stiff-Legged Dumbbell Deadlift": {
+      "en": [
+        "Dumbbell Romanian Deadlift",
+        "Dumbbell RDL"
+      ],
+      "de": [
+        "Rumänisches Kreuzheben (Kurzhantel)"
+      ]
+    },
+    "Natural Glute Ham Raise": {
+      "en": [
+        "Nordic Hamstring Curl",
+        "Nordic Curl"
+      ],
+      "de": [
+        "Nordic Curl"
+      ]
+    },
+    "EZ-Bar Skullcrusher": {
+      "en": [
+        "Skull Crusher",
+        "French Press"
+      ],
+      "de": [
+        "French Press",
+        "Stirndrücken"
+      ]
+    },
+    "Butterfly": {
+      "en": [
+        "Machine Fly",
+        "Pec Fly"
+      ],
+      "de": [
+        "Butterfly"
+      ]
+    },
+    "Reverse Machine Flyes": {
+      "en": [
+        "Rear Delt Fly (Machine)"
+      ],
+      "de": [
+        "Reverse Butterfly",
+        "Reverse Fliegende",
+        "Reverse Fliegende (Maschine)"
+      ]
+    },
+    "Leg Press": {
+      "en": [
+        "45 Degree Leg Press"
+      ],
+      "de": [
+        "Beinpresse"
+      ]
+    },
+    "Leg Extensions": {
+      "en": [
+        "Quad Extension"
+      ],
+      "de": [
+        "Beinstrecker",
+        "Beinstrecken",
+        "Beinstrecken (Maschine)"
+      ]
+    },
+    "Lying Leg Curls": {
+      "en": [
+        "Hamstring Curl"
+      ],
+      "de": [
+        "Beinbeuger",
+        "Beinbeugen liegend",
+        "Beinbeugen"
+      ]
+    },
+    "Seated Leg Curl": {
+      "en": [
+        "Hamstring Curl (Seated)"
+      ],
+      "de": [
+        "Beinbeuger",
+        "Beinbeugen sitzend",
+        "Beinbeugen sitzend (Maschine)"
+      ]
+    },
+    "Triceps Pushdown": {
+      "en": [
+        "Cable Pushdown"
+      ],
+      "de": [
+        "Trizepsdrücken",
+        "Trizeps-Pushdown (Kabelzug)",
+        "Trizepsdrücken (Kabel)"
+      ]
+    },
+    "Triceps Pushdown - Rope Attachment": {
+      "en": [
+        "Rope Pushdown"
+      ],
+      "de": [
+        "Trizepsdrücken Seil"
+      ]
+    },
+    "Hyperextensions (Back Extensions)": {
+      "en": [
+        "Hyperextension"
+      ],
+      "de": [
+        "Hyperextensions",
+        "Rückenstrecken",
+        "Rückenstrecken (Maschine)",
+        "Hyperextension (Gewichtet)"
+      ]
+    },
+    "Thigh Abductor": {
+      "en": [
+        "Abductor Machine"
+      ],
+      "de": [
+        "Abduktorenmaschine",
+        "Hüftabduktion",
+        "Hüftabduktion (Maschine)"
+      ]
+    },
+    "Thigh Adductor": {
+      "en": [
+        "Adductor Machine"
+      ],
+      "de": [
+        "Adduktorenmaschine",
+        "Hüftadduktion",
+        "Hüftadduktion (Maschine)"
+      ]
+    },
+    "Standing Calf Raises": {
+      "en": [
+        "Calf Raise"
+      ],
+      "de": [
+        "Wadenheben"
+      ]
+    },
+    "Front Barbell Squat": {
+      "en": [
+        "Front Squat"
+      ],
+      "de": [
+        "Frontkniebeuge"
+      ]
+    },
+    "Hack Squat": {
+      "en": [
+        "Hack Squat Machine"
+      ],
+      "de": [
+        "Hackenschmidt"
+      ]
+    },
+    "Seated Cable Rows": {
+      "en": [
+        "Cable Row",
+        "Low Row"
+      ],
+      "de": [
+        "Kabelrudern",
+        "Sitzendes Rudern am Kabelzug",
+        "Sitzendes Rudern - V-Griff (Kabelzug)",
+        "Sitzendes Rudern"
+      ]
+    },
+    "Cable Crossover": {
+      "en": [
+        "Cable Fly"
+      ],
+      "de": [
+        "Kabelzug-Fliegende"
+      ]
+    },
+    "Dumbbell Flyes": {
+      "en": [
+        "Dumbbell Fly"
+      ],
+      "de": [
+        "Fliegende"
+      ]
+    },
+    "Goblet Squat": {
+      "en": [],
+      "de": [
+        "Goblet-Kniebeuge"
+      ]
+    },
+    "Farmer's Walk": {
+      "en": [
+        "Farmers Carry",
+        "Farmer Carry"
+      ],
+      "de": [
+        "Farmer Walk"
+      ]
+    },
+    "Plank": {
+      "en": [
+        "Front Plank"
+      ],
+      "de": [
+        "Plank",
+        "Brett"
+      ]
+    },
+    "Running, Treadmill": {
+      "en": [
+        "Treadmill"
+      ],
+      "de": [
+        "Laufband"
+      ]
+    },
+    "Walking, Treadmill": {
+      "en": [
+        "Incline Walk"
+      ],
+      "de": [
+        "Laufband"
+      ]
+    },
+    "Bicycling, Stationary": {
+      "en": [
+        "Exercise Bike",
+        "Spin Bike"
+      ],
+      "de": [
+        "Fahrradergometer",
+        "Spinning"
+      ]
+    },
+    "Rowing, Stationary": {
+      "en": [
+        "Rower",
+        "Erg"
+      ],
+      "de": [
+        "Rudermaschine"
+      ]
+    },
+    "Elliptical Trainer": {
+      "en": [
+        "Elliptical",
+        "Cross Trainer"
+      ],
+      "de": [
+        "Ellipsentrainer"
+      ]
+    },
+    "Stairmaster": {
+      "en": [
+        "Stair Climber"
+      ],
+      "de": [
+        "Treppensteiger",
+        "Treppensteigen",
+        "Treppensteigen (Etagen)"
+      ]
+    },
+    "Rope Jumping": {
+      "en": [
+        "Skipping Rope"
+      ],
+      "de": [
+        "Springseil"
+      ]
+    },
+    "Power Clean": {
+      "en": [],
+      "de": [
+        "Power Clean"
+      ]
+    },
+    "Clean and Jerk": {
+      "en": [],
+      "de": [
+        "Stoßen"
+      ]
+    },
+    "Snatch": {
+      "en": [],
+      "de": [
+        "Reißen"
+      ]
+    },
+    "Trap Bar Deadlift": {
+      "en": [
+        "Hex Bar Deadlift"
+      ],
+      "de": [
+        "Hex-Bar-Kreuzheben"
+      ]
+    },
+    "Smith Machine Squat": {
+      "en": [],
+      "de": [
+        "Smith-Maschine Kniebeuge"
+      ]
+    },
+    "Smith Machine Bench Press": {
+      "en": [],
+      "de": [
+        "Smith-Maschine Bankdrücken",
+        "Bankdrücken (Smith Machine)"
+      ]
+    },
+    "Face Pull": {
+      "en": [],
+      "de": [
+        "Facepulls"
+      ]
+    },
+    "Parallel Bar Dip": {
+      "en": [
+        "Dips"
+      ],
+      "de": [
+        "Dips"
+      ]
+    },
+    "Calf Press": {
+      "en": [
+        "Calf Press Machine"
+      ],
+      "de": [
+        "Wadenpresse",
+        "Wadenpressen (Maschine)"
+      ]
+    },
+    "Cable Rope Overhead Triceps Extension": {
+      "en": [],
+      "de": [
+        "Überkopf-Trizepsstrecken",
+        "Überkopf-Trizepsstrecken (Kabelzug)"
+      ]
+    },
+    "Leverage Shoulder Press": {
+      "en": [],
+      "de": [
+        "Schulterdrücken (Maschinenplatten)",
+        "Schulterdrücken (Maschine mit Hantelscheiben)"
+      ]
+    },
+    "Weighted Crunches": {
+      "en": [
+        "Weighted Crunch"
+      ],
+      "de": [
+        "Crunch (Gewichtet)"
+      ]
+    },
+    "Smith Machine Incline Bench Press": {
+      "en": [],
+      "de": [
+        "Schrägbankdrücken (Smith Machine)"
+      ]
+    },
+    "Incline Dumbbell Curl": {
+      "en": [
+        "Incline Curl"
+      ],
+      "de": [
+        "Incline Curl sitzend (Kurzhantel)",
+        "Incline Curl"
+      ]
+    },
+    "Seated Dumbbell Palms-Up Wrist Curl": {
+      "en": [
+        "Wrist Curl"
+      ],
+      "de": [
+        "Wrist Curl mit den Handflächen nach oben sitzend"
+      ]
+    },
+    "Standing Cable Wood Chop": {
+      "en": [
+        "Cable Twist"
+      ],
+      "de": [
+        "Cable Twist",
+        "Cable Twist (Von unten nach oben)"
+      ]
+    },
+    "Lying T-Bar Row": {
+      "en": [
+        "Chest-Supported T-Bar Row"
+      ],
+      "de": [
+        "Brustgestütztes T-Bar Rudern"
+      ]
+    },
+    "Rope Straight-Arm Pulldown": {
+      "en": [],
+      "de": [
+        "Pulldown mit gestreckten Armen am Seil (Kabelzug)"
+      ]
+    },
+    "Machine Preacher Curls": {
+      "en": [
+        "Preacher Curl Machine"
+      ],
+      "de": [
+        "Preacher Curl (Maschine)"
+      ]
+    },
+    "Weighted Pull Ups": {
+      "en": [],
+      "de": [
+        "Klimmzug (Gewichtet)"
+      ]
+    },
+    "Hammer Curls": {
+      "en": [],
+      "de": [
+        "Hammer Curl (Kurzhantel)"
+      ]
+    },
+    "Standing Biceps Cable Curl": {
+      "en": [],
+      "de": [
+        "Bizepscurl (Kabel)",
+        "Bizepscurl (Kabelzug)"
+      ]
+    }
+  },
+  "tracking": {
+    "duration": [
+      "Plank",
+      "Side Bridge",
+      "Isometric Neck Exercise - Front And Back",
+      "Isometric Neck Exercise - Sides",
+      "Isometric Chest Squeezes",
+      "Battling Ropes",
+      "Mountain Climbers",
+      "Rope Jumping",
+      "Downward Facing Balance",
+      "Balance Board",
+      "Fast Skipping",
+      "Carioca Quick Step",
+      "Moving Claw Series",
+      "Linear Acceleration Wall Drill",
+      "Kneeling Arm Drill",
+      "Bench Sprint",
+      "Single-Cone Sprint Drill"
+    ],
+    "duration_weight": [
+      "Plate Pinch",
+      "Crucifix"
+    ],
+    "distance_duration": [
+      "Wind Sprints"
+    ],
+    "weight_distance": [
+      "Farmer's Walk",
+      "Yoke Walk",
+      "Rickshaw Carry",
+      "Sled Drag - Harness",
+      "Sled Push",
+      "Backward Drag",
+      "Forward Drag with Press",
+      "Bear Crawl Sled Drags",
+      "Sled Overhead Backward Walk",
+      "Prowler Sprint",
+      "Conan's Wheel"
+    ],
+    "weighted_bodyweight": [
+      "Weighted Pull Ups",
+      "Weighted Bench Dip",
+      "Hyperextensions (Back Extensions)"
+    ],
+    "assisted_bodyweight": [
+      "Band Assisted Pull-Up"
+    ],
+    "bodyweight_reps": [
+      "Mixed Grip Chin",
+      "Gironda Sternum Chins",
+      "Side To Side Chins",
+      "One Arm Chin-Up",
+      "Muscle Up",
+      "Kipping Muscle Up",
+      "Rope Climb",
+      "Ring Dips",
+      "Parallel Bar Dip",
+      "Dips - Chest Version",
+      "Rocky Pull-Ups/Pulldowns",
+      "Inverted Row with Straps",
+      "Suspended Fallout",
+      "Suspended Push-Up",
+      "Suspended Reverse Crunch",
+      "Suspended Row",
+      "Suspended Split Squat",
+      "Knee/Hip Raise On Parallel Bars",
+      "Otis-Up",
+      "London Bridges",
+      "Platform Hamstring Slides",
+      "Single-Leg High Box Squat",
+      "Glute Ham Raise",
+      "Bodyweight Flyes",
+      "Bodyweight Mid Row"
+    ]
+  },
+  "equipment": {
+    "Bodyweight Flyes": "other",
+    "Trap Bar Deadlift": "barbell",
+    "Close-Grip EZ Bar Curl": "ez_bar",
+    "Decline EZ Bar Triceps Extension": "ez_bar",
+    "Prone Manual Hamstring": "other"
+  },
+  "rank": [
+    "Barbell Bench Press - Medium Grip",
+    "Barbell Squat",
+    "Barbell Deadlift",
+    "Standing Military Press",
+    "Bent Over Barbell Row",
+    "Pullups",
+    "Wide-Grip Lat Pulldown",
+    "Dumbbell Bench Press",
+    "Incline Dumbbell Press",
+    "Barbell Incline Bench Press - Medium Grip",
+    "Romanian Deadlift",
+    "Leg Press",
+    "Leg Extensions",
+    "Lying Leg Curls",
+    "Seated Leg Curl",
+    "Barbell Hip Thrust",
+    "Seated Cable Rows",
+    "One-Arm Dumbbell Row",
+    "Dumbbell Shoulder Press",
+    "Side Lateral Raise",
+    "Barbell Curl",
+    "Dumbbell Bicep Curl",
+    "Hammer Curls",
+    "Triceps Pushdown",
+    "Triceps Pushdown - Rope Attachment",
+    "Face Pull",
+    "Chin-Up",
+    "Dips - Triceps Version",
+    "Pushups",
+    "Plank",
+    "Bulgarian Split Squat (Dumbbell)",
+    "Cable Lateral Raise",
+    "Assisted Pull-Up (Machine)",
+    "Hanging Leg Raise",
+    "Cable Crunch",
+    "Standing Calf Raises",
+    "Seated Calf Raise",
+    "Calf Press",
+    "Front Barbell Squat",
+    "Hack Squat",
+    "Dumbbell Lunges",
+    "Barbell Walking Lunge",
+    "Goblet Squat",
+    "Sumo Deadlift",
+    "Trap Bar Deadlift",
+    "Cable Crossover",
+    "Dumbbell Flyes",
+    "Butterfly",
+    "Reverse Machine Flyes",
+    "EZ-Bar Curl",
+    "Preacher Curl",
+    "Incline Dumbbell Curl",
+    "EZ-Bar Skullcrusher",
+    "Cable Rope Overhead Triceps Extension",
+    "Barbell Shrug",
+    "Dumbbell Shrug",
+    "Upright Barbell Row",
+    "T-Bar Row with Handle",
+    "Seated Machine Row",
+    "Chest-Supported Dumbbell Row",
+    "Pendlay Row",
+    "Thigh Abductor",
+    "Thigh Adductor",
+    "Machine Shoulder (Military) Press",
+    "Leverage Chest Press",
+    "Hip Thrust (Machine)",
+    "Machine Lateral Raise",
+    "Assisted Dip (Machine)",
+    "Smith Machine Squat",
+    "Smith Machine Bench Press",
+    "Hyperextensions (Back Extensions)",
+    "Good Morning",
+    "Kettlebell Swing",
+    "Power Clean",
+    "Clean and Jerk",
+    "Snatch",
+    "Push Press",
+    "Running, Treadmill",
+    "Walking, Treadmill",
+    "Running",
+    "Bicycling, Stationary",
+    "Rowing, Stationary",
+    "Elliptical Trainer",
+    "Stairmaster",
+    "Rope Jumping",
+    "Farmer's Walk",
+    "Sled Push",
+    "Crunches",
+    "Russian Twist",
+    "Ab Roller",
+    "Dead Hang",
+    "Straight-Arm Pulldown",
+    "Close-Grip Barbell Bench Press",
+    "Decline Barbell Bench Press",
+    "Arnold Dumbbell Press",
+    "Front Dumbbell Raise",
+    "Reverse Flyes",
+    "Glute Ham Raise",
+    "Stiff-Legged Dumbbell Deadlift",
+    "Box Jump (Multiple Response)",
+    "Burpee",
+    "Mountain Climbers",
+    "Weighted Pull Ups",
+    "Inverted Row",
+    "Wall Sit",
+    "Parallel Bar Dip",
+    "Rack Pulls",
+    "Concentration Curls",
+    "Tricep Dumbbell Kickback",
+    "Hollow Body Hold",
+    "Jumping Jacks",
+    "Barbell Glute Bridge",
+    "Zercher Squats",
+    "Overhead Squat",
+    "Bicycling",
+    "Ski Erg",
+    "Dragon Flag"
+  ],
+  "extras": [
+    {
+      "id": "liora.bulgarian_split_squat_dumbbell",
+      "en": "Bulgarian Split Squat (Dumbbell)",
+      "de": "Bulgarische Kniebeuge (Kurzhantel)",
+      "aliases": {
+        "en": [
+          "Bulgarian Split Squat",
+          "BSS",
+          "Rear Foot Elevated Split Squat"
+        ],
+        "de": [
+          "Bulgarian Split Squat"
+        ]
+      },
+      "tracking": "weight_reps",
+      "equipment": "dumbbell",
+      "category": "strength",
+      "primary": [
+        "quadriceps",
+        "glutes"
+      ],
+      "secondary": [
+        "hamstrings",
+        "adductors"
+      ],
+      "instructions": [
+        "Stand a stride in front of a bench holding a dumbbell in each hand and rest the top of your rear foot on the bench.",
+        "Lower straight down until your front thigh is about parallel to the floor, keeping your torso upright.",
+        "Drive through the front foot to stand back up. Finish all reps, then switch legs."
+      ]
+    },
+    {
+      "id": "liora.cable_lateral_raise",
+      "en": "Cable Lateral Raise",
+      "de": "Seitheben (Kabelzug)",
+      "aliases": {
+        "en": [
+          "Cable Side Raise"
+        ],
+        "de": [
+          "Seitheben am Kabel",
+          "Seitheben (Kabel)",
+          "Seitheben (Kabelzug)"
+        ]
+      },
+      "tracking": "weight_reps",
+      "equipment": "cable",
+      "category": "strength",
+      "primary": [
+        "shoulders"
+      ],
+      "secondary": [
+        "traps"
+      ],
+      "instructions": [
+        "Stand side-on to a low pulley and take the handle with the far hand.",
+        "With a slight bend in the elbow, raise your arm out to the side until it is level with your shoulder.",
+        "Lower under control and repeat. Switch sides after your reps."
+      ]
+    },
+    {
+      "id": "liora.assisted_pull_up_machine",
+      "en": "Assisted Pull-Up (Machine)",
+      "de": "Klimmzug (assistiert, Maschine)",
+      "aliases": {
+        "en": [
+          "Assisted Pull Up",
+          "Gravitron"
+        ],
+        "de": [
+          "Klimmzugmaschine"
+        ]
+      },
+      "tracking": "assisted_bodyweight",
+      "equipment": "machine",
+      "category": "strength",
+      "primary": [
+        "lats"
+      ],
+      "secondary": [
+        "biceps",
+        "middle_back"
+      ],
+      "instructions": [
+        "Set the assistance weight, kneel or stand on the platform and grip the handles slightly wider than shoulder width.",
+        "Pull your chest toward the bar by driving your elbows down, until your chin clears the bar.",
+        "Lower under control to a full hang. Less assistance means a harder set."
+      ]
+    },
+    {
+      "id": "liora.assisted_dip_machine",
+      "en": "Assisted Dip (Machine)",
+      "de": "Dips (assistiert, Maschine)",
+      "aliases": {
+        "en": [
+          "Assisted Dips"
+        ],
+        "de": [
+          "Dipmaschine assistiert"
+        ]
+      },
+      "tracking": "assisted_bodyweight",
+      "equipment": "machine",
+      "category": "strength",
+      "primary": [
+        "triceps"
+      ],
+      "secondary": [
+        "chest",
+        "shoulders"
+      ],
+      "instructions": [
+        "Set the assistance weight, kneel or stand on the platform and grip the dip handles.",
+        "Lower until your upper arms are about parallel to the floor, keeping the elbows close.",
+        "Press back up to straight arms. Less assistance means a harder set."
+      ]
+    },
+    {
+      "id": "liora.pendlay_row",
+      "en": "Pendlay Row",
+      "de": "Pendlay-Rudern (Langhantel)",
+      "aliases": {
+        "en": [],
+        "de": [
+          "Pendlay Row"
+        ]
+      },
+      "tracking": "weight_reps",
+      "equipment": "barbell",
+      "category": "strength",
+      "primary": [
+        "middle_back",
+        "lats"
+      ],
+      "secondary": [
+        "biceps",
+        "lower_back"
+      ],
+      "instructions": [
+        "Hinge over until your torso is roughly parallel to the floor, bar resting on the floor below your shoulders.",
+        "Row the bar explosively to your lower chest without raising your torso.",
+        "Return the bar to the floor and reset before every rep."
+      ]
+    },
+    {
+      "id": "liora.hip_thrust_machine",
+      "en": "Hip Thrust (Machine)",
+      "de": "Hip Thrust (Maschine)",
+      "aliases": {
+        "en": [
+          "Glute Drive"
+        ],
+        "de": [
+          "Hüftstoß Maschine"
+        ]
+      },
+      "tracking": "weight_reps",
+      "equipment": "machine",
+      "category": "strength",
+      "primary": [
+        "glutes"
+      ],
+      "secondary": [
+        "hamstrings"
+      ],
+      "instructions": [
+        "Sit with your upper back against the pad and the belt or pad across your hips, feet flat.",
+        "Drive your hips up until your torso and thighs form a straight line, squeezing the glutes.",
+        "Lower under control and repeat."
+      ]
+    },
+    {
+      "id": "liora.chest_supported_dumbbell_row",
+      "en": "Chest-Supported Dumbbell Row",
+      "de": "Brustgestütztes Rudern (Kurzhantel)",
+      "aliases": {
+        "en": [
+          "Incline Dumbbell Row",
+          "Seal Row (Dumbbell)"
+        ],
+        "de": [
+          "Rudern auf der Schrägbank"
+        ]
+      },
+      "tracking": "weight_reps",
+      "equipment": "dumbbell",
+      "category": "strength",
+      "primary": [
+        "middle_back"
+      ],
+      "secondary": [
+        "lats",
+        "biceps",
+        "shoulders"
+      ],
+      "instructions": [
+        "Lie chest-down on an incline bench with a dumbbell in each hand, arms hanging straight.",
+        "Row the dumbbells up toward your hips, squeezing your shoulder blades together.",
+        "Lower under control to a full stretch and repeat."
+      ]
+    },
+    {
+      "id": "liora.seated_machine_row",
+      "en": "Seated Machine Row",
+      "de": "Rudern sitzend (Maschine)",
+      "aliases": {
+        "en": [
+          "Machine Row"
+        ],
+        "de": [
+          "Rudern an der Maschine"
+        ]
+      },
+      "tracking": "weight_reps",
+      "equipment": "machine",
+      "category": "strength",
+      "primary": [
+        "middle_back"
+      ],
+      "secondary": [
+        "lats",
+        "biceps"
+      ],
+      "instructions": [
+        "Sit with your chest against the pad and grip the handles with straight arms.",
+        "Pull the handles toward your torso, driving the elbows back and squeezing the shoulder blades.",
+        "Return under control to a full stretch."
+      ]
+    },
+    {
+      "id": "liora.machine_lateral_raise",
+      "en": "Machine Lateral Raise",
+      "de": "Seitheben (Maschine)",
+      "aliases": {
+        "en": [
+          "Lateral Raise Machine"
+        ],
+        "de": [
+          "Seithebemaschine"
+        ]
+      },
+      "tracking": "weight_reps",
+      "equipment": "machine",
+      "category": "strength",
+      "primary": [
+        "shoulders"
+      ],
+      "secondary": [],
+      "instructions": [
+        "Sit with the pads against the outside of your upper arms.",
+        "Raise your arms out to the sides until they are level with your shoulders.",
+        "Lower under control and repeat."
+      ]
+    },
+    {
+      "id": "liora.kettlebell_swing",
+      "en": "Kettlebell Swing",
+      "de": "Kettlebell Swing",
+      "aliases": {
+        "en": [
+          "Russian Swing",
+          "Two-Handed Kettlebell Swing"
+        ],
+        "de": [
+          "KB Swing"
+        ]
+      },
+      "tracking": "weight_reps",
+      "equipment": "kettlebell",
+      "category": "strength",
+      "primary": [
+        "glutes",
+        "hamstrings"
+      ],
+      "secondary": [
+        "lower_back",
+        "shoulders"
+      ],
+      "instructions": [
+        "Stand with feet shoulder-width apart, kettlebell on the floor in front of you, and grip it with both hands.",
+        "Hike the bell back between your legs, then snap your hips forward to swing it to chest height.",
+        "Let it swing back down between your legs and go straight into the next rep."
+      ]
+    },
+    {
+      "id": "liora.running",
+      "en": "Running",
+      "de": "Laufen",
+      "aliases": {
+        "en": [
+          "Outdoor Run",
+          "Jogging"
+        ],
+        "de": [
+          "Joggen",
+          "Lauf"
+        ]
+      },
+      "tracking": "distance_duration",
+      "equipment": "bodyweight",
+      "category": "cardio",
+      "primary": [
+        "quadriceps"
+      ],
+      "secondary": [
+        "hamstrings",
+        "calves",
+        "glutes"
+      ],
+      "instructions": [
+        "Run outdoors at your planned pace. Log the distance and time."
+      ]
+    },
+    {
+      "id": "liora.dead_hang",
+      "en": "Dead Hang",
+      "de": "Dead Hang (Hängen)",
+      "aliases": {
+        "en": [
+          "Bar Hang"
+        ],
+        "de": [
+          "Hängen an der Stange"
+        ]
+      },
+      "tracking": "duration",
+      "equipment": "bodyweight",
+      "category": "strength",
+      "primary": [
+        "forearms"
+      ],
+      "secondary": [
+        "lats",
+        "shoulders"
+      ],
+      "instructions": [
+        "Hang from a pull-up bar with straight arms and a shoulder-width grip for as long as you can hold on."
+      ]
+    },
+    {
+      "id": "liora.wall_sit",
+      "en": "Wall Sit",
+      "de": "Wandsitzen",
+      "aliases": {
+        "en": [],
+        "de": [
+          "Wall Sit",
+          "Stuhl an der Wand"
+        ]
+      },
+      "tracking": "duration",
+      "equipment": "bodyweight",
+      "category": "strength",
+      "primary": [
+        "quadriceps"
+      ],
+      "secondary": [
+        "glutes"
+      ],
+      "instructions": [
+        "Lean your back against a wall and slide down until your knees are bent to about 90 degrees. Hold."
+      ]
+    },
+    {
+      "id": "liora.hollow_body_hold",
+      "en": "Hollow Body Hold",
+      "de": "Hollow Body Hold",
+      "aliases": {
+        "en": [
+          "Hollow Hold"
+        ],
+        "de": [
+          "Hohlkörperhalte"
+        ]
+      },
+      "tracking": "duration",
+      "equipment": "bodyweight",
+      "category": "strength",
+      "primary": [
+        "abdominals"
+      ],
+      "secondary": [],
+      "instructions": [
+        "Lie on your back, press your lower back into the floor and lift arms and legs slightly off the ground. Hold."
+      ]
+    },
+    {
+      "id": "liora.burpee",
+      "en": "Burpee",
+      "de": "Burpee",
+      "aliases": {
+        "en": [
+          "Burpees"
+        ],
+        "de": [
+          "Burpees"
+        ]
+      },
+      "tracking": "bodyweight_reps",
+      "equipment": "bodyweight",
+      "category": "plyometrics",
+      "primary": [
+        "quadriceps",
+        "chest"
+      ],
+      "secondary": [
+        "shoulders",
+        "triceps",
+        "abdominals"
+      ],
+      "instructions": [
+        "From standing, squat down and place your hands on the floor.",
+        "Jump your feet back into a push-up position and do a push-up.",
+        "Jump your feet back in and explode up into a jump with arms overhead."
+      ]
+    },
+    {
+      "id": "liora.jumping_jacks",
+      "en": "Jumping Jacks",
+      "de": "Hampelmann",
+      "aliases": {
+        "en": [
+          "Star Jumps"
+        ],
+        "de": [
+          "Hampelmänner",
+          "Jumping Jacks"
+        ]
+      },
+      "tracking": "bodyweight_reps",
+      "equipment": "bodyweight",
+      "category": "plyometrics",
+      "primary": [
+        "calves"
+      ],
+      "secondary": [
+        "shoulders",
+        "quadriceps"
+      ],
+      "instructions": [
+        "Jump your feet out wide while raising your arms overhead, then jump back to the start. Keep a steady rhythm."
+      ]
+    },
+    {
+      "id": "liora.ski_erg",
+      "en": "Ski Erg",
+      "de": "Ski-Ergometer",
+      "aliases": {
+        "en": [
+          "SkiErg",
+          "Ski Ergometer"
+        ],
+        "de": [
+          "Ski Erg"
+        ]
+      },
+      "tracking": "distance_duration",
+      "equipment": "machine",
+      "category": "cardio",
+      "primary": [
+        "lats",
+        "triceps"
+      ],
+      "secondary": [
+        "abdominals",
+        "shoulders"
+      ],
+      "instructions": [
+        "Pull both handles down in a double-pole motion, hinging at the hips, then let the arms rise and repeat. Log time and, if shown, distance."
+      ]
+    },
+    {
+      "id": "liora.dragon_flag",
+      "en": "Dragon Flag",
+      "de": "Dragon Flag",
+      "aliases": {
+        "en": [],
+        "de": []
+      },
+      "tracking": "bodyweight_reps",
+      "equipment": "bodyweight",
+      "category": "strength",
+      "primary": [
+        "abdominals"
+      ],
+      "secondary": [
+        "lower_back"
+      ],
+      "instructions": [
+        "Lie on a bench and grip it behind your head.",
+        "Lift your body onto your upper back, keeping it straight from shoulders to feet.",
+        "Lower your straight body slowly toward the bench without letting the hips bend, then raise it again."
+      ]
+    }
+  ]
+}

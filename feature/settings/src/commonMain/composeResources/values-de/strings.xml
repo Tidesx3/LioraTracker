@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="settings_title">Einstellungen</string>
+  <string name="settings_empty_title">Mach die App zu deiner</string>
+  <string name="settings_empty_body">Einheiten, Pausentimer, Hantelscheiben und Stange sowie Backup und Sync richtest du hier ein.</string>
+</resources>

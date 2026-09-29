@@ -23,3 +23,6 @@ Thumbs.db
 *.keystore
 keystore.properties
 google-services.json
+
+# Personal data samples (e.g. real Hevy exports); tests use synthetic fixtures instead
+sample/

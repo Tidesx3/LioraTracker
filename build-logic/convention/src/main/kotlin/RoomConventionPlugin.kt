@@ -22,7 +22,7 @@ class RoomConventionPlugin : Plugin<Project> {
 
         extensions.configure<KotlinMultiplatformExtension> {
             sourceSets.commonMain.dependencies {
-                implementation(libs.lib("room-runtime"))
+                api(libs.lib("room-runtime"))
                 implementation(libs.lib("sqlite-bundled"))
             }
         }

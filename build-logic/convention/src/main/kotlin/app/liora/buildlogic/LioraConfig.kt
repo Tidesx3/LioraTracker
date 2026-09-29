@@ -10,6 +10,9 @@ object LioraConfig {
     const val TARGET_SDK = 37
     const val MIN_SDK = 26
 
+    /** Languages every UI string must be translated into (English is the default). */
+    val TRANSLATED_LOCALES = listOf("de")
+
     val javaVersion = JavaVersion.VERSION_17
     val jvmTarget = JvmTarget.JVM_17
 }

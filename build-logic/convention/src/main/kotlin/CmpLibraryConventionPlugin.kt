@@ -1,6 +1,7 @@
 import app.liora.buildlogic.configureKotlinMultiplatform
 import app.liora.buildlogic.configureHostTests
 import app.liora.buildlogic.configureQuality
+import app.liora.buildlogic.configureTranslationCheck
 import app.liora.buildlogic.lib
 import app.liora.buildlogic.libs
 import app.liora.buildlogic.lioraAndroid
@@ -27,6 +28,7 @@ class CmpLibraryConventionPlugin : Plugin<Project> {
         configureKotlinMultiplatform(includeJvm = false)
         configureQuality()
         configureHostTests()
+        configureTranslationCheck("src/commonMain/composeResources")
 
         extensions.configure<KotlinMultiplatformExtension> {
             lioraAndroid {

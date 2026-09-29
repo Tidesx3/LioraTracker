@@ -24,6 +24,10 @@ android {
         }
     }
 
+    androidResources {
+        generateLocaleConfig = true
+    }
+
     testOptions {
         unitTests.isIncludeAndroidResources = true
     }
@@ -36,6 +40,7 @@ roborazzi {
 dependencies {
     implementation(projects.core.model)
     implementation(projects.core.data)
+    implementation(projects.core.database)
     implementation(projects.core.navigation)
     implementation(projects.core.designsystem)
 
@@ -71,6 +76,7 @@ dependencies {
 
     testImplementation(libs.junit4)
     testImplementation(libs.robolectric)
+    testImplementation(libs.sqlite.framework)
     testImplementation(libs.roborazzi)
     testImplementation(libs.roborazzi.compose)
     testImplementation(libs.roborazzi.junit.rule)

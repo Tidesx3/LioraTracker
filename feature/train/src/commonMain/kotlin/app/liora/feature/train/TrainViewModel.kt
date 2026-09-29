@@ -2,7 +2,7 @@ package app.liora.feature.train
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.liora.core.data.ActiveWorkoutRepository
+import app.liora.core.data.workout.ActiveWorkoutRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
