@@ -95,6 +95,8 @@ class WorkoutNotificationTest {
                 it.isResting && it.text == "Next: Barbell Bench Press · Set 2 of 3 · 80 kg × 10"
             }
         assertEquals(listOf("−15 s", "+15 s", "Skip rest"), resting.actions.map { it.title.toString() })
+        // The bar counts milliseconds, so it moves on every update instead of once a second.
+        assertEquals(90_000, resting.extras.getInt(Notification.EXTRA_PROGRESS_MAX))
         val timer = runBlocking { koin.get<RestTimerRepository>().current() }!!
         assertEquals(90.seconds, timer.total)
         awaitAlarmAt(timer.endsAt.toEpochMilliseconds())
