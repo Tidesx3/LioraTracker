@@ -2,5 +2,6 @@
 <resources>
   <!-- Window background shown before Compose draws; matches the theme surface to avoid a flash. -->
   <color name="liora_window_background">#FFF7F9FB</color>
-  <color name="ic_launcher_background">#FF0D1014</color>
+  <!-- The black the logo is drawn on. -->
+  <color name="ic_launcher_background">#FF000000</color>
 </resources>

@@ -12,6 +12,7 @@ The JDK isn't on PATH in every shell. Export it first when needed:
 - `./gradlew spotlessApply`: formats code (ktlint_official style plus compose-rules).
 - `./gradlew :app:android:assembleDebug` or `installDebug`.
 - `./gradlew :app:android:recordRoborazziDebug`: re-renders screenshots to `app/android/src/test/screenshots/`. Read the PNGs to review UI changes.
+- `java tools/icons/MakeIcons.java logo.png app/android/src/main/res build/icon-preview.png`: rebuilds the launcher and notification icons from `logo.png` (light artwork on black) and writes a preview sheet to check them by eye.
 
 ## Architecture rules
 
