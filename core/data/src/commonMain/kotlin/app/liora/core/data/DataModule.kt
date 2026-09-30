@@ -14,9 +14,11 @@ import app.liora.core.data.workout.LocalRestTimerRepository
 import app.liora.core.data.workout.OfflineActiveWorkoutRepository
 import app.liora.core.data.workout.OfflineSetLogger
 import app.liora.core.data.workout.OfflineWorkoutEditor
+import app.liora.core.data.workout.OfflineWorkoutHistoryRepository
 import app.liora.core.data.workout.RestTimerRepository
 import app.liora.core.data.workout.SetLogger
 import app.liora.core.data.workout.WorkoutEditor
+import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.database.databaseModule
 import app.liora.core.domain.RestDefaults
 import org.koin.core.module.dsl.singleOf
@@ -41,6 +43,7 @@ val dataModule =
         singleOf(::OfflineExerciseRepository) bind ExerciseRepository::class
         singleOf(::OfflineRoutineRepository) bind RoutineRepository::class
         singleOf(::OfflineActiveWorkoutRepository) bind ActiveWorkoutRepository::class
+        singleOf(::OfflineWorkoutHistoryRepository) bind WorkoutHistoryRepository::class
         singleOf(::OfflineWorkoutEditor) bind WorkoutEditor::class
         singleOf(::OfflineSetLogger) bind SetLogger::class
         singleOf(::LocalRestTimerRepository) bind RestTimerRepository::class

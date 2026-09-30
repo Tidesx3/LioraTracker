@@ -155,22 +155,26 @@ object PersonalRecords {
         }
     }
 
-    /** Best records over a history of sets. On ties the earliest set keeps the record. */
+    /**
+     * Best records over a history of sets. On ties the earliest set keeps the record. With [into], the
+     * sets add to a running best instead, for walking a long history in order without starting over
+     * for every set; they must come after the ones already counted.
+     */
     fun compute(
         trackingType: TrackingType,
         sets: List<LoggedSet>,
         formula: OneRepMaxFormula = OneRepMaxFormula.Epley,
+        into: MutableMap<RecordKey, PersonalRecord> = mutableMapOf(),
     ): Map<RecordKey, PersonalRecord> {
-        val records = mutableMapOf<RecordKey, PersonalRecord>()
         for (set in sets.filter { it.isWorkingSet }.sortedBy { it.completedAt }) {
             for ((key, value) in valuesOf(trackingType, set, formula)) {
-                val current = records[key]
+                val current = into[key]
                 if (current == null || isBetter(key, value, current.value)) {
-                    records[key] = PersonalRecord(key, value, set.id, set.completedAt!!)
+                    into[key] = PersonalRecord(key, value, set.id, set.completedAt!!)
                 }
             }
         }
-        return records
+        return into
     }
 
     /**

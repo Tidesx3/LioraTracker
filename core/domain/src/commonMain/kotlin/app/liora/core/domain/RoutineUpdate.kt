@@ -5,6 +5,7 @@ import app.liora.core.model.RepRange
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineExercise
 import app.liora.core.model.RoutineSet
+import app.liora.core.model.WorkoutExercise
 
 /**
  * "Update the routine with today's values": the routine rebuilt from what was actually done in a
@@ -21,10 +22,20 @@ object RoutineUpdate {
         routine: Routine,
         workout: ActiveWorkout,
         newId: () -> String,
+    ): Routine = fromExercises(routine, workout.exercises, newId)
+
+    /**
+     * [routine] rebuilt from [workoutExercises], the exercises of any workout: see [fromWorkout]. With an empty
+     * routine this turns a finished workout into a new routine, or into the plan for repeating it.
+     */
+    fun fromExercises(
+        routine: Routine,
+        workoutExercises: List<WorkoutExercise>,
+        newId: () -> String,
     ): Routine {
         val unmatched = routine.exercises.toMutableList()
         val exercises =
-            workout.exercises.mapNotNull { done ->
+            workoutExercises.mapNotNull { done ->
                 val sets = done.sets.filter { it.isCompleted }
                 if (sets.isEmpty()) return@mapNotNull null
                 val match = unmatched.firstOrNull { it.exerciseId == done.exerciseId }?.also { unmatched.remove(it) }

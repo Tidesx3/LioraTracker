@@ -3,4 +3,54 @@
   <string name="history_title">History</string>
   <string name="history_empty_title">No workouts yet</string>
   <string name="history_empty_body">Finished workouts land here, along with a calendar of your training days.</string>
+  <string name="history_pick_title">Pick a workout</string>
+  <string name="history_pick_body">Its exercises, sets and records show up here.</string>
+
+  <string name="cd_show_calendar">Show calendar</string>
+  <string name="cd_show_list">Show list</string>
+  <string name="cd_previous_month">Previous month</string>
+  <string name="cd_next_month">Next month</string>
+  <string name="cd_more">More options</string>
+  <string name="cd_records">Personal records</string>
+
+  <plurals name="history_workouts">
+    <item quantity="one">%1$d workout</item>
+    <item quantity="other">%1$d workouts</item>
+  </plurals>
+  <string name="history_month_none">No workouts this month.</string>
+  <string name="history_whole_month">Whole month</string>
+
+  <string name="stat_duration">Duration</string>
+  <string name="stat_volume">Volume</string>
+  <string name="stat_sets">Sets</string>
+  <string name="stat_records">Records</string>
+  <string name="duration_minutes">%1$s min</string>
+  <string name="duration_hours">%1$s h %2$s min</string>
+  <string name="exercise_sets" translatable="false">%1$s × %2$s</string>
+  <plurals name="more_exercises">
+    <item quantity="one">+ %1$d more exercise</item>
+    <item quantity="other">+ %1$d more exercises</item>
+  </plurals>
+  <string name="date_time" translatable="false">%1$s · %2$s</string>
+
+  <string name="detail_repeat">Repeat workout</string>
+  <string name="menu_save_as_routine">Save as routine</string>
+  <string name="menu_delete">Delete workout</string>
+  <plurals name="detail_records">
+    <item quantity="one">%1$d personal record</item>
+    <item quantity="other">%1$d personal records</item>
+  </plurals>
+  <string name="superset">Superset</string>
+
+  <string name="dialog_cancel">Cancel</string>
+  <string name="dialog_save">Save</string>
+  <string name="dialog_delete">Delete</string>
+  <string name="delete_title">Delete this workout?</string>
+  <string name="delete_body">It leaves your history, along with its sets and the records it set.</string>
+  <string name="save_routine_title">Save as routine</string>
+  <string name="save_routine_body">A new routine with this workout’s exercises and sets, at the weights you did.</string>
+  <string name="save_routine_name">Routine name</string>
+  <string name="in_progress_title">Workout in progress</string>
+  <string name="in_progress_body">Finish or discard the current workout before starting another one.</string>
+  <string name="in_progress_resume">Resume</string>
 </resources>

@@ -6,7 +6,9 @@ import app.liora.core.designsystem.resources.ic_arrow_back
 import app.liora.core.designsystem.resources.ic_arrow_drop_down
 import app.liora.core.designsystem.resources.ic_arrow_forward
 import app.liora.core.designsystem.resources.ic_backspace
+import app.liora.core.designsystem.resources.ic_calendar_month
 import app.liora.core.designsystem.resources.ic_check
+import app.liora.core.designsystem.resources.ic_chevron_left
 import app.liora.core.designsystem.resources.ic_chevron_right
 import app.liora.core.designsystem.resources.ic_close
 import app.liora.core.designsystem.resources.ic_delete
@@ -27,12 +29,14 @@ import app.liora.core.designsystem.resources.ic_more_vert
 import app.liora.core.designsystem.resources.ic_play_arrow
 import app.liora.core.designsystem.resources.ic_remove
 import app.liora.core.designsystem.resources.ic_reorder
+import app.liora.core.designsystem.resources.ic_replay
 import app.liora.core.designsystem.resources.ic_search
 import app.liora.core.designsystem.resources.ic_settings
 import app.liora.core.designsystem.resources.ic_skip_next
 import app.liora.core.designsystem.resources.ic_swap_horiz
 import app.liora.core.designsystem.resources.ic_timer
 import app.liora.core.designsystem.resources.ic_trophy
+import app.liora.core.designsystem.resources.ic_view_agenda
 import app.liora.core.designsystem.resources.ic_visibility_off
 import org.jetbrains.compose.resources.DrawableResource
 
@@ -51,6 +55,7 @@ object LioraIcons {
     val Add: DrawableResource = Res.drawable.ic_add
     val Back: DrawableResource = Res.drawable.ic_arrow_back
     val Check: DrawableResource = Res.drawable.ic_check
+    val ChevronLeft: DrawableResource = Res.drawable.ic_chevron_left
     val ChevronRight: DrawableResource = Res.drawable.ic_chevron_right
     val Close: DrawableResource = Res.drawable.ic_close
     val Delete: DrawableResource = Res.drawable.ic_delete
@@ -72,4 +77,7 @@ object LioraIcons {
     val Reorder: DrawableResource = Res.drawable.ic_reorder
     val Skip: DrawableResource = Res.drawable.ic_skip_next
     val Record: DrawableResource = Res.drawable.ic_trophy
+    val Calendar: DrawableResource = Res.drawable.ic_calendar_month
+    val ListView: DrawableResource = Res.drawable.ic_view_agenda
+    val Repeat: DrawableResource = Res.drawable.ic_replay
 }

@@ -18,8 +18,8 @@ import app.liora.core.model.WorkoutExercise
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
-/** The workout in progress as stored: the rows every edit reads, changes and writes back. */
-internal class ActiveRows(
+/** A workout as stored, with its live exercises and sets: the rows every edit reads, changes and writes back. */
+internal class WorkoutRows(
     val workout: WorkoutEntity,
     val exercises: List<WorkoutExerciseEntity>,
     val sets: List<WorkoutSetEntity>,
@@ -30,9 +30,9 @@ internal class ActiveRows(
         sets.filter { it.workoutExerciseId == workoutExerciseId }.sortedBy { it.position }
 }
 
-internal suspend fun WorkoutDao.activeRows(): ActiveRows? {
+internal suspend fun WorkoutDao.activeRows(): WorkoutRows? {
     val workout = getActive() ?: return null
-    return ActiveRows(workout, exercisesOf(workout.id), setsOf(workout.id))
+    return WorkoutRows(workout, exercisesOf(workout.id), setsOf(workout.id))
 }
 
 /**
@@ -95,26 +95,27 @@ internal suspend fun ExerciseDao.settingsOf(exerciseId: String): ExerciseSetting
 internal fun WorkoutEntity.toActiveWorkout(
     exercises: List<WorkoutExerciseEntity> = emptyList(),
     sets: List<WorkoutSetEntity> = emptyList(),
-): ActiveWorkout {
-    val setsByExercise = sets.groupBy { it.workoutExerciseId }
-    return ActiveWorkout(
+): ActiveWorkout =
+    ActiveWorkout(
         id = id,
         name = name,
         startedAt = Instant.fromEpochMilliseconds(startedAt),
         routineId = routineId,
-        exercises =
-            exercises.sortedBy { it.position }.map { exercise ->
-                WorkoutExercise(
-                    id = exercise.id,
-                    exerciseId = exercise.exerciseId,
-                    supersetGroup = exercise.supersetGroup,
-                    restSeconds = exercise.restSeconds,
-                    notes = exercise.notes,
-                    sets = setsByExercise[exercise.id].orEmpty().sortedBy { it.position }.map { it.toLoggedSet() },
-                )
-            },
+        exercises = exercises.toModels(sets.groupBy { it.workoutExerciseId }),
     )
-}
+
+/** Exercises with their sets, in order; [setsByExercise] may hold other workouts' sets too. */
+internal fun List<WorkoutExerciseEntity>.toModels(setsByExercise: Map<String, List<WorkoutSetEntity>>) =
+    sortedBy { it.position }.map { exercise ->
+        WorkoutExercise(
+            id = exercise.id,
+            exerciseId = exercise.exerciseId,
+            supersetGroup = exercise.supersetGroup,
+            restSeconds = exercise.restSeconds,
+            notes = exercise.notes,
+            sets = setsByExercise[exercise.id].orEmpty().sortedBy { it.position }.map { it.toLoggedSet() },
+        )
+    }
 
 internal fun WorkoutSetEntity.toLoggedSet() =
     LoggedSet(

@@ -3,4 +3,52 @@
   <string name="history_title">Verlauf</string>
   <string name="history_empty_title">Noch keine Trainings</string>
   <string name="history_empty_body">Abgeschlossene Trainings landen hier, zusammen mit einem Kalender deiner Trainingstage.</string>
+  <string name="history_pick_title">Training auswählen</string>
+  <string name="history_pick_body">Hier erscheinen seine Übungen, Sätze und Rekorde.</string>
+
+  <string name="cd_show_calendar">Kalender zeigen</string>
+  <string name="cd_show_list">Liste zeigen</string>
+  <string name="cd_previous_month">Voriger Monat</string>
+  <string name="cd_next_month">Nächster Monat</string>
+  <string name="cd_more">Weitere Optionen</string>
+  <string name="cd_records">Persönliche Rekorde</string>
+
+  <plurals name="history_workouts">
+    <item quantity="one">%1$d Training</item>
+    <item quantity="other">%1$d Trainings</item>
+  </plurals>
+  <string name="history_month_none">Keine Trainings in diesem Monat.</string>
+  <string name="history_whole_month">Ganzer Monat</string>
+
+  <string name="stat_duration">Dauer</string>
+  <string name="stat_volume">Volumen</string>
+  <string name="stat_sets">Sätze</string>
+  <string name="stat_records">Rekorde</string>
+  <string name="duration_minutes">%1$s Min.</string>
+  <string name="duration_hours">%1$s Std. %2$s Min.</string>
+  <plurals name="more_exercises">
+    <item quantity="one">+ %1$d weitere Übung</item>
+    <item quantity="other">+ %1$d weitere Übungen</item>
+  </plurals>
+
+  <string name="detail_repeat">Training wiederholen</string>
+  <string name="menu_save_as_routine">Als Routine speichern</string>
+  <string name="menu_delete">Training löschen</string>
+  <plurals name="detail_records">
+    <item quantity="one">%1$d persönlicher Rekord</item>
+    <item quantity="other">%1$d persönliche Rekorde</item>
+  </plurals>
+  <string name="superset">Supersatz</string>
+
+  <string name="dialog_cancel">Abbrechen</string>
+  <string name="dialog_save">Speichern</string>
+  <string name="dialog_delete">Löschen</string>
+  <string name="delete_title">Dieses Training löschen?</string>
+  <string name="delete_body">Es verschwindet aus deinem Verlauf, samt seinen Sätzen und den Rekorden, die es aufgestellt hat.</string>
+  <string name="save_routine_title">Als Routine speichern</string>
+  <string name="save_routine_body">Eine neue Routine mit den Übungen und Sätzen dieses Trainings, mit den Gewichten von damals.</string>
+  <string name="save_routine_name">Name der Routine</string>
+  <string name="in_progress_title">Training läuft</string>
+  <string name="in_progress_body">Beende oder verwirf das laufende Training, bevor du ein neues startest.</string>
+  <string name="in_progress_resume">Fortsetzen</string>
 </resources>

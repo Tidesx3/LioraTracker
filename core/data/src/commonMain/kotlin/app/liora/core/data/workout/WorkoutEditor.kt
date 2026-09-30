@@ -165,7 +165,7 @@ internal class OfflineWorkoutEditor(
 
     /** Writes [exercises] in this order, renumbered, with supersets repaired after whatever changed. */
     private suspend fun save(
-        rows: ActiveRows,
+        rows: WorkoutRows,
         exercises: List<WorkoutExerciseEntity>,
     ) {
         val groups = Supersets.normalize(exercises.map { it.supersetGroup })

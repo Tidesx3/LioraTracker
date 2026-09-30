@@ -9,6 +9,7 @@ import app.liora.core.data.AppStartup
 import app.liora.core.data.dataModule
 import app.liora.core.database.androidDatabaseModule
 import app.liora.feature.exercises.exercisesModule
+import app.liora.feature.history.historyModule
 import app.liora.feature.logger.loggerModule
 import app.liora.feature.train.trainModule
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +29,10 @@ open class LioraApplication : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@LioraApplication)
-            modules(databaseModules() + listOf(appModule, dataModule, trainModule, loggerModule, exercisesModule))
+            modules(
+                databaseModules() +
+                    listOf(appModule, dataModule, trainModule, historyModule, loggerModule, exercisesModule),
+            )
         }
         processScope.launch { get<AppStartup>().run() }
         // The workout notification and the end-of-rest alarm follow the database for as long as the

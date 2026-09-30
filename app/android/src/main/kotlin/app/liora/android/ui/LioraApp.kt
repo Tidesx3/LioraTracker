@@ -128,7 +128,7 @@ fun LioraApp(
                 entryProvider =
                     entryProvider {
                         trainEntries(navigator)
-                        historyEntries()
+                        historyEntries(navigator)
                         progressEntries(navigator)
                         exercisesEntries(navigator)
                         loggerEntries(navigator)

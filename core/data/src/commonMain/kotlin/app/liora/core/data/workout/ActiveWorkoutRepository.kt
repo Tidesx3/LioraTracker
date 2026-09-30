@@ -46,6 +46,13 @@ interface ActiveWorkoutRepository {
      */
     suspend fun startFromRoutine(routineId: String): ActiveWorkout
 
+    /**
+     * Starts a workout like a finished one: its name, exercises, supersets, rest times and sets, with
+     * that day's values prefilled (a rep range stays a hint). It isn't tied to a routine. Returns the
+     * workout already in progress instead, if there is one.
+     */
+    suspend fun repeat(workoutId: String): ActiveWorkout
+
     /** Names the workout; blank goes back to the default name. */
     suspend fun rename(name: String)
 
@@ -114,20 +121,51 @@ internal class OfflineActiveWorkoutRepository(
 
     override suspend fun startEmptyWorkout(): ActiveWorkout =
         transactions.inTransaction {
-            workoutDao.activeRows()?.toModel() ?: newWorkout(name = null, routineId = null).toActiveWorkout()
+            workoutDao.activeRows()?.toModel() ?: startPlanned(name = null, routineId = null, plan = NOTHING_PLANNED)
         }
 
     override suspend fun startFromRoutine(routineId: String): ActiveWorkout {
         val routine = requireNotNull(routines.get(routineId)) { "No routine $routineId" }
         return transactions.inTransaction {
+            workoutDao.activeRows()?.toModel()
+                ?: startPlanned(name = routine.name, routineId = routine.id, plan = routine)
+        }
+    }
+
+    override suspend fun repeat(workoutId: String): ActiveWorkout =
+        transactions.inTransaction {
             workoutDao.activeRows()?.toModel() ?: run {
-                val workout = newWorkout(name = routine.name, routineId = routine.id)
-                val (exercises, sets) = plannedRows(workout.id, routine)
-                workoutDao.upsertExercises(exercises)
-                workoutDao.upsertSets(sets)
-                workout.toActiveWorkout(exercises, sets)
+                val done = requireNotNull(workoutDao.finishedRows(workoutId)) { "No finished workout $workoutId" }
+                // What was done that day becomes the plan, just like a routine's targets.
+                val plan =
+                    RoutineUpdate.fromExercises(Routine(id = "", name = ""), done.toModel().exercises, ids::newId)
+                startPlanned(name = done.workout.name, routineId = null, plan = plan)
             }
         }
+
+    /** A new workout with [plan]'s exercises and sets, not yet ticked off. */
+    private suspend fun startPlanned(
+        name: String?,
+        routineId: String?,
+        plan: Routine,
+    ): ActiveWorkout {
+        val sync = stamper.newRow()
+        val workout =
+            WorkoutEntity(
+                id = ids.newId(),
+                name = name,
+                startedAt = sync.createdAt,
+                endedAt = null,
+                routineId = routineId,
+                notes = null,
+                bodyweightKg = null,
+                sync = sync,
+            )
+        workoutDao.upsert(workout)
+        val (exercises, sets) = plannedRows(workout.id, plan)
+        if (exercises.isNotEmpty()) workoutDao.upsertExercises(exercises)
+        if (sets.isNotEmpty()) workoutDao.upsertSets(sets)
+        return workout.toActiveWorkout(exercises, sets)
     }
 
     override suspend fun rename(name: String) {
@@ -155,7 +193,7 @@ internal class OfflineActiveWorkoutRepository(
     }
 
     /** Tombstones planned sets that weren't done and exercises left empty, repairing supersets they split. */
-    private suspend fun dropWhatWasntDone(rows: ActiveRows) {
+    private suspend fun dropWhatWasntDone(rows: WorkoutRows) {
         val open = rows.sets.filter { it.completedAt == null }
         if (open.isNotEmpty()) workoutDao.upsertSets(open.map { it.copy(sync = stamper.tombstone(it.sync)) })
         val withSets =
@@ -178,26 +216,6 @@ internal class OfflineActiveWorkoutRepository(
             workoutDao.upsert(workout.copy(sync = stamper.tombstone(workout.sync)))
             restTimer.stop()
         }
-    }
-
-    private suspend fun newWorkout(
-        name: String?,
-        routineId: String?,
-    ): WorkoutEntity {
-        val sync = stamper.newRow()
-        val workout =
-            WorkoutEntity(
-                id = ids.newId(),
-                name = name,
-                startedAt = sync.createdAt,
-                endedAt = null,
-                routineId = routineId,
-                notes = null,
-                bodyweightKg = null,
-                sync = sync,
-            )
-        workoutDao.upsert(workout)
-        return workout
     }
 
     /** The routine as a plan: sets not yet ticked off, carrying the routine's targets. */
@@ -243,3 +261,6 @@ internal class OfflineActiveWorkoutRepository(
         return exercises to sets
     }
 }
+
+/** An empty workout starts from an empty plan. */
+private val NOTHING_PLANNED = Routine(id = "", name = "")

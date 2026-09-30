@@ -61,6 +61,12 @@ data class RoutineDetailRoute(
     val routineId: String,
 ) : NavKey
 
+/** A finished workout from history. */
+@Serializable
+data class WorkoutDetailRoute(
+    val workoutId: String,
+) : NavKey
+
 /** Create (no id, optionally inside [folderId]) or edit a routine. */
 @Serializable
 data class RoutineEditorRoute(

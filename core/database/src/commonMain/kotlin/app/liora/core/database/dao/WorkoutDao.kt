@@ -58,6 +58,24 @@ private const val HISTORY_SETS =
       AND w.ended_at IS NOT NULL AND w.deleted_at IS NULL
     """
 
+/** History: every finished workout, newest first. */
+private const val FINISHED_WORKOUTS =
+    "SELECT * FROM workout WHERE ended_at IS NOT NULL AND deleted_at IS NULL ORDER BY started_at DESC"
+
+private const val EXERCISES_OF_FINISHED =
+    """
+    SELECT we.* FROM workout_exercise we JOIN workout w ON w.id = we.workout_id
+    WHERE w.ended_at IS NOT NULL AND w.deleted_at IS NULL AND we.deleted_at IS NULL
+    """
+
+private const val SETS_OF_FINISHED =
+    """
+    SELECT s.* FROM workout_set s
+    JOIN workout_exercise we ON we.id = s.workout_exercise_id
+    JOIN workout w ON w.id = we.workout_id
+    WHERE w.ended_at IS NOT NULL AND w.deleted_at IS NULL AND we.deleted_at IS NULL AND s.deleted_at IS NULL
+    """
+
 /** A set together with the exercise it was logged for. */
 data class ExerciseSetRow(
     @ColumnInfo(name = "exercise_id") val exerciseId: String,
@@ -95,6 +113,15 @@ interface WorkoutDao {
 
     @Query(HISTORY_SETS)
     fun observeHistorySets(exerciseIds: List<String>): Flow<List<ExerciseSetRow>>
+
+    @Query(FINISHED_WORKOUTS)
+    fun observeFinished(): Flow<List<WorkoutEntity>>
+
+    @Query(EXERCISES_OF_FINISHED)
+    fun observeFinishedExercises(): Flow<List<WorkoutExerciseEntity>>
+
+    @Query(SETS_OF_FINISHED)
+    fun observeFinishedSets(): Flow<List<WorkoutSetEntity>>
 
     @Upsert
     suspend fun upsert(workout: WorkoutEntity)
