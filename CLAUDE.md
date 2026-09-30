@@ -1,7 +1,7 @@
 # Liora: notes for Claude
 
 A workout tracker (Android first, KMP) for personal use and self-hosting. See README.md for the product
-summary and roadmap.
+summary and roadmap, and TODO.md for open bugs and polish.
 
 ## Commands
 
