@@ -84,7 +84,7 @@ LioraTracker/
   core/
     model/        KMP   pure types: Exercise, Workout, WorkoutSet, Routine, Measurement, TrackingType, SetType, Muscle, Equipment, value types (Mass, Distance)
     common/       KMP   UUIDv7 ids, HybridLogicalClock, dispatchers, Result, time utils
-    domain/       KMP   e1RM, PR engine, volume & per-muscle stats, plate calc, warm-up generator, unit conversion, importers (Hevy/Strong CSV), JSON export codec
+    domain/       KMP   e1RM, PR engine, volume & per-muscle stats, stall detection, load rounding, plate calc, warm-up generator, progression rules, safety bound, unit conversion, importers (Hevy/Strong CSV), JSON export codec
     database/     KMP   Room (android + jvm targets), DAOs, migrations, exported schemas, exercise seed
     data/         KMP   repositories (write-through, mark dirty), DataStore prefs
     sync/         KMP   SyncEngine, ChangeSet, SyncBackend interface, LWW merge (reused by server)
@@ -97,7 +97,7 @@ LioraTracker/
     exercises/    library, search/filter, exercise detail (history, charts, PRs), custom exercise editor
     progress/     e1RM/volume charts, PR board, weekly sets per muscle, consistency
     body/         bodyweight, measurements, progress photos
-    settings/     units, rest defaults, plates/bar, theme, backup/import/export, sync setup
+    settings/     units, rest defaults, gym profiles, theme, backup/import/export, sync setup
   platform/android/          rest-timer notification + alarms, WorkManager sync jobs, file pickers (SAF)
   integration/healthconnect/ Android: write sessions, read bodyweight (Phase 2)
   sync/gdrive/               Android: Drive appDataFolder backend (Phase 2)
@@ -121,6 +121,7 @@ Every syncable row carries `id` (UUIDv7, created on the client), `ownerId`, `cre
 - **Workout**: `name`, `startedAt`, `endedAt` (null means in progress), `routineId`, `notes`, `bodyweightKg` snapshot. Then **WorkoutExercise**, and **WorkoutSet** with `setType` (WARMUP/NORMAL/DROP/FAILURE), `weightKg`, `reps`, `durationSec`, `distanceM`, `rpe`, `completedAt`.
 - **Measurement**: `takenAt`, `type` (BODYWEIGHT, BODY_FAT, WAIST, CHEST, ARM_L, … plus custom types), `value` in canonical SI units.
 - **ProgressPhoto**: `takenAt`, `pose`, `localPath`, `blobId`.
+- **GymProfile** (Milestone 9): `name`, bar weights, plate inventory (sizes and pairs), dumbbell steps, and the stack step for machines and cables. Which profile is active is a local preference.
 - **Derived, not synced, recomputed locally:** `personal_record` and per-exercise stats caches.
 
 **Canonical units:** kg, meters and seconds are stored. The display unit is a preference (kg/lb, km/mi).
@@ -240,9 +241,26 @@ Every syncable row carries `id` (UUIDv7, created on the client), `ownerId`, `cre
    - Per-exercise charts: e1RM, best weight, volume, reps.
    - PR board, weekly sets per muscle (with a body heatmap), and a consistency calendar with streaks.
    - Monthly report.
+   - **Stall detection** (added 2026-09-30 on request): an exercise is stalled when its best e1RM hasn't improved
+     for N weeks (default 3; Milestone 9 makes it a setting).
+     - It is a pure `core/domain` function over the exercise's history.
+     - Only exercises trained during the window count, so a break doesn't show up as a stall.
+     - Exercises without an e1RM (bodyweight, timed) use their main record instead: most reps, longest duration.
+     - Stalled exercises get a badge in Progress and on the exercise detail.
 8. **Body:** bodyweight and measurements with charts, and progress photos (stored locally, compared side by side).
 9. **Settings, import and export:**
-   - Settings: units, rest defaults, plates and bar weight, the RPE column toggle, theme, language (System / English / Deutsch).
+   - Settings: units, rest defaults, gym profiles, the e1RM formula (Epley or Brzycki), the stall window, the RPE
+     column toggle, theme, language (System / English / Deutsch).
+   - **Gym profiles** (added 2026-09-30 on request; they replace a single plates-and-bar setting):
+     - Each gym has its bars, plate inventory, dumbbell steps (e.g. 2 kg steps up to 40 kg, then 2.5 kg) and
+       the stack step for machines and cables. One profile is active, and the logger can switch it.
+     - **Load rounding:** one domain helper rounds a target weight to what the active gym can load, by equipment:
+       plates for barbells and EZ bars, the dumbbell steps for dumbbells, the stack step for machines and cables.
+     - **Plate calculator:** tapping a barbell weight in the logger shows the plates per side (`PlateCalculator`,
+       built in Milestone 2).
+     - **Warm-ups:** an "add warm-up sets" action generates the ramp (`WarmupGenerator`: bar, then about
+       40/60/80 %) with weights rounded through the active profile. Dumbbell exercises skip the empty-bar step.
+     - **Schema:** a synced `gym_profile` table, so a version bump, a migration and a migration test.
    - JSON full export and import (lossless) and a CSV export.
    - **Hevy and Strong CSV import**, with an exercise-matching review screen (fuzzy match, unmatched names become custom exercises) before anything is committed.
      - **Real Hevy format** (from a German-locale export; the user's real file stays in the gitignored `sample/`, so tests build synthetic fixtures in this format):
@@ -276,6 +294,13 @@ Every syncable row carries `id` (UUIDv7, created on the client), `ownerId`, `cre
 - `app/web`: Compose Multiplatform (wasmJs) reusing `designsystem`, with desktop layouts. It is served by the Ktor server and offers a history browser, dashboards, a routine editor, and import/export.
   - Re-check Compose Web maturity before starting: it is Beta as of Compose Multiplatform 1.12.
 - Programs and progression engine: multi-week blocks, and rules like double progression or linear progression with deload (5/3/1, GZCLP).
+  - **Progression rules** (added 2026-09-30 on request): a pure `core/domain` function takes a rule and the recent
+    history and returns the next session's targets (weight and reps per set) plus the reason, e.g. "8 reps on
+    all 3 sets at 80 kg last time, so +2.5 kg". Target weights go through the active gym profile's load rounding.
+  - The reason is structured (a reason type plus its values), not an English sentence, so the UI renders it in
+    English or German with locale-aware numbers.
+  - **Safety bound:** a target more than X % (default 10 %) above the recent best (by e1RM, over the last few
+    weeks) is flagged before it is shown. The same check guards AI suggestions in Phase 5.
 - Wear OS companion, home-screen widget.
 
 ### Phase 5: AI (opt-in; runs server-side, so API keys never sit on the phone)
@@ -283,8 +308,9 @@ Every syncable row carries `id` (UUIDv7, created on the client), `ownerId`, `cre
   - "Ask your log" (e.g. "how has my bench moved since March?").
   - Post-workout and weekly insights.
   - Natural-language or voice logging into the active workout.
-  - Routine and program generation that respects your equipment and history.
-  - Plateau and deload suggestions on top of the deterministic engine.
+  - Routine and program generation that respects your equipment (the gym profiles) and history.
+  - Plateau and deload suggestions on top of the deterministic engine (stall detection and progression rules).
+  - Every suggested weight passes load rounding and the safety bound, like the engine's own targets.
 - Optionally, an **MCP server** endpoint so Claude Desktop or other clients can query your own data.
 
 ### Phase 6: Design and motion polish (low priority; added 2026-09-30 on request)
@@ -310,7 +336,7 @@ animations that make logging feel good. It depends on no other phase, so it can 
 ## Verification
 
 **Automated** (`./gradlew check`: unit tests, lint, detekt, Spotless):
-- **Domain:** golden tests for e1RM, PR detection, set-per-muscle math, plate and warm-up rounding, unit conversion. Parsers are tested against fixture CSVs in Hevy and Strong export format.
+- **Domain:** golden tests for e1RM, PR detection, set-per-muscle math, plate and warm-up rounding, load rounding per gym profile, stall detection, progression rules and the safety bound, unit conversion. Parsers are tested against fixture CSVs in Hevy and Strong export format.
 - **Sync:** a property test runs two or three simulated replicas with random edits, deletes and pushes against an in-memory backend and asserts they converge. The Drive layout is tested against a fake Drive.
 - **Database:** DAO tests on the JVM with the bundled SQLite driver, plus Room migration tests from exported schemas.
 - **UI:** Compose UI tests for the logger critical path, and Roborazzi screenshot tests for designsystem components in light and dark.
