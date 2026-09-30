@@ -60,3 +60,5 @@ build-logic        Gradle convention plugins (liora.kmp.library, liora.cmp.featu
 3. Self-hosted Ktor + PostgreSQL server (Docker)
 4. Web GUI, programs with auto-progression, Wear OS
 5. Opt-in AI: ask your log, insights, natural-language logging, program generation
+6. Design and motion polish (low priority): more character, a bit quirky and playful, with animations
+   that make logging feel good
