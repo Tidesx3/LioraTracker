@@ -62,6 +62,7 @@ internal fun TabletopLogger(
                 state = state,
                 onLog = actions.pad.onLogCurrent,
                 onToggle = actions.set.onToggleComplete,
+                onOpenExercise = actions.navigation.onOpenExercise,
                 modifier = Modifier.widthIn(max = UpNextWidth),
             )
         }

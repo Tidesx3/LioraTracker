@@ -93,13 +93,14 @@ internal fun ExerciseCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         border = if (inSuperset) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
     ) {
+        // The photo and the name open the exercise with its instructions and history.
+        val openExercise: () -> Unit = { exercise?.let { onOpenExercise(it.id) } }
         Row(Modifier.padding(start = 12.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            // The photo shows how it's done; a tap opens the exercise with its instructions and history.
             exercise?.let {
                 ExerciseThumbnail(
                     exercise = it,
                     size = ThumbnailSize,
-                    modifier = Modifier.padding(end = 12.dp).clickable { onOpenExercise(it.id) },
+                    modifier = Modifier.padding(end = 12.dp).clickable(onClick = openExercise),
                 )
             }
             Column(Modifier.weight(1f)) {
@@ -108,6 +109,7 @@ internal fun ExerciseCard(
                     text = exercise?.name.orEmpty(),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable(enabled = exercise != null, onClick = openExercise),
                 )
                 Text(
                     text =

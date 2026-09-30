@@ -1,5 +1,6 @@
 package app.liora.feature.logger
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.liora.core.designsystem.icon.LioraIcons
@@ -60,7 +62,12 @@ internal fun FocusPane(
             rememberRestProgress(state.restTimer)?.let { rest ->
                 RestTimerRing(rest, onAdjust = actions.rest.onAdjust, onSkip = actions.rest.onSkip)
             }
-            UpNext(state, onLog = actions.pad.onLogCurrent, onToggle = actions.set.onToggleComplete)
+            UpNext(
+                state = state,
+                onLog = actions.pad.onLogCurrent,
+                onToggle = actions.set.onToggleComplete,
+                onOpenExercise = actions.navigation.onOpenExercise,
+            )
         }
         PadFor(state, actions, canHide = false)
     }
@@ -72,6 +79,7 @@ internal fun UpNext(
     state: LoggerUiState.Active,
     onLog: () -> Unit,
     onToggle: (setId: String) -> Unit,
+    onOpenExercise: (exerciseId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val ref: SetRef? = state.edit?.let { state.workout.find(it.cell.setId) } ?: state.current
@@ -93,12 +101,24 @@ internal fun UpNext(
         val exercise = state.workout.exercises[ref.exerciseIndex]
         val set = state.workout.setAt(ref)
         val trackingType = state.trackingTypeOf(exercise.exerciseId)
-        state.exercises[exercise.exerciseId]?.let { ExercisePicture(it, Modifier.width(PictureWidth)) }
+        // Like on its card, the picture and the name open the exercise.
+        val openExercise = { onOpenExercise(exercise.exerciseId) }
+        state.exercises[exercise.exerciseId]?.let {
+            ExercisePicture(
+                exercise = it,
+                modifier =
+                    Modifier
+                        .width(PictureWidth)
+                        .clip(MaterialTheme.shapes.medium)
+                        .clickable(onClick = openExercise),
+            )
+        }
         Text(
             text = state.exercises[exercise.exerciseId]?.name.orEmpty(),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center,
+            modifier = Modifier.clickable(onClick = openExercise),
         )
         Text(
             text = stringResource(Res.string.focus_set, ref.setIndex + 1, exercise.sets.size),

@@ -1,5 +1,6 @@
 package app.liora.feature.logger
 
+import androidx.compose.animation.core.withInfiniteAnimationFrameMillis
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,8 +19,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.FloatState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
@@ -43,41 +48,59 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
-/** A rest countdown as shown: time left (rounded up, so it reads 0:01 until it's really over) and progress. */
+/**
+ * A rest countdown as shown: the time left, rounded up so it reads 0:01 until it's really over, and
+ * the share of the rest still to go.
+ */
 internal data class RestProgress(
     val remaining: Duration,
-    val fraction: Float,
-)
+    private val fractionLeft: FloatState,
+) {
+    /** Moves on every frame. Read it while drawing (a progress lambda), so only the indicator redraws. */
+    val fraction: Float get() = fractionLeft.floatValue
+}
 
-/** Ticks while shown; null once the rest is over. */
+/**
+ * Ticks while shown; null once the rest is over. The time left recomposes once a second, while the
+ * progress glides along frame by frame without recomposing anything.
+ */
 @Composable
 internal fun rememberRestProgress(
     timer: RestTimer?,
     clock: Clock = Clock.System,
 ): RestProgress? {
-    val progress by produceState(progressOf(timer, clock), timer, clock) {
+    val remaining by produceState(remainingOf(timer, clock), timer, clock) {
         while (true) {
-            value = progressOf(timer, clock)
+            value = remainingOf(timer, clock)
             if (value == null) break
             delay(TICK)
         }
     }
-    return progress
+    val fraction = remember(timer, clock) { mutableFloatStateOf(fractionOf(timer, clock)) }
+    LaunchedEffect(timer, clock) {
+        // An infinite animation as far as Compose is concerned, so UI tests don't wait for it to end.
+        while (fraction.floatValue > 0f) {
+            withInfiniteAnimationFrameMillis { fraction.floatValue = fractionOf(timer, clock) }
+        }
+    }
+    return remaining?.let { RestProgress(it, fraction) }
 }
 
-private fun progressOf(
+private fun remainingOf(
     timer: RestTimer?,
     clock: Clock,
-): RestProgress? {
-    timer ?: return null
-    val remaining = timer.remaining(clock.now())
-    if (remaining <= Duration.ZERO) return null
+): Duration? {
+    val remaining = timer?.remaining(clock.now())?.takeIf { it > Duration.ZERO } ?: return null
+    return ceil(remaining.toDouble(DurationUnit.SECONDS)).seconds
+}
+
+private fun fractionOf(
+    timer: RestTimer?,
+    clock: Clock,
+): Float {
+    timer ?: return 0f
     val total = timer.total.inWholeMilliseconds.coerceAtLeast(1)
-    return RestProgress(
-        // Rounded up, so it reads 0:01 until it's really over.
-        remaining = ceil(remaining.toDouble(DurationUnit.SECONDS)).seconds,
-        fraction = (remaining.inWholeMilliseconds.toFloat() / total).coerceIn(0f, 1f),
-    )
+    return (timer.remaining(clock.now()).inWholeMilliseconds.toFloat() / total).coerceIn(0f, 1f)
 }
 
 /** The rest countdown on phones: a strip above the pad, with −15 s, +15 s and skip. */
