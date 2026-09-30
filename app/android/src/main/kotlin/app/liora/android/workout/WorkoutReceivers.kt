@@ -11,8 +11,9 @@ import org.koin.core.component.get
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * The workout notification's buttons: log the set that's up next, add 30 seconds of rest, or skip the
- * rest. Works from the lock screen, without opening the app; the logger shows the change next time.
+ * The workout notification's buttons: log the set that's up next, take 15 seconds off the rest or add
+ * them, or skip the rest. Works from the lock screen, without opening the app; the logger shows the
+ * change next time.
  */
 class WorkoutActionReceiver :
     BroadcastReceiver(),
@@ -27,7 +28,8 @@ class WorkoutActionReceiver :
             try {
                 when (action) {
                     WorkoutNotifications.ACTION_COMPLETE_SET -> get<SetLogger>().completeCurrentSet()
-                    WorkoutNotifications.ACTION_ADD_REST -> get<RestTimerRepository>().adjust(ADDED_REST)
+                    WorkoutNotifications.ACTION_ADD_REST -> get<RestTimerRepository>().adjust(REST_STEP)
+                    WorkoutNotifications.ACTION_REMOVE_REST -> get<RestTimerRepository>().adjust(-REST_STEP)
                     WorkoutNotifications.ACTION_SKIP_REST -> get<RestTimerRepository>().stop()
                 }
                 get<WorkoutNotifier>().refresh()
@@ -38,7 +40,7 @@ class WorkoutActionReceiver :
     }
 
     private companion object {
-        val ADDED_REST = 30.seconds
+        val REST_STEP = 15.seconds
     }
 }
 

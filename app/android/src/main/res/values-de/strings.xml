@@ -10,7 +10,7 @@
   <string name="notif_channel_rest">Pause vorbei</string>
   <string name="notif_channel_rest_desc">Meldet sich, wenn deine Pause um ist.</string>
   <string name="notif_workout_default_title">Training</string>
-  <string name="notif_rest_title">Pause</string>
+  <string name="notif_rest_remaining">Pause %1$s</string>
   <string name="notif_rest_over_title">Pause vorbei</string>
   <string name="notif_next">Als Nächstes: %1$s</string>
   <string name="notif_set_of">Satz %1$d von %2$d</string>

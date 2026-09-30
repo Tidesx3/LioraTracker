@@ -27,7 +27,8 @@ import kotlin.time.Duration.Companion.seconds
 
 /**
  * The workout's one ongoing notification, from start to finish: the next set with its values, or the
- * rest countdown with a progress bar, plus buttons to log the set, add 30 seconds or skip the rest.
+ * rest countdown with a progress bar, plus buttons to log the set, take 15 seconds off the rest or add
+ * them, or skip it.
  * On Android 16 it asks to be promoted to a Live Update (status bar chip, Now Bar on the lock screen).
  *
  * It reads the same database state as the logger, so the two never disagree, and it is rebuilt from
@@ -57,10 +58,11 @@ class WorkoutNotifier(
         scope.launch {
             statuses.collectLatest { status ->
                 show(status)
-                // The system counts the rest down by itself; only the progress bar needs a nudge.
+                // While resting, the time left and the bar move on every second. Should the app be
+                // closed, the system's own countdown in the header keeps going without us.
                 var rest = status?.rest
                 while (status != null && rest != null) {
-                    delay(PROGRESS_REFRESH)
+                    delay(rest.untilNextSecond(clock.now()))
                     rest = rest.takeUnless { it.isOver(clock.now()) }
                     show(status.copy(rest = rest))
                 }
@@ -127,12 +129,16 @@ class WorkoutNotifier(
         val rest = status.rest
         if (rest != null) {
             builder
-                .setContentTitle(context.getString(R.string.notif_rest_title))
+                .setContentTitle(context.getString(R.string.notif_rest_remaining, rest.remainingClock(clock.now())))
                 .setContentText(next?.let { context.getString(R.string.notif_next, text.describe(it)) })
                 .setWhen(rest.endsAt.toEpochMilliseconds())
                 .setChronometerCountDown(true)
                 .setStyle(restProgress(rest))
                 .addAction(
+                    0,
+                    context.getString(R.string.notif_action_remove_rest),
+                    action(WorkoutNotifications.ACTION_REMOVE_REST),
+                ).addAction(
                     0,
                     context.getString(R.string.notif_action_add_rest),
                     action(WorkoutNotifications.ACTION_ADD_REST),
@@ -181,7 +187,6 @@ class WorkoutNotifier(
             .language
 
     private companion object {
-        val PROGRESS_REFRESH = 5.seconds
         val REST_OVER_TIMEOUT = 30.seconds
     }
 }

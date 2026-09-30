@@ -21,6 +21,7 @@ internal object WorkoutNotifications {
 
     const val ACTION_COMPLETE_SET = "app.liora.action.COMPLETE_SET"
     const val ACTION_ADD_REST = "app.liora.action.ADD_REST"
+    const val ACTION_REMOVE_REST = "app.liora.action.REMOVE_REST"
     const val ACTION_SKIP_REST = "app.liora.action.SKIP_REST"
     const val ACTION_REST_OVER = "app.liora.action.REST_OVER"
 

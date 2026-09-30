@@ -37,12 +37,11 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 /**
  * The live workout notification: the next set with last session's values, logging it from the
- * notification, the rest countdown with +30 s and skip, the end-of-rest alarm and its alert.
+ * notification, the rest countdown with −15 s, +15 s and skip, the end-of-rest alarm and its alert.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [36], application = TestLioraApplication::class)
@@ -93,20 +92,20 @@ class WorkoutNotificationTest {
         // The rest timer and the workout reach the notifier as separate updates; wait for both.
         val resting =
             awaitNotification {
-                it.title == "Rest" &&
-                    it.text == "Next: Barbell Bench Press · Set 2 of 3 · 80 kg × 10"
+                it.isResting && it.text == "Next: Barbell Bench Press · Set 2 of 3 · 80 kg × 10"
             }
-        assertEquals(listOf("+30 s", "Skip rest"), resting.actions.map { it.title.toString() })
+        assertEquals(listOf("−15 s", "+15 s", "Skip rest"), resting.actions.map { it.title.toString() })
         val timer = runBlocking { koin.get<RestTimerRepository>().current() }!!
         assertEquals(90.seconds, timer.total)
         awaitAlarmAt(timer.endsAt.toEpochMilliseconds())
 
-        resting.actions
-            .first()
-            .actionIntent
-            .send()
+        // +15 s and −15 s move the end of the rest, and the alarm with it.
+        resting.actions[1].actionIntent.send()
         shadowOf(Looper.getMainLooper()).idle()
-        val extended = awaitTimer { it?.total == 2.minutes }!!
+        awaitAlarmAt(awaitTimer { it?.total == 105.seconds }!!.endsAt.toEpochMilliseconds())
+        resting.actions[0].actionIntent.send()
+        shadowOf(Looper.getMainLooper()).idle()
+        val extended = awaitTimer { it?.total == 90.seconds }!!
         awaitAlarmAt(extended.endsAt.toEpochMilliseconds())
 
         // The alarm goes off: the rest ends with a heads-up, and the notification is back to the next set.
@@ -137,7 +136,7 @@ class WorkoutNotificationTest {
             sets.completeCurrentSet()
             koin.get<WorkoutNotifier>().refresh()
         }
-        val resting = awaitNotification { it.title == "Rest" }
+        val resting = awaitNotification { it.isResting }
         resting.actions
             .last()
             .actionIntent
@@ -168,6 +167,9 @@ class WorkoutNotificationTest {
     private val Notification.title get() = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()
 
     private val Notification.text get() = extras.getCharSequence(Notification.EXTRA_TEXT)?.toString().orEmpty()
+
+    /** The rest countdown, titled with the time left ("Rest 1:30"). */
+    private val Notification.isResting get() = title?.matches(REST_TITLE) == true
 
     private fun awaitNotification(
         id: Int = WorkoutNotifications.ID_WORKOUT,
@@ -214,6 +216,7 @@ class WorkoutNotificationTest {
     private companion object {
         val TIMEOUT = 10.seconds
         val POLL = 20.seconds / 1000
+        val REST_TITLE = Regex("""Rest \d+:\d{2}""")
 
         val PUSH =
             Routine(
