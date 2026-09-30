@@ -3,9 +3,14 @@
 A workout tracker (Android first, KMP) for personal use and self-hosting. See README.md for the product
 summary and roadmap, and TODO.md for open bugs and polish.
 
+**Where work stands:** `docs/PLAN.md` has the full plan, the specs for every milestone, and a **Progress**
+section saying what's done and what's next. Read it before starting a milestone, follow its spec, and
+update Progress (and README's status line) in the commit that finishes one.
+
 ## Commands
 
-The JDK isn't on PATH in every shell. Export it first when needed:
+The build needs JDK 21 and an Android SDK (CI shows the minimal setup: `.github/workflows/ci.yml`).
+On the Windows dev machine the JDK isn't on PATH in every shell. Export it first when needed:
 `export JAVA_HOME="/c/Program Files/Eclipse Adoptium/jdk-21.0.12.101-hotspot"`
 
 - `./gradlew check`: all tests plus Spotless, detekt and Android Lint. Run it before committing.
@@ -73,7 +78,8 @@ The JDK isn't on PATH in every shell. Export it first when needed:
     - `stopKoin()` in `@After`.
     - Room emits off the main thread, so use `waitUntil` (see `LioraAppTest.waitForText`) rather than asserting immediately.
 - **Translations:** `verifyTranslations` (part of `check`) fails when a `values/` string has no `values-de/` counterpart, or when a German string is stale. `translatable="false"` opts a string out.
-- **Personal data:** `sample/` holds the user's real exports (e.g. Hevy) and is gitignored. Tests use synthetic fixtures only.
+- **Personal data:** `sample/` holds the user's real exports (e.g. Hevy) and is gitignored, so it exists only on the dev machine. The repo is public: tests use synthetic fixtures only, and no real workout data goes into commits.
+- **Visual polish:** Phase 6 gives the app its character (playful design, motion). Until then, feature milestones keep visuals clean and standard rather than gold-plating them.
 - **Foldables:** the Galaxy Z Fold 7 is the reference device. Its cover screen is about 411 dp wide (compact); the inner screen is about 984 × 1092 dp (expanded).
   - Layouts follow window size classes, never device checks. `currentWindowLayout()` (designsystem) holds the breakpoints: navigation rail from 600 dp, two panes from 840 dp.
   - Wide screens get a navigation rail and list-detail panes. Reading-heavy content is capped at about 600 dp with `Modifier.readableWidth()`.
