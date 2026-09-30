@@ -8,5 +8,6 @@ kotlin {
         // Labels for domain concepts such as record types.
         implementation(projects.core.domain)
         implementation(projects.core.designsystem)
+        implementation(libs.coil.compose)
     }
 }

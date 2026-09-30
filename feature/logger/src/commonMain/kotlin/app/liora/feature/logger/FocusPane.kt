@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -24,6 +25,7 @@ import app.liora.core.domain.SetRef
 import app.liora.core.domain.find
 import app.liora.core.domain.setAt
 import app.liora.core.model.RepRange
+import app.liora.core.ui.ExercisePicture
 import app.liora.core.ui.setSummary
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.focus_all_done
@@ -91,6 +93,7 @@ internal fun UpNext(
         val exercise = state.workout.exercises[ref.exerciseIndex]
         val set = state.workout.setAt(ref)
         val trackingType = state.trackingTypeOf(exercise.exerciseId)
+        state.exercises[exercise.exerciseId]?.let { ExercisePicture(it, Modifier.width(PictureWidth)) }
         Text(
             text = state.exercises[exercise.exerciseId]?.name.orEmpty(),
             style = MaterialTheme.typography.titleLarge,
@@ -133,3 +136,6 @@ internal fun UpNext(
         }
     }
 }
+
+/** Big enough to recognise from the bench, small enough to leave room for the rest ring. */
+private val PictureWidth = 176.dp

@@ -76,6 +76,7 @@ internal class LoggerNavigationActions(
     val onClose: () -> Unit,
     val onAddExercises: () -> Unit,
     val onReplaceExercise: () -> Unit,
+    val onOpenExercise: (exerciseId: String) -> Unit,
 )
 
 @Composable
@@ -341,6 +342,7 @@ internal fun WorkoutList(
                     actions = actions.exercise,
                     setActions = actions.set,
                     onTextFocus = actions.pad.onTextFocus,
+                    onOpenExercise = actions.navigation.onOpenExercise,
                     numbers = numbers,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                 )

@@ -49,6 +49,8 @@ class LioraAppTest {
     fun trainTab_light() {
         setApp(darkTheme = false)
         composeRule.onNodeWithText("Start empty workout").assertIsDisplayed()
+        // The routines arrive from Room a moment later; capture once they have.
+        waitForText("No routines yet")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/train_light.png")
     }
 
@@ -102,6 +104,7 @@ class LioraAppTest {
         setApp(darkTheme = true)
         composeRule.onNodeWithText("Leeres Training starten").assertIsDisplayed()
         composeRule.onNodeWithText("Fortschritt").assertIsDisplayed()
+        waitForText("Noch keine Routinen")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/de_train_dark.png")
 
         composeRule.onNodeWithText("Leeres Training starten").performClick()

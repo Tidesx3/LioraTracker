@@ -2,6 +2,7 @@ package app.liora.feature.logger
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import app.liora.core.navigation.ExerciseDetailRoute
 import app.liora.core.navigation.ExercisePickerRoute
 import app.liora.core.navigation.LoggerRoute
 import app.liora.core.navigation.NavigationResultEffect
@@ -21,6 +22,7 @@ fun EntryProviderScope<NavKey>.loggerEntries(navigator: Navigator) {
                 LoggerNavigationActions(
                     onClose = navigator::goBack,
                     onAddExercises = { navigator.navigate(ExercisePickerRoute(PickerKeys.ADD)) },
+                    onOpenExercise = { navigator.navigate(ExerciseDetailRoute(it)) },
                     onReplaceExercise = {
                         navigator.navigate(
                             ExercisePickerRoute(PickerKeys.REPLACE, multiple = false),

@@ -38,6 +38,7 @@ import app.liora.core.domain.restAfter
 import app.liora.core.model.ExerciseSettings
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.WorkoutExercise
+import app.liora.core.ui.ExerciseThumbnail
 import app.liora.core.ui.RestTimePicker
 import app.liora.core.ui.restLabel
 import app.liora.core.ui.setNumbers
@@ -76,6 +77,7 @@ internal fun ExerciseCard(
     actions: ExerciseActions,
     setActions: SetRowActions,
     onTextFocus: () -> Unit,
+    onOpenExercise: (exerciseId: String) -> Unit,
     numbers: NumberFormatter,
     modifier: Modifier = Modifier,
 ) {
@@ -91,7 +93,15 @@ internal fun ExerciseCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         border = if (inSuperset) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
     ) {
-        Row(Modifier.padding(start = 16.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(start = 12.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            // The photo shows how it's done; a tap opens the exercise with its instructions and history.
+            exercise?.let {
+                ExerciseThumbnail(
+                    exercise = it,
+                    size = ThumbnailSize,
+                    modifier = Modifier.padding(end = 12.dp).clickable { onOpenExercise(it.id) },
+                )
+            }
             Column(Modifier.weight(1f)) {
                 if (inSuperset) SupersetLabel()
                 Text(
@@ -258,3 +268,5 @@ internal fun SupersetLabel(modifier: Modifier = Modifier) {
         )
     }
 }
+
+private val ThumbnailSize = 48.dp

@@ -15,19 +15,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.liora.core.model.Exercise
+import app.liora.core.ui.ExerciseThumbnail
 import app.liora.core.ui.customExerciseBadge
 import app.liora.core.ui.label
 import app.liora.feature.exercises.resources.Res
 import app.liora.feature.exercises.resources.exercises_hidden_badge
-import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -89,40 +86,6 @@ fun exerciseSubtitle(exercise: Exercise): String {
     val muscles = exercise.primaryMuscles.take(2).map { stringResource(it.label) }
     val equipment = stringResource(exercise.equipment.label)
     return if (muscles.isEmpty()) equipment else muscles.joinToString(", ") + " · " + equipment
-}
-
-/**
- * The exercise's photo, or its initial on a tonal tile when there is none (custom exercises, or no
- * network yet). The initial sits underneath, so a failed load simply leaves it visible.
- */
-@Composable
-fun ExerciseThumbnail(
-    exercise: Exercise,
-    size: Dp,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier =
-            modifier
-                .size(size)
-                .clip(MaterialTheme.shapes.small)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = exercise.name.take(1).uppercase(),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        exercise.imageUrls.firstOrNull()?.let { url ->
-            AsyncImage(
-                model = url,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.matchParentSize(),
-            )
-        }
-    }
 }
 
 @Composable
