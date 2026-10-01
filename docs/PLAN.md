@@ -12,10 +12,17 @@ As of 2026-10-01:
   with the live workout notification.
 - **Milestone 6 (history)** is done:
   - **6a** (`b763772`): list and calendar, workout detail, repeat a workout, save it as a routine, delete.
-  - **6b:** edit past workouts. A finished workout opens in the logger (`EditWorkoutRoute`): sets, exercises,
-    supersets, notes and name, plus its date, start and end. Changes save as they're made, like live logging; Done
-    drops sets that aren't logged, after asking. "Last time" and records look at the sessions before it.
-- **Next: Milestone 7 (progress).** Then 8 (body) and 9 (settings, import and export).
+  - **6b** (`5e5ea43`): edit past workouts. A finished workout opens in the logger (`EditWorkoutRoute`): sets,
+    exercises, supersets, notes and name, plus its date, start and end. Changes save as they're made, like live
+    logging; Done drops sets that aren't logged, after asking. "Last time" and records look at the sessions before it.
+- **Milestone 7 (progress)**, split in three:
+  - **7a is done:** per-exercise progress on the exercise page. A chart per metric (`ExerciseProgress.metricsFor`:
+    e1RM, heaviest weight, volume and total reps for weight × reps; the fitting measures for other tracking types),
+    best and latest values, the exercise's records and rep maxes, its past sessions (each opens its workout), and
+    stall detection (`Stalls`, 3 weeks) with a badge. Charts use Vico behind `LineChart` in `designsystem`.
+  - **Next: 7b**, the Progress tab: PR board, weekly sets per muscle with the body heatmap, consistency calendar
+    with streaks, and the stalled exercises. **Then 7c**, the monthly report.
+  - Then milestones 8 (body) and 9 (settings, import and export).
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a
   milestone go in TODO.md.

@@ -61,6 +61,19 @@ private const val HISTORY_SETS =
       AND w.ended_at IS NOT NULL AND w.deleted_at IS NULL AND w.started_at < :before
     """
 
+/** One exercise's completed sets in finished workouts, with the workout each belongs to, oldest first. */
+private const val SESSIONS_OF_EXERCISE =
+    """
+    SELECT w.id AS session_workout_id, w.name AS session_workout_name, w.started_at AS session_started_at, s.*
+    FROM workout_set s
+    JOIN workout_exercise we ON we.id = s.workout_exercise_id
+    JOIN workout w ON w.id = we.workout_id
+    WHERE we.exercise_id = :exerciseId
+      AND s.completed_at IS NOT NULL AND s.deleted_at IS NULL AND we.deleted_at IS NULL
+      AND w.ended_at IS NOT NULL AND w.deleted_at IS NULL
+    ORDER BY w.started_at, we.position, s.position
+    """
+
 /** History: every finished workout, newest first. */
 private const val FINISHED_WORKOUTS =
     "SELECT * FROM workout WHERE ended_at IS NOT NULL AND deleted_at IS NULL ORDER BY started_at DESC"
@@ -82,6 +95,14 @@ private const val SETS_OF_FINISHED =
 /** A set together with the exercise it was logged for. */
 data class ExerciseSetRow(
     @ColumnInfo(name = "exercise_id") val exerciseId: String,
+    @Embedded val set: WorkoutSetEntity,
+)
+
+/** A set together with the finished workout it was done in. */
+data class SessionSetRow(
+    @ColumnInfo(name = "session_workout_id") val workoutId: String,
+    @ColumnInfo(name = "session_workout_name") val workoutName: String?,
+    @ColumnInfo(name = "session_started_at") val startedAt: Long,
     @Embedded val set: WorkoutSetEntity,
 )
 
@@ -128,6 +149,9 @@ interface WorkoutDao {
         exerciseIds: List<String>,
         before: Long,
     ): Flow<List<ExerciseSetRow>>
+
+    @Query(SESSIONS_OF_EXERCISE)
+    fun observeSessionSets(exerciseId: String): Flow<List<SessionSetRow>>
 
     @Query(FINISHED_WORKOUTS)
     fun observeFinished(): Flow<List<WorkoutEntity>>

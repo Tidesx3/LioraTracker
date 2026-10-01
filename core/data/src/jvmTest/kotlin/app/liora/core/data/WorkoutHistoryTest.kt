@@ -148,6 +148,53 @@ class WorkoutHistoryTest {
             assertEquals(repeated.id, workouts.repeat(push).id)
         }
 
+    @Test
+    fun anExercisesSessionsComeOldestFirstWithWhatWasDone() =
+        runTest {
+            val bench = exercises.createCustom(ExerciseDraft("Bench", TrackingType.WeightReps, Equipment.Barbell))
+            // Benched twice in one workout: one session.
+            val twice = benchDay(bench, times = 2, logged = 6)
+            clock.advance(1.days)
+            workouts.startEmptyWorkout()
+            workouts.rename("Heavy")
+            // Only two of the three sets done; finishing drops the third.
+            val heavy = benchDay(bench, times = 1, logged = 2)
+            clock.advance(1.days)
+            history.delete(benchDay(bench, times = 1, logged = 3))
+            clock.advance(1.days)
+            // Still going: not history yet.
+            workouts.startEmptyWorkout()
+            workouts.editor.addExercises(listOf(bench))
+
+            val sessions = history.sessionsOf(bench).first()
+            assertEquals(listOf(twice, heavy), sessions.map { it.workoutId })
+            assertEquals(6, sessions.first().sets.size)
+            assertEquals("Heavy", sessions.last().workoutName)
+            assertEquals(2, sessions.last().sets.size)
+        }
+
+    /** A finished workout with [exerciseId] [times] times, three sets each, the first [logged] sets done. */
+    private suspend fun benchDay(
+        exerciseId: String,
+        times: Int,
+        logged: Int,
+    ): String {
+        val workout = workouts.startEmptyWorkout()
+        workouts.editor.addExercises(List(times) { exerciseId })
+        val sets =
+            workouts.activeWorkout
+                .first()!!
+                .exercises
+                .flatMap { it.sets }
+        sets.take(logged).forEach { set ->
+            clock.advance(1.minutes)
+            logger.updateSet(set.id) { copy(weight = Mass(80.0), reps = 8) }
+            logger.completeSet(set.id)
+        }
+        workouts.finish()
+        return workout.id
+    }
+
     /** A finished Push session from its routine: a warm-up and two working sets, half an hour long. */
     private suspend fun pushDay(): String {
         val bench = exercises.createCustom(ExerciseDraft("Bench", TrackingType.WeightReps, Equipment.Barbell))

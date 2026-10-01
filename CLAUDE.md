@@ -70,6 +70,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - Replace `@android:color/white` with `#FFFFFFFF`.
   - Expose it through `LioraIcons`.
 - **Colors:** use `MaterialTheme.colorScheme` for standard roles and `LioraTheme.colors` for set types, PRs and completion. Numbers that change live (timers, weights) get `.tabularNumbers()`.
+- **Charts:** use the wrappers in `designsystem` (`LineChart`); only they touch Vico. Progress values and records format through `valueText`/`axisText` in `core:ui`, so units and locales stay consistent.
 - **Versions:** all in `gradle/libs.versions.toml`. SDK levels and the JVM target are in `build-logic/.../LioraConfig.kt`.
 - **Tests:**
   - **Pure core modules:** tests go in `src/jvmTest`. Use `inMemoryLioraDatabase()` for Room (bundled SQLite has JVM natives).

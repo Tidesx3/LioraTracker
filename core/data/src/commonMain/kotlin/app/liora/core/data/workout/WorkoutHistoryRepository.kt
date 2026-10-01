@@ -10,6 +10,7 @@ import app.liora.core.database.model.WorkoutEntity
 import app.liora.core.database.model.WorkoutExerciseEntity
 import app.liora.core.database.model.WorkoutSetEntity
 import app.liora.core.domain.RoutineUpdate
+import app.liora.core.model.ExerciseSession
 import app.liora.core.model.FinishedWorkout
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.Routine
@@ -29,6 +30,9 @@ import kotlin.time.Instant
 interface WorkoutHistoryRepository {
     /** Every finished workout with its exercises and sets, newest first. */
     val workouts: Flow<List<FinishedWorkout>>
+
+    /** Every finished session of one exercise, oldest first: what its charts, records and history show. */
+    fun sessionsOf(exerciseId: String): Flow<List<ExerciseSession>>
 
     /** Opens a finished workout to correct it with the logger's tools. */
     fun edit(workoutId: String): FinishedWorkoutSession
@@ -86,6 +90,22 @@ internal class OfflineWorkoutHistoryRepository(
             val setsByExercise = sets.groupBy { it.workoutExerciseId }
             workouts.map { it.toFinishedWorkout(exercisesByWorkout[it.id].orEmpty(), setsByExercise) }
         }.distinctUntilChanged()
+
+    override fun sessionsOf(exerciseId: String): Flow<List<ExerciseSession>> =
+        workoutDao
+            .observeSessionSets(exerciseId)
+            .map { rows ->
+                // Rows come oldest first; grouping keeps that order.
+                rows.groupBy { it.workoutId }.map { (workoutId, sets) ->
+                    val first = sets.first()
+                    ExerciseSession(
+                        workoutId = workoutId,
+                        workoutName = first.workoutName,
+                        startedAt = Instant.fromEpochMilliseconds(first.startedAt),
+                        sets = sets.map { it.set.toLoggedSet() },
+                    )
+                }
+            }.distinctUntilChanged()
 
     override fun edit(workoutId: String): FinishedWorkoutSession {
         val target = WorkoutTarget.Finished(workoutId)

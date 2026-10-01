@@ -79,4 +79,15 @@
   <string name="record_longest_duration">Longest time</string>
   <string name="record_longest_distance">Longest distance</string>
   <string name="record_best_pace">Best pace</string>
+
+  <string name="metric_estimated_1rm">Est. 1RM</string>
+  <string name="metric_heaviest_weight">Heaviest weight</string>
+  <string name="metric_volume">Volume</string>
+  <string name="metric_most_reps">Most reps</string>
+  <string name="metric_total_reps">Total reps</string>
+  <string name="metric_longest_duration">Longest time</string>
+  <string name="metric_total_duration">Total time</string>
+  <string name="metric_longest_distance">Longest distance</string>
+  <string name="metric_best_pace">Best pace</string>
+  <string name="metric_least_assistance">Least assistance</string>
 </resources>

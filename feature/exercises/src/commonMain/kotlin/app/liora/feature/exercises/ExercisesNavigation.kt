@@ -15,7 +15,9 @@ import app.liora.core.navigation.ExercisesRoute
 import app.liora.core.navigation.ListDetail
 import app.liora.core.navigation.NavigationResultEffect
 import app.liora.core.navigation.Navigator
+import app.liora.core.navigation.WorkoutDetailRoute
 import app.liora.core.ui.currentLanguage
+import app.liora.feature.exercises.detail.ExerciseDetailNavigation
 import app.liora.feature.exercises.detail.ExerciseDetailScreen
 import app.liora.feature.exercises.detail.ExerciseDetailViewModel
 import app.liora.feature.exercises.editor.ExerciseEditorScreen
@@ -63,9 +65,13 @@ fun EntryProviderScope<NavKey>.exercisesEntries(navigator: Navigator) {
     entry<ExerciseDetailRoute>(metadata = ListDetail.detailPane()) { route ->
         ExerciseDetailScreen(
             viewModel = koinViewModel(key = route.exerciseId) { parametersOf(route.exerciseId) },
-            onBack = navigator::goBack,
-            onEdit = { navigator.navigate(ExerciseEditorRoute(exerciseId = it)) },
-            onCreateVariation = { navigator.navigate(ExerciseEditorRoute(variationOf = it)) },
+            navigation =
+                ExerciseDetailNavigation(
+                    onBack = navigator::goBack,
+                    onEdit = { navigator.navigate(ExerciseEditorRoute(exerciseId = it)) },
+                    onCreateVariation = { navigator.navigate(ExerciseEditorRoute(variationOf = it)) },
+                    onOpenWorkout = { navigator.navigate(WorkoutDetailRoute(it)) },
+                ),
         )
     }
     entry<ExerciseEditorRoute>(metadata = ListDetail.detailPane()) { route ->
@@ -109,6 +115,6 @@ val exercisesModule =
     module {
         viewModelOf(::ExerciseLibraryViewModel)
         viewModelOf(::ExercisePickerViewModel)
-        viewModel { (exerciseId: String) -> ExerciseDetailViewModel(exerciseId, get()) }
+        viewModel { (exerciseId: String) -> ExerciseDetailViewModel(exerciseId, get(), get(), get()) }
         viewModel { (route: ExerciseEditorRoute, language: String) -> ExerciseEditorViewModel(route, language, get()) }
     }

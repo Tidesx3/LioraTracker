@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -49,6 +50,7 @@ import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.layout.readableWidth
+import app.liora.core.domain.ProgressMetric
 import app.liora.core.model.Exercise
 import app.liora.core.model.Muscle
 import app.liora.core.navigation.LocalPaneRole
@@ -74,6 +76,8 @@ import app.liora.feature.exercises.resources.detail_instructions
 import app.liora.feature.exercises.resources.detail_muscles
 import app.liora.feature.exercises.resources.detail_notes
 import app.liora.feature.exercises.resources.detail_primary
+import app.liora.feature.exercises.resources.detail_progress
+import app.liora.feature.exercises.resources.detail_records
 import app.liora.feature.exercises.resources.detail_secondary
 import app.liora.feature.exercises.resources.detail_unhide
 import app.liora.feature.exercises.resources.detail_variation_of
@@ -82,12 +86,26 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
+/** Where the exercise page leads. */
+internal class ExerciseDetailNavigation(
+    val onBack: () -> Unit,
+    val onEdit: (exerciseId: String) -> Unit,
+    val onCreateVariation: (exerciseId: String) -> Unit,
+    val onOpenWorkout: (workoutId: String) -> Unit,
+)
+
+/** What can be done on the exercise page. */
+private class ExerciseDetailActions(
+    val navigation: ExerciseDetailNavigation,
+    val onHiddenChange: (Boolean) -> Unit,
+    val onDelete: () -> Unit,
+    val onSelectMetric: (ProgressMetric) -> Unit,
+)
+
 @Composable
 internal fun ExerciseDetailScreen(
     viewModel: ExerciseDetailViewModel,
-    onBack: () -> Unit,
-    onEdit: (String) -> Unit,
-    onCreateVariation: (String) -> Unit,
+    navigation: ExerciseDetailNavigation,
     modifier: Modifier = Modifier,
 ) {
     val language = currentLanguage()
@@ -95,17 +113,19 @@ internal fun ExerciseDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Deleted (here or elsewhere): leave once the data is gone, never before the write lands.
-    val currentOnBack by rememberUpdatedState(onBack)
+    val currentOnBack by rememberUpdatedState(navigation.onBack)
     LaunchedEffect(uiState) { if (uiState == ExerciseDetailUiState.Gone) currentOnBack() }
 
     val loaded = uiState as? ExerciseDetailUiState.Loaded ?: return
     ExerciseDetailContent(
         state = loaded,
-        onBack = onBack,
-        onEdit = { onEdit(loaded.exercise.id) },
-        onCreateVariation = { onCreateVariation(loaded.exercise.id) },
-        onHiddenChange = viewModel::setHidden,
-        onDelete = viewModel::requestDelete,
+        actions =
+            ExerciseDetailActions(
+                navigation = navigation,
+                onHiddenChange = viewModel::setHidden,
+                onDelete = viewModel::requestDelete,
+                onSelectMetric = viewModel::selectMetric,
+            ),
         modifier = modifier,
     )
 
@@ -150,26 +170,31 @@ internal fun ExerciseDetailScreen(
 @Composable
 private fun ExerciseDetailContent(
     state: ExerciseDetailUiState.Loaded,
-    onBack: () -> Unit,
-    onEdit: () -> Unit,
-    onCreateVariation: () -> Unit,
-    onHiddenChange: (Boolean) -> Unit,
-    onDelete: () -> Unit,
+    actions: ExerciseDetailActions,
     modifier: Modifier = Modifier,
 ) {
     val exercise = state.exercise
+    val navigation = actions.navigation
     Scaffold(
         modifier = modifier,
         topBar = {
             LioraTopAppBar(
                 title = "",
                 // Beside the list there is nothing to go back to; the list is right there.
-                navigationIcon = { if (LocalPaneRole.current != PaneRole.Detail) BackButton(onClick = onBack) },
+                navigationIcon = {
+                    if (LocalPaneRole.current != PaneRole.Detail) BackButton(onClick = navigation.onBack)
+                },
                 actions = {
                     if (exercise.isCustom) {
-                        LioraIconButton(LioraIcons.Edit, stringResource(Res.string.cd_edit), onEdit)
+                        LioraIconButton(LioraIcons.Edit, stringResource(Res.string.cd_edit), {
+                            navigation.onEdit(exercise.id)
+                        })
                     }
-                    DetailMenu(exercise = exercise, onHiddenChange = onHiddenChange, onDelete = onDelete)
+                    DetailMenu(
+                        exercise = exercise,
+                        onHiddenChange = actions.onHiddenChange,
+                        onDelete = actions.onDelete,
+                    )
                 },
             )
         },
@@ -182,6 +207,8 @@ private fun ExerciseDetailContent(
                 item { ExerciseImages(exercise.imageUrls, Modifier.padding(horizontal = 16.dp)) }
             }
             item { Header(state, Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) }
+            // Once trained, how it's going comes first; the how-to is for learning it.
+            state.progress?.let { progress -> progressItems(progress, actions) }
             item {
                 SectionHeader(stringResource(Res.string.detail_muscles))
                 Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -203,14 +230,16 @@ private fun ExerciseDetailContent(
                 item { SectionHeader(stringResource(Res.string.detail_instructions)) }
                 itemsIndexed(exercise.instructions) { index, step -> InstructionStep(index + 1, step) }
             }
-            item {
-                SectionHeader(stringResource(Res.string.detail_history))
-                HistoryPlaceholder(Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+            if (state.progress == null) {
+                item {
+                    SectionHeader(stringResource(Res.string.detail_history))
+                    HistoryPlaceholder(Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+                }
             }
             if (!exercise.isCustom) {
                 item {
                     OutlinedButton(
-                        onClick = onCreateVariation,
+                        onClick = { navigation.onCreateVariation(exercise.id) },
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                     ) {
                         Text(stringResource(Res.string.detail_create_variation))
@@ -218,6 +247,27 @@ private fun ExerciseDetailContent(
                 }
             }
         }
+    }
+}
+
+/** The chart, records and past sessions of an exercise that has been trained. */
+private fun LazyListScope.progressItems(
+    progress: ExerciseProgressState,
+    actions: ExerciseDetailActions,
+) {
+    item(key = "progress") {
+        SectionHeader(stringResource(Res.string.detail_progress))
+        ProgressChart(progress, actions.onSelectMetric, Modifier.padding(horizontal = 20.dp))
+    }
+    if (progress.records.isNotEmpty()) {
+        item(key = "records") {
+            SectionHeader(stringResource(Res.string.detail_records))
+            RecordList(progress, Modifier.padding(horizontal = 20.dp))
+        }
+    }
+    item(key = "sessions") {
+        SectionHeader(stringResource(Res.string.detail_history))
+        SessionList(progress, actions.navigation.onOpenWorkout)
     }
 }
 
@@ -242,6 +292,7 @@ private fun Header(
             SuggestionChip(onClick = {}, label = { Text(stringResource(exercise.equipment.label)) })
             if (exercise.isCustom) SuggestionChip(onClick = {}, label = { Text(stringResource(customExerciseBadge)) })
         }
+        state.progress?.stallWeeks?.let { StallBadge(it) }
     }
 }
 

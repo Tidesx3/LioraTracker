@@ -31,6 +31,22 @@
   <string name="detail_instructions">Ausführung</string>
   <string name="detail_notes">Notizen</string>
   <string name="detail_history">Verlauf</string>
+  <string name="detail_progress">Fortschritt</string>
+  <string name="detail_records">Rekorde</string>
+  <string name="detail_best">Bestwert</string>
+  <string name="detail_latest">Zuletzt</string>
+  <string name="detail_one_session">Bisher eine Einheit. Das Diagramm beginnt mit der nächsten.</string>
+  <string name="detail_rep_maxes">Bestwerte nach Wiederholungen</string>
+  <string name="detail_rep_max">%1$sRM: %2$s</string>
+  <plurals name="detail_show_all">
+    <item quantity="one">%1$d Einheit zeigen</item>
+    <item quantity="other">Alle %1$d Einheiten zeigen</item>
+  </plurals>
+  <plurals name="detail_stalled">
+    <item quantity="one">Stagniert seit %1$d Woche</item>
+    <item quantity="other">Stagniert seit %1$d Wochen</item>
+  </plurals>
+  <string name="detail_stalled_body">Keine neue Bestleistung seit %1$s (%2$s).</string>
   <string name="detail_history_empty">Noch nicht trainiert. Verlauf, Rekorde und Diagramme erscheinen hier nach deinen ersten Sätzen.</string>
   <string name="detail_variation_of">Variante von %1$s</string>
   <string name="detail_create_variation">Variante erstellen</string>

@@ -31,6 +31,22 @@
   <string name="detail_instructions">How to</string>
   <string name="detail_notes">Notes</string>
   <string name="detail_history">History</string>
+  <string name="detail_progress">Progress</string>
+  <string name="detail_records">Records</string>
+  <string name="detail_best">Best</string>
+  <string name="detail_latest">Latest</string>
+  <string name="detail_one_session">One session so far. The chart starts with the next one.</string>
+  <string name="detail_rep_maxes">Rep maxes</string>
+  <string name="detail_rep_max">%1$sRM: %2$s</string>
+  <plurals name="detail_show_all">
+    <item quantity="one">Show %1$d session</item>
+    <item quantity="other">Show all %1$d sessions</item>
+  </plurals>
+  <plurals name="detail_stalled">
+    <item quantity="one">Stalled for %1$d week</item>
+    <item quantity="other">Stalled for %1$d weeks</item>
+  </plurals>
+  <string name="detail_stalled_body">No new best since %1$s (%2$s).</string>
   <string name="detail_history_empty">Not trained yet. History, records and charts show up here after your first sets.</string>
   <string name="detail_variation_of">Variation of %1$s</string>
   <string name="detail_create_variation">Create variation</string>
