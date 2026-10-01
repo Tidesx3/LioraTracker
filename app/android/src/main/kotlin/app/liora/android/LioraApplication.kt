@@ -11,6 +11,7 @@ import app.liora.core.database.androidDatabaseModule
 import app.liora.feature.exercises.exercisesModule
 import app.liora.feature.history.historyModule
 import app.liora.feature.logger.loggerModule
+import app.liora.feature.progress.progressModule
 import app.liora.feature.train.trainModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +32,15 @@ open class LioraApplication : Application() {
             androidContext(this@LioraApplication)
             modules(
                 databaseModules() +
-                    listOf(appModule, dataModule, trainModule, historyModule, loggerModule, exercisesModule),
+                    listOf(
+                        appModule,
+                        dataModule,
+                        trainModule,
+                        historyModule,
+                        loggerModule,
+                        exercisesModule,
+                        progressModule,
+                    ),
             )
         }
         processScope.launch { get<AppStartup>().run() }

@@ -5,4 +5,48 @@
   <string name="progress_empty_body">Log a few workouts to see strength trends, personal records and weekly sets per muscle.</string>
   <string name="progress_body_title">Body</string>
   <string name="progress_body_subtitle">Bodyweight, measurements and progress photos</string>
+
+  <string name="progress_streak">Streak</string>
+  <plurals name="progress_streak_weeks">
+    <item quantity="one">%1$d week</item>
+    <item quantity="other">%1$d weeks</item>
+  </plurals>
+  <string name="progress_this_week">This week</string>
+  <plurals name="progress_workouts">
+    <item quantity="one">%1$d workout</item>
+    <item quantity="other">%1$d workouts</item>
+  </plurals>
+  <string name="progress_sets_this_week">Sets this week</string>
+
+  <string name="progress_consistency">Consistency</string>
+  <string name="progress_date_range" translatable="false">%1$s – %2$s</string>
+
+  <string name="progress_muscles">Sets per muscle</string>
+  <string name="progress_last_week">Last week</string>
+  <string name="cd_previous_week">Previous week</string>
+  <string name="cd_next_week">Next week</string>
+  <string name="progress_no_sets">No sets this week.</string>
+  <string name="progress_legend">Sets a week</string>
+  <string name="progress_legend_none" translatable="false">0</string>
+  <string name="progress_legend_light" translatable="false">1–4</string>
+  <string name="progress_legend_moderate" translatable="false">5–9</string>
+  <string name="progress_legend_full" translatable="false">10+</string>
+  <plurals name="progress_sets_count">
+    <item quantity="one">%1$s set</item>
+    <item quantity="other">%1$s sets</item>
+  </plurals>
+
+  <string name="progress_records">Bests</string>
+  <string name="progress_metric_date" translatable="false">%1$s · %2$s</string>
+  <plurals name="progress_stalled">
+    <item quantity="one">Stalled for %1$d week</item>
+    <item quantity="other">Stalled for %1$d weeks</item>
+  </plurals>
+  <plurals name="progress_show_all">
+    <item quantity="one">Show %1$d exercise</item>
+    <item quantity="other">Show all %1$d exercises</item>
+  </plurals>
+
+  <string name="progress_pick_title">Pick an exercise</string>
+  <string name="progress_pick_body">Its chart, records and sessions show up here.</string>
 </resources>

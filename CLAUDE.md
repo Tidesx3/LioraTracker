@@ -79,6 +79,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
     - Use Robolectric with `@Config(sdk = [36], application = TestLioraApplication::class)`. That app uses an in-memory DB on the framework SQLite driver, because bundled SQLite only ships Android binaries.
     - `stopKoin()` in `@After`.
     - Room emits off the main thread, so use `waitUntil` (see `LioraAppTest.waitForText`) rather than asserting immediately.
+    - Screens that depend on "now" (Progress, stalls) get a fixed clock: override Koin's `Clock` with `loadKoinModules` before anything uses it (see `ProgressFlowTest`), so screenshots don't change from day to day.
 - **Translations:** `verifyTranslations` (part of `check`) fails when a `values/` string has no `values-de/` counterpart, or when a German string is stale. `translatable="false"` opts a string out.
 - **Personal data:** `sample/` holds the user's real exports (e.g. Hevy) and is gitignored, so it exists only on the dev machine. The repo is public: tests use synthetic fixtures only, and no real workout data goes into commits.
 - **Visual polish:** Phase 6 gives the app its character (playful design, motion). Until then, feature milestones keep visuals clean and standard rather than gold-plating them.
@@ -95,6 +96,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - **Robolectric:** needs `--add-opens=java.base/jdk.internal.access=ALL-UNNAMED` on JDK 17+. It is already set in `configureHostTests()`.
   - A text field inside a dialog (the logger's rename, history's save as routine) keeps Compose from ever going idle, even with the test clock paused. Don't open those dialogs in UI tests; cover the write in `core/data` tests and check the dialog on a device.
   - Material's date picker dialog fills in a moment after it opens: `waitUntil` its content appears. Each day's semantic text is the full date ("Monday, August 10, 2026"), not the day number.
+- **Lazy lists keep their first visible item in view by key.** Don't show trailing items (a footer card) while a screen is loading: when the content arrives above them, the list opens scrolled to the bottom.
 - **Material3 version:** CMP `material3` is pinned to 1.9.0 (= androidx material3 1.4.0, the stable BOM version), not the alpha that ships alongside CMP 1.12.
 - **Compose string resources** (`composeResources/**/strings.xml`) do not unescape `\'` the way Android `res/` does; the backslash shows up in the UI. Write a typographic apostrophe (`’`) instead.
 - **Escaping in shell edits:** shell heredocs and sed here mangle backslashes and quotes. Make escaping-sensitive edits with the file edit tools, or with a script file, not inline shell text.

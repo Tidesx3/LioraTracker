@@ -32,6 +32,7 @@ internal class LocaleDateFormatter(
     use24Hours: Boolean,
 ) : DateFormatter {
     private val short = pattern("EEEMMMd")
+    private val dayMonth = pattern("MMMd")
     private val long = pattern("EEEEyMMMMd")
     private val monthYear = pattern("yMMMM")
     private val clock = pattern(if (use24Hours) "Hm" else "hma")
@@ -39,6 +40,8 @@ internal class LocaleDateFormatter(
     override val firstDayOfWeek: DayOfWeek = WeekFields.of(locale).firstDayOfWeek.toKotlinDayOfWeek()
 
     override fun shortDate(date: LocalDate): String = short.format(date.toJavaLocalDate())
+
+    override fun dayAndMonth(date: LocalDate): String = dayMonth.format(date.toJavaLocalDate())
 
     override fun longDate(date: LocalDate): String = long.format(date.toJavaLocalDate())
 

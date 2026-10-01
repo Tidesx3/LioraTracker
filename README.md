@@ -9,9 +9,10 @@ custom exercises, German, the foldable layouts, routines with folders and supers
 (number pad, rest timer, live workout notification, personal records, tabletop mode) are done. History
 is done too: list, calendar, workout detail (repeat, save as routine, delete) and editing past workouts
 in the logger, times included. Each exercise's page charts its progress (e1RM, weight, volume, reps),
-lists its records and sessions, and flags a stall. Next are the Progress tab (records board, sets per
-muscle, streaks, monthly report), body metrics, and settings with import and export. Details and
-progress are in [docs/PLAN.md](docs/PLAN.md).
+lists its records and sessions, and flags a stall. The Progress tab shows the weekly streak, a
+consistency grid, sets per muscle on a body heatmap, and every exercise's best. Next are the monthly
+report, body metrics, and settings with import and export. Details and progress are in
+[docs/PLAN.md](docs/PLAN.md).
 
 ## Principles
 

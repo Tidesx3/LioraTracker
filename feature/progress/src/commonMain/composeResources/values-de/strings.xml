@@ -5,4 +5,42 @@
   <string name="progress_empty_body">Logge ein paar Trainings, um Kraftverläufe, persönliche Rekorde und wöchentliche Sätze pro Muskel zu sehen.</string>
   <string name="progress_body_title">Körper</string>
   <string name="progress_body_subtitle">Körpergewicht, Maße und Fortschrittsfotos</string>
+
+  <string name="progress_streak">Serie</string>
+  <plurals name="progress_streak_weeks">
+    <item quantity="one">%1$d Woche</item>
+    <item quantity="other">%1$d Wochen</item>
+  </plurals>
+  <string name="progress_this_week">Diese Woche</string>
+  <plurals name="progress_workouts">
+    <item quantity="one">%1$d Training</item>
+    <item quantity="other">%1$d Trainings</item>
+  </plurals>
+  <string name="progress_sets_this_week">Sätze diese Woche</string>
+
+  <string name="progress_consistency">Regelmäßigkeit</string>
+
+  <string name="progress_muscles">Sätze pro Muskel</string>
+  <string name="progress_last_week">Letzte Woche</string>
+  <string name="cd_previous_week">Vorige Woche</string>
+  <string name="cd_next_week">Nächste Woche</string>
+  <string name="progress_no_sets">In dieser Woche keine Sätze.</string>
+  <string name="progress_legend">Sätze pro Woche</string>
+  <plurals name="progress_sets_count">
+    <item quantity="one">%1$s Satz</item>
+    <item quantity="other">%1$s Sätze</item>
+  </plurals>
+
+  <string name="progress_records">Bestwerte</string>
+  <plurals name="progress_stalled">
+    <item quantity="one">Stagniert seit %1$d Woche</item>
+    <item quantity="other">Stagniert seit %1$d Wochen</item>
+  </plurals>
+  <plurals name="progress_show_all">
+    <item quantity="one">%1$d Übung zeigen</item>
+    <item quantity="other">Alle %1$d Übungen zeigen</item>
+  </plurals>
+
+  <string name="progress_pick_title">Wähle eine Übung</string>
+  <string name="progress_pick_body">Hier erscheinen ihr Verlauf, ihre Rekorde und Einheiten.</string>
 </resources>

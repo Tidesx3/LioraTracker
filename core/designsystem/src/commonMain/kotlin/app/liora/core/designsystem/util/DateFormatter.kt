@@ -17,6 +17,9 @@ interface DateFormatter {
     /** "Tue, Sep 29" / "Di., 29. Sept.", for lists grouped under a month. */
     fun shortDate(date: LocalDate): String
 
+    /** "Sep 29" / "29. Sept.", where space is tight, such as a chart's axis. */
+    fun dayAndMonth(date: LocalDate): String
+
     /** "Tuesday, September 29, 2026" / "Dienstag, 29. September 2026". */
     fun longDate(date: LocalDate): String
 

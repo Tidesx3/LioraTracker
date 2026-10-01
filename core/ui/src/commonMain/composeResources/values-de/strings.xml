@@ -90,4 +90,7 @@
   <string name="metric_longest_distance">Längste Distanz</string>
   <string name="metric_best_pace">Beste Pace</string>
   <string name="metric_least_assistance">Wenigste Unterstützung</string>
+
+  <string name="body_front">Vorne</string>
+  <string name="body_back">Hinten</string>
 </resources>

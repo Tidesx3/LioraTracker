@@ -1,5 +1,6 @@
 package app.liora.core.domain
 
+import app.liora.core.model.FinishedWorkout
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.Muscle
 import app.liora.core.model.TrackingType
@@ -40,5 +41,24 @@ fun setsPerMuscle(work: List<MuscleWork>): Map<Muscle, Double> {
     }
     return totals
 }
+
+/** Which muscles an exercise trains. */
+data class MuscleTargets(
+    val primary: Set<Muscle>,
+    val secondary: Set<Muscle>,
+)
+
+/** Hard sets per muscle over [workouts] (see [setsPerMuscle]); exercises [targetsOf] doesn't know don't count. */
+fun setsPerMuscle(
+    workouts: List<FinishedWorkout>,
+    targetsOf: (exerciseId: String) -> MuscleTargets?,
+): Map<Muscle, Double> =
+    setsPerMuscle(
+        workouts.flatMap { it.exercises }.mapNotNull { exercise ->
+            targetsOf(exercise.exerciseId)?.let { targets ->
+                MuscleWork(targets.primary, targets.secondary, exercise.sets.count { it.isWorkingSet })
+            }
+        },
+    )
 
 private const val SECONDARY_MUSCLE_WEIGHT = 0.5
