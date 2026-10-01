@@ -12,12 +12,9 @@ import app.liora.core.data.sync.SyncStamper
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.LocalRestTimerRepository
 import app.liora.core.data.workout.OfflineActiveWorkoutRepository
-import app.liora.core.data.workout.OfflineSetLogger
-import app.liora.core.data.workout.OfflineWorkoutEditor
 import app.liora.core.data.workout.OfflineWorkoutHistoryRepository
 import app.liora.core.data.workout.RestTimerRepository
 import app.liora.core.data.workout.SetLogger
-import app.liora.core.data.workout.WorkoutEditor
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.database.databaseModule
 import app.liora.core.domain.RestDefaults
@@ -44,8 +41,8 @@ val dataModule =
         singleOf(::OfflineRoutineRepository) bind RoutineRepository::class
         singleOf(::OfflineActiveWorkoutRepository) bind ActiveWorkoutRepository::class
         singleOf(::OfflineWorkoutHistoryRepository) bind WorkoutHistoryRepository::class
-        singleOf(::OfflineWorkoutEditor) bind WorkoutEditor::class
-        singleOf(::OfflineSetLogger) bind SetLogger::class
+        // The workout in progress has one set logger, shared by the logger and the notification.
+        single<SetLogger> { get<ActiveWorkoutRepository>().sets }
         singleOf(::LocalRestTimerRepository) bind RestTimerRepository::class
         // Until Settings make them adjustable.
         single { RestDefaults() }

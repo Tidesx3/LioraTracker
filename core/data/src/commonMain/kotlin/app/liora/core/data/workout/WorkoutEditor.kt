@@ -10,7 +10,10 @@ import app.liora.core.database.model.WorkoutSetEntity
 import app.liora.core.domain.Supersets
 import app.liora.core.model.SetType
 
-/** Changes to the exercises of the workout in progress. Every change leaves supersets consistent. */
+/**
+ * Changes to the exercises of a workout: the one in progress, or a finished one being corrected (see
+ * [WorkoutSession]). Every change leaves supersets consistent.
+ */
 interface WorkoutEditor {
     /** Adds exercises at the end, each with as many sets as last time, or a sensible start. */
     suspend fun addExercises(exerciseIds: List<String>)
@@ -43,6 +46,7 @@ interface WorkoutEditor {
 }
 
 internal class OfflineWorkoutEditor(
+    private val target: WorkoutTarget,
     private val workoutDao: WorkoutDao,
     private val exerciseDao: ExerciseDao,
     private val transactions: TransactionRunner,
@@ -52,10 +56,10 @@ internal class OfflineWorkoutEditor(
     override suspend fun addExercises(exerciseIds: List<String>) {
         if (exerciseIds.isEmpty()) return
         transactions.inTransaction {
-            val rows = workoutDao.activeRows() ?: return@inTransaction
+            val rows = target.rows(workoutDao) ?: return@inTransaction
             val lastTypes =
                 workoutDao
-                    .lastSessionSets(exerciseIds.distinct())
+                    .lastSessionSets(exerciseIds.distinct(), before = rows.earlierThan)
                     .groupBy({ it.exerciseId }, { it.set.setType })
             val added =
                 exerciseIds.map { exerciseId ->
@@ -95,7 +99,7 @@ internal class OfflineWorkoutEditor(
         exerciseId: String,
     ) {
         transactions.inTransaction {
-            val rows = workoutDao.activeRows() ?: return@inTransaction
+            val rows = target.rows(workoutDao) ?: return@inTransaction
             val trackingType = exerciseDao.trackingTypeOf(exerciseId)
             save(rows, rows.exercises.map { if (it.id == workoutExerciseId) it.copy(exerciseId = exerciseId) else it })
             val sets =
@@ -109,7 +113,7 @@ internal class OfflineWorkoutEditor(
 
     override suspend fun removeExercise(workoutExerciseId: String) {
         transactions.inTransaction {
-            val rows = workoutDao.activeRows() ?: return@inTransaction
+            val rows = target.rows(workoutDao) ?: return@inTransaction
             val sets = rows.setsOf(workoutExerciseId).map { it.copy(sync = stamper.tombstone(it.sync)) }
             if (sets.isNotEmpty()) workoutDao.upsertSets(sets)
             save(rows, rows.exercises.filterNot { it.id == workoutExerciseId })
@@ -158,7 +162,7 @@ internal class OfflineWorkoutEditor(
 
     private suspend fun edit(change: (List<WorkoutExerciseEntity>) -> List<WorkoutExerciseEntity>) {
         transactions.inTransaction {
-            val rows = workoutDao.activeRows() ?: return@inTransaction
+            val rows = target.rows(workoutDao) ?: return@inTransaction
             save(rows, change(rows.exercises))
         }
     }

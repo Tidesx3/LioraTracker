@@ -8,6 +8,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.navigation.EditWorkoutRoute
 import app.liora.core.navigation.ExerciseDetailRoute
 import app.liora.core.navigation.HistoryRoute
 import app.liora.core.navigation.ListDetail
@@ -65,6 +66,7 @@ fun EntryProviderScope<NavKey>.historyEntries(navigator: Navigator) {
                         navigator.selectTopLevel(TrainRoute)
                         navigator.openFromList(TrainRoute, RoutineDetailRoute(routineId))
                     },
+                    onEdit = { navigator.navigate(EditWorkoutRoute(route.workoutId)) },
                 ),
         )
     }

@@ -11,6 +11,7 @@
   <string name="cd_previous_month">Previous month</string>
   <string name="cd_next_month">Next month</string>
   <string name="cd_more">More options</string>
+  <string name="cd_edit">Edit workout</string>
   <string name="cd_records">Personal records</string>
 
   <plurals name="history_workouts">

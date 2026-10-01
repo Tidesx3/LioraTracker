@@ -20,5 +20,7 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
   or drop the time from the title.
 - **Save as routine: check the name dialog on a device.** UI tests can't drive it (see the Robolectric
   gotcha in CLAUDE.md); saving itself is covered in `core:data`.
+- **Editing a past workout: check the start and end time pickers on a device.** UI tests drive the date
+  picker only. The time math is covered in `core:domain` (`WorkoutTimesTest`), the writes in `core:data`.
 - **Robolectric: a text field in a dialog never lets Compose go idle.** Find the cause, so the rename
   and save-as-routine dialogs can get UI tests.

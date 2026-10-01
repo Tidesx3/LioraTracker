@@ -11,6 +11,7 @@
   <string name="cd_previous_month">Voriger Monat</string>
   <string name="cd_next_month">Nächster Monat</string>
   <string name="cd_more">Weitere Optionen</string>
+  <string name="cd_edit">Training bearbeiten</string>
   <string name="cd_records">Persönliche Rekorde</string>
 
   <plurals name="history_workouts">

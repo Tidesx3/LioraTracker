@@ -1,11 +1,18 @@
 package app.liora.android
 
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -22,6 +29,7 @@ import app.liora.core.model.RepRange
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineExercise
 import app.liora.core.model.RoutineSet
+import app.liora.feature.logger.LoggerTags
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
@@ -47,7 +55,7 @@ import kotlin.time.Duration.Companion.minutes
 
 /**
  * History end to end: finished workouts by month and on a calendar, a workout with the records it set,
- * and what can be done with one: save it as a routine, repeat it, delete it. Workouts are seeded at
+ * and what can be done with one: correct it, save it as a routine, repeat it, delete it. Workouts are seeded at
  * fixed dates in a fixed zone, so the screenshots don't change from day to day.
  */
 @RunWith(RobolectricTestRunner::class)
@@ -175,6 +183,79 @@ class HistoryFlowTest {
     }
 
     @Test
+    @Config(qualifiers = COVER)
+    fun correctAFinishedWorkout() {
+        openLatestPush()
+        composeRule.onNodeWithContentDescription("Edit workout").performClick()
+        waitForText("Done")
+        waitForText("Tuesday, August 11, 2026")
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/workout_edit_dark.png")
+
+        // The first bench set was heavier than logged.
+        composeRule.onAllNodesWithTag(LoggerTags.CELL)[0].performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasTestTag(LoggerTags.PAD)) }
+        listOf("8", "5").forEach { padKey(it).performClick() }
+        // A set added but never logged doesn't stay.
+        composeRule.onAllNodesWithText("Add set").onFirst().performClick()
+        composeRule.waitUntil(TIMEOUT_MS) {
+            nodeExists(hasContentDescription("Log set") and !hasAnyAncestor(hasTestTag(LoggerTags.PAD)))
+        }
+        composeRule.onNode(hasTestTag(LoggerTags.FINISH)).performClick()
+        waitForText("1 set isn’t logged")
+        composeRule.onNode(hasTestTag(LoggerTags.CORRECTIONS_CONFIRM)).performClick()
+
+        // Back on the workout, corrected.
+        waitForText("Repeat workout")
+        waitForText("85 kg × 10")
+        composeRule.onAllNodesWithText("82.5 kg × 10").assertCountEquals(2)
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun moveAWorkoutToAnotherDay() {
+        openLatestPush()
+        composeRule.onNodeWithContentDescription("Edit workout").performClick()
+        waitForText("Done")
+        composeRule.onNode(hasTestTag(LoggerTags.DATE)).performClick()
+        // The picker's window fills in a moment after it opens; each day is named by its full date.
+        val monday = hasText("Monday, August 10, 2026") and hasAnyAncestor(isDialog())
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(monday) }
+        composeRule.onNode(monday).performClick()
+        composeRule.onNodeWithText("OK").performClick()
+        waitForText("Monday, August 10, 2026")
+
+        // Back leaves like Done; nothing was left unlogged, so nothing asks.
+        composeRule.onNodeWithContentDescription("Back").performClick()
+        waitForText("Repeat workout")
+        waitForText("Monday, August 10, 2026 · ")
+    }
+
+    @Test
+    @Config(qualifiers = INNER)
+    fun innerScreen_correctingAWorkoutTakesTheWholeWindow() {
+        openHistory()
+        waitForText("Pick a workout")
+        composeRule.onAllNodesWithText("Push").onFirst().performClick()
+        waitForText("Repeat workout")
+        composeRule.onNodeWithContentDescription("Edit workout").performClick()
+        waitForText("Done")
+        composeRule.onAllNodesWithText("Pick a workout").assertCountEquals(0)
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/fold_inner_workout_edit_dark.png")
+    }
+
+    @Test
+    @Config(qualifiers = "de-$COVER")
+    fun germanCorrections() {
+        openLatestPush("Verlauf", repeat = "Training wiederholen")
+        composeRule.onNodeWithContentDescription("Training bearbeiten").performClick()
+        waitForText("Fertig")
+        composeRule.onNodeWithText("Dienstag, 11. August 2026").assertExists()
+        composeRule.onNodeWithText("Beginn 17:45").assertExists()
+        composeRule.onNodeWithText("Ende 18:03").assertExists()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/de_workout_edit_dark.png")
+    }
+
+    @Test
     @Config(qualifiers = INNER)
     fun innerScreen_listBesideTheOpenWorkout() {
         openHistory()
@@ -207,6 +288,23 @@ class HistoryFlowTest {
         composeRule.waitForIdle()
         composeRule.onNodeWithText(tab).performClick()
     }
+
+    /** The heavier Push on 11 August, newest of all. */
+    private fun openLatestPush(
+        tab: String = "History",
+        repeat: String = "Repeat workout",
+    ) {
+        openHistory(tab)
+        waitForText("Push")
+        composeRule.onAllNodesWithText("Push").onFirst().performClick()
+        waitForText(repeat)
+    }
+
+    private fun padKey(label: String): SemanticsNodeInteraction =
+        composeRule.onNode(hasText(label) and hasAnyAncestor(hasTestTag(LoggerTags.PAD)))
+
+    private fun nodeExists(matcher: SemanticsMatcher) =
+        composeRule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty()
 
     /**
      * A finished workout from [routineId], every set done, then moved to [start]: ten minutes a set.

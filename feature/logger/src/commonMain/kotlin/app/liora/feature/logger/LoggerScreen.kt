@@ -35,11 +35,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
@@ -58,6 +60,7 @@ import app.liora.core.ui.currentLanguage
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.cd_minimize
 import app.liora.feature.logger.resources.cd_rename
+import app.liora.feature.logger.resources.edit_done
 import app.liora.feature.logger.resources.logger_add_exercises
 import app.liora.feature.logger.resources.logger_discard
 import app.liora.feature.logger.resources.logger_empty_body
@@ -88,37 +91,35 @@ internal fun LoggerScreen(
     val language = currentLanguage()
     LaunchedEffect(language) { viewModel.setLanguage(language) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val corrected by viewModel.corrected.collectAsStateWithLifecycle()
+    CloseWhenDone(uiState, corrected, viewModel.correctsHistory, navigation.onClose)
 
-    // Close once the database confirms the workout ended. Closing right away would clear this
-    // ViewModel and cancel the finish/discard write before it lands.
-    var hadWorkout by remember { mutableStateOf(false) }
-    val currentOnClose by rememberUpdatedState(navigation.onClose)
-    LaunchedEffect(uiState) {
-        when (uiState) {
-            is LoggerUiState.Active -> hadWorkout = true
-            LoggerUiState.NoWorkout -> if (hadWorkout) currentOnClose()
-            LoggerUiState.Loading -> Unit
+    var dialog by rememberSaveable { mutableStateOf<LoggerDialog?>(null) }
+    val showDialog = { value: LoggerDialog ->
+        viewModel.closePad()
+        dialog = value
+    }
+    val onDone: () -> Unit = {
+        (uiState as? LoggerUiState.Active)?.let { active ->
+            val question = askBeforeLeaving(active)
+            if (question != null) showDialog(question) else viewModel.finishCorrections()
         }
     }
 
-    // Back closes the pad before it leaves the logger.
+    // Back closes the pad before it leaves the logger, and leaves a finished workout like Done.
     val editing = (uiState as? LoggerUiState.Active)?.edit != null
     NavigationBackHandler(
         state = rememberNavigationEventState(NavigationEventInfo.None),
-        isBackEnabled = editing,
-        onBackCompleted = viewModel::closePad,
+        isBackEnabled = editing || viewModel.correctsHistory,
+        onBackCompleted = { if (editing) viewModel.closePad() else onDone() },
     )
 
     val state = uiState
-    if (state == LoggerUiState.Loading) return
-    var dialog by rememberSaveable { mutableStateOf<LoggerDialog?>(null) }
+    // A finished workout that's gone closes; there is nothing to show meanwhile.
+    if (state == LoggerUiState.Loading || (state == LoggerUiState.NoWorkout && viewModel.correctsHistory)) return
     LoggerContent(
         state = state as? LoggerUiState.Active,
-        actions =
-            loggerActions(viewModel, navigation) {
-                viewModel.closePad()
-                dialog = it
-            },
+        actions = loggerActions(viewModel, navigation, onShowDialog = showDialog, onDone = onDone),
         modifier = modifier,
     )
     (state as? LoggerUiState.Active)?.let { active ->
@@ -131,9 +132,43 @@ internal fun LoggerScreen(
                     onDiscard = viewModel::discard,
                     onReorder = viewModel::reorder,
                     onFinish = viewModel::finish,
+                    corrections =
+                        CorrectionActions(
+                            onMoveTo = viewModel::moveTo,
+                            onStartAt = viewModel::startAt,
+                            onEndAt = viewModel::endAt,
+                            onFinish = viewModel::finishCorrections,
+                            onDelete = viewModel::deleteWorkout,
+                        ),
                     onDismiss = { dialog = null },
                 ),
         )
+    }
+}
+
+/**
+ * Closes the logger once the database confirms the workout ended, a finished one is gone, or its
+ * corrections are saved. Closing right away would clear the ViewModel and cancel the write before it
+ * lands.
+ */
+@Composable
+private fun CloseWhenDone(
+    uiState: LoggerUiState,
+    corrected: Boolean,
+    correctsHistory: Boolean,
+    onClose: () -> Unit,
+) {
+    var hadWorkout by remember { mutableStateOf(false) }
+    var closed by remember { mutableStateOf(false) }
+    val currentOnClose by rememberUpdatedState(onClose)
+    LaunchedEffect(uiState, corrected) {
+        if (uiState is LoggerUiState.Active) hadWorkout = true
+        val gone = uiState == LoggerUiState.NoWorkout && (hadWorkout || correctsHistory)
+        // Once only: the state can still change while the screen leaves, and a second close would go too far.
+        if ((corrected || gone) && !closed) {
+            closed = true
+            currentOnClose()
+        }
     }
 }
 
@@ -145,6 +180,8 @@ internal class LoggerActions(
     val pad: PadActions,
     val rest: RestActions,
     val onShowDialog: (LoggerDialog) -> Unit,
+    /** Leaves a finished workout being corrected. */
+    val onDone: () -> Unit,
 )
 
 internal class PadActions(
@@ -164,6 +201,7 @@ private fun loggerActions(
     viewModel: LoggerViewModel,
     navigation: LoggerNavigationActions,
     onShowDialog: (LoggerDialog) -> Unit,
+    onDone: () -> Unit,
 ) = LoggerActions(
     navigation = navigation,
     exercise =
@@ -195,6 +233,7 @@ private fun loggerActions(
         ),
     rest = RestActions(onAdjust = viewModel::adjustRest, onSkip = viewModel::skipRest),
     onShowDialog = onShowDialog,
+    onDone = onDone,
 )
 
 @Composable
@@ -206,14 +245,19 @@ private fun LoggerContent(
     Scaffold(
         modifier = modifier,
         topBar = {
+            val finished = state?.isFinished == true
             LioraTopAppBar(
                 title = workoutDisplayName(state?.workout?.name),
                 navigationIcon = {
-                    LioraIconButton(
-                        LioraIcons.ExpandDown,
-                        stringResource(Res.string.cd_minimize),
-                        actions.navigation.onClose,
-                    )
+                    if (finished) {
+                        BackButton(onClick = actions.onDone)
+                    } else {
+                        LioraIconButton(
+                            LioraIcons.ExpandDown,
+                            stringResource(Res.string.cd_minimize),
+                            actions.navigation.onClose,
+                        )
+                    }
                 },
                 actions = {
                     if (state != null) {
@@ -223,10 +267,10 @@ private fun LoggerContent(
                             { actions.onShowDialog(LoggerDialog.Rename) },
                         )
                         Button(
-                            onClick = { actions.onShowDialog(LoggerDialog.Finish) },
-                            modifier = Modifier.padding(end = 8.dp),
+                            onClick = { if (finished) actions.onDone() else actions.onShowDialog(LoggerDialog.Finish) },
+                            modifier = Modifier.padding(end = 8.dp).testTag(LoggerTags.FINISH),
                         ) {
-                            Text(stringResource(Res.string.logger_finish))
+                            Text(stringResource(if (finished) Res.string.edit_done else Res.string.logger_finish))
                         }
                     }
                 },
@@ -243,6 +287,14 @@ private fun LoggerContent(
             return@Scaffold
         }
         Column(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
+            state.endedAt?.let { endedAt ->
+                WorkoutTimeChips(
+                    startedAt = state.workout.startedAt,
+                    endedAt = endedAt,
+                    onShowDialog = actions.onShowDialog,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+            }
             WorkoutStats(state, Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             val layout = currentWindowLayout()
@@ -359,11 +411,14 @@ internal fun WorkoutList(
                     Spacer(Modifier.width(6.dp))
                     Text(stringResource(Res.string.logger_add_exercises))
                 }
-                TextButton(
-                    onClick = { actions.onShowDialog(LoggerDialog.Discard) },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                ) {
-                    Text(stringResource(Res.string.logger_discard))
+                // A finished workout is deleted from history, not discarded.
+                if (!state.isFinished) {
+                    TextButton(
+                        onClick = { actions.onShowDialog(LoggerDialog.Discard) },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                    ) {
+                        Text(stringResource(Res.string.logger_discard))
+                    }
                 }
             }
         }
@@ -393,13 +448,18 @@ private fun WorkoutStats(
     state: LoggerUiState.Active,
     modifier: Modifier = Modifier,
 ) {
-    val elapsed = rememberElapsedTime(state.workout.startedAt)
+    // A finished workout's clock has stopped.
+    val duration = state.endedAt?.let { it - state.workout.startedAt } ?: rememberElapsedTime(state.workout.startedAt)
     val numbers = rememberNumberFormatter()
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Stat(label = stringResource(Res.string.logger_stat_duration), value = elapsed.formatAsClock(), highlight = true)
+        Stat(
+            label = stringResource(Res.string.logger_stat_duration),
+            value = duration.formatAsClock(),
+            highlight = !state.isFinished,
+        )
         Stat(
             label = stringResource(Res.string.logger_stat_volume),
             value = "${numbers.format(state.volumeKg, maxFractionDigits = 0)} ${WeightUnit.Kilogram.symbol}",
@@ -431,10 +491,17 @@ private fun Stat(
 
 private val FocusPaneWidth = 360.dp
 
-/** Test tags for the logger's value cells and number pad. */
+/** Test tags for the logger's value cells, number pad and buttons. */
 object LoggerTags {
     const val CELL = "logger.cell"
     const val PAD = "logger.pad"
     const val TABLETOP = "logger.tabletop"
+
+    /** Finish, or Done on a finished workout. */
+    const val FINISH = "logger.finish"
     const val FINISH_CONFIRM = "logger.finish.confirm"
+    const val DATE = "logger.date"
+
+    /** Confirms leaving a finished workout: drop the sets not logged, or delete it. */
+    const val CORRECTIONS_CONFIRM = "logger.corrections.confirm"
 }

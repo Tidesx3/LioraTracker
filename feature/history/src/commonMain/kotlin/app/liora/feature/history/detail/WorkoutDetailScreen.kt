@@ -56,6 +56,7 @@ import app.liora.core.ui.setNumbers
 import app.liora.core.ui.setSummary
 import app.liora.feature.history.WorkoutTotals
 import app.liora.feature.history.resources.Res
+import app.liora.feature.history.resources.cd_edit
 import app.liora.feature.history.resources.cd_more
 import app.liora.feature.history.resources.cd_records
 import app.liora.feature.history.resources.date_time
@@ -76,6 +77,8 @@ internal class WorkoutDetailNavigation(
     val onOpenExercise: (exerciseId: String) -> Unit,
     val onOpenLogger: () -> Unit,
     val onOpenRoutine: (routineId: String) -> Unit,
+    /** Opens the workout in the logger to correct it. */
+    val onEdit: () -> Unit,
 )
 
 @Composable
@@ -106,6 +109,7 @@ internal fun WorkoutDetailScreen(
         onBack = navigation.onBack,
         onOpenExercise = navigation.onOpenExercise,
         onRepeat = { if (viewModel.repeat()) navigation.onOpenLogger() },
+        onEdit = navigation.onEdit,
         onMenu = viewModel::showDialog,
         modifier = modifier,
     )
@@ -131,6 +135,7 @@ private fun WorkoutDetailContent(
     onBack: () -> Unit,
     onOpenExercise: (String) -> Unit,
     onRepeat: () -> Unit,
+    onEdit: () -> Unit,
     onMenu: (WorkoutDialog) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -142,7 +147,10 @@ private fun WorkoutDetailContent(
                 title = "",
                 // Beside the list there is nothing to go back to; the list is right there.
                 navigationIcon = { if (LocalPaneRole.current != PaneRole.Detail) BackButton(onClick = onBack) },
-                actions = { DetailMenu(onMenu) },
+                actions = {
+                    LioraIconButton(LioraIcons.Edit, stringResource(Res.string.cd_edit), onEdit)
+                    DetailMenu(onMenu)
+                },
             )
         },
         bottomBar = {

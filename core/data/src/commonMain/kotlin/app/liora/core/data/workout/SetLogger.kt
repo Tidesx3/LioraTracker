@@ -34,7 +34,10 @@ sealed interface SetCompletion {
     ) : SetCompletion
 }
 
-/** Logging sets in the workout in progress. The logger and the workout notification share it. */
+/**
+ * Logging sets in a workout. The one in progress has a single logger, shared by the logger screen and
+ * the workout notification; a finished one gets its own while it's corrected (see [WorkoutSession]).
+ */
 interface SetLogger {
     /** Adds a set to the exercise, repeating the last one's values so a working set needs no typing. */
     suspend fun addSet(workoutExerciseId: String)
@@ -48,8 +51,9 @@ interface SetLogger {
     suspend fun removeSet(setId: String)
 
     /**
-     * Ticks a set off. Empty fields take their placeholder (last session, else the routine's target),
-     * and rest starts unless the set is mid-round in a superset.
+     * Ticks a set off. Empty fields take their placeholder (last session, else the routine's target).
+     * In the workout in progress rest starts, unless the set is mid-round in a superset; a finished
+     * workout's set counts as done when the workout ended, and starts no rest.
      */
     suspend fun completeSet(setId: String): SetCompletion
 
@@ -60,6 +64,7 @@ interface SetLogger {
 }
 
 internal class OfflineSetLogger(
+    private val target: WorkoutTarget,
     private val workoutDao: WorkoutDao,
     private val exerciseDao: ExerciseDao,
     private val restTimer: RestTimerRepository,
@@ -70,7 +75,7 @@ internal class OfflineSetLogger(
 ) : SetLogger {
     override suspend fun addSet(workoutExerciseId: String) {
         transactions.inTransaction {
-            val rows = workoutDao.activeRows() ?: return@inTransaction
+            val rows = target.rows(workoutDao) ?: return@inTransaction
             if (rows.exercises.none { it.id == workoutExerciseId }) return@inTransaction
             val last = rows.setsOf(workoutExerciseId).lastOrNull()
             val row =
@@ -96,7 +101,7 @@ internal class OfflineSetLogger(
 
     override suspend fun removeSet(setId: String) {
         transactions.inTransaction {
-            val row = workoutDao.activeRows()?.sets?.firstOrNull { it.id == setId } ?: return@inTransaction
+            val row = target.rows(workoutDao)?.sets?.firstOrNull { it.id == setId } ?: return@inTransaction
             workoutDao.upsertSet(row.copy(sync = stamper.tombstone(row.sync)))
         }
     }
@@ -106,38 +111,50 @@ internal class OfflineSetLogger(
 
     override suspend fun completeCurrentSet(): SetCompletion? =
         transactions.inTransaction {
-            val workout = workoutDao.activeRows()?.toModel() ?: return@inTransaction null
+            val workout = target.rows(workoutDao)?.toModel() ?: return@inTransaction null
             val current = WorkoutOrder.current(workout) ?: return@inTransaction null
             complete(workout.setAt(current).id)
         }
 
     override suspend fun reopenSet(setId: String) = editSet(setId) { it.copy(completedAt = null) }
 
-    /** Runs inside a transaction; null when the set isn't part of the workout in progress. */
+    /** Runs inside a transaction; null when the set isn't part of the target workout. */
     private suspend fun complete(setId: String): SetCompletion? {
-        val rows = workoutDao.activeRows()
+        val rows = target.rows(workoutDao)
         val workout = rows?.toModel()
         val ref = workout?.find(setId)
         if (rows == null || workout == null || ref == null) return null
         val exercise = workout.exercises[ref.exerciseIndex]
-        val previous = workoutDao.lastSessionSets(listOf(exercise.exerciseId)).map { it.set.toLoggedSet() }
+        val previous =
+            workoutDao
+                .lastSessionSets(listOf(exercise.exerciseId), before = rows.earlierThan)
+                .map { it.set.toLoggedSet() }
         val filled =
             SetPlaceholders.fill(workout.setAt(ref), SetPlaceholders.previousFor(exercise.sets, ref.setIndex, previous))
         val missing = SetPlaceholders.missingFields(exerciseDao.trackingTypeOf(exercise.exerciseId), filled)
         if (missing.isNotEmpty()) return SetCompletion.Missing(missing)
 
         val row = rows.sets.first { it.id == setId }
-        val logged = filled.copy(completedAt = Instant.fromEpochMilliseconds(stamper.nowMillis()))
+        // A set added to a finished workout was done during it; its end is the closest time there is.
+        val endedAt = rows.workout.endedAt
+        val logged = filled.copy(completedAt = Instant.fromEpochMilliseconds(endedAt ?: stamper.nowMillis()))
         workoutDao.upsertSet(row.withValues(logged).copy(sync = stamper.touch(row.sync)))
 
         // Mid-round in a superset you go straight to the next exercise; a timer left running would lie.
         val rest =
-            if (WorkoutOrder.restsAfter(workout, ref)) {
+            if (endedAt == null && WorkoutOrder.restsAfter(workout, ref)) {
                 restAfter(logged, exercise, exerciseDao.settingsOf(exercise.exerciseId), restDefaults)
             } else {
                 null
             }
-        if (rest != null) restTimer.start(rest) else restTimer.stop()
+        when {
+            // Correcting history leaves the timer of the workout in progress alone.
+            endedAt != null -> Unit
+
+            rest != null -> restTimer.start(rest)
+
+            else -> restTimer.stop()
+        }
         return SetCompletion.Logged(rest)
     }
 
@@ -146,7 +163,7 @@ internal class OfflineSetLogger(
         change: (LoggedSet) -> LoggedSet,
     ) {
         transactions.inTransaction {
-            val row = workoutDao.activeRows()?.sets?.firstOrNull { it.id == setId } ?: return@inTransaction
+            val row = target.rows(workoutDao)?.sets?.firstOrNull { it.id == setId } ?: return@inTransaction
             val updated = row.withValues(change(row.toLoggedSet()).copy(id = row.id))
             if (updated != row) workoutDao.upsertSet(updated.copy(sync = stamper.touch(row.sync)))
         }

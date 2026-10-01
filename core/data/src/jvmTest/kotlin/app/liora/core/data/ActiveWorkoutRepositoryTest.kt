@@ -40,6 +40,7 @@ class ActiveWorkoutRepositoryTest {
     private val repository =
         OfflineActiveWorkoutRepository(
             workoutDao = database.workoutDao(),
+            exerciseDao = database.exerciseDao(),
             routines = routines,
             restTimer = LocalRestTimerRepository(database.localMetaDao(), clock),
             transactions = TransactionRunner(database),

@@ -4,13 +4,13 @@ import app.liora.core.common.IdGenerator
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.sync.SyncStamper
 import app.liora.core.database.TransactionRunner
-import app.liora.core.database.dao.ExerciseSetRow
+import app.liora.core.database.dao.ExerciseDao
 import app.liora.core.database.dao.WorkoutDao
 import app.liora.core.database.model.WorkoutEntity
 import app.liora.core.database.model.WorkoutExerciseEntity
 import app.liora.core.database.model.WorkoutSetEntity
+import app.liora.core.domain.RestDefaults
 import app.liora.core.domain.RoutineUpdate
-import app.liora.core.domain.Supersets
 import app.liora.core.model.ActiveWorkout
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.Routine
@@ -25,17 +25,11 @@ import kotlinx.coroutines.flow.map
 /**
  * Owns the single in-progress workout. It lives in the database from the first tap, so it survives
  * the app being killed, the phone rebooting or the battery dying mid-session. Editing its exercises
- * and logging sets go through [WorkoutEditor] and [SetLogger].
+ * and logging sets go through its [editor] and [sets].
  */
-interface ActiveWorkoutRepository {
+interface ActiveWorkoutRepository : WorkoutSession {
     /** The workout in progress with its exercises and sets, or null. */
     val activeWorkout: Flow<ActiveWorkout?>
-
-    /** Last session's completed sets for each exercise of the workout in progress, by exercise id. */
-    val previousSets: Flow<Map<String, List<LoggedSet>>>
-
-    /** Every earlier completed set of the exercises in the workout in progress, by exercise id. */
-    val exerciseHistory: Flow<Map<String, List<LoggedSet>>>
 
     /** Starts an empty workout, or returns the one already in progress. */
     suspend fun startEmptyWorkout(): ActiveWorkout
@@ -53,9 +47,6 @@ interface ActiveWorkoutRepository {
      */
     suspend fun repeat(workoutId: String): ActiveWorkout
 
-    /** Names the workout; blank goes back to the default name. */
-    suspend fun rename(name: String)
-
     /**
      * Ends the workout. Planned sets that weren't done, and exercises left without any, are dropped:
      * history keeps what happened. With [updateRoutine], the routine it was started from takes on
@@ -68,12 +59,29 @@ interface ActiveWorkoutRepository {
 
 internal class OfflineActiveWorkoutRepository(
     private val workoutDao: WorkoutDao,
+    exerciseDao: ExerciseDao,
     private val routines: RoutineRepository,
     private val restTimer: RestTimerRepository,
     private val transactions: TransactionRunner,
     private val ids: IdGenerator,
     private val stamper: SyncStamper,
+    restDefaults: RestDefaults = RestDefaults(),
 ) : ActiveWorkoutRepository {
+    override val editor: WorkoutEditor =
+        OfflineWorkoutEditor(WorkoutTarget.Active, workoutDao, exerciseDao, transactions, ids, stamper)
+
+    override val sets: SetLogger =
+        OfflineSetLogger(
+            WorkoutTarget.Active,
+            workoutDao,
+            exerciseDao,
+            restTimer,
+            transactions,
+            ids,
+            stamper,
+            restDefaults,
+        )
+
     @OptIn(ExperimentalCoroutinesApi::class)
     override val activeWorkout: Flow<ActiveWorkout?> =
         workoutDao
@@ -91,33 +99,11 @@ internal class OfflineActiveWorkoutRepository(
                 }
             }.distinctUntilChanged()
 
-    override val previousSets: Flow<Map<String, List<LoggedSet>>> =
-        setsOfActiveExercises(workoutDao::observeLastSessionSets)
+    private val earlier = activeWorkout.map { active -> active?.let { EarlierSessions.ofActive(it.exercises) } }
 
-    override val exerciseHistory: Flow<Map<String, List<LoggedSet>>> =
-        setsOfActiveExercises(workoutDao::observeHistorySets)
+    override val previousSets: Flow<Map<String, List<LoggedSet>>> = earlier.sets(workoutDao::observeLastSessionSets)
 
-    /** Sets from [query] for the exercises of the workout in progress, re-queried as exercises come and go. */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun setsOfActiveExercises(
-        query: (List<String>) -> Flow<List<ExerciseSetRow>>,
-    ): Flow<Map<String, List<LoggedSet>>> =
-        activeWorkout
-            .map { workout ->
-                workout
-                    ?.exercises
-                    ?.map { it.exerciseId }
-                    ?.distinct()
-                    ?.sorted()
-                    .orEmpty()
-            }.distinctUntilChanged()
-            .flatMapLatest { exerciseIds ->
-                if (exerciseIds.isEmpty()) {
-                    flowOf(emptyMap())
-                } else {
-                    query(exerciseIds).map { rows -> rows.groupBy({ it.exerciseId }, { it.set.toLoggedSet() }) }
-                }
-            }.distinctUntilChanged()
+    override val exerciseHistory: Flow<Map<String, List<LoggedSet>>> = earlier.sets(workoutDao::observeHistorySets)
 
     override suspend fun startEmptyWorkout(): ActiveWorkout =
         transactions.inTransaction {
@@ -170,13 +156,7 @@ internal class OfflineActiveWorkoutRepository(
 
     override suspend fun rename(name: String) {
         transactions.inTransaction {
-            val workout = workoutDao.getActive() ?: return@inTransaction
-            val trimmed = name.trim().ifEmpty { null }
-            if (trimmed !=
-                workout.name
-            ) {
-                workoutDao.upsert(workout.copy(name = trimmed, sync = stamper.touch(workout.sync)))
-            }
+            workoutDao.getActive()?.let { workoutDao.rename(it, name, stamper) }
         }
     }
 
@@ -185,29 +165,11 @@ internal class OfflineActiveWorkoutRepository(
         val routine = workout.routineId?.takeIf { updateRoutine }?.let { routines.get(it) }
         transactions.inTransaction {
             val rows = workoutDao.activeRows() ?: return@inTransaction
-            dropWhatWasntDone(rows)
+            workoutDao.dropWhatWasntDone(rows, stamper)
             workoutDao.upsert(rows.workout.copy(endedAt = stamper.nowMillis(), sync = stamper.touch(rows.workout.sync)))
             restTimer.stop()
         }
         routine?.let { routines.save(RoutineUpdate.fromWorkout(it, workout, ids::newId)) }
-    }
-
-    /** Tombstones planned sets that weren't done and exercises left empty, repairing supersets they split. */
-    private suspend fun dropWhatWasntDone(rows: WorkoutRows) {
-        val open = rows.sets.filter { it.completedAt == null }
-        if (open.isNotEmpty()) workoutDao.upsertSets(open.map { it.copy(sync = stamper.tombstone(it.sync)) })
-        val withSets =
-            rows.sets
-                .filter { it.completedAt != null }
-                .map { it.workoutExerciseId }
-                .toSet()
-        val kept = rows.exercises.sortedBy { it.position }.filter { it.id in withSets }
-        val groups = Supersets.normalize(kept.map { it.supersetGroup })
-        workoutDao.saveExercises(
-            rows.exercises,
-            kept.zip(groups) { exercise, group -> exercise.copy(supersetGroup = group) },
-            stamper,
-        )
     }
 
     override suspend fun discard() {

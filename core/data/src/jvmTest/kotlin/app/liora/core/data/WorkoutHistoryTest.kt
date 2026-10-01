@@ -8,7 +8,6 @@ import app.liora.core.data.routine.OfflineRoutineRepository
 import app.liora.core.data.sync.SyncStamper
 import app.liora.core.data.workout.LocalRestTimerRepository
 import app.liora.core.data.workout.OfflineActiveWorkoutRepository
-import app.liora.core.data.workout.OfflineSetLogger
 import app.liora.core.data.workout.OfflineWorkoutHistoryRepository
 import app.liora.core.database.TransactionRunner
 import app.liora.core.database.inMemoryLioraDatabase
@@ -45,10 +44,26 @@ class WorkoutHistoryTest {
     private val routines = OfflineRoutineRepository(database.routineDao(), transactions, ids, stamper)
     private val restTimer = LocalRestTimerRepository(database.localMetaDao(), clock)
     private val workouts =
-        OfflineActiveWorkoutRepository(database.workoutDao(), routines, restTimer, transactions, ids, stamper)
-    private val logger =
-        OfflineSetLogger(database.workoutDao(), database.exerciseDao(), restTimer, transactions, ids, stamper)
-    private val history = OfflineWorkoutHistoryRepository(database.workoutDao(), routines, transactions, ids, stamper)
+        OfflineActiveWorkoutRepository(
+            database.workoutDao(),
+            database.exerciseDao(),
+            routines,
+            restTimer,
+            transactions,
+            ids,
+            stamper,
+        )
+    private val logger = workouts.sets
+    private val history =
+        OfflineWorkoutHistoryRepository(
+            database.workoutDao(),
+            database.exerciseDao(),
+            routines,
+            restTimer,
+            transactions,
+            ids,
+            stamper,
+        )
 
     @AfterTest
     fun tearDown() = database.close()

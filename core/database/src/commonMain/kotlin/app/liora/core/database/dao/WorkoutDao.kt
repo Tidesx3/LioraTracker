@@ -24,8 +24,8 @@ private const val SETS_OF_WORKOUT =
     """
 
 /**
- * The completed sets of each exercise's most recent finished session: the "previous" column and the
- * values a set logs when ticked without typing.
+ * The completed sets of each exercise's most recent finished session that started before `:before`:
+ * the "previous" column and the values a set logs when ticked without typing.
  */
 private const val LAST_SESSION_SETS =
     """
@@ -41,13 +41,16 @@ private const val LAST_SESSION_SETS =
         JOIN workout_set s2 ON s2.workout_exercise_id = we2.id
         WHERE we2.exercise_id = we.exercise_id
           AND s2.completed_at IS NOT NULL AND s2.deleted_at IS NULL AND we2.deleted_at IS NULL
-          AND w2.ended_at IS NOT NULL AND w2.deleted_at IS NULL
+          AND w2.ended_at IS NOT NULL AND w2.deleted_at IS NULL AND w2.started_at < :before
         ORDER BY w2.started_at DESC LIMIT 1
       )
     ORDER BY we.position, s.position
     """
 
-/** Every completed set of these exercises in finished workouts: the history personal records come from. */
+/**
+ * Every completed set of these exercises in finished workouts that started before `:before`: the
+ * history personal records are measured against.
+ */
 private const val HISTORY_SETS =
     """
     SELECT we.exercise_id AS exercise_id, s.* FROM workout_set s
@@ -55,7 +58,7 @@ private const val HISTORY_SETS =
     JOIN workout w ON w.id = we.workout_id
     WHERE we.exercise_id IN (:exerciseIds)
       AND s.completed_at IS NOT NULL AND s.deleted_at IS NULL AND we.deleted_at IS NULL
-      AND w.ended_at IS NOT NULL AND w.deleted_at IS NULL
+      AND w.ended_at IS NOT NULL AND w.deleted_at IS NULL AND w.started_at < :before
     """
 
 /** History: every finished workout, newest first. */
@@ -93,6 +96,9 @@ interface WorkoutDao {
     @Query("SELECT * FROM workout WHERE id = :id")
     suspend fun get(id: String): WorkoutEntity?
 
+    @Query("SELECT * FROM workout WHERE id = :id")
+    fun observe(id: String): Flow<WorkoutEntity?>
+
     @Query(EXERCISES_OF_WORKOUT)
     fun observeExercises(workoutId: String): Flow<List<WorkoutExerciseEntity>>
 
@@ -106,13 +112,22 @@ interface WorkoutDao {
     suspend fun setsOf(workoutId: String): List<WorkoutSetEntity>
 
     @Query(LAST_SESSION_SETS)
-    fun observeLastSessionSets(exerciseIds: List<String>): Flow<List<ExerciseSetRow>>
+    fun observeLastSessionSets(
+        exerciseIds: List<String>,
+        before: Long,
+    ): Flow<List<ExerciseSetRow>>
 
     @Query(LAST_SESSION_SETS)
-    suspend fun lastSessionSets(exerciseIds: List<String>): List<ExerciseSetRow>
+    suspend fun lastSessionSets(
+        exerciseIds: List<String>,
+        before: Long,
+    ): List<ExerciseSetRow>
 
     @Query(HISTORY_SETS)
-    fun observeHistorySets(exerciseIds: List<String>): Flow<List<ExerciseSetRow>>
+    fun observeHistorySets(
+        exerciseIds: List<String>,
+        before: Long,
+    ): Flow<List<ExerciseSetRow>>
 
     @Query(FINISHED_WORKOUTS)
     fun observeFinished(): Flow<List<WorkoutEntity>>

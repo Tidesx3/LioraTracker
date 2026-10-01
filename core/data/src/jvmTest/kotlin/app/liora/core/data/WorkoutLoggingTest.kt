@@ -7,8 +7,6 @@ import app.liora.core.data.routine.OfflineRoutineRepository
 import app.liora.core.data.sync.SyncStamper
 import app.liora.core.data.workout.LocalRestTimerRepository
 import app.liora.core.data.workout.OfflineActiveWorkoutRepository
-import app.liora.core.data.workout.OfflineSetLogger
-import app.liora.core.data.workout.OfflineWorkoutEditor
 import app.liora.core.data.workout.SetCompletion
 import app.liora.core.database.TransactionRunner
 import app.liora.core.database.inMemoryLioraDatabase
@@ -49,15 +47,15 @@ class WorkoutLoggingTest {
     private val workouts =
         OfflineActiveWorkoutRepository(
             workoutDao = database.workoutDao(),
+            exerciseDao = database.exerciseDao(),
             routines = routines,
             restTimer = restTimer,
             transactions = transactions,
             ids = ids,
             stamper = stamper,
         )
-    private val editor = OfflineWorkoutEditor(database.workoutDao(), database.exerciseDao(), transactions, ids, stamper)
-    private val logger =
-        OfflineSetLogger(database.workoutDao(), database.exerciseDao(), restTimer, transactions, ids, stamper)
+    private val editor = workouts.editor
+    private val logger = workouts.sets
 
     @AfterTest
     fun tearDown() = database.close()

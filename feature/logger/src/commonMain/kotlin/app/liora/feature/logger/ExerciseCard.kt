@@ -111,21 +111,24 @@ internal fun ExerciseCard(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable(enabled = exercise != null, onClick = openExercise),
                 )
-                Text(
-                    text =
-                        restLabel(
-                            effectiveRestSeconds(workoutExercise, exercise?.settings ?: ExerciseSettings(), state),
-                        ),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.clickable { choosingRest = true }.padding(vertical = 4.dp),
-                )
+                // Rest only matters while training; a finished workout has had its rests.
+                if (!state.isFinished) {
+                    Text(
+                        text =
+                            restLabel(
+                                effectiveRestSeconds(workoutExercise, exercise?.settings ?: ExerciseSettings(), state),
+                            ),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.clickable { choosingRest = true }.padding(vertical = 4.dp),
+                    )
+                }
             }
             ExerciseMenu(
                 workoutExercise = workoutExercise,
                 isLast = index == state.workout.exercises.lastIndex,
                 hasNote = workoutExercise.notes != null || noteOpen,
-                onChooseRest = { choosingRest = true },
+                onChooseRest = { choosingRest = true }.takeUnless { state.isFinished },
                 onAddNote = { noteOpen = true },
                 actions = actions,
             )
@@ -219,7 +222,8 @@ private fun ExerciseMenu(
     workoutExercise: WorkoutExercise,
     isLast: Boolean,
     hasNote: Boolean,
-    onChooseRest: () -> Unit,
+    /** Null where rest doesn't apply. */
+    onChooseRest: (() -> Unit)?,
     onAddNote: () -> Unit,
     actions: ExerciseActions,
 ) {
@@ -235,7 +239,7 @@ private fun ExerciseMenu(
             ) {
                 add(Res.string.menu_superset_remove to { actions.onSupersetChange(id, false) })
             }
-            add(Res.string.menu_rest to onChooseRest)
+            onChooseRest?.let { add(Res.string.menu_rest to it) }
             if (!hasNote) add(Res.string.menu_add_note to onAddNote)
             add(Res.string.menu_remove to { actions.onRemove(id) })
         }

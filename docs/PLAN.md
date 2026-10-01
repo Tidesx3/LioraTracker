@@ -5,14 +5,17 @@ Check it when a milestone or phase starts, and keep **Progress** below current w
 
 ## Progress
 
-As of 2026-09-30:
+As of 2026-10-01:
 
 - **Phase 0** is done.
 - **Phase 1**, milestones 1–5 are done: database and seed, domain, exercises and foldables, routines, and the logger
   with the live workout notification.
-- **Milestone 6 (history):**
-  - **6a is done** (`b763772`): list and calendar, workout detail, repeat a workout, save it as a routine, delete.
-  - **Next: 6b, edit past workouts.** Then milestones 7 (progress), 8 (body) and 9 (settings, import and export).
+- **Milestone 6 (history)** is done:
+  - **6a** (`b763772`): list and calendar, workout detail, repeat a workout, save it as a routine, delete.
+  - **6b:** edit past workouts. A finished workout opens in the logger (`EditWorkoutRoute`): sets, exercises,
+    supersets, notes and name, plus its date, start and end. Changes save as they're made, like live logging; Done
+    drops sets that aren't logged, after asking. "Last time" and records look at the sessions before it.
+- **Next: Milestone 7 (progress).** Then 8 (body) and 9 (settings, import and export).
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a
   milestone go in TODO.md.

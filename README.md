@@ -7,9 +7,9 @@ GUI, and AI features on top.
 **Status:** Phase 1 (the offline MVP) is in progress. The database, domain logic, exercise library with
 custom exercises, German, the foldable layouts, routines with folders and supersets, and the logger
 (number pad, rest timer, live workout notification, personal records, tabletop mode) are done. History
-has its list, calendar and workout detail (repeat, save as routine, delete); editing past workouts is
-next, then progress charts, body metrics, and settings with import and export. Details and progress are
-in [docs/PLAN.md](docs/PLAN.md).
+is done too: list, calendar, workout detail (repeat, save as routine, delete) and editing past workouts
+in the logger, times included. Next are progress charts, body metrics, and settings with import and
+export. Details and progress are in [docs/PLAN.md](docs/PLAN.md).
 
 ## Principles
 

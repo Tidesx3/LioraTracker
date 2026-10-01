@@ -48,6 +48,7 @@ import app.liora.core.designsystem.component.ActiveWorkoutRailButton
 import app.liora.core.designsystem.layout.currentWindowLayout
 import app.liora.core.designsystem.util.workoutDisplayName
 import app.liora.core.model.ActiveWorkout
+import app.liora.core.navigation.EditWorkoutRoute
 import app.liora.core.navigation.ListDetailSceneStrategy
 import app.liora.core.navigation.LoggerRoute
 import app.liora.core.navigation.Navigator
@@ -90,7 +91,9 @@ fun LioraApp(
     }
     AskForNotificationsDuringWorkouts(workoutRunning = activeWorkout != null)
     val layout = currentWindowLayout()
-    val showRail = layout.navigationRail && navigator.currentRoute != LoggerRoute
+    // The logger takes the whole window, on the workout in progress or on a finished one being corrected.
+    val inLogger = navigator.currentRoute == LoggerRoute || navigator.currentRoute is EditWorkoutRoute
+    val showRail = layout.navigationRail && !inLogger
     val showBottomChrome = !layout.navigationRail && navigator.currentRoute in TopLevelDestination.routes
     val listDetail = remember(layout.twoPane) { ListDetailSceneStrategy<NavKey>(layout.twoPane) }
 

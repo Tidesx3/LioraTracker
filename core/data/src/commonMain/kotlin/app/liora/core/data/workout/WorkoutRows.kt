@@ -1,6 +1,5 @@
 package app.liora.core.data.workout
 
-import app.liora.core.data.sync.SyncStamper
 import app.liora.core.database.dao.ExerciseDao
 import app.liora.core.database.dao.WorkoutDao
 import app.liora.core.database.model.SyncMetadata
@@ -35,27 +34,10 @@ internal suspend fun WorkoutDao.activeRows(): WorkoutRows? {
     return WorkoutRows(workout, exercisesOf(workout.id), setsOf(workout.id))
 }
 
-/**
- * Writes the rows of [updated] that differ from [stored] with a touched sync stamp, and tombstones
- * stored rows that are gone, so only real changes sync.
- */
-internal suspend fun WorkoutDao.saveExercises(
-    stored: List<WorkoutExerciseEntity>,
-    updated: List<WorkoutExerciseEntity>,
-    stamper: SyncStamper,
-) {
-    val storedById = stored.associateBy { it.id }
-    val keptIds = updated.map { it.id }.toSet()
-    val writes =
-        updated.mapNotNull { row ->
-            val previous = storedById[row.id]
-            when {
-                previous == null -> row
-                row == previous -> null
-                else -> row.copy(sync = stamper.touch(previous.sync))
-            }
-        } + stored.filter { it.id !in keptIds }.map { it.copy(sync = stamper.tombstone(it.sync)) }
-    if (writes.isNotEmpty()) upsertExercises(writes)
+/** The finished workout [id], or null if there is none (in progress, deleted or never existed). */
+internal suspend fun WorkoutDao.finishedRows(id: String): WorkoutRows? {
+    val workout = get(id)?.takeIf { it.endedAt != null && it.sync.deletedAt == null } ?: return null
+    return WorkoutRows(workout, exercisesOf(id), setsOf(id))
 }
 
 /** A set with nothing typed or logged yet. */

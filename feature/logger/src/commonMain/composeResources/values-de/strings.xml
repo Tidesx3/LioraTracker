@@ -56,6 +56,7 @@
   <string name="focus_log">Satz abhaken</string>
   <string name="focus_all_done">Alle Sätze erledigt</string>
   <string name="focus_all_done_body">Füge eine Übung oder einen Satz hinzu, oder beende das Training.</string>
+  <string name="focus_all_done_finished_body">Füge eine Übung oder einen Satz hinzu, oder tippe auf Fertig.</string>
 
   <string name="finish_title">Training beenden?</string>
   <string name="finish_empty_title">Noch nichts geloggt</string>
@@ -70,4 +71,21 @@
   </plurals>
   <string name="finish_update_routine">„%1$s“ mit den heutigen Gewichten und Wiederholungen aktualisieren</string>
   <string name="cd_personal_record">Persönlicher Rekord</string>
+
+  <string name="edit_done">Fertig</string>
+  <string name="edit_start">Beginn %1$s</string>
+  <string name="edit_end">Ende %1$s</string>
+  <string name="edit_start_title">Begonnen um</string>
+  <string name="edit_end_title">Beendet um</string>
+  <string name="dialog_ok">OK</string>
+  <string name="edit_open_title">Nicht geloggte Sätze entfernen?</string>
+  <plurals name="edit_open_sets">
+    <item quantity="one">%1$d Satz ist nicht geloggt und wird aus dem Training entfernt.</item>
+    <item quantity="other">%1$d Sätze sind nicht geloggt und werden aus dem Training entfernt.</item>
+  </plurals>
+  <string name="edit_open_confirm">Entfernen</string>
+  <string name="edit_keep_editing">Weiter bearbeiten</string>
+  <string name="edit_empty_title">Keine Sätze geloggt</string>
+  <string name="edit_empty_body">In diesem Training ist nichts mehr geloggt. Aus deinem Verlauf löschen?</string>
+  <string name="edit_delete">Training löschen</string>
 </resources>

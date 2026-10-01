@@ -67,6 +67,12 @@ data class WorkoutDetailRoute(
     val workoutId: String,
 ) : NavKey
 
+/** A finished workout opened in the logger to correct it: its sets, exercises and times. */
+@Serializable
+data class EditWorkoutRoute(
+    val workoutId: String,
+) : NavKey
+
 /** Create (no id, optionally inside [folderId]) or edit a routine. */
 @Serializable
 data class RoutineEditorRoute(

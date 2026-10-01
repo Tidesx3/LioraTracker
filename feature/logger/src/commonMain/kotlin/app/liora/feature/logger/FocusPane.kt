@@ -32,6 +32,7 @@ import app.liora.core.ui.setSummary
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.focus_all_done
 import app.liora.feature.logger.resources.focus_all_done_body
+import app.liora.feature.logger.resources.focus_all_done_finished_body
 import app.liora.feature.logger.resources.focus_log
 import app.liora.feature.logger.resources.focus_previous
 import app.liora.feature.logger.resources.focus_set
@@ -91,7 +92,9 @@ internal fun UpNext(
         if (ref == null) {
             Text(stringResource(Res.string.focus_all_done), style = MaterialTheme.typography.titleLarge)
             Text(
-                stringResource(Res.string.focus_all_done_body),
+                stringResource(
+                    if (state.isFinished) Res.string.focus_all_done_finished_body else Res.string.focus_all_done_body,
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

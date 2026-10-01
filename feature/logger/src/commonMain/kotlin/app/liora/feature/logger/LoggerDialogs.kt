@@ -47,13 +47,26 @@ import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
-internal enum class LoggerDialog { Rename, Discard, Reorder, Finish }
+internal enum class LoggerDialog {
+    Rename,
+    Discard,
+    Reorder,
+    Finish,
+
+    // A finished workout being corrected.
+    Date,
+    Start,
+    End,
+    DropOpenSets,
+    DeleteEmpty,
+}
 
 internal class LoggerDialogActions(
     val onRename: (String) -> Unit,
     val onDiscard: () -> Unit,
     val onReorder: (workoutExerciseIds: List<String>) -> Unit,
     val onFinish: (updateRoutine: Boolean) -> Unit,
+    val corrections: CorrectionActions,
     val onDismiss: () -> Unit,
 )
 
@@ -111,6 +124,15 @@ internal fun LoggerDialogHost(
                 },
                 onDismiss = onDismiss,
             )
+        }
+
+        LoggerDialog.Date,
+        LoggerDialog.Start,
+        LoggerDialog.End,
+        LoggerDialog.DropOpenSets,
+        LoggerDialog.DeleteEmpty,
+        -> {
+            CorrectionDialogHost(dialog, state, actions.corrections, onDismiss)
         }
 
         null -> {
