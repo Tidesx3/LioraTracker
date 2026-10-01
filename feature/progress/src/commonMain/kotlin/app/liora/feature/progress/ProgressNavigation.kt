@@ -11,8 +11,11 @@ import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.navigation.BodyRoute
 import app.liora.core.navigation.ExerciseDetailRoute
 import app.liora.core.navigation.ListDetail
+import app.liora.core.navigation.MonthlyReportRoute
 import app.liora.core.navigation.Navigator
 import app.liora.core.navigation.ProgressRoute
+import app.liora.feature.progress.report.MonthlyReportScreen
+import app.liora.feature.progress.report.MonthlyReportViewModel
 import app.liora.feature.progress.resources.Res
 import app.liora.feature.progress.resources.progress_pick_body
 import app.liora.feature.progress.resources.progress_pick_title
@@ -41,6 +44,7 @@ fun EntryProviderScope<NavKey>.progressEntries(navigator: Navigator) {
                 ProgressNavigation(
                     onOpenExercise = { navigator.openFromList(ProgressRoute, ExerciseDetailRoute(it)) },
                     onOpenBody = { navigator.navigate(BodyRoute) },
+                    onOpenReport = { navigator.openFromList(ProgressRoute, MonthlyReportRoute) },
                 ),
             // Shown beside the overview on wide screens; this highlights the exercise open there.
             selectedExerciseId =
@@ -50,9 +54,13 @@ fun EntryProviderScope<NavKey>.progressEntries(navigator: Navigator) {
                     ?.exerciseId,
         )
     }
+    entry<MonthlyReportRoute>(metadata = ListDetail.detailPane()) {
+        MonthlyReportScreen(viewModel = koinViewModel(), onBack = navigator::goBack)
+    }
 }
 
 val progressModule =
     module {
         viewModelOf(::ProgressViewModel)
+        viewModelOf(::MonthlyReportViewModel)
     }

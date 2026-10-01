@@ -43,4 +43,19 @@
 
   <string name="progress_pick_title">Wähle eine Übung</string>
   <string name="progress_pick_body">Hier erscheinen ihr Verlauf, ihre Rekorde und Einheiten.</string>
+
+  <string name="report_title">Monatsbericht</string>
+  <string name="cd_previous_month">Voriger Monat</string>
+  <string name="cd_next_month">Nächster Monat</string>
+  <string name="report_none">Keine Trainings in diesem Monat.</string>
+  <string name="report_workouts">Trainings</string>
+  <string name="report_days">Trainingstage</string>
+  <string name="report_time">Zeit</string>
+  <string name="report_volume">Volumen</string>
+  <string name="report_sets">Sätze</string>
+  <string name="report_last_month">Vormonat: %1$s</string>
+  <string name="report_records">Persönliche Rekorde</string>
+  <string name="report_top">Am meisten trainiert</string>
+  <string name="report_muscles">Muskeln</string>
+  <string name="report_muscle_legend">Farben nach der durchschnittlichen Woche, Sätze über den ganzen Monat.</string>
 </resources>

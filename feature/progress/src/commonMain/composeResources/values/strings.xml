@@ -49,4 +49,21 @@
 
   <string name="progress_pick_title">Pick an exercise</string>
   <string name="progress_pick_body">Its chart, records and sessions show up here.</string>
+
+  <string name="report_title">Monthly report</string>
+  <string name="cd_previous_month">Previous month</string>
+  <string name="cd_next_month">Next month</string>
+  <string name="report_none">No workouts this month.</string>
+  <string name="report_workouts">Workouts</string>
+  <string name="report_days">Training days</string>
+  <string name="report_time">Time</string>
+  <string name="report_volume">Volume</string>
+  <string name="report_sets">Sets</string>
+  <string name="report_last_month">Last month: %1$s</string>
+  <string name="report_records">Personal records</string>
+  <string name="report_record_line" translatable="false">%1$s: %2$s</string>
+  <string name="report_top">Most trained</string>
+  <string name="report_exercise_line" translatable="false">%1$s · %2$s</string>
+  <string name="report_muscles">Muscles</string>
+  <string name="report_muscle_legend">Shaded by the average week; sets over the whole month.</string>
 </resources>

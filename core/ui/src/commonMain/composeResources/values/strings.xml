@@ -93,4 +93,7 @@
 
   <string name="body_front">Front</string>
   <string name="body_back">Back</string>
+
+  <string name="duration_minutes">%1$s min</string>
+  <string name="duration_hours">%1$s h %2$s min</string>
 </resources>

@@ -19,6 +19,7 @@ import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.database.dao.WorkoutDao
 import app.liora.core.model.Mass
 import app.liora.feature.progress.ProgressTags
+import app.liora.feature.progress.report.ReportTags
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -124,6 +125,49 @@ class ProgressFlowTest {
     }
 
     @Test
+    @Config(qualifiers = COVER)
+    fun monthlyReport() {
+        openProgress()
+        waitForText("Monthly report")
+        composeRule.onNodeWithText("Monthly report").performClick()
+        waitForText("August 2026")
+        // Four workouts so far in August, eight in July.
+        waitForText("Last month: 8")
+        composeRule.onNode(hasTestTag(ReportTags.CALENDAR)).assertIsDisplayed()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/monthly_report_dark.png")
+        // Flyes and pull-ups set records; the stalled bench didn't.
+        scrollTo("Dumbbell Flyes: ", substring = true)
+        composeRule.onAllNodesWithText("Barbell Bench Press: ", substring = true).assertCountEquals(0)
+
+        // July is the first month with training: nothing before it.
+        composeRule.onNodeWithContentDescription("Previous month").performClick()
+        waitForText("July 2026")
+        composeRule.onAllNodesWithContentDescription("Previous month").assertCountEquals(0)
+    }
+
+    @Test
+    @Config(qualifiers = INNER)
+    fun innerScreen_theReportOpensBesideTheOverview() {
+        openProgress()
+        waitForText("Monthly report")
+        composeRule.onNodeWithText("Monthly report").performClick()
+        waitForText("August 2026")
+        waitForText("Last month: 8")
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/fold_inner_monthly_report_dark.png")
+    }
+
+    @Test
+    @Config(qualifiers = "de-$COVER")
+    fun germanMonthlyReport() {
+        openProgress("Fortschritt")
+        waitForText("Monatsbericht")
+        composeRule.onNodeWithText("Monatsbericht").performClick()
+        waitForText("August 2026")
+        waitForText("Vormonat: 8")
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/de_monthly_report_dark.png")
+    }
+
+    @Test
     @Config(qualifiers = "de-$COVER")
     fun germanWeeksStartOnMonday() {
         openProgress("Fortschritt")
@@ -141,8 +185,11 @@ class ProgressFlowTest {
     }
 
     /** Scrolls the overview until [text] shows; it may not be composed before. */
-    private fun scrollTo(text: String) {
-        composeRule.onNode(hasScrollToIndexAction()).performScrollToNode(hasText(text))
+    private fun scrollTo(
+        text: String,
+        substring: Boolean = false,
+    ) {
+        composeRule.onNode(hasScrollToIndexAction()).performScrollToNode(hasText(text, substring = substring))
     }
 
     private class Logged(

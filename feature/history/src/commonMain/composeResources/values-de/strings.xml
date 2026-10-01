@@ -25,8 +25,6 @@
   <string name="stat_volume">Volumen</string>
   <string name="stat_sets">Sätze</string>
   <string name="stat_records">Rekorde</string>
-  <string name="duration_minutes">%1$s Min.</string>
-  <string name="duration_hours">%1$s Std. %2$s Min.</string>
   <plurals name="more_exercises">
     <item quantity="one">+ %1$d weitere Übung</item>
     <item quantity="other">+ %1$d weitere Übungen</item>

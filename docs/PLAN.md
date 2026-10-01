@@ -15,18 +15,20 @@ As of 2026-10-01:
   - **6b** (`5e5ea43`): edit past workouts. A finished workout opens in the logger (`EditWorkoutRoute`): sets,
     exercises, supersets, notes and name, plus its date, start and end. Changes save as they're made, like live
     logging; Done drops sets that aren't logged, after asking. "Last time" and records look at the sessions before it.
-- **Milestone 7 (progress)**, split in three:
+- **Milestone 7 (progress)** is done, in three parts:
   - **7a is done** (`ceb2249`): per-exercise progress on the exercise page. A chart per metric
     (`ExerciseProgress.metricsFor`: e1RM, heaviest weight, volume and total reps for weight × reps; the fitting
     measures for other tracking types), best and latest values, the exercise's records and rep maxes, its past
     sessions (each opens its workout), and stall detection (`Stalls`, 3 weeks) with a badge. Charts use Vico behind
     `LineChart` in `designsystem`.
-  - **7b is done:** the Progress tab. The weekly streak (`TrainingCalendar.weekStreak`) and this week's workouts
-    and sets, a 16-week consistency grid, sets per muscle week by week with a body heatmap (`BodyHeatmap` in
-    `core:ui`, a figure drawn in code), and the bests board (`RecordsBoard`: each exercise's standing best in its
-    main metric, stalls flagged). On the inner screen an exercise opens beside the overview.
-  - **Next: 7c**, the monthly report.
-  - Then milestones 8 (body) and 9 (settings, import and export).
+  - **7b** (`6d7e7a9`): the Progress tab. The weekly streak (`TrainingCalendar.weekStreak`) and this week's
+    workouts and sets, a 16-week consistency grid, sets per muscle week by week with a body heatmap
+    (`BodyHeatmap` in `core:ui`, a figure drawn in code), and the bests board (`RecordsBoard`: each exercise's
+    standing best in its main metric, stalls flagged). On the inner screen an exercise opens beside the overview.
+  - **7c:** the monthly report (`MonthlyReports`, `MonthlyReportRoute`), from a card on the Progress tab: workouts,
+    training days, time, volume and sets against the month before, a calendar of training days, the records set,
+    the most trained exercises, and muscles shaded by the average week. Months page back to the first with training.
+- **Next: Milestone 8 (body).** Then 9 (settings, import and export).
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a
   milestone go in TODO.md.

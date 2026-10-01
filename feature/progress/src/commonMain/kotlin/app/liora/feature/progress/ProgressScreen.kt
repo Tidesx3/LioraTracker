@@ -44,6 +44,9 @@ import app.liora.feature.progress.resources.progress_streak_weeks
 import app.liora.feature.progress.resources.progress_this_week
 import app.liora.feature.progress.resources.progress_title
 import app.liora.feature.progress.resources.progress_workouts
+import app.liora.feature.progress.resources.report_title
+import kotlinx.datetime.yearMonth
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -52,6 +55,7 @@ import org.jetbrains.compose.resources.stringResource
 internal class ProgressNavigation(
     val onOpenExercise: (exerciseId: String) -> Unit,
     val onOpenBody: () -> Unit,
+    val onOpenReport: () -> Unit,
 )
 
 @Composable
@@ -109,6 +113,15 @@ private fun ProgressContent(
 
                 is ProgressUiState.Loaded -> {
                     item(key = "summary") { Summary(state, Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) }
+                    item(key = "report") {
+                        LinkCard(
+                            icon = LioraIcons.Calendar,
+                            title = stringResource(Res.string.report_title),
+                            subtitle = rememberDateFormatter().month(state.today.yearMonth),
+                            onClick = navigation.onOpenReport,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        )
+                    }
                     item(key = "consistency") {
                         SectionHeader(stringResource(Res.string.progress_consistency))
                         ConsistencyGrid(state.trainingDays, state.today, Modifier.padding(horizontal = 20.dp))
@@ -129,7 +142,13 @@ private fun ProgressContent(
             // open scrolled to the bottom.
             if (state != ProgressUiState.Loading) {
                 item(key = "body") {
-                    BodyCard(navigation.onOpenBody, Modifier.padding(horizontal = 16.dp, vertical = 16.dp))
+                    LinkCard(
+                        icon = LioraIcons.Body,
+                        title = stringResource(Res.string.progress_body_title),
+                        subtitle = stringResource(Res.string.progress_body_subtitle),
+                        onClick = navigation.onOpenBody,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+                    )
                 }
             }
         }
@@ -175,8 +194,12 @@ private fun SummaryStat(
     }
 }
 
+/** A card leading to another page: the monthly report, the body. */
 @Composable
-private fun BodyCard(
+private fun LinkCard(
+    icon: DrawableResource,
+    title: String,
+    subtitle: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -186,11 +209,11 @@ private fun BodyCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
         ListItem(
-            headlineContent = { Text(stringResource(Res.string.progress_body_title)) },
-            supportingContent = { Text(stringResource(Res.string.progress_body_subtitle)) },
+            headlineContent = { Text(title) },
+            supportingContent = { Text(subtitle) },
             leadingContent = {
                 Icon(
-                    painter = painterResource(LioraIcons.Body),
+                    painter = painterResource(icon),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                 )

@@ -17,10 +17,9 @@ import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.model.WeightUnit
+import app.liora.core.ui.durationLabel
 import app.liora.feature.history.resources.Res
 import app.liora.feature.history.resources.cd_records
-import app.liora.feature.history.resources.duration_hours
-import app.liora.feature.history.resources.duration_minutes
 import app.liora.feature.history.resources.stat_duration
 import app.liora.feature.history.resources.stat_records
 import app.liora.feature.history.resources.stat_sets
@@ -28,24 +27,6 @@ import app.liora.feature.history.resources.stat_volume
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration
-
-/** "58 min", "1 h 12 min": how long a workout took, to the minute. */
-@Composable
-internal fun durationLabel(duration: Duration): String {
-    val numbers = rememberNumberFormatter()
-    // A workout that took seconds still reads as a minute rather than zero.
-    val minutes = duration.inWholeMinutes.coerceAtLeast(1)
-    val hours = minutes / MINUTES_PER_HOUR
-    return if (hours == 0L) {
-        stringResource(Res.string.duration_minutes, numbers.format(minutes.toInt()))
-    } else {
-        stringResource(
-            Res.string.duration_hours,
-            numbers.format(hours.toInt()),
-            numbers.format((minutes % MINUTES_PER_HOUR).toInt()),
-        )
-    }
-}
 
 /** Duration, volume, sets and (when there are any) records, side by side. */
 @Composable
@@ -105,5 +86,3 @@ internal fun RecordsBadge(
         )
     }
 }
-
-private const val MINUTES_PER_HOUR = 60L

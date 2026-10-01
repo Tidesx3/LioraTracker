@@ -26,6 +26,10 @@ data object LoggerRoute : NavKey
 @Serializable
 data object BodyRoute : NavKey
 
+/** A month looked back on, starting with the current one. */
+@Serializable
+data object MonthlyReportRoute : NavKey
+
 @Serializable
 data object SettingsRoute : NavKey
 

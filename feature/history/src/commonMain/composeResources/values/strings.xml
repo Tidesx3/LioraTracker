@@ -25,8 +25,6 @@
   <string name="stat_volume">Volume</string>
   <string name="stat_sets">Sets</string>
   <string name="stat_records">Records</string>
-  <string name="duration_minutes">%1$s min</string>
-  <string name="duration_hours">%1$s h %2$s min</string>
   <string name="exercise_sets" translatable="false">%1$s × %2$s</string>
   <plurals name="more_exercises">
     <item quantity="one">+ %1$d more exercise</item>
