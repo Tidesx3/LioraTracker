@@ -55,9 +55,9 @@ As of 2026-10-02:
     The set logger reads rest defaults when a set is ticked off; the formula and stall window reach the
     logger's live records, exercise detail, history, workout detail, the Progress tab and the monthly report;
     `MainActivity` applies the theme from the first frame and styles the system bars to match.
-  - **9b (done): units and the RPE column.** `Units` in `core/model` (weight in kg or lb; distance in km and m,
-    or miles and yards; body measurements in cm or in) and the `rpe` switch join `Settings` as preference rows
-    (no schema change). Values stay stored in kilograms and metres. `MainActivity` provides `LocalUnits`
+  - **9b (done, `3519beb`): units and the RPE column.** `Units` in `core/model` (weight in kg or lb; distance in
+    km and m, or miles and yards; body measurements in cm or in) and the `rpe` switch join `Settings` as
+    preference rows (no schema change). Values stay stored in kilograms and metres. `MainActivity` provides `LocalUnits`
     (`core:ui` `UnitLabels.kt`), and every label converts for display: set summaries, progress values and
     records, body measurements, volume in history, the logger, the finish sheet and the monthly report, the
     routine editor and the workout notification. Charts plot converted values, so axis steps stay round. The
@@ -65,25 +65,26 @@ As of 2026-10-02:
     10 m or yd). The RPE column (`SetField.Rpe`, after reps, only for exercises counted in reps) takes 1–10 in
     half points, is never needed to tick a set off and never pre-filled; a recorded RPE also shows in workout
     detail ("· RPE 8"), even with the column switched off.
-  - **9c, gym profiles (in progress).** Done so far: `GymProfile` in `core/model` (name, the unit its equipment
-    is labelled in, barbell and EZ bar, plate pairs, dumbbell runs, stack step; weights stored in kg) and
-    `GymProfiles.standard(unit)` in `core/domain`. `LoadRounding` rounds down to what the gym can load by
-    equipment, steps to the next loadable weight, and gives the plates per side; `WarmupGenerator` rounds
-    through it (no bar step for dumbbells and machines). The synced `gym_profile` table (schema v3,
-    `AutoMigration` 2→3 with a migration test) and `GymProfileRepository` in `core/data/gym`: the gym in use
-    is per device in `local_meta`, else the first gym, else standard equipment in the display unit; a new gym
-    becomes the one in use. `SetLogger.addWarmups` puts warm-ups before an exercise's sets. Still to do:
-    - Settings: a Gyms row (the gym in use, or "Standard equipment") opening a list of gyms (pick the one in
-      use, add, open) and an editor (name, unit, barbell, EZ bar, plates with pairs, dumbbell runs, stack
-      step; delete). Routes in `core/navigation`, English and German strings.
-    - Logger: `LoggerUiState` carries the gym in use and how many gyms there are. Above the pad, for barbell
-      and EZ bar weights, the plates per side (`LoadRounding.plates`), and a gym switch with two or more
-      gyms. ± on a weight steps through `LoadRounding.step` by the exercise's equipment (`CellInput.stepped`).
-      The exercise menu offers "Add warm-up sets" for weight × reps exercises without warm-ups yet, ramping
-      to the first working set's weight or placeholder (`WarmupGenerator`, then `SetLogger.addWarmups`).
-    - UI tests and screenshots (gyms list and editor at cover and inner sizes, German; the logger's plates
-      and warm-ups), then PLAN, README and CLAUDE.md.
-  - **9d:** JSON export and import (lossless) and a CSV export.
+  - **9c (done): gym profiles.** `GymProfile` in `core/model`: a name, the unit its equipment is labelled in,
+    barbell and EZ bar, plate pairs, dumbbell runs and the stack step, with weights stored in kg.
+    `GymProfiles.standard(unit)` in `core/domain` stands in until a gym is set up. `LoadRounding` rounds down
+    to what the gym can load by equipment (plates for barbells and EZ bars, the dumbbell rack, the stack for
+    machines and cables, else two of the smallest plate), finds the next loadable weight, and gives the plates
+    per side. It works in thousandths of the gym's own unit, so pound plates add up exactly.
+    `WarmupGenerator` rounds through it, with no bar step for dumbbells and machines. Gyms live in the synced
+    `gym_profile` table (schema v3, `AutoMigration` 2→3 with a migration test), behind `GymProfileRepository`
+    in `core/data/gym`. The gym in use is kept per device in `local_meta`; without a choice it's the first gym,
+    else standard equipment in the display unit, and a new gym becomes the one in use.
+    - Settings has a Gym row that opens the gyms (`GymsRoute`): pick the one in use, add one, open one in
+      the editor (`GymEditorRoute`) for its name, unit, bars, plates with pairs, dumbbell runs and stack
+      step, or delete it. A new gym switched to pounds swaps to the standard pound equipment.
+    - In the logger, ± on a weight goes to the next weight the gym can load for the exercise's equipment,
+      replacing 9b's fixed 2.5 kg and 5 lb steps. For barbell and EZ bar exercises, the plates per side
+      show above the pad, with the total when the weight can't be loaded exactly. With two or more gyms,
+      a switch sits on the same line. The exercise menu offers "Add warm-up sets" for weight × reps
+      exercises that have no warm-ups and nothing logged yet. It ramps to the first working set's weight or
+      placeholder, and `SetLogger.addWarmups` puts the sets before the working ones.
+  - **Next: 9d**, JSON export and import (lossless) and a CSV export.
   - **9e:** Hevy and Strong CSV import with the matching review screen; then Milestone 9 and Phase 1 are done.
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a

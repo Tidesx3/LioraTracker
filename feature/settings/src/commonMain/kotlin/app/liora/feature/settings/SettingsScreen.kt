@@ -35,16 +35,19 @@ import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.Settings
 import app.liora.core.domain.ThemeMode
 import app.liora.core.model.DistanceUnit
+import app.liora.core.model.GymProfile
 import app.liora.core.model.Units
 import app.liora.core.model.WeightUnit
 import app.liora.core.ui.AppLanguage
 import app.liora.core.ui.AppLanguages
 import app.liora.core.ui.RestTimePicker
 import app.liora.core.ui.rememberAppLanguage
+import app.liora.feature.settings.gym.gymName
 import app.liora.feature.settings.resources.Res
 import app.liora.feature.settings.resources.dialog_cancel
 import app.liora.feature.settings.resources.dynamic_color
 import app.liora.feature.settings.resources.formula
+import app.liora.feature.settings.resources.gym
 import app.liora.feature.settings.resources.language
 import app.liora.feature.settings.resources.rest_hint
 import app.liora.feature.settings.resources.rest_warmup
@@ -68,12 +71,16 @@ import kotlin.time.Duration.Companion.seconds
 internal fun SettingsScreen(
     viewModel: SettingsViewModel,
     onBack: () -> Unit,
+    onOpenGyms: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val gym by viewModel.gym.collectAsStateWithLifecycle()
     SettingsContent(
         settings = settings,
+        gym = gym,
         onBack = onBack,
+        onOpenGyms = onOpenGyms,
         onChange = viewModel::update,
         language = rememberAppLanguage(),
         modifier = modifier,
@@ -96,7 +103,9 @@ private enum class Choice {
 @Composable
 private fun SettingsContent(
     settings: Settings?,
+    gym: GymProfile?,
     onBack: () -> Unit,
+    onOpenGyms: () -> Unit,
     onChange: (SettingsChange) -> Unit,
     language: AppLanguage,
     modifier: Modifier = Modifier,
@@ -139,6 +148,11 @@ private fun SettingsContent(
                     description = stringResource(Res.string.rpe_body),
                     checked = settings.rpe,
                     onCheckedChange = { on -> onChange { it.copy(rpe = on) } },
+                )
+                SettingRow(
+                    stringResource(Res.string.gym),
+                    gym?.let { gymName(it) }.orEmpty(),
+                    onClick = onOpenGyms,
                 )
             }
             item(key = "units") {

@@ -91,4 +91,11 @@
   <string name="edit_empty_title">No sets logged</string>
   <string name="edit_empty_body">Nothing in this workout is logged any more. Delete it from your history?</string>
   <string name="edit_delete">Delete workout</string>
+
+  <string name="menu_add_warmups">Add warm-up sets</string>
+  <string name="plates_per_side">Per side: %1$s</string>
+  <string name="plates_per_side_total">Per side: %1$s (%2$s in all)</string>
+  <string name="plates_bar_only">Just the bar</string>
+  <string name="gym_title">Gym</string>
+  <string name="cd_gym">Gym: %1$s</string>
 </resources>

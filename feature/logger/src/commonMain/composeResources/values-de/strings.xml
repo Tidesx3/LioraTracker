@@ -88,4 +88,11 @@
   <string name="edit_empty_title">Keine Sätze geloggt</string>
   <string name="edit_empty_body">In diesem Training ist nichts mehr geloggt. Aus deinem Verlauf löschen?</string>
   <string name="edit_delete">Training löschen</string>
+
+  <string name="menu_add_warmups">Aufwärmsätze hinzufügen</string>
+  <string name="plates_per_side">Pro Seite: %1$s</string>
+  <string name="plates_per_side_total">Pro Seite: %1$s (insgesamt %2$s)</string>
+  <string name="plates_bar_only">Nur die Stange</string>
+  <string name="gym_title">Studio</string>
+  <string name="cd_gym">Studio: %1$s</string>
 </resources>

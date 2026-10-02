@@ -16,6 +16,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -24,15 +25,18 @@ import androidx.window.testing.layout.FoldingFeature
 import androidx.window.testing.layout.TestWindowLayoutInfo
 import androidx.window.testing.layout.WindowLayoutInfoPublisherRule
 import app.liora.core.data.AppStartup
+import app.liora.core.data.gym.GymProfileRepository
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.SetLogger
+import app.liora.core.domain.GymProfiles
 import app.liora.core.model.Mass
 import app.liora.core.model.RepRange
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineExercise
 import app.liora.core.model.RoutineSet
+import app.liora.core.model.SetType
 import app.liora.core.model.Units
 import app.liora.core.model.WeightUnit
 import app.liora.feature.logger.LoggerTags
@@ -41,6 +45,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -247,6 +252,59 @@ class LoggerFlowTest {
     }
 
     @Test
+    @Config(qualifiers = COVER)
+    fun warmupSetsAndThePlatesOnTheBar() {
+        logLastSession()
+        launch()
+        waitForText("Start")
+        composeRule.onNodeWithText("Start").performClick()
+        waitForText("Finish")
+
+        // A ramp to last time's 80 kg, in what the plates make: the bar, then about 40, 60, 80 and 90 %.
+        composeRule.onNodeWithContentDescription("More options").performClick()
+        composeRule.onNodeWithText("Add warm-up sets").performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { currentSets().size == 8 }
+        assertEquals(
+            listOf(20.0 to 10, 30.0 to 8, 47.5 to 5, 62.5 to 3, 70.0 to 1),
+            currentSets().take(5).map { it.weight!!.kilograms to it.reps },
+        )
+        assertTrue(currentSets().take(5).all { it.type == SetType.Warmup })
+
+        // The first working set's 80 kg: 25 and 5 each side of a 20 kg bar.
+        composeRule.onAllNodesWithTag(LoggerTags.CELL)[WORKING_SET_CELL].performClick()
+        waitForPlates("Per side: 25 · 5 kg")
+        // 101 kg can't be loaded; the closest below shows with its total.
+        listOf("1", "0", "1").forEach { padKey(it).performClick() }
+        waitForPlates("Per side: 25 · 15 kg (100 kg in all)")
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/logger_plates_dark.png")
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun switchGymsFromThePad() {
+        runBlocking {
+            val gyms = GlobalContext.get().get<GymProfileRepository>()
+            gyms.save(GymProfiles.standard(WeightUnit.Kilogram, "Studio Nord").copy(id = ""))
+            // No 25s at home; the gym saved last is the one in use.
+            val standard = GymProfiles.standard(WeightUnit.Kilogram, "Home")
+            gyms.save(standard.copy(id = "", plates = standard.plates.filterNot { it.weight == Mass(25.0) }))
+        }
+        logLastSession()
+        launch()
+        waitForText("Start")
+        composeRule.onNodeWithText("Start").performClick()
+        waitForText("Finish")
+        composeRule.onAllNodesWithTag(LoggerTags.CELL)[0].performClick()
+        waitForPlates("Per side: 20 · 10 kg")
+
+        composeRule.onNodeWithContentDescription("Gym: Home").performClick()
+        waitForText("Studio Nord")
+        composeRule.onNodeWithText("Studio Nord").performClick()
+        waitForPlates("Per side: 25 · 5 kg")
+        composeRule.onNodeWithContentDescription("Gym: Studio Nord").assertIsDisplayed()
+    }
+
+    @Test
     @Config(qualifiers = INNER)
     fun innerScreen_theSetUpNextBesideTheWorkout() {
         logLastSession()
@@ -306,6 +364,21 @@ class LoggerFlowTest {
     private fun loggedSets() =
         composeRule.onAllNodesWithContentDescription("Undo logged set").fetchSemanticsNodes().size
 
+    private fun currentSets() =
+        runBlocking {
+            GlobalContext
+                .get()
+                .get<ActiveWorkoutRepository>()
+                .activeWorkout
+                .first()!!
+                .exercises
+                .single()
+                .sets
+        }
+
+    private fun waitForPlates(text: String) =
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasTestTag(LoggerTags.PLATES) and hasText(text)) }
+
     private fun nodeExists(matcher: SemanticsMatcher) =
         composeRule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty()
 
@@ -320,6 +393,9 @@ class LoggerFlowTest {
         /** The inner screen turned sideways, so the hinge runs across. */
         const val TABLETOP_SIZE = "w1092dp-h984dp-night-xhdpi"
         const val BENCH = "Barbell Bench Press"
+
+        /** Five warm-ups of two cells each come before the first working set. */
+        const val WORKING_SET_CELL = 10
         const val TIMEOUT_MS = 10_000L
 
         val PUSH =

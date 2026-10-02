@@ -1,14 +1,16 @@
 package app.liora.feature.logger
 
+import app.liora.core.domain.LoadRounding
 import app.liora.core.domain.SetField
 import app.liora.core.domain.SetPlaceholders
 import app.liora.core.domain.parseClockDigits
 import app.liora.core.domain.parseDecimalInput
+import app.liora.core.model.Equipment
+import app.liora.core.model.GymProfile
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.Mass
 import app.liora.core.model.TrackingType
 import app.liora.core.model.Units
-import app.liora.core.model.WeightUnit
 import app.liora.core.ui.distanceFor
 import app.liora.core.ui.longDistance
 import kotlin.time.Duration.Companion.seconds
@@ -127,9 +129,9 @@ internal fun LoggedSet.withTyped(
     }
 
 /**
- * The set with [field] one step up or down in [units], starting from its value or else its placeholder:
- * 2.5 kg or 5 lb, one rep, 15 seconds, a tenth of a kilometre or mile on a run, 10 metres or yards on a
- * carry, half an RPE point. Never below zero.
+ * The set with [field] one step up or down, starting from its value or else its placeholder: the next weight
+ * [gym] can load for [equipment] (the next plate pair, dumbbell or stack step), one rep, 15 seconds, a tenth
+ * of a kilometre or mile on a run, 10 metres or yards on a carry, half an RPE point. Never below zero.
  */
 internal fun LoggedSet.stepped(
     field: SetField,
@@ -137,13 +139,14 @@ internal fun LoggedSet.stepped(
     trackingType: TrackingType,
     placeholder: LoggedSet?,
     units: Units,
+    equipment: Equipment,
+    gym: GymProfile,
 ): LoggedSet {
     val from = SetPlaceholders.fill(this, placeholder)
     val sign = if (up) 1 else -1
     return when (field) {
         SetField.Weight -> {
-            val shown = (from.weight?.inUnit(units.weight) ?: 0.0) + sign * weightStep(units.weight)
-            copy(weight = Mass.of(shown.coerceAtLeast(0.0), units.weight))
+            copy(weight = LoadRounding.step(from.weight ?: Mass.Zero, up, equipment, gym))
         }
 
         SetField.Reps -> {
@@ -171,12 +174,6 @@ internal fun LoggedSet.stepped(
     }
 }
 
-private fun weightStep(unit: WeightUnit): Double =
-    when (unit) {
-        WeightUnit.Kilogram -> WEIGHT_STEP_KG
-        WeightUnit.Pound -> WEIGHT_STEP_LB
-    }
-
 private fun positive(value: Int): Int? = value.takeIf { it > 0 }
 
 /** The RPE scale as the logger takes it: 1 to 10 in half points. */
@@ -189,8 +186,6 @@ internal object SetRpe {
     const val START = 7.5
 }
 
-private const val WEIGHT_STEP_KG = 2.5
-private const val WEIGHT_STEP_LB = 5.0
 private const val LONG_DISTANCE_STEP = 0.1
 private const val SHORT_DISTANCE_STEP = 10.0
 private const val DURATION_STEP_S = 15

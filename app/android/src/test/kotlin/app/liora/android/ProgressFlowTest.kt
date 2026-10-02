@@ -102,7 +102,10 @@ class ProgressFlowTest {
         waitForText("Last week")
         composeRule.onNodeWithContentDescription("Next week").performClick()
         waitForText("This week")
-        composeRule.onAllNodesWithContentDescription("Next week").assertCountEquals(0)
+        // Back on this week there is no next one.
+        composeRule.waitUntil(TIMEOUT_MS) {
+            composeRule.onAllNodesWithContentDescription("Next week").fetchSemanticsNodes().isEmpty()
+        }
 
         // The bests: bench hasn't beaten 20 July since.
         scrollTo("Stalled for 3 weeks")

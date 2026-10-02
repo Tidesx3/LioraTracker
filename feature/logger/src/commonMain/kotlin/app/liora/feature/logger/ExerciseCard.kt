@@ -46,6 +46,7 @@ import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.cd_more
 import app.liora.feature.logger.resources.logger_add_set
 import app.liora.feature.logger.resources.menu_add_note
+import app.liora.feature.logger.resources.menu_add_warmups
 import app.liora.feature.logger.resources.menu_remove
 import app.liora.feature.logger.resources.menu_reorder
 import app.liora.feature.logger.resources.menu_replace
@@ -66,7 +67,8 @@ internal class ExerciseActions(
     val onRemove: (String) -> Unit,
     val onRestChange: (id: String, seconds: Int?) -> Unit,
     val onNotesChange: (id: String, notes: String?) -> Unit,
-    val onAddSet: (String) -> Unit,
+    /** Adds a set at the end, or with [warmups] the ramp of warm-up sets before the first. */
+    val onAddSets: (id: String, warmups: Boolean) -> Unit,
 )
 
 /** One exercise of the workout: name and rest, its note, and a row per set. */
@@ -128,6 +130,7 @@ internal fun ExerciseCard(
                 workoutExercise = workoutExercise,
                 isLast = index == state.workout.exercises.lastIndex,
                 hasNote = workoutExercise.notes != null || noteOpen,
+                canAddWarmups = state.warmupsFor(index).isNotEmpty(),
                 onChooseRest = { choosingRest = true }.takeUnless { state.isFinished },
                 onAddNote = { noteOpen = true },
                 actions = actions,
@@ -169,7 +172,7 @@ internal fun ExerciseCard(
             }
         }
         TextButton(onClick = {
-            actions.onAddSet(workoutExercise.id)
+            actions.onAddSets(workoutExercise.id, false)
         }, modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)) {
             Icon(painterResource(LioraIcons.Add), contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
@@ -223,6 +226,7 @@ private fun ExerciseMenu(
     workoutExercise: WorkoutExercise,
     isLast: Boolean,
     hasNote: Boolean,
+    canAddWarmups: Boolean,
     /** Null where rest doesn't apply. */
     onChooseRest: (() -> Unit)?,
     onAddNote: () -> Unit,
@@ -232,6 +236,7 @@ private fun ExerciseMenu(
     val id = workoutExercise.id
     val items: List<Pair<StringResource, () -> Unit>> =
         buildList {
+            if (canAddWarmups) add(Res.string.menu_add_warmups to { actions.onAddSets(id, true) })
             add(Res.string.menu_replace to { actions.onReplace(id) })
             add(Res.string.menu_reorder to actions.onReorder)
             if (!isLast) add(Res.string.menu_superset_next to { actions.onSupersetChange(id, true) })

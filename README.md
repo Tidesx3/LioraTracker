@@ -14,8 +14,9 @@ consistency grid, sets per muscle on a body heatmap, every exercise's best, and 
 Body tracks bodyweight, body fat and circumferences day by day, with a chart and the change over the
 month, and keeps progress photos private on the phone, compared side by side with the weight change
 between them. Settings cover rest defaults, an RPE column in the logger, units (kg or lb, km or miles, cm
-or inches, shown and typed everywhere), the e1RM formula, the stall window, theme and language.
-Next are gym profiles, and import and export. Details and progress are in
+or inches, shown and typed everywhere), the e1RM formula, the stall window, theme and language. Gyms
+describe their bars, plates, dumbbells and machine stacks: the logger's ± steps go to weights the gym
+can load, show the plates per side for a barbell, and add warm-up sets. Next is import and export. Details and progress are in
 [docs/PLAN.md](docs/PLAN.md).
 
 ## Principles

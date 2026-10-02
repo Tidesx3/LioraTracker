@@ -44,4 +44,48 @@
   <string name="language_de" translatable="false">Deutsch</string>
 
   <string name="dialog_cancel">Cancel</string>
+
+  <string name="gym">Gym</string>
+  <string name="gym_standard">Standard equipment</string>
+  <string name="gyms_title">Gyms</string>
+  <string name="gyms_empty_title">No gyms yet</string>
+  <string name="gyms_empty_body">Until you add one, weights round to standard plates, dumbbells and machine stacks. Add your gym so they match what it has.</string>
+  <string name="gyms_add">Add gym</string>
+  <string name="cd_use_gym">Use %1$s</string>
+  <string name="gym_bar_summary">%1$s bar</string>
+  <plurals name="gym_plate_sizes">
+    <item quantity="one">%1$d plate size</item>
+    <item quantity="other">%1$d plate sizes</item>
+  </plurals>
+
+  <string name="gym_new_title">New gym</string>
+  <string name="gym_edit_title">Edit gym</string>
+  <string name="gym_save">Save</string>
+  <string name="cd_close">Close</string>
+  <string name="gym_name">Name</string>
+  <string name="gym_unit">Plates and dumbbells in</string>
+  <string name="gym_section_bars">Bars</string>
+  <string name="gym_barbell">Barbell</string>
+  <string name="gym_ez_bar">EZ bar</string>
+  <string name="gym_section_plates">Plates</string>
+  <string name="gym_plate_weight">Weight</string>
+  <string name="gym_plate_pairs">Pairs</string>
+  <string name="gym_add_plate">Add plate size</string>
+  <string name="cd_remove_plate">Remove plate size</string>
+  <string name="gym_section_dumbbells">Dumbbells</string>
+  <string name="gym_dumbbells_hint">For example from 2 to 40 in steps of 2</string>
+  <string name="gym_dumbbell_from">From</string>
+  <string name="gym_dumbbell_to">To</string>
+  <string name="gym_dumbbell_step">Step</string>
+  <string name="gym_add_dumbbells">Add dumbbell range</string>
+  <string name="cd_remove_dumbbells">Remove dumbbell range</string>
+  <string name="gym_section_machines">Machines and cables</string>
+  <string name="gym_stack_step">Stack steps</string>
+  <string name="gym_delete">Delete gym</string>
+  <string name="gym_delete_title">Delete %1$s?</string>
+  <string name="gym_delete_body">Workouts you logged there stay as they are.</string>
+  <string name="gym_delete_confirm">Delete</string>
+  <string name="gym_discard_title">Discard changes?</string>
+  <string name="gym_discard">Discard</string>
+  <string name="gym_keep_editing">Keep editing</string>
 </resources>

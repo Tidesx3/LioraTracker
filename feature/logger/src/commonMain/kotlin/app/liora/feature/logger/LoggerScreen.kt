@@ -95,7 +95,8 @@ internal fun LoggerScreen(
 
     var dialog by rememberSaveable { mutableStateOf<LoggerDialog?>(null) }
     val showDialog = { value: LoggerDialog ->
-        viewModel.closePad()
+        // The gym is switched from the pad, which stays open to show the plates at the new gym.
+        if (value != LoggerDialog.Gym) viewModel.closePad()
         dialog = value
     }
     val onDone: () -> Unit = {
@@ -131,6 +132,7 @@ internal fun LoggerScreen(
                     onDiscard = viewModel::discard,
                     onReorder = viewModel::reorder,
                     onFinish = viewModel::finish,
+                    onUseGym = viewModel::useGym,
                     corrections =
                         CorrectionActions(
                             onMoveTo = viewModel::moveTo,
@@ -214,7 +216,7 @@ private fun loggerActions(
             onRemove = viewModel::removeExercise,
             onRestChange = viewModel::setRest,
             onNotesChange = viewModel::setNotes,
-            onAddSet = viewModel::addSet,
+            onAddSets = { id, warmups -> if (warmups) viewModel.addWarmups(id) else viewModel.addSet(id) },
         ),
     set =
         SetRowActions(
@@ -353,13 +355,22 @@ internal fun PadFor(
     // Clear focus from a note being typed, so the system keyboard and the pad never both show.
     val focusManager = LocalFocusManager.current
     LaunchedEffect(cell) { if (cell != null) focusManager.clearFocus() }
-    NumberPad(
-        decimals = trackingType != null && field?.inputKind(trackingType)?.takesDecimals == true,
-        nextLogsSet = field != null && field == fields.lastOrNull(),
-        onKey = actions.pad.onKey,
-        canHide = canHide,
-        modifier = modifier,
-    )
+    Column(modifier) {
+        val exerciseId = ref?.let { state.workout.exercises[it.exerciseIndex].exerciseId }
+        PadInfo(
+            plates = ref?.let(state::platesFor),
+            takesPlates = exerciseId != null && state.takesPlates(exerciseId),
+            gym = state.gym,
+            canSwitchGym = state.gyms.size > 1,
+            onSwitchGym = { actions.onShowDialog(LoggerDialog.Gym) },
+        )
+        NumberPad(
+            decimals = trackingType != null && field?.inputKind(trackingType)?.takesDecimals == true,
+            nextLogsSet = field != null && field == fields.lastOrNull(),
+            onKey = actions.pad.onKey,
+            canHide = canHide,
+        )
+    }
 }
 
 @Composable
@@ -494,6 +505,9 @@ private val FocusPaneWidth = 360.dp
 object LoggerTags {
     const val CELL = "logger.cell"
     const val PAD = "logger.pad"
+
+    /** The plates per side above the pad. */
+    const val PLATES = "logger.plates"
     const val TABLETOP = "logger.tabletop"
 
     /** Finish, or Done on a finished workout. */

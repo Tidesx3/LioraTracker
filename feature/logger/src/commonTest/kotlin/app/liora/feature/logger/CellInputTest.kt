@@ -1,7 +1,9 @@
 package app.liora.feature.logger
 
+import app.liora.core.domain.GymProfiles
 import app.liora.core.domain.SetField
 import app.liora.core.model.DistanceUnit
+import app.liora.core.model.Equipment
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.Mass
 import app.liora.core.model.TrackingType
@@ -18,6 +20,8 @@ import kotlin.time.Duration.Companion.seconds
 class CellInputTest {
     private val metric = Units()
     private val imperial = Units(weight = WeightUnit.Pound, distance = DistanceUnit.Mile)
+    private val metricGym = GymProfiles.standard(WeightUnit.Kilogram)
+    private val imperialGym = GymProfiles.standard(WeightUnit.Pound)
 
     @Test
     fun typingAWeightKeepsTheSeparatorWhileTyping() {
@@ -51,9 +55,19 @@ class CellInputTest {
         // A step is 5 lb, from the value as shown.
         assertClose(
             230.0,
-            set.stepped(SetField.Weight, up = true, TrackingType.WeightReps, null, imperial).weight!!.inUnit(
-                WeightUnit.Pound,
-            ),
+            set
+                .stepped(
+                    SetField.Weight,
+                    up = true,
+                    TrackingType.WeightReps,
+                    null,
+                    imperial,
+                    Equipment.Other,
+                    imperialGym,
+                ).weight!!
+                .inUnit(
+                    WeightUnit.Pound,
+                ),
         )
     }
 
@@ -90,14 +104,28 @@ class CellInputTest {
         assertClose(
             1_770.2784,
             LoggedSet("s", distanceMeters = 1_609.344)
-                .stepped(SetField.Distance, up = true, TrackingType.DistanceDuration, null, imperial)
-                .distanceMeters!!,
+                .stepped(
+                    SetField.Distance,
+                    up = true,
+                    TrackingType.DistanceDuration,
+                    null,
+                    imperial,
+                    Equipment.Other,
+                    imperialGym,
+                ).distanceMeters!!,
         )
         assertClose(
             9.144,
             LoggedSet("s", distanceMeters = 18.288)
-                .stepped(SetField.Distance, up = false, TrackingType.WeightDistance, null, imperial)
-                .distanceMeters!!,
+                .stepped(
+                    SetField.Distance,
+                    up = false,
+                    TrackingType.WeightDistance,
+                    null,
+                    imperial,
+                    Equipment.Other,
+                    imperialGym,
+                ).distanceMeters!!,
         )
     }
 
@@ -133,14 +161,42 @@ class CellInputTest {
         assertEquals(
             75.seconds,
             LoggedSet("s", duration = 1.minutes)
-                .stepped(SetField.Duration, up = true, TrackingType.Duration, null, metric)
+                .stepped(SetField.Duration, up = true, TrackingType.Duration, null, metric, Equipment.Other, metricGym)
                 .duration,
         )
         assertClose(
             5_100.0,
             LoggedSet("s", distanceMeters = 5_000.0)
-                .stepped(SetField.Distance, up = true, TrackingType.DistanceDuration, null, metric)
-                .distanceMeters!!,
+                .stepped(
+                    SetField.Distance,
+                    up = true,
+                    TrackingType.DistanceDuration,
+                    null,
+                    metric,
+                    Equipment.Other,
+                    metricGym,
+                ).distanceMeters!!,
+        )
+    }
+
+    @Test
+    fun weightStepsGoToWhatTheGymCanLoad() {
+        val gymStep = { set: LoggedSet, up: Boolean, equipment: Equipment ->
+            set.stepped(SetField.Weight, up, TrackingType.WeightReps, null, metric, equipment, metricGym).weight
+        }
+        // An empty barbell starts at the bar; plates come in pairs of the smallest.
+        assertEquals(Mass(20.0), gymStep(LoggedSet("s"), true, Equipment.Barbell))
+        assertEquals(Mass(102.5), gymStep(LoggedSet("s", weight = Mass(101.0)), true, Equipment.Barbell))
+        // Dumbbells go along the rack, machines along the stack.
+        assertEquals(Mass(42.5), gymStep(LoggedSet("s", weight = Mass(40.0)), true, Equipment.Dumbbell))
+        assertEquals(Mass(35.0), gymStep(LoggedSet("s", weight = Mass(37.0)), false, Equipment.Machine))
+        // A gym with 7 kg steps on its stacks.
+        val sevens = metricGym.copy(stackStep = Mass(7.0))
+        assertEquals(
+            Mass(21.0),
+            LoggedSet("s", weight = Mass(14.0))
+                .stepped(SetField.Weight, up = true, TrackingType.WeightReps, null, metric, Equipment.Cable, sevens)
+                .weight,
         )
     }
 
@@ -156,7 +212,7 @@ class CellInputTest {
         field: SetField,
         up: Boolean,
         placeholder: LoggedSet? = null,
-    ): LoggedSet = set.stepped(field, up, TrackingType.WeightReps, placeholder, metric)
+    ): LoggedSet = set.stepped(field, up, TrackingType.WeightReps, placeholder, metric, Equipment.Other, metricGym)
 
     private fun assertClose(
         expected: Double,

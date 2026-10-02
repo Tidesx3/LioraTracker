@@ -42,4 +42,48 @@
   <string name="language_system">Wie das Handy</string>
 
   <string name="dialog_cancel">Abbrechen</string>
+
+  <string name="gym">Studio</string>
+  <string name="gym_standard">Standardausstattung</string>
+  <string name="gyms_title">Studios</string>
+  <string name="gyms_empty_title">Noch keine Studios</string>
+  <string name="gyms_empty_body">Bis du eins anlegst, runden Gewichte auf übliche Scheiben, Kurzhanteln und Steckgewichte. Lege dein Studio an, damit sie zu seiner Ausstattung passen.</string>
+  <string name="gyms_add">Studio hinzufügen</string>
+  <string name="cd_use_gym">%1$s verwenden</string>
+  <string name="gym_bar_summary">Stange %1$s</string>
+  <plurals name="gym_plate_sizes">
+    <item quantity="one">%1$d Scheibengröße</item>
+    <item quantity="other">%1$d Scheibengrößen</item>
+  </plurals>
+
+  <string name="gym_new_title">Neues Studio</string>
+  <string name="gym_edit_title">Studio bearbeiten</string>
+  <string name="gym_save">Speichern</string>
+  <string name="cd_close">Schließen</string>
+  <string name="gym_name">Name</string>
+  <string name="gym_unit">Scheiben und Hanteln in</string>
+  <string name="gym_section_bars">Stangen</string>
+  <string name="gym_barbell">Langhantelstange</string>
+  <string name="gym_ez_bar">SZ-Stange</string>
+  <string name="gym_section_plates">Scheiben</string>
+  <string name="gym_plate_weight">Gewicht</string>
+  <string name="gym_plate_pairs">Paare</string>
+  <string name="gym_add_plate">Scheibengröße hinzufügen</string>
+  <string name="cd_remove_plate">Scheibengröße entfernen</string>
+  <string name="gym_section_dumbbells">Kurzhanteln</string>
+  <string name="gym_dumbbells_hint">Zum Beispiel von 2 bis 40 in Schritten von 2</string>
+  <string name="gym_dumbbell_from">Von</string>
+  <string name="gym_dumbbell_to">Bis</string>
+  <string name="gym_dumbbell_step">Schritt</string>
+  <string name="gym_add_dumbbells">Hantelreihe hinzufügen</string>
+  <string name="cd_remove_dumbbells">Hantelreihe entfernen</string>
+  <string name="gym_section_machines">Maschinen und Kabelzüge</string>
+  <string name="gym_stack_step">Steckgewicht in Schritten von</string>
+  <string name="gym_delete">Studio löschen</string>
+  <string name="gym_delete_title">%1$s löschen?</string>
+  <string name="gym_delete_body">Trainings, die du dort geloggt hast, bleiben, wie sie sind.</string>
+  <string name="gym_delete_confirm">Löschen</string>
+  <string name="gym_discard_title">Änderungen verwerfen?</string>
+  <string name="gym_discard">Verwerfen</string>
+  <string name="gym_keep_editing">Weiter bearbeiten</string>
 </resources>

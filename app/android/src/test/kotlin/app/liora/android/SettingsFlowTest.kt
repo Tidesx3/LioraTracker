@@ -1,6 +1,8 @@
 package app.liora.android
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.isOn
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -10,15 +12,16 @@ import androidx.compose.ui.test.performClick
 import app.liora.core.data.AppStartup
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.domain.OneRepMaxFormula
-import app.liora.core.domain.Settings
 import app.liora.core.domain.ThemeMode
 import app.liora.core.model.DistanceUnit
 import app.liora.core.model.LengthUnit
+import app.liora.core.model.Units
 import app.liora.core.model.WeightUnit
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -88,20 +91,23 @@ class SettingsFlowTest {
 
         composeRule.onNodeWithText("Weight").performClick()
         composeRule.onNodeWithText("Pounds (lb)").performClick()
-        waitForSaved { it.units.weight == WeightUnit.Pound }
+        // The dialog closes at once; the row shows the choice once it's saved.
+        waitForText("Pounds (lb)")
         composeRule.onNodeWithText("Distance").performClick()
         composeRule.onNodeWithText("Miles and yards").performClick()
-        waitForSaved { it.units.distance == DistanceUnit.Mile }
+        waitForText("Miles and yards")
         composeRule.onNodeWithText("Body measurements").performClick()
         composeRule.onNodeWithText("Inches (in)").performClick()
-        waitForSaved { it.units.bodyLength == LengthUnit.Inch }
+        waitForText("Inches (in)")
         composeRule.onNodeWithText("RPE column").performClick()
-        waitForSaved { it.rpe }
-
-        composeRule.onNodeWithText("Pounds (lb)").assertIsDisplayed()
-        composeRule.onNodeWithText("Miles and yards").assertIsDisplayed()
-        composeRule.onNodeWithText("Inches (in)").assertIsDisplayed()
+        composeRule.waitUntil(TIMEOUT_MS) {
+            composeRule.onAllNodes(isToggleable() and isOn()).fetchSemanticsNodes().isNotEmpty()
+        }
         composeRule.onRoot().captureRoboImage("src/test/screenshots/settings_units_dark.png")
+
+        val saved = runBlocking { settings.current() }
+        assertEquals(Units(WeightUnit.Pound, DistanceUnit.Mile, LengthUnit.Inch), saved.units)
+        assertTrue(saved.rpe)
     }
 
     @Test
@@ -133,10 +139,6 @@ class SettingsFlowTest {
         composeRule.waitUntil(TIMEOUT_MS) {
             composeRule.onAllNodesWithText(text, substring = true).fetchSemanticsNodes().isNotEmpty()
         }
-
-    /** Waits until the stored settings pass [check]: the screen saves in the background. */
-    private fun waitForSaved(check: (Settings) -> Boolean) =
-        composeRule.waitUntil(TIMEOUT_MS) { check(runBlocking { settings.current() }) }
 
     private companion object {
         const val COVER = "w411dp-h960dp-night-xxhdpi"

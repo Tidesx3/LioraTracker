@@ -3,6 +3,7 @@ package app.liora.feature.logger
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.exercise.ExerciseRepository
+import app.liora.core.data.gym.GymProfileRepository
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
@@ -13,7 +14,10 @@ import app.liora.core.data.workout.SetLogger
 import app.liora.core.data.workout.WorkoutEditor
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.data.workout.WorkoutSession
+import app.liora.core.domain.GymProfiles
+import app.liora.core.domain.LoadRounding
 import app.liora.core.domain.OneRepMaxFormula
+import app.liora.core.domain.PlateLoad
 import app.liora.core.domain.RecordKey
 import app.liora.core.domain.RestDefaults
 import app.liora.core.domain.RoutineUpdate
@@ -21,20 +25,26 @@ import app.liora.core.domain.SessionRecords
 import app.liora.core.domain.SetField
 import app.liora.core.domain.SetPlaceholders
 import app.liora.core.domain.SetRef
+import app.liora.core.domain.Settings
+import app.liora.core.domain.WarmupGenerator
+import app.liora.core.domain.WarmupSet
 import app.liora.core.domain.WorkoutOrder
 import app.liora.core.domain.WorkoutTimes
 import app.liora.core.domain.find
 import app.liora.core.domain.setAt
 import app.liora.core.domain.volumeOf
 import app.liora.core.model.ActiveWorkout
+import app.liora.core.model.Equipment
 import app.liora.core.model.Exercise
 import app.liora.core.model.FinishedWorkout
+import app.liora.core.model.GymProfile
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.RestTimer
 import app.liora.core.model.Routine
 import app.liora.core.model.SetType
 import app.liora.core.model.TrackingType
 import app.liora.core.model.Units
+import app.liora.core.model.WeightUnit
 import app.liora.core.ui.headlineRecords
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -95,6 +105,10 @@ sealed interface LoggerUiState {
         val units: Units = Units(),
         /** Whether sets get an RPE column. */
         val rpe: Boolean = false,
+        /** The gym weights round to: ± steps, plates on the bar, warm-ups. */
+        val gym: GymProfile = GymProfiles.standard(WeightUnit.Kilogram),
+        /** Every gym set up, to switch between. */
+        val gyms: List<GymProfile> = emptyList(),
         /** How estimated one-rep maxes are worked out, for today's records. */
         val formula: OneRepMaxFormula = OneRepMaxFormula.Epley,
         val edit: CellEdit?,
@@ -171,6 +185,42 @@ sealed interface LoggerUiState {
             val exercise = workout.exercises[ref.exerciseIndex]
             return SetPlaceholders.previousFor(exercise.sets, ref.setIndex, previous[exercise.exerciseId].orEmpty())
         }
+
+        fun equipmentOf(exerciseId: String): Equipment = exercises[exerciseId]?.equipment ?: Equipment.Other
+
+        /**
+         * The plates per side for [ref]'s weight (as typed, else its placeholder), when its exercise is
+         * loaded on a bar; null otherwise, or before there's a weight.
+         */
+        fun platesFor(ref: SetRef): PlateLoad? {
+            val exerciseId = workout.exercises[ref.exerciseIndex].exerciseId
+            if (!trackingTypeOf(exerciseId).usesWeight) return null
+            val weight = workout.setAt(ref).weight ?: placeholderFor(ref).weight ?: return null
+            return LoadRounding.plates(weight, equipmentOf(exerciseId), gym)
+        }
+
+        /** Whether [exerciseId]'s weights go on a bar with plates. */
+        fun takesPlates(exerciseId: String): Boolean =
+            trackingTypeOf(exerciseId).usesWeight && LoadRounding.barFor(equipmentOf(exerciseId), gym) != null
+
+        /**
+         * The warm-up sets "Add warm-up sets" would put before [exerciseIndex]'s sets: a ramp to its first
+         * working set's weight (as typed, else its placeholder). Empty when there's nothing to ramp to, the
+         * exercise isn't weight × reps, it has warm-ups already, or it's under way.
+         */
+        fun warmupsFor(exerciseIndex: Int): List<WarmupSet> {
+            val exercise = workout.exercises[exerciseIndex]
+            val sets = exercise.sets
+            val firstWorking = sets.indexOfFirst { it.type != SetType.Warmup }
+            val notYet =
+                !isFinished &&
+                    trackingTypeOf(exercise.exerciseId) == TrackingType.WeightReps &&
+                    sets.none { it.type == SetType.Warmup || it.isCompleted }
+            if (!notYet || firstWorking < 0) return emptyList()
+            val ref = SetRef(exerciseIndex, firstWorking)
+            val working = workout.setAt(ref).weight ?: placeholderFor(ref).weight ?: return emptyList()
+            return WarmupGenerator.generate(working, equipmentOf(exercise.exerciseId), gym)
+        }
     }
 }
 
@@ -203,7 +253,7 @@ internal class PickerKeys(
  * from history to correct it. Both log the same way; only the workout in progress has a clock, rest
  * and a finish.
  */
-@Suppress("TooManyFunctions") // one function per user intent
+@Suppress("TooManyFunctions", "LongParameterList") // one function per user intent, drawing on every part of a workout
 class LoggerViewModel(
     private val finishedWorkoutId: String?,
     private val activeWorkouts: ActiveWorkoutRepository,
@@ -212,6 +262,7 @@ class LoggerViewModel(
     settings: SettingsRepository,
     exerciseRepository: ExerciseRepository,
     routines: RoutineRepository,
+    private val gymProfiles: GymProfileRepository,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
     private val edit = MutableStateFlow<CellEdit?>(null)
@@ -279,8 +330,8 @@ class LoggerViewModel(
             exercises,
             restTimer,
             editing,
-            combine(routine, settings.settings) { fromRoutine, chosen -> fromRoutine to chosen },
-        ) { session, byId, timer, (cell, error), (fromRoutine, chosen) ->
+            combine(routine, settings.settings, gymProfiles.active, gymProfiles.profiles, ::Context),
+        ) { session, byId, timer, (cell, error), context ->
             val workout = session.workout?.workout
             if (workout == null) {
                 LoggerUiState.NoWorkout
@@ -290,12 +341,14 @@ class LoggerViewModel(
                     exercises = byId,
                     previous = session.previous,
                     history = session.history,
-                    routine = fromRoutine,
+                    routine = context.routine,
                     restTimer = timer,
-                    restDefaults = chosen.rest,
-                    formula = chosen.oneRepMaxFormula,
-                    units = chosen.units,
-                    rpe = chosen.rpe,
+                    restDefaults = context.settings.rest,
+                    formula = context.settings.oneRepMaxFormula,
+                    units = context.settings.units,
+                    rpe = context.settings.rpe,
+                    gym = context.gym,
+                    gyms = context.gyms,
                     // A cell whose set was removed meanwhile is no longer being edited.
                     edit = cell?.takeIf { workout.find(it.cell.setId) != null },
                     invalid = error?.takeIf { workout.find(it.setId) != null },
@@ -317,6 +370,14 @@ class LoggerViewModel(
         val workout: OpenWorkout?,
         val previous: Map<String, List<LoggedSet>>,
         val history: Map<String, List<LoggedSet>>,
+    )
+
+    /** What the workout is logged against: its routine, the settings, and the gym. */
+    private data class Context(
+        val routine: Routine?,
+        val settings: Settings,
+        val gym: GymProfile,
+        val gyms: List<GymProfile>,
     )
 
     private val active: LoggerUiState.Active? get() = uiState.value as? LoggerUiState.Active
@@ -355,20 +416,34 @@ class LoggerViewModel(
         }
     }
 
-    /** The set being typed into, with how its exercise is tracked and the units it's typed in. */
+    /**
+     * The set being typed into, with how its exercise is tracked, the units it's typed in, and what its
+     * weight is loaded with.
+     */
     private class TypingTarget(
         val ref: SetRef,
         val trackingType: TrackingType,
         val fields: List<SetField>,
         val placeholder: LoggedSet,
         val units: Units,
+        val equipment: Equipment,
+        val gym: GymProfile,
     )
 
     private fun typingTarget(edit: CellEdit): TypingTarget? {
         val state = active ?: return null
         val ref = state.workout.find(edit.cell.setId) ?: return null
-        val trackingType = state.trackingTypeOf(state.workout.exercises[ref.exerciseIndex].exerciseId)
-        return TypingTarget(ref, trackingType, state.fieldsOf(trackingType), state.placeholderFor(ref), state.units)
+        val exerciseId = state.workout.exercises[ref.exerciseIndex].exerciseId
+        val trackingType = state.trackingTypeOf(exerciseId)
+        return TypingTarget(
+            ref = ref,
+            trackingType = trackingType,
+            fields = state.fieldsOf(trackingType),
+            placeholder = state.placeholderFor(ref),
+            units = state.units,
+            equipment = state.equipmentOf(exerciseId),
+            gym = state.gym,
+        )
     }
 
     private fun typeKey(
@@ -391,7 +466,15 @@ class LoggerViewModel(
         edit.value = current.copy(text = null)
         clearInvalid(current.cell)
         write(current.cell.setId) {
-            stepped(current.cell.field, up, target.trackingType, target.placeholder, target.units)
+            stepped(
+                current.cell.field,
+                up,
+                target.trackingType,
+                target.placeholder,
+                target.units,
+                target.equipment,
+                target.gym,
+            )
         }
     }
 
@@ -455,6 +538,20 @@ class LoggerViewModel(
     ) = write(setId) { copy(type = type) }
 
     fun addSet(workoutExerciseId: String) = launch { sets.addSet(workoutExerciseId) }
+
+    /** Puts a ramp of warm-up sets before the exercise's sets (see [LoggerUiState.Active.warmupsFor]). */
+    fun addWarmups(workoutExerciseId: String) {
+        val state = active ?: return
+        val index =
+            state.workout.exercises
+                .indexOfFirst { it.id == workoutExerciseId }
+                .takeIf { it >= 0 } ?: return
+        val warmups = state.warmupsFor(index)
+        launch { sets.addWarmups(workoutExerciseId, warmups) }
+    }
+
+    /** Rounds weights to [gymId]'s equipment on this device from now on. */
+    fun useGym(gymId: String) = launch { gymProfiles.use(gymId) }
 
     fun removeSet(setId: String) = launch { sets.removeSet(setId) }
 

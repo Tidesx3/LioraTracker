@@ -45,5 +45,7 @@ private fun LoggerEntry(
 val loggerModule =
     module {
         // A finished workout's id opens it for corrections; without one, the logger is on the workout in progress.
-        viewModel { params -> LoggerViewModel(params.getOrNull<String>(), get(), get(), get(), get(), get(), get()) }
+        viewModel { params ->
+            LoggerViewModel(params.getOrNull<String>(), get(), get(), get(), get(), get(), get(), get())
+        }
     }

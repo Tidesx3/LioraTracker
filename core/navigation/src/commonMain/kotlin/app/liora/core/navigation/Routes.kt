@@ -63,6 +63,16 @@ data object MonthlyReportRoute : NavKey
 @Serializable
 data object SettingsRoute : NavKey
 
+/** The gyms set up, and which one weights round to. */
+@Serializable
+data object GymsRoute : NavKey
+
+/** Set up a new gym (no id) or change one. */
+@Serializable
+data class GymEditorRoute(
+    val gymId: String? = null,
+) : NavKey
+
 @Serializable
 data class ExerciseDetailRoute(
     val exerciseId: String,

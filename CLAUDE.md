@@ -45,9 +45,10 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - Never hard-delete synced rows.
   - Synced tables have no foreign-key constraints. Repositories keep references consistent and cascade tombstones.
   - `ownerId` is a server-side concept, added in Phase 3. The local DB belongs to one user.
-- **Local-only tables:** `local_meta` (device id, seed version, the running rest timer) and `exercise_name` (search index, rebuilt from the seed).
+- **Local-only tables:** `local_meta` (device id, seed version, the running rest timer, the gym in use) and `exercise_name` (search index, rebuilt from the seed).
 - **Photos:** progress photos are files in app-private `files/photos` (never the shared gallery), written only through `PhotoStorage`. Their rows sync; the images will sync as blobs (Phase 2).
 - **Settings:** read them from `SettingsRepository` (`settings` Flow, or `current()` inside a transaction), never hard-coded defaults: the e1RM formula, stall window and rest defaults all come from there. One `preference` row per choice; add a key in `SettingsCodec` for a new one.
+- **Gyms and loads:** weights a user can load come from the gym in use (`GymProfileRepository.active`, per device). Round targets and steps through `LoadRounding` by the exercise's equipment, never a fixed 2.5 kg step. A gym keeps its own unit (pound plates stay 45 lb) while storing kilograms.
 - **Derived data:** PRs and stats caches are recomputed locally and never synced.
 - **Schema:** Room schemas are exported to `core/database/schemas/` and committed. Schema v1 is live on devices, so every change needs a version bump plus a migration (or `AutoMigration`) and a migration test.
 - **Writes must outlive the screen:** don't pop a screen right after launching a write in its `viewModelScope`. Leaving the screen clears the ViewModel and cancels the write. Close in reaction to the new data instead (see `LoggerScreen`).
@@ -98,6 +99,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 
 - **AGP 9 KMP plugin:** the `kotlin { android { } }` DSL is reached from convention code through the `lioraAndroid {}` helper, since KGP's `androidTarget` is a different, legacy API.
 - **Robolectric:** needs `--add-opens=java.base/jdk.internal.access=ALL-UNNAMED` on JDK 17+. It is already set in `configureHostTests()`.
+  - Don't poll a repository with `runBlocking` inside `composeRule.waitUntil`. It blocks the main thread, so a ViewModel write that resumes on Main between its steps never finishes. Wait for what the screen shows, then read the repository once.
   - A text field inside a dialog (the logger's rename, history's save as routine) keeps Compose from ever going idle, even with the test clock paused. Don't open those dialogs in UI tests; cover the write in `core/data` tests and check the dialog on a device.
   - Material's date picker dialog fills in a moment after it opens: `waitUntil` its content appears. Each day's semantic text is the full date ("Monday, August 10, 2026"), not the day number.
   - Images: `TestLioraApplication`'s Coil loader decodes on the main thread with `BitmapFactory`, because Robolectric's native `ImageDecoder` fails on Windows. Tests that need photos draw them (`syntheticPhoto` in the app tests) and import them through the real `PhotoStorage`.

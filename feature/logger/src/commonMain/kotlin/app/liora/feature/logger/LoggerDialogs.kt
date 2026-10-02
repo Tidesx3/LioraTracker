@@ -52,6 +52,7 @@ internal enum class LoggerDialog {
     Discard,
     Reorder,
     Finish,
+    Gym,
 
     // A finished workout being corrected.
     Date,
@@ -66,6 +67,7 @@ internal class LoggerDialogActions(
     val onDiscard: () -> Unit,
     val onReorder: (workoutExerciseIds: List<String>) -> Unit,
     val onFinish: (updateRoutine: Boolean) -> Unit,
+    val onUseGym: (gymId: String) -> Unit,
     val corrections: CorrectionActions,
     val onDismiss: () -> Unit,
 )
@@ -121,6 +123,18 @@ internal fun LoggerDialogHost(
                 onDiscard = {
                     onDismiss()
                     actions.onDiscard()
+                },
+                onDismiss = onDismiss,
+            )
+        }
+
+        LoggerDialog.Gym -> {
+            GymDialog(
+                gyms = state.gyms,
+                inUse = state.gym,
+                onUse = { gymId ->
+                    onDismiss()
+                    actions.onUseGym(gymId)
                 },
                 onDismiss = onDismiss,
             )
