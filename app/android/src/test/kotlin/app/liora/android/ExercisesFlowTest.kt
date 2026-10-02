@@ -75,9 +75,11 @@ class ExercisesFlowTest {
         composeRule.onAllNodesWithText("Quadrizeps").onFirst().performClick()
         composeRule.onNodeWithText("Speichern").performClick()
 
-        // Back in the library, the new exercise matches the search that created it.
-        waitForText("Eigene")
-        composeRule.onNode(hasText("Beinpresse Internat") and !hasSetTextAction()).performClick()
+        // Back in the library, the new exercise matches the search that created it. (Waiting for "Eigene"
+        // would pass at once: the filter chip has that text too.)
+        val newExercise = hasText("Beinpresse Internat") and !hasSetTextAction()
+        composeRule.waitUntil(TIMEOUT_MS) { composeRule.onAllNodes(newExercise).fetchSemanticsNodes().isNotEmpty() }
+        composeRule.onNode(newExercise).performClick()
         waitForText("Quadrizeps")
 
         composeRule.onNodeWithContentDescription("Weitere Optionen").performClick()

@@ -13,7 +13,8 @@ lists its records and sessions, and flags a stall. The Progress tab shows the we
 consistency grid, sets per muscle on a body heatmap, every exercise's best, and a monthly report.
 Body tracks bodyweight, body fat and circumferences day by day, with a chart and the change over the
 month, and keeps progress photos private on the phone, compared side by side with the weight change
-between them. Next are settings with import and export. Details and progress are in
+between them. Settings cover rest defaults, the e1RM formula, the stall window, theme and language.
+Next are units, gym profiles, and import and export. Details and progress are in
 [docs/PLAN.md](docs/PLAN.md).
 
 ## Principles

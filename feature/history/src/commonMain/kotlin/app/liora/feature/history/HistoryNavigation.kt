@@ -75,5 +75,5 @@ fun EntryProviderScope<NavKey>.historyEntries(navigator: Navigator) {
 val historyModule =
     module {
         viewModelOf(::HistoryViewModel)
-        viewModel { (workoutId: String) -> WorkoutDetailViewModel(workoutId, get(), get(), get()) }
+        viewModel { (workoutId: String) -> WorkoutDetailViewModel(workoutId, get(), get(), get(), get()) }
     }

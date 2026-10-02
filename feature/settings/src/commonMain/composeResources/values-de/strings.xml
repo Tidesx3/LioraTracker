@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="settings_title">Einstellungen</string>
-  <string name="settings_empty_title">Mach die App zu deiner</string>
-  <string name="settings_empty_body">Einheiten, Pausentimer, Hantelscheiben und Stange sowie Backup und Sync richtest du hier ein.</string>
+
+  <string name="section_workout">Training</string>
+  <string name="rest_working">Pause zwischen Sätzen</string>
+  <string name="rest_warmup">Pause nach Aufwärmsätzen</string>
+  <string name="rest_hint">Wenn die Übung keine eigene Pause hat</string>
+
+  <string name="section_progress">Fortschritt</string>
+  <string name="formula">Geschätztes 1RM</string>
+  <string name="formula_epley">Epley</string>
+  <string name="formula_epley_body">Die übliche Formel; bei vielen Wiederholungen etwas großzügig</string>
+  <string name="formula_brzycki">Brzycki</string>
+  <string name="formula_brzycki_body">Vorsichtiger ab etwa 10 Wiederholungen</string>
+  <string name="stall_window">Stagnation melden nach</string>
+  <plurals name="stall_weeks">
+    <item quantity="one">%1$d Woche ohne neue Bestleistung</item>
+    <item quantity="other">%1$d Wochen ohne neue Bestleistung</item>
+  </plurals>
+
+  <string name="section_appearance">Darstellung</string>
+  <string name="theme">Design</string>
+  <string name="theme_system">Wie das Handy</string>
+  <string name="theme_light">Hell</string>
+  <string name="theme_dark">Dunkel</string>
+  <string name="dynamic_color">Farben vom Hintergrundbild</string>
+  <string name="language">Sprache</string>
+  <string name="language_system">Wie das Handy</string>
+
+  <string name="dialog_cancel">Abbrechen</string>
 </resources>

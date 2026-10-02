@@ -55,3 +55,6 @@ object LioraTheme {
 /** The platform's dynamic (wallpaper-derived) scheme, or null where unsupported. */
 @Composable
 internal expect fun platformDynamicColorScheme(darkTheme: Boolean): ColorScheme?
+
+/** Whether the phone offers colors from the wallpaper (Android 12 and up). */
+expect val dynamicColorSupported: Boolean

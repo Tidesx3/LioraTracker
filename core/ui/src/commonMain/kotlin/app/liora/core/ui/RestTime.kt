@@ -37,19 +37,21 @@ fun restLabel(seconds: Int?): String =
         else -> stringResource(Res.string.rest_value, seconds.seconds.formatAsClock())
     }
 
-/** Picks a rest time: the exercise's own default (null), off (0), or a common duration. */
+/** Picks a rest time: the exercise's own default (null, when offered), off (0), or a common duration. */
 @Composable
 fun RestTimePicker(
     current: Int?,
     onChoose: (Int?) -> Unit,
     onDismiss: () -> Unit,
+    // The app-wide default has no exercise default to fall back on.
+    offerExerciseDefault: Boolean = true,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.rest_picker_title)) },
         text = {
             LazyColumn(Modifier.selectableGroup()) {
-                items(REST_CHOICES) { seconds ->
+                items(if (offerExerciseDefault) REST_CHOICES else REST_CHOICES.filterNotNull()) { seconds ->
                     Row(
                         modifier = Modifier.fillMaxWidth().clickable { onChoose(seconds) }.padding(vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically,

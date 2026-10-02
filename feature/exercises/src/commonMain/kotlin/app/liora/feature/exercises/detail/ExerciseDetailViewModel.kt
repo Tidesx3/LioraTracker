@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.exercise.ExerciseInUseException
 import app.liora.core.data.exercise.ExerciseRepository
+import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.domain.ExerciseProgress
 import app.liora.core.domain.PersonalRecord
@@ -11,6 +12,7 @@ import app.liora.core.domain.PersonalRecords
 import app.liora.core.domain.ProgressMetric
 import app.liora.core.domain.ProgressPoint
 import app.liora.core.domain.RecordType
+import app.liora.core.domain.Settings
 import app.liora.core.domain.Stall
 import app.liora.core.domain.Stalls
 import app.liora.core.model.Exercise
@@ -75,21 +77,23 @@ data class ExerciseProgressState(
             trackingType: TrackingType,
             sessions: List<ExerciseSession>,
             chosen: ProgressMetric?,
+            settings: Settings,
             clock: Clock,
         ): ExerciseProgressState? {
             if (sessions.isEmpty()) return null
             val metrics = ExerciseProgress.metricsFor(trackingType)
             val metric = chosen?.takeIf { it in metrics } ?: metrics.first()
-            val all = PersonalRecords.compute(trackingType, sessions.flatMap { it.sets }).values
+            val formula = settings.oneRepMaxFormula
+            val all = PersonalRecords.compute(trackingType, sessions.flatMap { it.sets }, formula).values
             val (repMaxes, records) = all.partition { it.key.type == RecordType.RepMax }
             val now = clock.now()
-            val stall = Stalls.of(trackingType, sessions, now)
+            val stall = Stalls.of(trackingType, sessions, now, settings.stallWindow, formula)
             return ExerciseProgressState(
                 trackingType = trackingType,
                 sessions = sessions.reversed(),
                 metrics = metrics,
                 metric = metric,
-                points = ExerciseProgress.series(trackingType, sessions, metric),
+                points = ExerciseProgress.series(trackingType, sessions, metric, formula),
                 records = records.sortedBy { it.key.type.ordinal },
                 repMaxes = telling(repMaxes),
                 stall = stall,
@@ -122,6 +126,7 @@ class ExerciseDetailViewModel(
     private val exerciseId: String,
     private val repository: ExerciseRepository,
     history: WorkoutHistoryRepository,
+    settings: SettingsRepository,
     clock: Clock,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
@@ -143,12 +148,13 @@ class ExerciseDetailViewModel(
             exercise,
             history.sessionsOf(exerciseId),
             metric,
+            settings.settings,
             dialog,
-        ) { (exercise, baseName), sessions, chosen, open ->
+        ) { (exercise, baseName), sessions, chosen, preferences, open ->
             if (exercise == null) {
                 ExerciseDetailUiState.Gone
             } else {
-                val progress = ExerciseProgressState.of(exercise.trackingType, sessions, chosen, clock)
+                val progress = ExerciseProgressState.of(exercise.trackingType, sessions, chosen, preferences, clock)
                 ExerciseDetailUiState.Loaded(exercise, baseName, progress, open)
             }
         }

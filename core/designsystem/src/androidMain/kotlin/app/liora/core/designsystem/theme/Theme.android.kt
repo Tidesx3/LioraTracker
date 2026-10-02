@@ -13,3 +13,5 @@ internal actual fun platformDynamicColorScheme(darkTheme: Boolean): ColorScheme?
     val context = LocalContext.current
     return if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
 }
+
+actual val dynamicColorSupported: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S

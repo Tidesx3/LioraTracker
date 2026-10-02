@@ -1,6 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="settings_title">Settings</string>
-  <string name="settings_empty_title">Make it yours</string>
-  <string name="settings_empty_body">Units, rest timer defaults, plates and bar weight, backup and sync will be set up here.</string>
+
+  <string name="section_workout">Workout</string>
+  <string name="rest_working">Rest between sets</string>
+  <string name="rest_warmup">Rest after warm-up sets</string>
+  <string name="rest_hint">When the exercise has no rest of its own</string>
+
+  <string name="section_progress">Progress</string>
+  <string name="formula">Estimated 1RM</string>
+  <string name="formula_epley">Epley</string>
+  <string name="formula_epley_body">The usual one; a little generous at higher reps</string>
+  <string name="formula_brzycki">Brzycki</string>
+  <string name="formula_brzycki_body">More cautious above about 10 reps</string>
+  <string name="stall_window">Stall alert after</string>
+  <plurals name="stall_weeks">
+    <item quantity="one">%1$d week without a new best</item>
+    <item quantity="other">%1$d weeks without a new best</item>
+  </plurals>
+
+  <string name="section_appearance">Appearance</string>
+  <string name="theme">Theme</string>
+  <string name="theme_system">As the phone</string>
+  <string name="theme_light">Light</string>
+  <string name="theme_dark">Dark</string>
+  <string name="dynamic_color">Colors from the wallpaper</string>
+  <string name="language">Language</string>
+  <string name="language_system">As the phone</string>
+  <string name="language_en" translatable="false">English</string>
+  <string name="language_de" translatable="false">Deutsch</string>
+
+  <string name="dialog_cancel">Cancel</string>
 </resources>

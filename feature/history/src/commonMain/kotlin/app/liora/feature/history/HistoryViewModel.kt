@@ -3,8 +3,10 @@ package app.liora.feature.history
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.exercise.ExerciseRepository
+import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.domain.HistoryRecords
+import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.TrainingCalendar
 import app.liora.core.domain.volumeOf
 import app.liora.core.model.Exercise
@@ -74,6 +76,7 @@ sealed interface HistoryUiState {
 class HistoryViewModel(
     history: WorkoutHistoryRepository,
     exerciseRepository: ExerciseRepository,
+    settings: SettingsRepository,
     private val clock: Clock,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
@@ -87,13 +90,13 @@ class HistoryViewModel(
             .onStart { emit(emptyMap()) }
 
     val uiState: StateFlow<HistoryUiState> =
-        combine(history.workouts, exercises) { workouts, exercisesById ->
+        combine(history.workouts, exercises, settings.settings) { workouts, exercisesById, chosen ->
             if (workouts.isEmpty()) {
                 HistoryUiState.Empty
             } else {
                 val zone = TimeZone.currentSystemDefault()
                 HistoryUiState.Loaded(
-                    workouts = items(workouts, exercisesById, zone),
+                    workouts = items(workouts, exercisesById, zone, chosen.oneRepMaxFormula),
                     today = TrainingCalendar.dayOf(clock.now(), zone),
                 )
             }
@@ -110,9 +113,10 @@ internal fun items(
     workouts: List<FinishedWorkout>,
     exercises: Map<String, Exercise>,
     zone: TimeZone,
+    formula: OneRepMaxFormula,
 ): List<WorkoutItem> {
     val trackingTypeOf = { id: String -> exercises[id]?.trackingType ?: TrackingType.WeightReps }
-    val records = HistoryRecords.of(workouts, trackingTypeOf = trackingTypeOf)
+    val records = HistoryRecords.of(workouts, formula, trackingTypeOf)
     return workouts.map { workout ->
         val start = workout.startedAt.toLocalDateTime(zone)
         WorkoutItem(

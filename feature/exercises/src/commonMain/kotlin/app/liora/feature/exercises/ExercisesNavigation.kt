@@ -115,6 +115,6 @@ val exercisesModule =
     module {
         viewModelOf(::ExerciseLibraryViewModel)
         viewModelOf(::ExercisePickerViewModel)
-        viewModel { (exerciseId: String) -> ExerciseDetailViewModel(exerciseId, get(), get(), get()) }
+        viewModel { (exerciseId: String) -> ExerciseDetailViewModel(exerciseId, get(), get(), get(), get()) }
         viewModel { (route: ExerciseEditorRoute, language: String) -> ExerciseEditorViewModel(route, language, get()) }
     }

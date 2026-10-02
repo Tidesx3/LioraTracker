@@ -18,6 +18,9 @@ import kotlin.time.Duration.Companion.seconds
 interface SettingsRepository {
     val settings: Flow<Settings>
 
+    /** The settings now; unlike [settings], safe to read inside a database transaction. */
+    suspend fun current(): Settings
+
     /** Applies [change]; only the choices it actually changes are written, so they alone sync. */
     suspend fun update(change: (Settings) -> Settings)
 }
@@ -32,6 +35,9 @@ internal class OfflineSettingsRepository(
             .observeAll()
             .map { rows -> SettingsCodec.decode(rows.associate { it.key to it.value }) }
             .distinctUntilChanged()
+
+    override suspend fun current(): Settings =
+        SettingsCodec.decode(dao.all().filter { it.sync.deletedAt == null }.associate { it.key to it.value })
 
     override suspend fun update(change: (Settings) -> Settings) =
         transactions.inTransaction {

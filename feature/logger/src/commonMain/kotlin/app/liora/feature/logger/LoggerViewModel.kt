@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.exercise.ExerciseRepository
 import app.liora.core.data.routine.RoutineRepository
+import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.FinishedWorkoutSession
 import app.liora.core.data.workout.RestTimerRepository
@@ -12,6 +13,7 @@ import app.liora.core.data.workout.SetLogger
 import app.liora.core.data.workout.WorkoutEditor
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.data.workout.WorkoutSession
+import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.RecordKey
 import app.liora.core.domain.RestDefaults
 import app.liora.core.domain.RoutineUpdate
@@ -88,6 +90,8 @@ sealed interface LoggerUiState {
         val routine: Routine?,
         val restTimer: RestTimer?,
         val restDefaults: RestDefaults,
+        /** How estimated one-rep maxes are worked out, for today's records. */
+        val formula: OneRepMaxFormula = OneRepMaxFormula.Epley,
         val edit: CellEdit?,
         /** A field that kept a set from being ticked off; shown as an error until it gets a value. */
         val invalid: CellRef?,
@@ -118,6 +122,7 @@ sealed interface LoggerUiState {
                             trackingTypeOf(exerciseId),
                             history[exerciseId].orEmpty(),
                             instances.flatMap { it.sets },
+                            formula,
                         ).entries
                 }.associate { it.key to it.value }
 
@@ -196,7 +201,7 @@ class LoggerViewModel(
     private val activeWorkouts: ActiveWorkoutRepository,
     private val history: WorkoutHistoryRepository,
     private val restTimers: RestTimerRepository,
-    private val restDefaults: RestDefaults,
+    settings: SettingsRepository,
     exerciseRepository: ExerciseRepository,
     routines: RoutineRepository,
 ) : ViewModel() {
@@ -266,8 +271,8 @@ class LoggerViewModel(
             exercises,
             restTimer,
             editing,
-            routine,
-        ) { session, byId, timer, (cell, error), fromRoutine ->
+            combine(routine, settings.settings) { fromRoutine, chosen -> fromRoutine to chosen },
+        ) { session, byId, timer, (cell, error), (fromRoutine, chosen) ->
             val workout = session.workout?.workout
             if (workout == null) {
                 LoggerUiState.NoWorkout
@@ -279,7 +284,8 @@ class LoggerViewModel(
                     history = session.history,
                     routine = fromRoutine,
                     restTimer = timer,
-                    restDefaults = restDefaults,
+                    restDefaults = chosen.rest,
+                    formula = chosen.oneRepMaxFormula,
                     // A cell whose set was removed meanwhile is no longer being edited.
                     edit = cell?.takeIf { workout.find(it.cell.setId) != null },
                     invalid = error?.takeIf { workout.find(it.setId) != null },

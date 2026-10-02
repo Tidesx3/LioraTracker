@@ -45,6 +45,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - `ownerId` is a server-side concept, added in Phase 3. The local DB belongs to one user.
 - **Local-only tables:** `local_meta` (device id, seed version, the running rest timer) and `exercise_name` (search index, rebuilt from the seed).
 - **Photos:** progress photos are files in app-private `files/photos` (never the shared gallery), written only through `PhotoStorage`. Their rows sync; the images will sync as blobs (Phase 2).
+- **Settings:** read them from `SettingsRepository` (`settings` Flow, or `current()` inside a transaction), never hard-coded defaults: the e1RM formula, stall window and rest defaults all come from there. One `preference` row per choice; add a key in `SettingsCodec` for a new one.
 - **Derived data:** PRs and stats caches are recomputed locally and never synced.
 - **Schema:** Room schemas are exported to `core/database/schemas/` and committed. Schema v1 is live on devices, so every change needs a version bump plus a migration (or `AutoMigration`) and a migration test.
 - **Writes must outlive the screen:** don't pop a screen right after launching a write in its `viewModelScope`. Leaving the screen clears the ViewModel and cancels the write. Close in reaction to the new data instead (see `LoggerScreen`).

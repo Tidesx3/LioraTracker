@@ -3,6 +3,7 @@ package app.liora.feature.history.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.exercise.ExerciseRepository
+import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.domain.HistoryRecords
@@ -71,6 +72,7 @@ class WorkoutDetailViewModel(
     private val workoutId: String,
     private val history: WorkoutHistoryRepository,
     exerciseRepository: ExerciseRepository,
+    settings: SettingsRepository,
     private val activeWorkouts: ActiveWorkoutRepository,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
@@ -90,10 +92,12 @@ class WorkoutDetailViewModel(
 
     /** The workout with the records its sets broke, measured against everything before it. */
     private val workoutWithRecords =
-        combine(history.workouts, exercises) { workouts, exercisesById ->
+        combine(history.workouts, exercises, settings.settings) { workouts, exercisesById, chosen ->
             workouts.firstOrNull { it.id == workoutId }?.let { workout ->
                 val records =
-                    HistoryRecords.of(workouts) { exercisesById[it]?.trackingType ?: TrackingType.WeightReps }
+                    HistoryRecords.of(workouts, chosen.oneRepMaxFormula) {
+                        exercisesById[it]?.trackingType ?: TrackingType.WeightReps
+                    }
                 val setIds = workout.exercises.flatMap { exercise -> exercise.sets.map { it.id } }.toSet()
                 Triple(workout, exercisesById, records.filterKeys { it in setIds })
             }

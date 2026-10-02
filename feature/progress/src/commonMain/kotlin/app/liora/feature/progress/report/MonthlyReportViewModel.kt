@@ -3,6 +3,7 @@ package app.liora.feature.progress.report
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.exercise.ExerciseRepository
+import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.domain.MonthlyReport
 import app.liora.core.domain.MonthlyReports
@@ -51,6 +52,7 @@ sealed interface MonthlyReportUiState {
 class MonthlyReportViewModel(
     history: WorkoutHistoryRepository,
     exerciseRepository: ExerciseRepository,
+    settings: SettingsRepository,
     private val clock: Clock,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
@@ -66,7 +68,7 @@ class MonthlyReportViewModel(
             .onStart { emit(emptyMap()) }
 
     val uiState: StateFlow<MonthlyReportUiState> =
-        combine(history.workouts, exercises, offset) { workouts, byId, back ->
+        combine(history.workouts, exercises, offset, settings.settings) { workouts, byId, back, chosen ->
             val zone = TimeZone.currentSystemDefault()
             val current = TrainingCalendar.dayOf(clock.now(), zone).yearMonth
             var month = current
@@ -78,6 +80,7 @@ class MonthlyReportViewModel(
                     zone = zone,
                     trackingTypeOf = { byId[it]?.trackingType ?: TrackingType.WeightReps },
                     targetsOf = { id -> byId[id]?.let { MuscleTargets(it.primaryMuscles, it.secondaryMuscles) } },
+                    formula = chosen.oneRepMaxFormula,
                 )
             MonthlyReportUiState.Loaded(
                 report = report,

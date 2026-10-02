@@ -65,7 +65,8 @@ internal class OfflineActiveWorkoutRepository(
     private val transactions: TransactionRunner,
     private val ids: IdGenerator,
     private val stamper: SyncStamper,
-    restDefaults: RestDefaults = RestDefaults(),
+    // Read as each set is ticked off, so a change in Settings applies to the next rest.
+    restDefaults: suspend () -> RestDefaults = { RestDefaults() },
 ) : ActiveWorkoutRepository {
     override val editor: WorkoutEditor =
         OfflineWorkoutEditor(WorkoutTarget.Active, workoutDao, exerciseDao, transactions, ids, stamper)

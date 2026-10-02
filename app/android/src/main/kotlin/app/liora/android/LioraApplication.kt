@@ -13,6 +13,7 @@ import app.liora.feature.exercises.exercisesModule
 import app.liora.feature.history.historyModule
 import app.liora.feature.logger.loggerModule
 import app.liora.feature.progress.progressModule
+import app.liora.feature.settings.settingsModule
 import app.liora.feature.train.trainModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +43,7 @@ open class LioraApplication : Application() {
                         exercisesModule,
                         progressModule,
                         bodyModule,
+                        settingsModule,
                     ),
             )
         }

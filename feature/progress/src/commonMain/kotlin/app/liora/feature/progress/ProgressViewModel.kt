@@ -3,10 +3,12 @@ package app.liora.feature.progress
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.exercise.ExerciseRepository
+import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.domain.BoardEntry
 import app.liora.core.domain.MuscleTargets
 import app.liora.core.domain.RecordsBoard
+import app.liora.core.domain.Settings
 import app.liora.core.domain.TrainingCalendar
 import app.liora.core.domain.setsPerMuscle
 import app.liora.core.model.Exercise
@@ -32,6 +34,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 sealed interface ProgressUiState {
     data object Loading : ProgressUiState
@@ -72,6 +75,7 @@ data class BoardRow(
 class ProgressViewModel(
     history: WorkoutHistoryRepository,
     exerciseRepository: ExerciseRepository,
+    settings: SettingsRepository,
     private val clock: Clock,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
@@ -88,8 +92,14 @@ class ProgressViewModel(
             .onStart { emit(emptyMap()) }
 
     val uiState: StateFlow<ProgressUiState> =
-        combine(history.workouts, exercises, firstDayOfWeek, weekOffset) { workouts, byId, firstDay, offset ->
-            if (workouts.isEmpty()) ProgressUiState.Empty else loaded(workouts, byId, firstDay, offset)
+        combine(
+            history.workouts,
+            exercises,
+            firstDayOfWeek,
+            weekOffset,
+            settings.settings,
+        ) { workouts, byId, firstDay, offset, chosen ->
+            if (workouts.isEmpty()) ProgressUiState.Empty else loaded(workouts, byId, firstDay, offset, chosen)
         }
             // The board goes through every set ever logged; keep that off the main thread.
             .flowOn(Dispatchers.Default)
@@ -117,6 +127,7 @@ class ProgressViewModel(
         exercisesById: Map<String, Exercise>,
         firstDay: DayOfWeek,
         offset: Int,
+        chosen: Settings,
     ): ProgressUiState.Loaded {
         val zone = TimeZone.currentSystemDefault()
         val now = clock.now()
@@ -147,14 +158,21 @@ class ProgressViewModel(
             hasEarlierWeeks = trainingDays.any { it < muscleWeek },
             setsPerMuscle = setsPerMuscle(inWeek(muscleWeek), targetsOf),
             board =
-                RecordsBoard.of(workouts, { exercisesById[it]?.trackingType }, now).mapNotNull { entry ->
-                    exercisesById[entry.exerciseId]?.let { exercise ->
-                        val stallWeeks = entry.stall?.let { ((now - it.best.at).inWholeDays / DAYS_PER_WEEK).toInt() }
-                        BoardRow(exercise.name, exercise.trackingType, entry, stallWeeks)
-                    }
-                },
+                RecordsBoard
+                    .of(workouts, { exercisesById[it]?.trackingType }, now, chosen.oneRepMaxFormula, chosen.stallWindow)
+                    .mapNotNull { entry -> boardRow(entry, exercisesById, now) },
         )
     }
+
+    private fun boardRow(
+        entry: BoardEntry,
+        exercisesById: Map<String, Exercise>,
+        now: Instant,
+    ): BoardRow? =
+        exercisesById[entry.exerciseId]?.let { exercise ->
+            val stallWeeks = entry.stall?.let { ((now - it.best.at).inWholeDays / DAYS_PER_WEEK).toInt() }
+            BoardRow(exercise.name, exercise.trackingType, entry, stallWeeks)
+        }
 
     private companion object {
         const val DAYS_PER_WEEK = 7

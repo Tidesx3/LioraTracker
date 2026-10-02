@@ -3,6 +3,7 @@ package app.liora.core.domain
 import app.liora.core.model.ExerciseSession
 import app.liora.core.model.FinishedWorkout
 import app.liora.core.model.TrackingType
+import kotlin.time.Duration
 import kotlin.time.Instant
 
 /** Each exercise's sessions across [workouts], oldest first, by exercise id; only completed sets. */
@@ -37,6 +38,7 @@ object RecordsBoard {
         trackingTypeOf: (exerciseId: String) -> TrackingType?,
         now: Instant,
         formula: OneRepMaxFormula = OneRepMaxFormula.Epley,
+        stallWindow: Duration = Stalls.DEFAULT_WINDOW,
     ): List<BoardEntry> =
         sessionsByExercise(workouts)
             .mapNotNull { (exerciseId, sessions) ->
@@ -48,6 +50,6 @@ object RecordsBoard {
                     points.reduceOrNull { best, point ->
                         if (ExerciseProgress.improves(metric, point.value, best.value)) point else best
                     } ?: return@mapNotNull null
-                BoardEntry(exerciseId, metric, best, Stalls.of(trackingType, sessions, now, formula = formula))
+                BoardEntry(exerciseId, metric, best, Stalls.of(trackingType, sessions, now, stallWindow, formula))
             }.sortedByDescending { it.best.at }
 }

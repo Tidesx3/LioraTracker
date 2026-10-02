@@ -71,7 +71,7 @@ internal class OfflineSetLogger(
     private val transactions: TransactionRunner,
     private val ids: IdGenerator,
     private val stamper: SyncStamper,
-    private val restDefaults: RestDefaults = RestDefaults(),
+    private val restDefaults: suspend () -> RestDefaults = { RestDefaults() },
 ) : SetLogger {
     override suspend fun addSet(workoutExerciseId: String) {
         transactions.inTransaction {
@@ -143,7 +143,7 @@ internal class OfflineSetLogger(
         // Mid-round in a superset you go straight to the next exercise; a timer left running would lie.
         val rest =
             if (endedAt == null && WorkoutOrder.restsAfter(workout, ref)) {
-                restAfter(logged, exercise, exerciseDao.settingsOf(exercise.exerciseId), restDefaults)
+                restAfter(logged, exercise, exerciseDao.settingsOf(exercise.exerciseId), restDefaults())
             } else {
                 null
             }
