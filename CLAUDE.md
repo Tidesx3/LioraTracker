@@ -82,7 +82,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - Replace `@android:color/white` with `#FFFFFFFF`.
   - Expose it through `LioraIcons`.
 - **Colors:** use `MaterialTheme.colorScheme` for standard roles and `LioraTheme.colors` for set types, PRs and completion. The accent is violet (#5504CF; #A57BFF for text and buttons in dark). Numbers that change live (timers, weights) get `.tabularNumbers()`.
-- **Building blocks:** cards are `LioraCard`; rows of figures are `Stat`s in a `StatRow` (designsystem), never hand-made label/value columns; records are listed with `RecordsCard` (`core:ui`), with values from `RecordHighlights`. Avoid sentences that pack data together ("Bench: heaviest, best 1RM"): give each item a row or a chip.
+- **Building blocks:** cards are `LioraCard`; rows of figures are `Stat`s in a `StatRow` (designsystem), never hand-made label/value columns; records are listed with `RecordsCard` (`core:ui`), with values from `RecordHighlights`; empty screens are an `EmptyState` with one of the `Illustration` scenes (designsystem, drawn in code in theme tints; a new one goes into `Scenes.kt` and shows up in `IllustrationsTest`). Avoid sentences that pack data together ("Bench: heaviest, best 1RM"): give each item a row or a chip.
 - **Charts:** use the wrappers in `designsystem` (`LineChart`); only they touch Vico. Progress values and records format through `valueText`/`axisText` in `core:ui`, so units and locales stay consistent.
 - **Versions:** all in `gradle/libs.versions.toml`. SDK levels and the JVM target are in `build-logic/.../LioraConfig.kt`.
 - **Tests:**

@@ -52,8 +52,9 @@ object LioraCardDefaults {
         with(MaterialTheme.colorScheme) { if (isDark()) surfaceContainerHigh else surfaceContainerLowest }
 }
 
+/** Whether the theme is a dark one, from its surface, so wallpaper colors count too. */
 @Composable
-private fun isDark(): Boolean = MaterialTheme.colorScheme.surface.luminance() < HALF
+internal fun isDark(): Boolean = MaterialTheme.colorScheme.surface.luminance() < HALF
 
 private const val SHADOW_ELEVATION = 10
 private const val HALF = 0.5f

@@ -27,6 +27,7 @@ import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.core.navigation.LocalPaneRole
@@ -105,7 +106,7 @@ private fun HistoryContent(
 
             HistoryUiState.Empty -> {
                 EmptyState(
-                    icon = LioraIcons.History,
+                    illustration = Illustration.Calendar,
                     title = stringResource(Res.string.history_empty_title),
                     body = stringResource(Res.string.history_empty_body),
                     modifier = Modifier.padding(padding),

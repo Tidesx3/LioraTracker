@@ -45,6 +45,7 @@ import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.model.Equipment
 import app.liora.core.model.Exercise
 import app.liora.core.model.Muscle
@@ -315,7 +316,7 @@ internal fun NoResults(
     modifier: Modifier = Modifier,
 ) {
     EmptyState(
-        icon = LioraIcons.Search,
+        illustration = Illustration.Search,
         title = stringResource(Res.string.exercises_no_results_title),
         body = stringResource(Res.string.exercises_no_results_body),
         modifier = modifier,

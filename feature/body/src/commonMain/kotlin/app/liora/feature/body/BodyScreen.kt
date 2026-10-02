@@ -37,6 +37,7 @@ import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.rememberDateFormatter
@@ -133,7 +134,7 @@ private fun BodyList(
         if (state.summaries.isEmpty()) {
             item(key = "empty") {
                 EmptyState(
-                    icon = LioraIcons.Body,
+                    illustration = Illustration.Body,
                     title = stringResource(Res.string.body_empty_title),
                     body = stringResource(Res.string.body_empty_body),
                 )

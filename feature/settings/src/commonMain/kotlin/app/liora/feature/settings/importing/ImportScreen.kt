@@ -49,6 +49,7 @@ import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.core.domain.importing.ExerciseChoice
@@ -181,7 +182,7 @@ private fun Failed(
 ) {
     val notAnExport = problem == ImportProblem.NotAnExport
     EmptyState(
-        icon = LioraIcons.UnknownFile,
+        illustration = Illustration.UnknownFile,
         title =
             stringResource(
                 if (notAnExport) Res.string.import_not_an_export_title else Res.string.import_unreadable_title,
@@ -384,7 +385,7 @@ private fun Done(
             },
         )
     EmptyState(
-        icon = LioraIcons.Check,
+        illustration = Illustration.Done,
         title = stringResource(Res.string.import_done_title),
         body = lines.joinToString("\n"),
         modifier = modifier.readableWidth().padding(top = 48.dp),

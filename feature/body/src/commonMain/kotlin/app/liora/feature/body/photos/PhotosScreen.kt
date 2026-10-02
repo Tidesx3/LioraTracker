@@ -52,6 +52,7 @@ import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.core.model.MeasurementType
 import app.liora.core.model.PhotoPose
@@ -153,7 +154,7 @@ internal fun PhotosScreen(
 
                 uiState.total == 0 -> {
                     EmptyState(
-                        icon = LioraIcons.Photos,
+                        illustration = Illustration.Photos,
                         title = stringResource(Res.string.photos_empty_title),
                         body = stringResource(Res.string.photos_empty_body),
                     )

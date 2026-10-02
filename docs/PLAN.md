@@ -5,7 +5,7 @@ Check it when a milestone or phase starts, and keep **Progress** below current w
 
 ## Progress
 
-As of 2026-10-02:
+As of 2026-10-03:
 
 - **Phase 0** is done.
 - **Phase 1**, milestones 1–5 are done: database and seed, domain, exercises and foldables, routines, and the logger
@@ -144,8 +144,13 @@ As of 2026-10-02:
     (`RecordHighlights` in `core/domain`), on workout detail, the finish sheet and the monthly report; history
     cards show the name, date, duration, volume and sets only; the consistency grid is drawn, so its rows
     line up; the monthly report's figures sit two to a row; an exercise's sessions list their sets as chips,
-    alike sets counted; charts label their axes in Sora. Next in 2b: illustrated empty states and a pass
-    over the remaining screens on the phone.
+    alike sets counted; charts label their axes in Sora; the body heatmap is an anatomical figure (`0161ee1`).
+    Empty screens are illustrated: `EmptyState` takes an `Illustration` (`designsystem/illustration`), one of
+    eleven small scenes drawn in code on a soft blob of the accent (routines, a barbell, a calendar, a chart,
+    search, a kettlebell, a scale, photos, plates, an unreadable file, a tick in confetti). Their colors are
+    tints of the theme's, so they follow dark mode and wallpaper colors; `IllustrationsTest` renders them
+    all on one sheet. The list-detail placeholders use their feature's scene. Next in 2b: a pass over the
+    remaining screens on the phone.
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a
   milestone go in TODO.md.

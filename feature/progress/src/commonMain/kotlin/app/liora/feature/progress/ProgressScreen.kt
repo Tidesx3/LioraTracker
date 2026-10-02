@@ -28,6 +28,7 @@ import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.component.Stat
 import app.liora.core.designsystem.component.StatRow
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.rememberDateFormatter
@@ -107,7 +108,7 @@ private fun ProgressContent(
                 ProgressUiState.Empty -> {
                     item {
                         EmptyState(
-                            icon = LioraIcons.Progress,
+                            illustration = Illustration.Chart,
                             title = stringResource(Res.string.progress_empty_title),
                             body = stringResource(Res.string.progress_empty_body),
                         )

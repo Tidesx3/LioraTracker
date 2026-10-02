@@ -45,6 +45,7 @@ import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.model.RoutineFolder
 import app.liora.core.navigation.LocalPaneRole
@@ -213,7 +214,7 @@ private fun TrainContent(
             if (!uiState.loading && uiState.isEmpty) {
                 item(key = "empty") {
                     EmptyState(
-                        icon = LioraIcons.Train,
+                        illustration = Illustration.Routines,
                         title = stringResource(Res.string.train_routines_empty_title),
                         body = stringResource(Res.string.train_routines_empty_body),
                     )

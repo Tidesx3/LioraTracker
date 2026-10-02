@@ -146,6 +146,8 @@ class RoutinesFlowTest {
         composeRule.onNode(isSelected() and hasText("Push")).assertIsDisplayed()
         composeRule.onAllNodesWithContentDescription("Back").assertCountEquals(0)
         composeRule.onNodeWithText("40 kg × 10").assertIsDisplayed()
+        // The exercises' names arrive after their sets.
+        waitForText(BENCH)
         composeRule.onRoot().captureRoboImage("src/test/screenshots/fold_inner_train_routine_dark.png")
 
         // The editor opens in the same pane and closes back to the routine.
@@ -208,6 +210,8 @@ class RoutinesFlowTest {
         composeRule.onNodeWithText("3 Übungen · 8 Sätze").assertIsDisplayed()
         composeRule.onNodeWithText("Supersatz").assertIsDisplayed()
         composeRule.onAllNodesWithText("80 kg × 8–12").assertCountEquals(3)
+        // The exercises' names arrive after their sets.
+        waitForText("Bankdrücken (Langhantel)")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/de_routine_detail_dark.png")
 
         composeRule.onNodeWithContentDescription("Bearbeiten").performClick()

@@ -22,6 +22,7 @@ import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.feature.settings.resources.Res
 import app.liora.feature.settings.resources.cd_use_gym
@@ -78,7 +79,7 @@ private fun GymsContent(
 
             state.gyms.isEmpty() -> {
                 EmptyState(
-                    icon = LioraIcons.Train,
+                    illustration = Illustration.Gym,
                     title = stringResource(Res.string.gyms_empty_title),
                     body = stringResource(Res.string.gyms_empty_body),
                     modifier = Modifier.padding(padding).readableWidth(),

@@ -8,6 +8,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.navigation.BodyRoute
 import app.liora.core.navigation.ExerciseDetailRoute
 import app.liora.core.navigation.ListDetail
@@ -31,7 +32,7 @@ fun EntryProviderScope<NavKey>.progressEntries(navigator: Navigator) {
             ListDetail.listPane {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     EmptyState(
-                        icon = LioraIcons.Progress,
+                        illustration = Illustration.Chart,
                         title = stringResource(Res.string.progress_pick_title),
                         body = stringResource(Res.string.progress_pick_body),
                     )

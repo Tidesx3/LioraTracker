@@ -48,6 +48,7 @@ import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.Stat
 import app.liora.core.designsystem.component.StatRow
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.layout.currentWindowLayout
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.theme.tabularNumbers
@@ -282,7 +283,7 @@ private fun LoggerContent(
     ) { padding ->
         if (state == null) {
             EmptyState(
-                icon = LioraIcons.Train,
+                illustration = Illustration.Workout,
                 title = stringResource(Res.string.logger_no_workout_title),
                 body = stringResource(Res.string.logger_no_workout_body),
                 modifier = Modifier.padding(padding),
@@ -392,7 +393,7 @@ internal fun WorkoutList(
         if (state.workout.exercises.isEmpty()) {
             item(key = "empty") {
                 EmptyState(
-                    icon = LioraIcons.Exercise,
+                    illustration = Illustration.Workout,
                     title = stringResource(Res.string.logger_empty_title),
                     body = stringResource(Res.string.logger_empty_body),
                 )

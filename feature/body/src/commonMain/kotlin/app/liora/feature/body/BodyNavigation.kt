@@ -8,6 +8,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.model.MeasurementType
 import app.liora.core.navigation.BodyRoute
 import app.liora.core.navigation.ComparePhotosRoute
@@ -47,7 +48,7 @@ fun EntryProviderScope<NavKey>.bodyEntries(navigator: Navigator) {
             ListDetail.listPane {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     EmptyState(
-                        icon = LioraIcons.Body,
+                        illustration = Illustration.Body,
                         title = stringResource(Res.string.body_pick_title),
                         body = stringResource(Res.string.body_pick_body),
                     )

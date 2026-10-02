@@ -5,7 +5,8 @@ an offline-first Android app now, then sync to your own Google Drive, a self-hos
 GUI, and AI features on top.
 
 **Status:** Phase 1, the offline MVP, is done, and Phase 2 (design and motion) is under way: the app has
-its look, a vivid violet with the Sora typeface, floating cards and pills. The database, domain logic, exercise library with
+its look, a vivid violet with the Sora typeface, floating cards and pills, and small drawn scenes on
+empty screens. The database, domain logic, exercise library with
 custom exercises, German, the foldable layouts, routines with folders and supersets, and the logger
 (number pad, rest timer, live workout notification, personal records, tabletop mode) are done. History
 is done too: list, calendar, workout detail (repeat, save as routine, delete) and editing past workouts
@@ -21,7 +22,7 @@ can load, show the plates per side for a barbell, and add warm-up sets. Everythi
 file (readable JSON plus the photos) that restores on another phone without overwriting newer changes,
 and workouts export as CSV for spreadsheets. Workouts and body measurements import from Hevy and Strong
 exports, with a review of which exercise each name becomes; gym-specific machines become variations of
-their own. Next is Phase 2: design and motion polish. Details and progress are in
+their own. Phase 2 continues with motion and playful copy. Details and progress are in
 [docs/PLAN.md](docs/PLAN.md).
 
 ## Principles

@@ -8,6 +8,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.navigation.ExercisePickerRoute
 import app.liora.core.navigation.ListDetail
 import app.liora.core.navigation.LoggerRoute
@@ -37,7 +38,7 @@ fun EntryProviderScope<NavKey>.trainEntries(navigator: Navigator) {
             ListDetail.listPane {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     EmptyState(
-                        icon = LioraIcons.Train,
+                        illustration = Illustration.Routines,
                         title = stringResource(Res.string.train_pick_title),
                         body = stringResource(Res.string.train_pick_body),
                     )
