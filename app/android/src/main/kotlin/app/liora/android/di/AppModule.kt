@@ -1,9 +1,11 @@
 package app.liora.android.di
 
 import android.content.Context
+import app.liora.android.photos.AndroidPhotoStorage
 import app.liora.android.ui.LioraAppViewModel
 import app.liora.android.workout.RestAlarmScheduler
 import app.liora.android.workout.WorkoutNotifier
+import app.liora.core.data.body.PhotoStorage
 import app.liora.core.data.seed.ExerciseSeedSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,6 +17,7 @@ val appModule =
     module {
         viewModelOf(::LioraAppViewModel)
         single<ExerciseSeedSource> { assetSeedSource(androidContext()) }
+        single<PhotoStorage> { AndroidPhotoStorage(androidContext()) }
         single { WorkoutNotifier(androidContext(), get(), get(), get(), get()) }
         single { RestAlarmScheduler(androidContext(), get(), get()) }
     }

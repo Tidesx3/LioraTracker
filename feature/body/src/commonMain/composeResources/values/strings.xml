@@ -25,7 +25,53 @@
   <string name="log_invalid">Check this value</string>
   <string name="log_pick_day">Change the day</string>
 
+  <string name="photos_title">Progress photos</string>
+  <string name="photos_card_empty">See how you change, side by side</string>
+  <plurals name="photos_count">
+    <item quantity="one">%1$d photo</item>
+    <item quantity="other">%1$d photos</item>
+  </plurals>
+  <string name="photos_empty_title">No photos yet</string>
+  <string name="photos_empty_body">Photos stay on this phone, inside Liora. Same spot, same light and the same poses make them easy to compare.</string>
+  <string name="photos_add">Add photo</string>
+  <string name="photos_add_title">Add progress photos</string>
+  <string name="photos_take">Take photo</string>
+  <string name="photos_choose">Choose from gallery</string>
+  <string name="photos_pose">Pose</string>
+  <string name="photos_all">All</string>
+  <string name="photos_compare">Compare</string>
+  <plurals name="photos_failed">
+    <item quantity="one">%1$d photo couldn’t be added</item>
+    <item quantity="other">%1$d photos couldn’t be added</item>
+  </plurals>
+  <string name="cd_photo">Progress photo from %1$s</string>
+
+  <string name="photo_delete">Delete photo</string>
+  <string name="photo_delete_title">Delete this photo?</string>
+  <string name="photo_delete_body">It’s removed from this phone. This can’t be undone.</string>
+  <string name="photo_change_day">Change the day</string>
+
+  <string name="compare_title">Compare</string>
+  <string name="compare_before">Before</string>
+  <string name="compare_after">After</string>
+  <string name="compare_same_day">Same day</string>
+  <plurals name="compare_days_apart">
+    <item quantity="one">%1$d day apart</item>
+    <item quantity="other">%1$d days apart</item>
+  </plurals>
+  <plurals name="compare_weeks_apart">
+    <item quantity="one">%1$d week apart</item>
+    <item quantity="other">%1$d weeks apart</item>
+  </plurals>
+  <plurals name="compare_months_apart">
+    <item quantity="one">%1$d month apart</item>
+    <item quantity="other">%1$d months apart</item>
+  </plurals>
+  <string name="compare_hint">Tap a side, then a photo below to put it there.</string>
+  <string name="compare_need_two">Add a second photo to compare.</string>
+
   <string name="cd_close">Close</string>
   <string name="dialog_ok">OK</string>
   <string name="dialog_cancel">Cancel</string>
+  <string name="dialog_delete">Delete</string>
 </resources>

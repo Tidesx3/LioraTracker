@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Where the camera app may write a new progress photo: a scratch folder in the cache, imported from there. -->
+<paths>
+  <cache-path
+    name="camera"
+    path="camera/" />
+</paths>

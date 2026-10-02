@@ -11,6 +11,7 @@ import app.liora.core.designsystem.resources.ic_check
 import app.liora.core.designsystem.resources.ic_chevron_left
 import app.liora.core.designsystem.resources.ic_chevron_right
 import app.liora.core.designsystem.resources.ic_close
+import app.liora.core.designsystem.resources.ic_compare
 import app.liora.core.designsystem.resources.ic_delete
 import app.liora.core.designsystem.resources.ic_drag_indicator
 import app.liora.core.designsystem.resources.ic_edit
@@ -26,6 +27,8 @@ import app.liora.core.designsystem.resources.ic_menu_book
 import app.liora.core.designsystem.resources.ic_monitor_weight
 import app.liora.core.designsystem.resources.ic_monitoring
 import app.liora.core.designsystem.resources.ic_more_vert
+import app.liora.core.designsystem.resources.ic_photo_camera
+import app.liora.core.designsystem.resources.ic_photo_library
 import app.liora.core.designsystem.resources.ic_play_arrow
 import app.liora.core.designsystem.resources.ic_remove
 import app.liora.core.designsystem.resources.ic_reorder
@@ -80,4 +83,7 @@ object LioraIcons {
     val Calendar: DrawableResource = Res.drawable.ic_calendar_month
     val ListView: DrawableResource = Res.drawable.ic_view_agenda
     val Repeat: DrawableResource = Res.drawable.ic_replay
+    val Camera: DrawableResource = Res.drawable.ic_photo_camera
+    val Photos: DrawableResource = Res.drawable.ic_photo_library
+    val Compare: DrawableResource = Res.drawable.ic_compare
 }

@@ -55,6 +55,7 @@ dependencies {
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.exifinterface)
     implementation(libs.coil.network.okhttp)
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)

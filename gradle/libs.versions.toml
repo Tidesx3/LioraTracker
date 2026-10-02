@@ -14,6 +14,8 @@ composeBom = "2026.09.00"
 # AndroidX / JetBrains-multiplatform AndroidX
 androidxActivity = "1.13.0"
 androidxCore = "1.19.1"
+# Reads photo EXIF the same on every Android version (the framework class had bugs on older ones).
+androidxExifInterface = "1.4.2"
 # Matches the androidx.window that material3-adaptive brings in; the testing artifact fakes fold postures.
 androidxWindow = "1.5.0"
 jbLifecycle = "2.11.0"
@@ -65,6 +67,7 @@ androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-mani
 
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxActivity" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
+androidx-exifinterface = { module = "androidx.exifinterface:exifinterface", version.ref = "androidxExifInterface" }
 androidx-window-testing = { module = "androidx.window:window-testing", version.ref = "androidxWindow" }
 
 jb-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jbLifecycle" }

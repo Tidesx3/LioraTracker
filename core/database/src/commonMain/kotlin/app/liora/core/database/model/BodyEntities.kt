@@ -19,17 +19,18 @@ data class MeasurementEntity(
     @Embedded override val sync: SyncMetadata,
 ) : SyncedRow
 
+/** A progress photo; [pose] is a stable key like `front`. */
 @Entity(tableName = "progress_photo", indices = [Index("taken_at")])
 data class ProgressPhotoEntity(
-    @PrimaryKey val id: String,
+    @PrimaryKey override val id: String,
     @ColumnInfo(name = "taken_at") val takenAt: Long,
     val pose: String?,
     /** App-private file; photos sync as blobs, not as table data. */
     @ColumnInfo(name = "local_path") val localPath: String?,
     @ColumnInfo(name = "blob_id") val blobId: String?,
     val notes: String?,
-    @Embedded val sync: SyncMetadata,
-)
+    @Embedded override val sync: SyncMetadata,
+) : SyncedRow
 
 /** User preferences that follow the user across devices (units, rest defaults, plates, ...). */
 @Entity(tableName = "preference")

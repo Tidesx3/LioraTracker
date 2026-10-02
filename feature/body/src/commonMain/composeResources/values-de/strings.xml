@@ -25,7 +25,53 @@
   <string name="log_invalid">Wert prüfen</string>
   <string name="log_pick_day">Tag ändern</string>
 
+  <string name="photos_title">Fortschrittsfotos</string>
+  <string name="photos_card_empty">Sieh deine Veränderung im direkten Vergleich</string>
+  <plurals name="photos_count">
+    <item quantity="one">%1$d Foto</item>
+    <item quantity="other">%1$d Fotos</item>
+  </plurals>
+  <string name="photos_empty_title">Noch keine Fotos</string>
+  <string name="photos_empty_body">Die Fotos bleiben auf diesem Handy, nur in Liora. Gleicher Ort, gleiches Licht und gleiche Posen machen sie gut vergleichbar.</string>
+  <string name="photos_add">Foto hinzufügen</string>
+  <string name="photos_add_title">Fortschrittsfotos hinzufügen</string>
+  <string name="photos_take">Foto aufnehmen</string>
+  <string name="photos_choose">Aus der Galerie wählen</string>
+  <string name="photos_pose">Pose</string>
+  <string name="photos_all">Alle</string>
+  <string name="photos_compare">Vergleichen</string>
+  <plurals name="photos_failed">
+    <item quantity="one">%1$d Foto konnte nicht hinzugefügt werden</item>
+    <item quantity="other">%1$d Fotos konnten nicht hinzugefügt werden</item>
+  </plurals>
+  <string name="cd_photo">Fortschrittsfoto vom %1$s</string>
+
+  <string name="photo_delete">Foto löschen</string>
+  <string name="photo_delete_title">Dieses Foto löschen?</string>
+  <string name="photo_delete_body">Es wird von diesem Handy entfernt. Das lässt sich nicht rückgängig machen.</string>
+  <string name="photo_change_day">Tag ändern</string>
+
+  <string name="compare_title">Vergleich</string>
+  <string name="compare_before">Vorher</string>
+  <string name="compare_after">Nachher</string>
+  <string name="compare_same_day">Am selben Tag</string>
+  <plurals name="compare_days_apart">
+    <item quantity="one">%1$d Tag dazwischen</item>
+    <item quantity="other">%1$d Tage dazwischen</item>
+  </plurals>
+  <plurals name="compare_weeks_apart">
+    <item quantity="one">%1$d Woche dazwischen</item>
+    <item quantity="other">%1$d Wochen dazwischen</item>
+  </plurals>
+  <plurals name="compare_months_apart">
+    <item quantity="one">%1$d Monat dazwischen</item>
+    <item quantity="other">%1$d Monate dazwischen</item>
+  </plurals>
+  <string name="compare_hint">Tippe auf eine Seite und dann unten auf ein Foto, um es dort zu zeigen.</string>
+  <string name="compare_need_two">Füge ein zweites Foto hinzu, um zu vergleichen.</string>
+
   <string name="cd_close">Schließen</string>
   <string name="dialog_ok">OK</string>
   <string name="dialog_cancel">Abbrechen</string>
+  <string name="dialog_delete">Löschen</string>
 </resources>

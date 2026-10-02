@@ -3,9 +3,11 @@ package app.liora.feature.body
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -36,6 +39,7 @@ import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.core.model.MeasurementType
+import app.liora.core.ui.StoredPhoto
 import app.liora.core.ui.label
 import app.liora.core.ui.measurementText
 import app.liora.feature.body.resources.Res
@@ -44,32 +48,43 @@ import app.liora.feature.body.resources.body_empty_title
 import app.liora.feature.body.resources.body_log
 import app.liora.feature.body.resources.body_measurements
 import app.liora.feature.body.resources.body_title
+import app.liora.feature.body.resources.photos_card_empty
+import app.liora.feature.body.resources.photos_count
+import app.liora.feature.body.resources.photos_title
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /** Where the Body page leads. */
 internal class BodyNavigation(
     val onBack: () -> Unit,
     val onOpen: (MeasurementType) -> Unit,
+    val onOpenPhotos: () -> Unit,
     val onLog: () -> Unit,
+)
+
+/** What's open beside the Body page on wide screens, to highlight it. */
+internal data class BodySelection(
+    val type: MeasurementType? = null,
+    val photos: Boolean = false,
 )
 
 @Composable
 internal fun BodyScreen(
     viewModel: BodyViewModel,
     navigation: BodyNavigation,
-    selectedType: MeasurementType?,
+    selection: BodySelection,
     modifier: Modifier = Modifier,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    BodyContent(state = uiState, navigation = navigation, selectedType = selectedType, modifier = modifier)
+    BodyContent(state = uiState, navigation = navigation, selection = selection, modifier = modifier)
 }
 
 @Composable
 private fun BodyContent(
     state: BodyUiState,
     navigation: BodyNavigation,
-    selectedType: MeasurementType?,
+    selection: BodySelection,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -91,65 +106,127 @@ private fun BodyContent(
             )
         },
     ) { padding ->
-        when (state) {
-            BodyUiState.Loading -> {
-                Unit
-            }
-
-            BodyUiState.Empty -> {
-                EmptyState(
-                    icon = LioraIcons.Body,
-                    title = stringResource(Res.string.body_empty_title),
-                    body = stringResource(Res.string.body_empty_body),
-                    modifier = Modifier.padding(padding),
-                )
-            }
-
-            is BodyUiState.Loaded -> {
-                Measurements(
-                    state = state,
-                    selectedType = selectedType,
-                    onOpen = navigation.onOpen,
-                    contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = FabClearance),
-                )
-            }
+        if (state is BodyUiState.Loaded) {
+            BodyList(
+                state = state,
+                selection = selection,
+                navigation = navigation,
+                contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = FabClearance),
+            )
         }
     }
 }
 
 @Composable
-private fun Measurements(
+private fun BodyList(
     state: BodyUiState.Loaded,
-    selectedType: MeasurementType?,
-    onOpen: (MeasurementType) -> Unit,
+    selection: BodySelection,
+    navigation: BodyNavigation,
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
     val bodyweight = state.summaries.firstOrNull { it.type == MeasurementType.Bodyweight }
     val others = state.summaries.filter { it.type != MeasurementType.Bodyweight }
     LazyColumn(modifier = modifier.readableWidth(), contentPadding = contentPadding) {
+        if (state.summaries.isEmpty()) {
+            item(key = "empty") {
+                EmptyState(
+                    icon = LioraIcons.Body,
+                    title = stringResource(Res.string.body_empty_title),
+                    body = stringResource(Res.string.body_empty_body),
+                )
+            }
+        }
         if (bodyweight != null) {
             item(key = "bodyweight") {
                 BodyweightCard(
                     summary = bodyweight,
-                    selected = selectedType == MeasurementType.Bodyweight,
-                    onClick = { onOpen(MeasurementType.Bodyweight) },
+                    selected = selection.type == MeasurementType.Bodyweight,
+                    onClick = { navigation.onOpen(MeasurementType.Bodyweight) },
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
+        }
+        item(key = "photos") {
+            PhotosCard(
+                state = state,
+                selected = selection.photos,
+                onClick = navigation.onOpenPhotos,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            )
         }
         if (others.isNotEmpty()) {
             item(key = "header") { SectionHeader(stringResource(Res.string.body_measurements)) }
             items(others, key = { it.type.key }) { summary ->
                 MeasurementRow(
                     summary = summary,
-                    selected = summary.type == selectedType,
-                    onClick = { onOpen(summary.type) },
+                    selected = summary.type == selection.type,
+                    onClick = { navigation.onOpen(summary.type) },
                 )
             }
         }
     }
 }
+
+/** Progress photos: how many, and the latest few. */
+@Composable
+private fun PhotosCard(
+    state: BodyUiState.Loaded,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth().semantics { if (selected) this.selected = true },
+        colors = CardDefaults.cardColors(containerColor = cardColor(selected)),
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(LioraIcons.Photos),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+                Column(Modifier.weight(1f).padding(start = 16.dp)) {
+                    Text(stringResource(Res.string.photos_title), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text =
+                            if (state.photoCount == 0) {
+                                stringResource(Res.string.photos_card_empty)
+                            } else {
+                                pluralStringResource(Res.plurals.photos_count, state.photoCount, state.photoCount)
+                            },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Icon(painter = painterResource(LioraIcons.ChevronRight), contentDescription = null)
+            }
+            if (state.recentPhotos.isNotEmpty()) {
+                // Always four slots, so one photo isn't stretched across the card.
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    repeat(RECENT_PHOTOS) { index ->
+                        val photo = state.recentPhotos.getOrNull(index)
+                        Box(Modifier.weight(1f).aspectRatio(PHOTO_ASPECT)) {
+                            if (photo != null) {
+                                StoredPhoto(
+                                    path = photo.path,
+                                    contentDescription = null,
+                                    modifier = Modifier.matchParentSize().clip(MaterialTheme.shapes.small),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun cardColor(selected: Boolean) =
+    if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainer
 
 /** Bodyweight up front: the latest, how it moved over the month, and its curve. */
 @Composable
@@ -164,12 +241,7 @@ private fun BodyweightCard(
         modifier = modifier.fillMaxWidth().semantics { if (selected) this.selected = true },
         colors =
             CardDefaults.cardColors(
-                containerColor =
-                    if (selected) {
-                        MaterialTheme.colorScheme.secondaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainer
-                    },
+                containerColor = cardColor(selected),
             ),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

@@ -114,4 +114,8 @@
   <string name="measurement_calf_left">Left calf</string>
   <string name="measurement_calf_right">Right calf</string>
   <string name="value_percent">%1$s%</string>
+
+  <string name="pose_front">Front</string>
+  <string name="pose_side">Side</string>
+  <string name="pose_back">Back</string>
 </resources>

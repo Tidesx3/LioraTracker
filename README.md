@@ -12,7 +12,8 @@ in the logger, times included. Each exercise's page charts its progress (e1RM, w
 lists its records and sessions, and flags a stall. The Progress tab shows the weekly streak, a
 consistency grid, sets per muscle on a body heatmap, every exercise's best, and a monthly report.
 Body tracks bodyweight, body fat and circumferences day by day, with a chart and the change over the
-month. Next are progress photos, then settings with import and export. Details and progress are in
+month, and keeps progress photos private on the phone, compared side by side with the weight change
+between them. Next are settings with import and export. Details and progress are in
 [docs/PLAN.md](docs/PLAN.md).
 
 ## Principles

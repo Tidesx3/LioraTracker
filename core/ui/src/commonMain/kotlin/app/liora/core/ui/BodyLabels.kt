@@ -5,6 +5,7 @@ import app.liora.core.designsystem.util.NumberFormatter
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.model.MeasurementKind
 import app.liora.core.model.MeasurementType
+import app.liora.core.model.PhotoPose
 import app.liora.core.model.WeightUnit
 import app.liora.core.ui.resources.Res
 import app.liora.core.ui.resources.measurement_abdomen
@@ -23,6 +24,9 @@ import app.liora.core.ui.resources.measurement_shoulders
 import app.liora.core.ui.resources.measurement_thigh_left
 import app.liora.core.ui.resources.measurement_thigh_right
 import app.liora.core.ui.resources.measurement_waist
+import app.liora.core.ui.resources.pose_back
+import app.liora.core.ui.resources.pose_front
+import app.liora.core.ui.resources.pose_side
 import app.liora.core.ui.resources.value_percent
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -51,6 +55,14 @@ val MeasurementType.label: StringResource
             MeasurementType.ThighRight -> Res.string.measurement_thigh_right
             MeasurementType.CalfLeft -> Res.string.measurement_calf_left
             MeasurementType.CalfRight -> Res.string.measurement_calf_right
+        }
+
+val PhotoPose.label: StringResource
+    get() =
+        when (this) {
+            PhotoPose.Front -> Res.string.pose_front
+            PhotoPose.Side -> Res.string.pose_side
+            PhotoPose.Back -> Res.string.pose_back
         }
 
 /** The unit a measurement is shown and typed in: "kg", "%", "cm". */

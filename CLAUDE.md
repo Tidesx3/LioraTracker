@@ -44,6 +44,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - Synced tables have no foreign-key constraints. Repositories keep references consistent and cascade tombstones.
   - `ownerId` is a server-side concept, added in Phase 3. The local DB belongs to one user.
 - **Local-only tables:** `local_meta` (device id, seed version, the running rest timer) and `exercise_name` (search index, rebuilt from the seed).
+- **Photos:** progress photos are files in app-private `files/photos` (never the shared gallery), written only through `PhotoStorage`. Their rows sync; the images will sync as blobs (Phase 2).
 - **Derived data:** PRs and stats caches are recomputed locally and never synced.
 - **Schema:** Room schemas are exported to `core/database/schemas/` and committed. Schema v1 is live on devices, so every change needs a version bump plus a migration (or `AutoMigration`) and a migration test.
 - **Writes must outlive the screen:** don't pop a screen right after launching a write in its `viewModelScope`. Leaving the screen clears the ViewModel and cancels the write. Close in reaction to the new data instead (see `LoggerScreen`).
@@ -96,6 +97,8 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - **Robolectric:** needs `--add-opens=java.base/jdk.internal.access=ALL-UNNAMED` on JDK 17+. It is already set in `configureHostTests()`.
   - A text field inside a dialog (the logger's rename, history's save as routine) keeps Compose from ever going idle, even with the test clock paused. Don't open those dialogs in UI tests; cover the write in `core/data` tests and check the dialog on a device.
   - Material's date picker dialog fills in a moment after it opens: `waitUntil` its content appears. Each day's semantic text is the full date ("Monday, August 10, 2026"), not the day number.
+  - Images: `TestLioraApplication`'s Coil loader decodes on the main thread with `BitmapFactory`, because Robolectric's native `ImageDecoder` fails on Windows. Tests that need photos draw them (`syntheticPhoto` in the app tests) and import them through the real `PhotoStorage`.
+  - Material's `ExtendedFloatingActionButton` clears its text's semantics: give it a `contentDescription` (screen readers need it too) and find it by that in tests.
 - **Lazy lists keep their first visible item in view by key.** Don't show trailing items (a footer card) while a screen is loading: when the content arrives above them, the list opens scrolled to the bottom.
 - **Material3 version:** CMP `material3` is pinned to 1.9.0 (= androidx material3 1.4.0, the stable BOM version), not the alpha that ships alongside CMP 1.12.
 - **Compose string resources** (`composeResources/**/strings.xml`) do not unescape `\'` the way Android `res/` does; the backslash shows up in the UI. Write a typographic apostrophe (`’`) instead.

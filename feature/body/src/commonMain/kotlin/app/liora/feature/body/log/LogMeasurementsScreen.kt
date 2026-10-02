@@ -8,21 +8,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -46,23 +41,18 @@ import app.liora.core.model.MeasurementType
 import app.liora.core.ui.label
 import app.liora.core.ui.measurementInputText
 import app.liora.core.ui.unitSymbol
+import app.liora.feature.body.DayPicker
 import app.liora.feature.body.resources.Res
 import app.liora.feature.body.resources.body_log
 import app.liora.feature.body.resources.cd_close
-import app.liora.feature.body.resources.dialog_cancel
-import app.liora.feature.body.resources.dialog_ok
 import app.liora.feature.body.resources.log_circumferences
 import app.liora.feature.body.resources.log_clear_hint
 import app.liora.feature.body.resources.log_invalid
 import app.liora.feature.body.resources.log_pick_day
 import app.liora.feature.body.resources.log_save
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import kotlin.time.Instant
 
 @Composable
 internal fun LogMeasurementsScreen(
@@ -224,46 +214,6 @@ private fun MeasurementField(
         modifier = modifier.testTag(LogTags.field(type)),
     )
 }
-
-/** Picks the day the measurements were taken; days still to come can't have any. */
-@Composable
-private fun DayPicker(
-    day: LocalDate,
-    today: LocalDate,
-    onPick: (LocalDate) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    // The picker works in UTC midnights.
-    val latest = remember(today) { today.utcMillis() }
-    val state =
-        rememberDatePickerState(
-            initialSelectedDateMillis = day.utcMillis(),
-            selectableDates =
-                object : SelectableDates {
-                    override fun isSelectableDate(utcTimeMillis: Long) = utcTimeMillis <= latest
-                },
-        )
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    state.selectedDateMillis?.let { picked ->
-                        onPick(Instant.fromEpochMilliseconds(picked).toLocalDateTime(TimeZone.UTC).date)
-                    }
-                },
-                enabled = state.selectedDateMillis != null,
-            ) {
-                Text(stringResource(Res.string.dialog_ok))
-            }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.dialog_cancel)) } },
-    ) {
-        DatePicker(state = state)
-    }
-}
-
-private fun LocalDate.utcMillis(): Long = atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
 
 /** The form's rows: bodyweight and body fat, then circumferences in pairs, top to bottom. */
 private val FieldRows: List<List<MeasurementType>> =

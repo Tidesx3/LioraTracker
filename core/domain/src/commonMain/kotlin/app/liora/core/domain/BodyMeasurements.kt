@@ -32,6 +32,9 @@ object BodyMeasurements {
     /** How far back a change looks: a month sees a trend through the day-to-day noise of a scale. */
     const val CHANGE_WINDOW_DAYS = 30
 
+    /** How far back [around] looks for a value: a week of not stepping on the scale. */
+    const val DAYS_AROUND = 7
+
     /** [type]'s values by day where the user is, oldest first. */
     fun daily(
         measurements: List<Measurement>,
@@ -54,6 +57,18 @@ object BodyMeasurements {
         val cutoff = latest.day.minus(CHANGE_WINDOW_DAYS, DateTimeUnit.DAY)
         val baseline = daily.lastOrNull { it.day <= cutoff } ?: daily.first()
         return if (baseline.day == latest.day) null else MeasurementChange(baseline.day, latest.value - baseline.value)
+    }
+
+    /**
+     * The value on [day], or else the latest in the [DAYS_AROUND] days before it: what someone weighed
+     * when a photo was taken, say, without weighing in every day.
+     */
+    fun around(
+        daily: List<DayValue>,
+        day: LocalDate,
+    ): DayValue? {
+        val earliest = day.minus(DAYS_AROUND, DateTimeUnit.DAY)
+        return daily.lastOrNull { it.day in earliest..day }
     }
 
     /**

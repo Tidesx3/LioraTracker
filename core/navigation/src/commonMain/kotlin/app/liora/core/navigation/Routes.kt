@@ -38,6 +38,24 @@ data class LogMeasurementsRoute(
     val day: String? = null,
 ) : NavKey
 
+@Serializable
+data object ProgressPhotosRoute : NavKey
+
+@Serializable
+data class ProgressPhotoRoute(
+    val photoId: String,
+) : NavKey
+
+/**
+ * Two progress photos side by side. Without ids it starts with the first and latest in the pose
+ * photographed most recently; with only [afterId], that photo against the first before it.
+ */
+@Serializable
+data class ComparePhotosRoute(
+    val beforeId: String? = null,
+    val afterId: String? = null,
+) : NavKey
+
 /** A month looked back on, starting with the current one. */
 @Serializable
 data object MonthlyReportRoute : NavKey

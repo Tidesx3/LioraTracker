@@ -10,15 +10,26 @@ import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.model.MeasurementType
 import app.liora.core.navigation.BodyRoute
+import app.liora.core.navigation.ComparePhotosRoute
 import app.liora.core.navigation.ListDetail
 import app.liora.core.navigation.LogMeasurementsRoute
 import app.liora.core.navigation.MeasurementDetailRoute
 import app.liora.core.navigation.Navigator
+import app.liora.core.navigation.ProgressPhotoRoute
+import app.liora.core.navigation.ProgressPhotosRoute
 import app.liora.feature.body.detail.MeasurementDetailNavigation
 import app.liora.feature.body.detail.MeasurementDetailScreen
 import app.liora.feature.body.detail.MeasurementDetailViewModel
 import app.liora.feature.body.log.LogMeasurementsScreen
 import app.liora.feature.body.log.LogMeasurementsViewModel
+import app.liora.feature.body.photos.CompareScreen
+import app.liora.feature.body.photos.CompareViewModel
+import app.liora.feature.body.photos.PhotoNavigation
+import app.liora.feature.body.photos.PhotoScreen
+import app.liora.feature.body.photos.PhotoViewModel
+import app.liora.feature.body.photos.PhotosNavigation
+import app.liora.feature.body.photos.PhotosScreen
+import app.liora.feature.body.photos.PhotosViewModel
 import app.liora.feature.body.resources.Res
 import app.liora.feature.body.resources.body_pick_body
 import app.liora.feature.body.resources.body_pick_title
@@ -30,7 +41,7 @@ import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 fun EntryProviderScope<NavKey>.bodyEntries(navigator: Navigator) {
-    // On wide screens a measurement, or the form, opens beside the overview.
+    // On wide screens a measurement, the form or the photo gallery opens beside the overview.
     entry<BodyRoute>(
         metadata =
             ListDetail.listPane {
@@ -50,13 +61,18 @@ fun EntryProviderScope<NavKey>.bodyEntries(navigator: Navigator) {
                     // With a measurement open beside it, back closes both.
                     onBack = { navigator.close(BodyRoute) },
                     onOpen = { navigator.openFromList(BodyRoute, MeasurementDetailRoute(it.key)) },
+                    onOpenPhotos = { navigator.openFromList(BodyRoute, ProgressPhotosRoute) },
                     onLog = { navigator.navigate(LogMeasurementsRoute()) },
                 ),
-            selectedType =
-                navigator.backStack
-                    .filterIsInstance<MeasurementDetailRoute>()
-                    .lastOrNull()
-                    ?.let { MeasurementType.fromKey(it.typeKey) },
+            selection =
+                BodySelection(
+                    type =
+                        navigator.backStack
+                            .filterIsInstance<MeasurementDetailRoute>()
+                            .lastOrNull()
+                            ?.let { MeasurementType.fromKey(it.typeKey) },
+                    photos = ProgressPhotosRoute in navigator.backStack,
+                ),
         )
     }
     entry<MeasurementDetailRoute>(metadata = ListDetail.detailPane()) { route ->
@@ -78,6 +94,38 @@ fun EntryProviderScope<NavKey>.bodyEntries(navigator: Navigator) {
             onDone = navigator::goBack,
         )
     }
+    photoEntries(navigator)
+}
+
+private fun EntryProviderScope<NavKey>.photoEntries(navigator: Navigator) {
+    entry<ProgressPhotosRoute>(metadata = ListDetail.detailPane()) {
+        PhotosScreen(
+            viewModel = koinViewModel(),
+            navigation =
+                PhotosNavigation(
+                    onBack = navigator::goBack,
+                    onOpen = { navigator.navigate(ProgressPhotoRoute(it)) },
+                    onCompare = { navigator.navigate(ComparePhotosRoute()) },
+                ),
+        )
+    }
+    // A photo and the comparison take the whole window: photos want the room.
+    entry<ProgressPhotoRoute> { route ->
+        PhotoScreen(
+            viewModel = koinViewModel(key = route.photoId) { parametersOf(route.photoId) },
+            navigation =
+                PhotoNavigation(
+                    onBack = navigator::goBack,
+                    onCompare = { navigator.navigate(ComparePhotosRoute(afterId = it)) },
+                ),
+        )
+    }
+    entry<ComparePhotosRoute> { route ->
+        CompareScreen(
+            viewModel = koinViewModel(key = route.toString()) { parametersOf(route) },
+            onBack = navigator::goBack,
+        )
+    }
 }
 
 val bodyModule =
@@ -85,4 +133,7 @@ val bodyModule =
         viewModelOf(::BodyViewModel)
         viewModel { (type: MeasurementType) -> MeasurementDetailViewModel(type, get()) }
         viewModel { (route: LogMeasurementsRoute) -> LogMeasurementsViewModel(route, get(), get()) }
+        viewModelOf(::PhotosViewModel)
+        viewModel { (photoId: String) -> PhotoViewModel(photoId, get(), get(), get()) }
+        viewModel { (route: ComparePhotosRoute) -> CompareViewModel(route, get(), get()) }
     }

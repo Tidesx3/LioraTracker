@@ -115,4 +115,8 @@
   <string name="measurement_calf_right">Wade rechts</string>
   <!-- German puts a space before the percent sign. -->
   <string name="value_percent">%1$s %</string>
+
+  <string name="pose_front">Vorne</string>
+  <string name="pose_side">Seite</string>
+  <string name="pose_back">Hinten</string>
 </resources>
