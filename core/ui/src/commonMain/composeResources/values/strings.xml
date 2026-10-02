@@ -61,6 +61,7 @@
     <item quantity="one">%1$s rep</item>
     <item quantity="other">%1$s reps</item>
   </plurals>
+  <string name="set_rpe" translatable="false">RPE %1$s</string>
 
   <string name="rest_value">Rest %1$s</string>
   <string name="rest_default">Rest: exercise default</string>

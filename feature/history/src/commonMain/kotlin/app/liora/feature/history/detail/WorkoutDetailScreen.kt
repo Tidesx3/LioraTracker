@@ -302,6 +302,7 @@ private fun DoneExercise(
                             set.reps?.let(::RepRange),
                             set.duration,
                             set.distanceMeters,
+                            set.rpe,
                         ),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.weight(1f),

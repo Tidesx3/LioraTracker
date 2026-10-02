@@ -45,22 +45,28 @@ As of 2026-10-02:
     latest in the pose photographed last), with the time between them and the change in bodyweight; tapping a side
     and then a photo swaps it. Photos sync as blobs in Phase 2; until then `blob_id` stays empty.
 - **Milestone 9 (settings, import and export)** is in progress, split into five parts, each committed on its own:
-  - **9a (done): settings and synced preferences.** `Settings` and `ThemeMode` in `core/domain`; `PreferenceDao`
-    over the existing `preference` table (no schema change); `SettingsRepository` with `SettingsCodec` in
-    `core/data/settings` (one row per choice; `update` writes only the choices that changed, so a new device
-    can't overwrite another's with its defaults; `current()` is a suspend read that is safe inside a
-    transaction). The Settings screen (`feature/settings`, from the Train tab's gear) has Workout (rest after
+  - **9a (done, `3ec369b`): settings and synced preferences.** `Settings` and `ThemeMode` in `core/domain`;
+    `PreferenceDao` over the existing `preference` table (no schema change); `SettingsRepository` with
+    `SettingsCodec` in `core/data/settings` (one row per choice; `update` writes only the choices that changed,
+    so a new device can't overwrite another's with its defaults; `current()` is a suspend read that is safe
+    inside a transaction). The Settings screen (`feature/settings`, from the Train tab's gear) has Workout (rest after
     working sets and after warm-ups), Progress (e1RM formula, stall window) and Appearance (theme, wallpaper
     colors on Android 12+, language on Android 13+ through `AppLanguage` in `core:ui`, which the OS keeps).
     The set logger reads rest defaults when a set is ticked off; the formula and stall window reach the
     logger's live records, exercise detail, history, workout detail, the Progress tab and the monthly report;
     `MainActivity` applies the theme from the first frame and styles the system bars to match.
-  - **Next: 9b**, units (kg/lb, km/mi) everywhere values are shown and typed, and the logger's RPE column
-    toggle. Hard-coded `WeightUnit.Kilogram` is in `core:ui` (`ProgressLabels`, `SetLabels`, `BodyLabels`),
-    history, the logger (volume, finish sheet), the monthly report and the workout notification; the number
-    pad and `CellInput` type kilograms.
-  - **9c:** gym profiles (synced `gym_profile` table, schema v3 with a migration test), load rounding, the plate
-    calculator in the logger, and "add warm-up sets".
+  - **9b (done): units and the RPE column.** `Units` in `core/model` (weight in kg or lb; distance in km and m,
+    or miles and yards; body measurements in cm or in) and the `rpe` switch join `Settings` as preference rows
+    (no schema change). Values stay stored in kilograms and metres. `MainActivity` provides `LocalUnits`
+    (`core:ui` `UnitLabels.kt`), and every label converts for display: set summaries, progress values and
+    records, body measurements, volume in history, the logger, the finish sheet and the monthly report, the
+    routine editor and the workout notification. Charts plot converted values, so axis steps stay round. The
+    logger, routine editor and body log type in the chosen units (± steps of 2.5 kg or 5 lb, 0.1 km or mi,
+    10 m or yd). The RPE column (`SetField.Rpe`, after reps, only for exercises counted in reps) takes 1–10 in
+    half points, is never needed to tick a set off and never pre-filled; a recorded RPE also shows in workout
+    detail ("· RPE 8"), even with the column switched off.
+  - **Next: 9c**, gym profiles (synced `gym_profile` table, schema v3 with a migration test), load rounding, the
+    plate calculator in the logger, and "add warm-up sets".
   - **9d:** JSON export and import (lossless) and a CSV export.
   - **9e:** Hevy and Strong CSV import with the matching review screen; then Milestone 9 and Phase 1 are done.
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.

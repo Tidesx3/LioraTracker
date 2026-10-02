@@ -10,7 +10,11 @@ import androidx.compose.ui.test.performClick
 import app.liora.core.data.AppStartup
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.domain.OneRepMaxFormula
+import app.liora.core.domain.Settings
 import app.liora.core.domain.ThemeMode
+import app.liora.core.model.DistanceUnit
+import app.liora.core.model.LengthUnit
+import app.liora.core.model.WeightUnit
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -77,6 +81,30 @@ class SettingsFlowTest {
     }
 
     @Test
+    @Config(qualifiers = COVER)
+    fun unitsAndTheRpeColumn() {
+        openSettings()
+        composeRule.onNodeWithText("Kilograms (kg)").assertIsDisplayed()
+
+        composeRule.onNodeWithText("Weight").performClick()
+        composeRule.onNodeWithText("Pounds (lb)").performClick()
+        waitForSaved { it.units.weight == WeightUnit.Pound }
+        composeRule.onNodeWithText("Distance").performClick()
+        composeRule.onNodeWithText("Miles and yards").performClick()
+        waitForSaved { it.units.distance == DistanceUnit.Mile }
+        composeRule.onNodeWithText("Body measurements").performClick()
+        composeRule.onNodeWithText("Inches (in)").performClick()
+        waitForSaved { it.units.bodyLength == LengthUnit.Inch }
+        composeRule.onNodeWithText("RPE column").performClick()
+        waitForSaved { it.rpe }
+
+        composeRule.onNodeWithText("Pounds (lb)").assertIsDisplayed()
+        composeRule.onNodeWithText("Miles and yards").assertIsDisplayed()
+        composeRule.onNodeWithText("Inches (in)").assertIsDisplayed()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/settings_units_dark.png")
+    }
+
+    @Test
     @Config(qualifiers = INNER)
     fun innerScreen() {
         openSettings()
@@ -105,6 +133,10 @@ class SettingsFlowTest {
         composeRule.waitUntil(TIMEOUT_MS) {
             composeRule.onAllNodesWithText(text, substring = true).fetchSemanticsNodes().isNotEmpty()
         }
+
+    /** Waits until the stored settings pass [check]: the screen saves in the background. */
+    private fun waitForSaved(check: (Settings) -> Boolean) =
+        composeRule.waitUntil(TIMEOUT_MS) { check(runBlocking { settings.current() }) }
 
     private companion object {
         const val COVER = "w411dp-h960dp-night-xxhdpi"

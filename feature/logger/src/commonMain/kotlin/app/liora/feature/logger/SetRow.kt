@@ -45,19 +45,19 @@ import app.liora.core.model.LoggedSet
 import app.liora.core.model.RepRange
 import app.liora.core.model.SetType
 import app.liora.core.model.TrackingType
+import app.liora.core.model.Units
+import app.liora.core.ui.LocalUnits
 import app.liora.core.ui.SetTypeMenu
-import app.liora.core.ui.distanceInKilometers
+import app.liora.core.ui.distanceFor
 import app.liora.core.ui.setSummary
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.cd_complete_set
 import app.liora.feature.logger.resources.cd_personal_record
 import app.liora.feature.logger.resources.cd_remove_set
 import app.liora.feature.logger.resources.cd_reopen_set
-import app.liora.feature.logger.resources.col_kg
-import app.liora.feature.logger.resources.col_km
-import app.liora.feature.logger.resources.col_m
 import app.liora.feature.logger.resources.col_previous
 import app.liora.feature.logger.resources.col_reps
+import app.liora.feature.logger.resources.col_rpe
 import app.liora.feature.logger.resources.col_set
 import app.liora.feature.logger.resources.col_time
 import org.jetbrains.compose.resources.painterResource
@@ -67,11 +67,17 @@ import org.jetbrains.compose.resources.stringResource
 internal class SetRowState(
     val set: LoggedSet,
     val number: Int,
-    val trackingType: TrackingType,
+    val columns: SetColumns,
     val hints: SetHints,
     val isCurrent: Boolean,
     val edit: CellEdit?,
     val invalid: SetField?,
+)
+
+/** How an exercise is tracked, and the columns its sets have, left to right. */
+internal class SetColumns(
+    val trackingType: TrackingType,
+    val fields: List<SetField>,
 )
 
 /** Last session's counterpart of a set, and what its empty fields show and log. */
@@ -93,42 +99,31 @@ internal class SetRowActions(
 /** Column titles lined up with [SetRow]. */
 @Composable
 internal fun SetHeader(
-    trackingType: TrackingType,
+    columns: SetColumns,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(CellGap)) {
         HeaderText(stringResource(Res.string.col_set), Modifier.width(BadgeWidth))
         HeaderText(stringResource(Res.string.col_previous), Modifier.weight(1f), TextAlign.Start)
-        SetField.of(trackingType).forEach { field ->
-            HeaderText(columnTitle(field, trackingType), Modifier.width(field.cellWidth))
+        columns.fields.forEach { field ->
+            HeaderText(columnTitle(field, columns.trackingType), Modifier.width(field.cellWidth))
         }
         Box(Modifier.width(CheckSize))
     }
 }
 
+/** A column's title: what it counts, or the unit its values are typed in. */
 @Composable
 private fun columnTitle(
     field: SetField,
     trackingType: TrackingType,
 ): String =
     when (field) {
-        SetField.Weight -> {
-            stringResource(Res.string.col_kg)
-        }
-
-        SetField.Reps -> {
-            stringResource(Res.string.col_reps)
-        }
-
-        SetField.Distance -> {
-            stringResource(
-                if (trackingType.distanceInKilometers) Res.string.col_km else Res.string.col_m,
-            )
-        }
-
-        SetField.Duration -> {
-            stringResource(Res.string.col_time)
-        }
+        SetField.Weight -> LocalUnits.current.weight.symbol
+        SetField.Reps -> stringResource(Res.string.col_reps)
+        SetField.Distance -> LocalUnits.current.distanceFor(trackingType).symbol
+        SetField.Duration -> stringResource(Res.string.col_time)
+        SetField.Rpe -> stringResource(Res.string.col_rpe)
     }
 
 @Composable
@@ -220,14 +215,15 @@ internal fun SetRow(
                         .clickable(enabled = state.hints.previous != null) { actions.onCopyPrevious(set.id) }
                         .padding(vertical = 8.dp),
             )
-            SetField.of(state.trackingType).forEach { field ->
+            val units = LocalUnits.current
+            state.columns.fields.forEach { field ->
                 val cell = CellRef(set.id, field)
                 val editing = state.edit?.takeIf { it.cell == cell }
                 ValueCell(
                     text =
                         editing?.text?.let { typedText(field, it) }
-                            ?: valueText(set, field, state.trackingType, numbers),
-                    placeholder = valueText(state.hints.placeholder, field, state.trackingType, numbers),
+                            ?: valueText(set, field, state.columns.trackingType, units, numbers),
+                    placeholder = valueText(state.hints.placeholder, field, state.columns.trackingType, units, numbers),
                     focused = editing != null,
                     invalid = state.invalid == field,
                     completed = set.isCompleted,
@@ -330,7 +326,7 @@ private fun previousText(
     return when {
         previous != null -> {
             setSummary(
-                state.trackingType,
+                state.columns.trackingType,
                 previous.weight,
                 previous.reps?.let(::RepRange),
                 previous.duration,
@@ -348,18 +344,20 @@ private fun previousText(
     }
 }
 
-/** A set's value for [field] as the cell shows it, or null when empty. */
+/** A set's value for [field] as the cell shows it, in [units], or null when empty. */
 internal fun valueText(
     set: LoggedSet,
     field: SetField,
     trackingType: TrackingType,
+    units: Units,
     numbers: NumberFormatter,
 ): String? =
     when (field) {
-        SetField.Weight -> set.weight?.let { numbers.format(it.kilograms) }
+        SetField.Weight -> set.weight?.let { numbers.format(it.inUnit(units.weight)) }
         SetField.Reps -> set.reps?.let { numbers.format(it) }
-        SetField.Distance -> set.distanceMeters?.let { numbers.format(it / trackingType.metersPerUnit) }
+        SetField.Distance -> set.distanceMeters?.let { numbers.format(units.distanceFor(trackingType).fromMeters(it)) }
         SetField.Duration -> set.duration?.formatAsClock()
+        SetField.Rpe -> set.rpe?.let { numbers.format(it, maxFractionDigits = 1) }
     }
 
 /** Text as it's being typed, with the locale's separator and times shown as m:ss. */
@@ -380,6 +378,7 @@ internal val SetField.cellWidth: Dp
             SetField.Weight, SetField.Distance -> 64.dp
             SetField.Reps -> 52.dp
             SetField.Duration -> 64.dp
+            SetField.Rpe -> 44.dp
         }
 
 internal val RowHeight = 52.dp

@@ -1,5 +1,6 @@
 package app.liora.core.domain
 
+import app.liora.core.model.Units
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 
@@ -10,6 +11,9 @@ import kotlin.time.Duration.Companion.days
 data class Settings(
     /** Rest when neither the workout nor the exercise sets its own. */
     val rest: RestDefaults = RestDefaults(),
+    /** An RPE column in the logger, to rate how hard each set was. Off for those who don't rate their sets. */
+    val rpe: Boolean = false,
+    val units: Units = Units(),
     val oneRepMaxFormula: OneRepMaxFormula = OneRepMaxFormula.Epley,
     /** How long a lift can go without a new best before it counts as stalled. */
     val stallWindow: Duration = Stalls.DEFAULT_WINDOW,

@@ -6,6 +6,19 @@
   <string name="rest_working">Pause zwischen Sätzen</string>
   <string name="rest_warmup">Pause nach Aufwärmsätzen</string>
   <string name="rest_hint">Wenn die Übung keine eigene Pause hat</string>
+  <string name="rpe">RPE-Spalte</string>
+  <string name="rpe_body">Wie schwer jeder Satz war, von 1 bis 10</string>
+
+  <string name="section_units">Einheiten</string>
+  <string name="unit_weight">Gewicht</string>
+  <string name="unit_kilograms">Kilogramm (kg)</string>
+  <string name="unit_pounds">Pfund (lb)</string>
+  <string name="unit_distance">Distanz</string>
+  <string name="unit_kilometers">Kilometer und Meter</string>
+  <string name="unit_miles">Meilen und Yards</string>
+  <string name="unit_body_length">Körpermaße</string>
+  <string name="unit_centimeters">Zentimeter (cm)</string>
+  <string name="unit_inches">Zoll (in)</string>
 
   <string name="section_progress">Fortschritt</string>
   <string name="formula">Geschätztes 1RM</string>

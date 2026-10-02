@@ -26,11 +26,11 @@ import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.domain.MonthlyReport
 import app.liora.core.domain.TrainingCalendar
-import app.liora.core.model.WeightUnit
 import app.liora.core.ui.BodyHeatmap
 import app.liora.core.ui.headlineRecords
 import app.liora.core.ui.label
 import app.liora.core.ui.recordLabel
+import app.liora.core.ui.volumeText
 import app.liora.feature.progress.resources.Res
 import app.liora.feature.progress.resources.progress_sets_count
 import app.liora.feature.progress.resources.report_exercise_line
@@ -154,14 +154,7 @@ internal fun TopExercises(
                 Text(
                     text =
                         if (share.volumeKg > 0.0) {
-                            stringResource(
-                                Res.string.report_exercise_line,
-                                sets,
-                                "${numbers.format(
-                                    share.volumeKg,
-                                    maxFractionDigits = 0,
-                                )} ${WeightUnit.Kilogram.symbol}",
-                            )
+                            stringResource(Res.string.report_exercise_line, sets, volumeText(share.volumeKg))
                         } else {
                             sets
                         },

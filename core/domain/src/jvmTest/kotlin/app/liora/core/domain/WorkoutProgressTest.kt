@@ -152,6 +152,19 @@ class WorkoutProgressTest {
         assertEquals(setOf(SetField.Duration), SetPlaceholders.missingFields(TrackingType.Duration, LoggedSet("s")))
     }
 
+    @Test
+    fun rpeComesLastAndOnlyWhereRepsAreCounted() {
+        assertEquals(
+            listOf(SetField.Weight, SetField.Reps, SetField.Rpe),
+            SetField.of(TrackingType.WeightReps, withRpe = true),
+        )
+        assertEquals(listOf(SetField.Weight, SetField.Reps), SetField.of(TrackingType.WeightReps))
+        assertEquals(
+            listOf(SetField.Distance, SetField.Duration),
+            SetField.of(TrackingType.DistanceDuration, withRpe = true),
+        )
+    }
+
     private fun workout(vararg exercises: WorkoutExercise) =
         ActiveWorkout(
             id = "w",

@@ -194,16 +194,23 @@ enum class SetField {
     Reps,
     Distance,
     Duration,
+
+    /** How hard the set was, 1 to 10. Optional, and only for sets counted in reps. */
+    Rpe,
     ;
 
     companion object {
-        /** The fields [trackingType] shows, left to right. */
-        fun of(trackingType: TrackingType): List<SetField> =
+        /** The fields [trackingType] shows, left to right; [withRpe] adds RPE where reps are counted. */
+        fun of(
+            trackingType: TrackingType,
+            withRpe: Boolean = false,
+        ): List<SetField> =
             buildList {
                 if (trackingType.usesWeight) add(Weight)
                 if (trackingType.usesReps) add(Reps)
                 if (trackingType.usesDistance) add(Distance)
                 if (trackingType.usesDuration) add(Duration)
+                if (withRpe && trackingType.usesReps) add(Rpe)
             }
     }
 }

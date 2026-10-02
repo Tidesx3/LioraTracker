@@ -16,7 +16,7 @@ ij_kotlin_allow_trailing_comma_on_call_site = true
 # Composables are PascalCase functions.
 ktlint_function_naming_ignore_when_annotated_with = Composable
 # compose-rules (io.nlopez.compose.rules)
-compose_allowed_composition_locals = LocalLioraColors,LocalPaneRole
+compose_allowed_composition_locals = LocalLioraColors,LocalPaneRole,LocalUnits
 
 [*.{yml,yaml,json,toml,xml}]
 indent_size = 2

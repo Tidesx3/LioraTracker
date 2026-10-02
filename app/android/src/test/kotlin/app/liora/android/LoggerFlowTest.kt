@@ -25,6 +25,7 @@ import androidx.window.testing.layout.TestWindowLayoutInfo
 import androidx.window.testing.layout.WindowLayoutInfoPublisherRule
 import app.liora.core.data.AppStartup
 import app.liora.core.data.routine.RoutineRepository
+import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.SetLogger
 import app.liora.core.model.Mass
@@ -32,8 +33,11 @@ import app.liora.core.model.RepRange
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineExercise
 import app.liora.core.model.RoutineSet
+import app.liora.core.model.Units
+import app.liora.core.model.WeightUnit
 import app.liora.feature.logger.LoggerTags
 import com.github.takahirom.roborazzi.captureRoboImage
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -50,7 +54,8 @@ import org.robolectric.annotation.GraphicsMode
 
 /**
  * The logger end to end: a routine's sets logged with one tap each from last session's values, the
- * rest timer that follows, typing a set on the number pad, and the two panes on the Fold's inner screen.
+ * rest timer that follows, typing a set on the number pad (also in pounds, with an RPE), and the two panes on
+ * the Fold's inner screen.
  */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -191,6 +196,54 @@ class LoggerFlowTest {
         composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasTestTag(LoggerTags.CELL) and isSelected()) }
         composeRule.onAllNodesWithTag(LoggerTags.CELL)[2].assert(isSelected())
         composeRule.onRoot().captureRoboImage("src/test/screenshots/logger_pad_dark.png")
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun poundsAndTheRpeColumn() {
+        runBlocking {
+            GlobalContext.get().get<SettingsRepository>().update {
+                it.copy(units = Units(weight = WeightUnit.Pound), rpe = true)
+            }
+        }
+        logLastSession()
+        launch()
+        waitForText("Start")
+        composeRule.onNodeWithText("Start").performClick()
+        waitForText("Finish")
+        // Last time's 80 kg, in pounds; the RPE column is empty, never filled in from last time.
+        composeRule.onNodeWithText("lb").assertIsDisplayed()
+        composeRule.onNodeWithText("RPE").assertIsDisplayed()
+        composeRule.onAllNodesWithText("176.37 lb × 10").assertCountEquals(3)
+
+        // 185 lb for 8 at RPE 8.5: typed in pounds, stored in kilograms.
+        composeRule.onAllNodesWithTag(LoggerTags.CELL)[0].performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasTestTag(LoggerTags.PAD)) }
+        listOf("1", "8", "5").forEach { padKey(it).performClick() }
+        padButton("Next field").performClick()
+        padKey("8").performClick()
+        padButton("Next field").performClick()
+        listOf("8", ".", "5").forEach { padKey(it).performClick() }
+        padButton("Log set").performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { loggedSets() == 1 }
+
+        val logged =
+            runBlocking {
+                GlobalContext
+                    .get()
+                    .get<ActiveWorkoutRepository>()
+                    .activeWorkout
+                    .first()!!
+                    .exercises
+                    .single()
+                    .sets
+                    .first()
+            }
+        assertEquals(185.0, logged.weight!!.inUnit(WeightUnit.Pound), 1e-9)
+        assertEquals(8, logged.reps)
+        assertEquals(8.5, logged.rpe!!, 0.0)
+        waitForText("Skip")
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/logger_pounds_rpe_dark.png")
     }
 
     @Test

@@ -3,10 +3,11 @@ package app.liora.core.ui
 import androidx.compose.runtime.Composable
 import app.liora.core.designsystem.util.NumberFormatter
 import app.liora.core.designsystem.util.rememberNumberFormatter
+import app.liora.core.model.Mass
 import app.liora.core.model.MeasurementKind
 import app.liora.core.model.MeasurementType
 import app.liora.core.model.PhotoPose
-import app.liora.core.model.WeightUnit
+import app.liora.core.model.Units
 import app.liora.core.ui.resources.Res
 import app.liora.core.ui.resources.measurement_abdomen
 import app.liora.core.ui.resources.measurement_biceps_left
@@ -33,8 +34,8 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 import kotlin.math.round
 
-// Body measurements as people see and type them: kilograms, percent, and circumferences in centimetres
-// (stored in metres). When Settings add pounds and inches, only this file changes.
+// Body measurements as people see and type them, in the units chosen in Settings: bodyweight in kilograms
+// or pounds, body fat in percent, and circumferences in centimetres or inches (stored in metres).
 
 val MeasurementType.label: StringResource
     get() =
@@ -65,27 +66,45 @@ val PhotoPose.label: StringResource
             PhotoPose.Back -> Res.string.pose_back
         }
 
-/** The unit a measurement is shown and typed in: "kg", "%", "cm". */
-val MeasurementType.unitSymbol: String
-    get() =
-        when (kind) {
-            MeasurementKind.Mass -> WeightUnit.Kilogram.symbol
-            MeasurementKind.Percent -> "%"
-            MeasurementKind.Length -> "cm"
-        }
+/** The unit a measurement is shown and typed in: "kg", "lb", "%", "cm", "in". */
+fun MeasurementType.unitSymbol(units: Units): String =
+    when (kind) {
+        MeasurementKind.Mass -> units.weight.symbol
+        MeasurementKind.Percent -> "%"
+        MeasurementKind.Length -> units.bodyLength.symbol
+    }
 
 /** A stored value in the unit it's shown in. */
-fun MeasurementType.toShown(stored: Double): Double = if (kind == MeasurementKind.Length) stored * CM_PER_M else stored
+fun MeasurementType.toShown(
+    stored: Double,
+    units: Units,
+): Double =
+    when (kind) {
+        MeasurementKind.Mass -> Mass(stored).inUnit(units.weight)
+        MeasurementKind.Percent -> stored
+        MeasurementKind.Length -> units.bodyLength.fromMeters(stored)
+    }
 
 /** A value typed in the shown unit, as it's stored. */
-fun MeasurementType.fromShown(shown: Double): Double = if (kind == MeasurementKind.Length) shown / CM_PER_M else shown
+fun MeasurementType.fromShown(
+    shown: Double,
+    units: Units,
+): Double =
+    when (kind) {
+        MeasurementKind.Mass -> Mass.of(shown, units.weight).kilograms
+        MeasurementKind.Percent -> shown
+        MeasurementKind.Length -> units.bodyLength.toMeters(shown)
+    }
 
 /** A measurement with its unit, the way the locale writes it: "82,5 kg", "18,5 %", "85 cm". */
 @Composable
 fun measurementText(
     type: MeasurementType,
     value: Double,
-): String = withUnit(type, measurementAxisText(type, value, rememberNumberFormatter()))
+): String {
+    val units = LocalUnits.current
+    return withUnit(type, units, measurementAxisText(type.toShown(value, units), rememberNumberFormatter()))
+}
 
 /** How far a measurement moved, signed: "−1,5 kg", "+0,5 cm", "±0 %". */
 @Composable
@@ -93,39 +112,40 @@ fun measurementChangeText(
     type: MeasurementType,
     amount: Double,
 ): String {
-    val shown = round(type.toShown(amount) * TENTHS) / TENTHS
+    val units = LocalUnits.current
+    val shown = round(type.toShown(amount, units) * TENTHS) / TENTHS
     val sign =
         when {
             shown > 0 -> "+"
             shown < 0 -> "−"
             else -> "±"
         }
-    return withUnit(type, sign + rememberNumberFormatter().format(abs(shown), maxFractionDigits = 1))
+    return withUnit(type, units, sign + rememberNumberFormatter().format(abs(shown), maxFractionDigits = 1))
 }
 
-/** A measurement without its unit, to one decimal, for a chart axis whose title names it: "82,5". */
+/** A measurement already in the unit it's shown in, to one decimal, for a chart axis whose title names it: "82,5". */
 fun measurementAxisText(
-    type: MeasurementType,
-    value: Double,
+    shown: Double,
     numbers: NumberFormatter,
-): String = numbers.format(type.toShown(value), maxFractionDigits = 1)
+): String = numbers.format(shown, maxFractionDigits = 1)
 
 /** A measurement as it goes back into a text field to be corrected, with every decimal it was typed with. */
 fun measurementInputText(
     type: MeasurementType,
     value: Double,
+    units: Units,
     numbers: NumberFormatter,
-): String = numbers.format(type.toShown(value))
+): String = numbers.format(type.toShown(value, units))
 
 @Composable
 private fun withUnit(
     type: MeasurementType,
+    units: Units,
     number: String,
 ): String =
     when (type.kind) {
         MeasurementKind.Percent -> stringResource(Res.string.value_percent, number)
-        MeasurementKind.Mass, MeasurementKind.Length -> "$number ${type.unitSymbol}"
+        MeasurementKind.Mass, MeasurementKind.Length -> "$number ${type.unitSymbol(units)}"
     }
 
-private const val CM_PER_M = 100.0
 private const val TENTHS = 10.0

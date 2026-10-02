@@ -161,15 +161,10 @@ private fun FieldRow(
                 type = type,
                 // Fields not changed yet show what the day has.
                 text =
-                    form.edits[type] ?: values.onDay[type]
-                        ?.let {
-                            measurementInputText(
-                                type,
-                                it,
-                                numbers,
-                            )
-                        }.orEmpty(),
-                hint = values.before[type]?.let { measurementInputText(type, it, numbers) },
+                    form.edits[type]
+                        ?: values.onDay[type]?.let { measurementInputText(type, it, form.units, numbers) }.orEmpty(),
+                hint = values.before[type]?.let { measurementInputText(type, it, form.units, numbers) },
+                unit = type.unitSymbol(form.units),
                 invalid = form.isInvalid(type),
                 last = type == FieldRows.last().last(),
                 onEdit = { onEdit(type, it) },
@@ -184,6 +179,7 @@ private fun MeasurementField(
     type: MeasurementType,
     text: String,
     hint: String?,
+    unit: String,
     invalid: Boolean,
     last: Boolean,
     onEdit: (String) -> Unit,
@@ -202,7 +198,7 @@ private fun MeasurementField(
         label = { Text(stringResource(type.label), maxLines = 1, overflow = TextOverflow.Ellipsis) },
         // The latest value before this day, while the field is empty.
         placeholder = hint?.let { { Text(it) } },
-        suffix = { Text(type.unitSymbol) },
+        suffix = { Text(unit) },
         isError = invalid,
         supportingText = if (invalid) ({ Text(stringResource(Res.string.log_invalid)) }) else null,
         singleLine = true,

@@ -38,10 +38,12 @@ import app.liora.core.domain.ProgressPoint
 import app.liora.core.model.ExerciseSession
 import app.liora.core.model.RepRange
 import app.liora.core.model.TrackingType
+import app.liora.core.ui.LocalUnits
 import app.liora.core.ui.axisText
 import app.liora.core.ui.metricLabel
 import app.liora.core.ui.recordLabel
 import app.liora.core.ui.setSummary
+import app.liora.core.ui.toShown
 import app.liora.core.ui.unit
 import app.liora.core.ui.valueText
 import app.liora.feature.exercises.resources.Res
@@ -124,7 +126,14 @@ internal fun ProgressChart(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        val points = remember(state.points, state.metric) { chartPoints(state.points, state.metric) }
+        val units = LocalUnits.current
+        val points =
+            remember(state.points, state.metric, units, trackingType) {
+                chartPoints(
+                    state.points,
+                    state.metric,
+                ).map { it.copy(value = unit.toShown(it.value, units, trackingType)) }
+            }
         if (points.size < 2) {
             Text(
                 text = stringResource(Res.string.detail_one_session),

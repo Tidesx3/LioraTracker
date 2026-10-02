@@ -23,12 +23,12 @@ import app.liora.core.model.Mass
 import app.liora.core.model.RepRange
 import app.liora.core.model.SetType
 import app.liora.core.model.TrackingType
-import app.liora.core.model.WeightUnit
 import app.liora.core.ui.resources.Res
 import app.liora.core.ui.resources.reps_count
 import app.liora.core.ui.resources.set_badge_drop
 import app.liora.core.ui.resources.set_badge_failure
 import app.liora.core.ui.resources.set_badge_warmup
+import app.liora.core.ui.resources.set_rpe
 import app.liora.core.ui.resources.set_type_drop
 import app.liora.core.ui.resources.set_type_failure
 import app.liora.core.ui.resources.set_type_normal
@@ -121,12 +121,9 @@ fun SetTypeMenu(
     }
 }
 
-/** Long distances read in kilometers (a 5 km run), short ones in meters (a 20 m farmer's walk). */
-val TrackingType.distanceInKilometers: Boolean get() = this == TrackingType.DistanceDuration
-
 /**
- * A set's targets or values in the columns its tracking type uses: "80 kg × 8–12", "12 reps",
- * "2,5 km · 10:00". Numbers follow the locale.
+ * A set's targets or values in the columns its tracking type uses, in the chosen units: "80 kg × 8–12",
+ * "12 reps", "2,5 km · 10:00", and with [rpe] "80 kg × 8 · RPE 8,5". Numbers follow the locale.
  */
 @Composable
 fun setSummary(
@@ -135,34 +132,22 @@ fun setSummary(
     reps: RepRange?,
     duration: Duration?,
     distanceMeters: Double?,
+    rpe: Double? = null,
 ): String {
     val numbers = rememberNumberFormatter()
-    val weightText =
-        weight?.takeIf { trackingType.usesWeight }?.let {
-            "${numbers.format(
-                it.kilograms,
-            )} ${WeightUnit.Kilogram.symbol}"
-        }
+    val weightText = weight?.takeIf { trackingType.usesWeight }?.let { weightText(it) }
     val repsText =
         reps?.takeIf { trackingType.usesReps }?.let {
             if (it.isRange) "${numbers.format(it.min)}–${numbers.format(it.max)}" else numbers.format(it.min)
         }
-    val distanceText =
-        distanceMeters?.takeIf { trackingType.usesDistance }?.let {
-            if (trackingType.distanceInKilometers) {
-                "${numbers.format(
-                    it / METERS_PER_KM,
-                )} km"
-            } else {
-                "${numbers.format(it)} m"
-            }
-        }
+    val distanceText = distanceMeters?.takeIf { trackingType.usesDistance }?.let { distanceText(it, trackingType) }
     val durationText = duration?.takeIf { trackingType.usesDuration }?.formatAsClock()
-    return when {
-        weightText != null && repsText != null -> "$weightText × $repsText"
-        repsText != null && reps != null -> pluralStringResource(Res.plurals.reps_count, reps.max, repsText)
-        else -> listOfNotNull(weightText, distanceText, durationText).joinToString(" · ").ifEmpty { "–" }
-    }
+    val values =
+        when {
+            weightText != null && repsText != null -> "$weightText × $repsText"
+            repsText != null && reps != null -> pluralStringResource(Res.plurals.reps_count, reps.max, repsText)
+            else -> listOfNotNull(weightText, distanceText, durationText).joinToString(" · ").ifEmpty { "–" }
+        }
+    val rpeText = rpe?.takeIf { trackingType.usesReps }?.let { stringResource(Res.string.set_rpe, numbers.format(it)) }
+    return listOfNotNull(values, rpeText).joinToString(" · ")
 }
-
-private const val METERS_PER_KM = 1_000.0

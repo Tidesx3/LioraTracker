@@ -69,9 +69,6 @@
   <string name="editor_col_set">Set</string>
   <string name="editor_col_reps">Reps</string>
   <string name="editor_col_time">Time</string>
-  <string name="editor_col_kg" translatable="false">kg</string>
-  <string name="editor_col_km" translatable="false">km</string>
-  <string name="editor_col_m" translatable="false">m</string>
   <string name="editor_reps_max_hint">max</string>
   <string name="editor_superset_next">Superset with next</string>
   <string name="editor_superset_remove">Remove from superset</string>

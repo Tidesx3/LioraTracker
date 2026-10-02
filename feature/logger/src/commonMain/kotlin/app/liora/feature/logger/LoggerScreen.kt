@@ -53,10 +53,9 @@ import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.designsystem.util.rememberElapsedTime
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.designsystem.util.workoutDisplayName
-import app.liora.core.domain.SetField
 import app.liora.core.domain.find
-import app.liora.core.model.WeightUnit
 import app.liora.core.ui.currentLanguage
+import app.liora.core.ui.volumeText
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.cd_minimize
 import app.liora.feature.logger.resources.cd_rename
@@ -349,13 +348,13 @@ internal fun PadFor(
     val cell = state.edit?.cell
     val ref = cell?.let { state.workout.find(it.setId) } ?: state.current
     val trackingType = ref?.let { state.trackingTypeOf(state.workout.exercises[it.exerciseIndex].exerciseId) }
-    val fields = trackingType?.let(SetField::of).orEmpty()
+    val fields = trackingType?.let(state::fieldsOf).orEmpty()
     val field = cell?.field ?: fields.firstOrNull()
     // Clear focus from a note being typed, so the system keyboard and the pad never both show.
     val focusManager = LocalFocusManager.current
     LaunchedEffect(cell) { if (cell != null) focusManager.clearFocus() }
     NumberPad(
-        decimals = trackingType != null && field?.inputKind(trackingType) == InputKind.Decimal,
+        decimals = trackingType != null && field?.inputKind(trackingType)?.takesDecimals == true,
         nextLogsSet = field != null && field == fields.lastOrNull(),
         onKey = actions.pad.onKey,
         canHide = canHide,
@@ -462,7 +461,7 @@ private fun WorkoutStats(
         )
         Stat(
             label = stringResource(Res.string.logger_stat_volume),
-            value = "${numbers.format(state.volumeKg, maxFractionDigits = 0)} ${WeightUnit.Kilogram.symbol}",
+            value = volumeText(state.volumeKg),
         )
         Stat(label = stringResource(Res.string.logger_stat_sets), value = numbers.format(state.completedSets))
     }

@@ -3,10 +3,12 @@ package app.liora.feature.body.log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.body.BodyRepository
+import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.domain.BodyMeasurements
 import app.liora.core.domain.TrainingCalendar
 import app.liora.core.domain.parseDecimalInput
 import app.liora.core.model.MeasurementType
+import app.liora.core.model.Units
 import app.liora.core.navigation.LogMeasurementsRoute
 import app.liora.core.ui.fromShown
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +36,8 @@ data class LogForm(
     val today: LocalDate,
     val day: LocalDate,
     val edits: Map<MeasurementType, String> = emptyMap(),
+    /** The units values are typed in. */
+    val units: Units = Units(),
     val saving: Boolean = false,
     /** Set once the save has landed; the screen closes in response. */
     val done: Boolean = false,
@@ -54,7 +58,7 @@ data class LogForm(
         text: String,
     ): Double? =
         parseDecimalInput(text)
-            ?.let(type::fromShown)
+            ?.let { type.fromShown(it, units) }
             ?.takeIf { BodyMeasurements.isPlausible(type, it) }
 }
 
@@ -68,12 +72,19 @@ data class DayValues(
 class LogMeasurementsViewModel(
     route: LogMeasurementsRoute,
     private val body: BodyRepository,
+    settings: SettingsRepository,
     clock: Clock,
 ) : ViewModel() {
     private val zone = TimeZone.currentSystemDefault()
     private val today = TrainingCalendar.dayOf(clock.now(), zone)
     private val state = MutableStateFlow(LogForm(today = today, day = route.day?.let(LocalDate::parse) ?: today))
     val form: StateFlow<LogForm> = state.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            settings.settings.collect { chosen -> state.update { it.copy(units = chosen.units) } }
+        }
+    }
 
     val dayValues: StateFlow<DayValues> =
         combine(body.measurements, state.map { it.day }.distinctUntilChanged()) { all, day ->

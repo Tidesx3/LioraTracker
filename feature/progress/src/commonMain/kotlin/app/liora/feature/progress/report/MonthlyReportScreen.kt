@@ -32,11 +32,11 @@ import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.domain.MonthTotals
-import app.liora.core.model.WeightUnit
 import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.durationLabel
+import app.liora.core.ui.volumeText
 import app.liora.feature.progress.resources.Res
 import app.liora.feature.progress.resources.cd_next_month
 import app.liora.feature.progress.resources.cd_previous_month
@@ -165,7 +165,6 @@ private fun Totals(
     modifier: Modifier = Modifier,
 ) {
     val numbers = rememberNumberFormatter()
-    val kg = { value: Double -> "${numbers.format(value, maxFractionDigits = 0)} ${WeightUnit.Kilogram.symbol}" }
     FlowRow(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -182,7 +181,7 @@ private fun Totals(
             numbers.format(previous.trainingDays),
         )
         Total(stringResource(Res.string.report_time), durationLabel(totals.duration), durationLabel(previous.duration))
-        Total(stringResource(Res.string.report_volume), kg(totals.volumeKg), kg(previous.volumeKg))
+        Total(stringResource(Res.string.report_volume), volumeText(totals.volumeKg), volumeText(previous.volumeKg))
         Total(stringResource(Res.string.report_sets), numbers.format(totals.sets), numbers.format(previous.sets))
     }
 }

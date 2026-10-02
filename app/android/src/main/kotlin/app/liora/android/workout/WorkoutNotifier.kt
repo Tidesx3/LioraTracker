@@ -11,6 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import app.liora.android.R
 import app.liora.core.data.exercise.ExerciseRepository
+import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.RestTimerRepository
 import app.liora.core.model.RestTimer
@@ -45,6 +46,7 @@ class WorkoutNotifier(
     private val workouts: ActiveWorkoutRepository,
     private val restTimer: RestTimerRepository,
     private val exercises: ExerciseRepository,
+    private val settings: SettingsRepository,
     private val clock: Clock,
 ) {
     private val manager = NotificationManagerCompat.from(context)
@@ -61,7 +63,8 @@ class WorkoutNotifier(
             workouts.previousSets,
             exercises.observeExercises(language()).map { all -> all.associateBy { it.id } },
             restTimer.timer,
-        ) { workout, previous, byId, rest -> workoutStatus(workout, previous, byId, rest, clock.now()) }
+            settings.settings.map { it.units }.distinctUntilChanged(),
+        ) { workout, previous, byId, rest, units -> workoutStatus(workout, previous, byId, rest, units, clock.now()) }
             .distinctUntilChanged()
 
     /** Keeps the notification in step with the workout for as long as [scope] lives. */

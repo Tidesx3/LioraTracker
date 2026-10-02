@@ -1,9 +1,12 @@
 package app.liora.buildlogic
 
 import com.diffplug.gradle.spotless.SpotlessExtension
+import com.diffplug.gradle.spotless.SpotlessTask
 import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.api.Project
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.withType
 
 /** Formatting (Spotless + ktlint + compose-rules) and static analysis (detekt) for every module. */
 internal fun Project.configureQuality() {
@@ -26,6 +29,12 @@ internal fun Project.configureQuality() {
             target(buildScript)
             ktlint(ktlintVersion)
         }
+    }
+    // ktlint reads the root .editorconfig (style, the compose-rules allowlists), but Spotless doesn't track
+    // its contents: without this, editing it leaves the lint results UP-TO-DATE and stale.
+    val editorConfig = rootProject.layout.projectDirectory.file(".editorconfig")
+    tasks.withType<SpotlessTask>().configureEach {
+        inputs.file(editorConfig).withPathSensitivity(PathSensitivity.RELATIVE)
     }
 
     extensions.configure<DetektExtension> {

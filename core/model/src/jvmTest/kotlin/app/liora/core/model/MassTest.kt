@@ -17,6 +17,14 @@ class MassTest {
     }
 
     @Test
+    fun lengthsConvertBothWays() {
+        assertClose(3.10685596, LengthUnit.Mile.fromMeters(5_000.0))
+        assertClose(36.0, LengthUnit.Inch.fromMeters(0.9144))
+        assertClose(0.85, LengthUnit.Centimeter.toMeters(85.0))
+        assertClose(40.0, LengthUnit.Yard.fromMeters(LengthUnit.Yard.toMeters(40.0)))
+    }
+
+    @Test
     fun arithmeticAndOrdering() {
         val bar = Mass(20.0)
         val plates = Mass(2.5) * 4.0

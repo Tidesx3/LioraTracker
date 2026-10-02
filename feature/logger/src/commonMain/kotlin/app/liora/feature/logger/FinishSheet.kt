@@ -36,8 +36,8 @@ import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.designsystem.util.rememberElapsedTime
 import app.liora.core.designsystem.util.rememberNumberFormatter
-import app.liora.core.model.WeightUnit
 import app.liora.core.ui.recordLabel
+import app.liora.core.ui.volumeText
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.finish_empty_body
 import app.liora.feature.logger.resources.finish_empty_title
@@ -137,7 +137,7 @@ private fun Totals(
         Total(stringResource(Res.string.logger_stat_duration), elapsed.formatAsClock())
         Total(
             stringResource(Res.string.logger_stat_volume),
-            "${numbers.format(summary.volumeKg, maxFractionDigits = 0)} ${WeightUnit.Kilogram.symbol}",
+            volumeText(summary.volumeKg),
         )
         Total(stringResource(Res.string.logger_stat_sets), numbers.format(summary.completedSets))
     }

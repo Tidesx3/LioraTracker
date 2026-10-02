@@ -6,6 +6,19 @@
   <string name="rest_working">Rest between sets</string>
   <string name="rest_warmup">Rest after warm-up sets</string>
   <string name="rest_hint">When the exercise has no rest of its own</string>
+  <string name="rpe">RPE column</string>
+  <string name="rpe_body">Rate how hard each set was, from 1 to 10</string>
+
+  <string name="section_units">Units</string>
+  <string name="unit_weight">Weight</string>
+  <string name="unit_kilograms">Kilograms (kg)</string>
+  <string name="unit_pounds">Pounds (lb)</string>
+  <string name="unit_distance">Distance</string>
+  <string name="unit_kilometers">Kilometers and meters</string>
+  <string name="unit_miles">Miles and yards</string>
+  <string name="unit_body_length">Body measurements</string>
+  <string name="unit_centimeters">Centimeters (cm)</string>
+  <string name="unit_inches">Inches (in)</string>
 
   <string name="section_progress">Progress</string>
   <string name="formula">Estimated 1RM</string>

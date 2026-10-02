@@ -116,7 +116,7 @@ fun LineChart(
  * The value axis: room above and below the data, never below zero, labelled in round steps such as
  * 90, 95, 100, 105 rather than 92.5, 96, 99.5, 103.1.
  */
-private data class ValueAxis(
+internal data class ValueAxis(
     val min: Double,
     val max: Double,
     val step: Double,
@@ -127,8 +127,11 @@ private data class ValueAxis(
             val max = values.max()
             val spread = if (max > min) max - min else max.coerceAtLeast(1.0) * RANGE_PADDING
             val step = niceStep(spread / (VALUE_LABELS - 1))
-            val low = (floor(min / step) * step).coerceAtLeast(0.0)
-            return ValueAxis(low, low + step * ceil((max - low) / step).coerceAtLeast(1.0), step)
+            // Out to the step past each end, so no point sits on the edge and gets cut off, even when it's
+            // a round value itself. The slack absorbs floating-point noise: 0.88 / 0.01 is 88.00000000000001.
+            val low = ((ceil(min / step - STEP_SLACK) - 1) * step).coerceAtLeast(0.0)
+            val high = (floor(max / step + STEP_SLACK) + 1) * step
+            return ValueAxis(low, high, step)
         }
 
         /** The round step at or above [raw]: 1, 2, 2.5 or 5 times a power of ten. */
@@ -143,6 +146,7 @@ private data class ValueAxis(
 private const val DATE_LABELS = 4.0
 private const val VALUE_LABELS = 4
 private const val RANGE_PADDING = 0.1
+private const val STEP_SLACK = 1e-9
 private val NICE_STEPS = listOf(1.0, 2.0, 2.5, 5.0, 10.0)
 
 /** Days between date labels: a day, two, a week, two, four, eight, a quarter, half a year, a year. */

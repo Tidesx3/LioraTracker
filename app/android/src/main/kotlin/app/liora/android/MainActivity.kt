@@ -8,6 +8,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +19,7 @@ import app.liora.android.workout.WorkoutNotifications
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.domain.ThemeMode
+import app.liora.core.ui.LocalUnits
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.inject
 
@@ -32,7 +34,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // After a recreation the intent was already handled.
         if (savedInstanceState == null) openLogger = intent.opensLogger()
-        // Read once up front, so a chosen light or dark theme shows from the first frame.
+        // Read once up front, so a chosen theme and units show from the first frame.
         val initial = runBlocking { settingsRepository.current() }
         setContent {
             val settings by settingsRepository.settings.collectAsStateWithLifecycle(initial)
@@ -51,7 +53,9 @@ class MainActivity : ComponentActivity() {
                 onDispose {}
             }
             LioraTheme(darkTheme = dark, dynamicColor = settings.dynamicColor) {
-                LioraApp(openLogger = openLogger, onOpenLoggerHandle = { openLogger = false })
+                CompositionLocalProvider(LocalUnits provides settings.units) {
+                    LioraApp(openLogger = openLogger, onOpenLoggerHandle = { openLogger = false })
+                }
             }
         }
     }

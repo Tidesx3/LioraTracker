@@ -132,7 +132,7 @@ val bodyModule =
     module {
         viewModelOf(::BodyViewModel)
         viewModel { (type: MeasurementType) -> MeasurementDetailViewModel(type, get()) }
-        viewModel { (route: LogMeasurementsRoute) -> LogMeasurementsViewModel(route, get(), get()) }
+        viewModel { (route: LogMeasurementsRoute) -> LogMeasurementsViewModel(route, get(), get(), get()) }
         viewModelOf(::PhotosViewModel)
         viewModel { (photoId: String) -> PhotoViewModel(photoId, get(), get(), get()) }
         viewModel { (route: ComparePhotosRoute) -> CompareViewModel(route, get(), get()) }

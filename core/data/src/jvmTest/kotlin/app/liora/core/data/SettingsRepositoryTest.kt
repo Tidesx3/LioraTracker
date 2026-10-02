@@ -10,6 +10,10 @@ import app.liora.core.database.model.SyncMetadata
 import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.Settings
 import app.liora.core.domain.ThemeMode
+import app.liora.core.model.DistanceUnit
+import app.liora.core.model.LengthUnit
+import app.liora.core.model.Units
+import app.liora.core.model.WeightUnit
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
@@ -60,6 +64,34 @@ class SettingsRepositoryTest {
             assertEquals(28.days, stored.stallWindow)
             assertEquals(150.seconds, stored.rest.working)
             assertEquals(Settings().rest.warmup, stored.rest.warmup)
+        }
+
+    @Test
+    fun unitsAndTheRpeColumnAreKept() =
+        runTest {
+            settings.update {
+                it.copy(
+                    rpe = true,
+                    units = Units(WeightUnit.Pound, DistanceUnit.Mile, LengthUnit.Inch),
+                )
+            }
+
+            val stored = settings.settings.first()
+            assertEquals(true, stored.rpe)
+            assertEquals(Units(WeightUnit.Pound, DistanceUnit.Mile, LengthUnit.Inch), stored.units)
+            assertEquals(
+                mapOf(
+                    "logger.rpe" to "true",
+                    "units.weight" to "lb",
+                    "units.distance" to "mi",
+                    "units.body_length" to "in",
+                ),
+                dao.all().associate { it.key to it.value },
+            )
+
+            // Only pounds back to kilograms: the distance stays in miles.
+            settings.update { it.copy(units = it.units.copy(weight = WeightUnit.Kilogram)) }
+            assertEquals(Units(WeightUnit.Kilogram, DistanceUnit.Mile, LengthUnit.Inch), settings.current().units)
         }
 
     @Test

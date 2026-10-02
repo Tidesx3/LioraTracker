@@ -26,9 +26,7 @@
   <string name="col_previous">Previous</string>
   <string name="col_reps">Reps</string>
   <string name="col_time">Time</string>
-  <string name="col_kg" translatable="false">kg</string>
-  <string name="col_km" translatable="false">km</string>
-  <string name="col_m" translatable="false">m</string>
+  <string name="col_rpe" translatable="false">RPE</string>
   <string name="superset">Superset</string>
 
   <string name="menu_replace">Replace exercise</string>

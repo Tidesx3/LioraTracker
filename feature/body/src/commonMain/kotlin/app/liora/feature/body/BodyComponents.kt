@@ -17,8 +17,10 @@ import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.domain.DayValue
 import app.liora.core.domain.MeasurementChange
 import app.liora.core.model.MeasurementType
+import app.liora.core.ui.LocalUnits
 import app.liora.core.ui.measurementAxisText
 import app.liora.core.ui.measurementChangeText
+import app.liora.core.ui.toShown
 import app.liora.feature.body.resources.Res
 import app.liora.feature.body.resources.body_change_since
 import app.liora.feature.body.resources.dialog_cancel
@@ -38,9 +40,10 @@ internal fun MeasurementChart(
     modifier: Modifier = Modifier,
 ) {
     val numbers = rememberNumberFormatter()
+    val units = LocalUnits.current
     LineChart(
-        points = remember(days) { days.map { ChartPoint(it.day, it.value) } },
-        formatValue = remember(numbers, type) { { measurementAxisText(type, it, numbers) } },
+        points = remember(days, type, units) { days.map { ChartPoint(it.day, type.toShown(it.value, units)) } },
+        formatValue = remember(numbers) { { measurementAxisText(it, numbers) } },
         modifier = modifier.testTag(BodyTags.CHART),
     )
 }

@@ -34,6 +34,7 @@ import app.liora.core.model.RestTimer
 import app.liora.core.model.Routine
 import app.liora.core.model.SetType
 import app.liora.core.model.TrackingType
+import app.liora.core.model.Units
 import app.liora.core.ui.headlineRecords
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -90,6 +91,10 @@ sealed interface LoggerUiState {
         val routine: Routine?,
         val restTimer: RestTimer?,
         val restDefaults: RestDefaults,
+        /** The units values are typed in. */
+        val units: Units = Units(),
+        /** Whether sets get an RPE column. */
+        val rpe: Boolean = false,
         /** How estimated one-rep maxes are worked out, for today's records. */
         val formula: OneRepMaxFormula = OneRepMaxFormula.Epley,
         val edit: CellEdit?,
@@ -148,13 +153,16 @@ sealed interface LoggerUiState {
         fun trackingTypeOf(exerciseId: String): TrackingType =
             exercises[exerciseId]?.trackingType ?: TrackingType.WeightReps
 
+        /** The columns a set of [trackingType] has in the logger, left to right. */
+        fun fieldsOf(trackingType: TrackingType): List<SetField> = SetField.of(trackingType, withRpe = rpe)
+
         /** What an empty field of [ref] shows greyed out and logs when ticked without typing. */
         fun placeholderFor(ref: SetRef): LoggedSet {
             val exercise = workout.exercises[ref.exerciseIndex]
             val previousSet =
                 SetPlaceholders.previousFor(exercise.sets, ref.setIndex, previous[exercise.exerciseId].orEmpty())
             return SetPlaceholders.fill(
-                workout.setAt(ref).copy(weight = null, reps = null, duration = null, distanceMeters = null),
+                workout.setAt(ref).copy(weight = null, reps = null, duration = null, distanceMeters = null, rpe = null),
                 previousSet,
             )
         }
@@ -286,6 +294,8 @@ class LoggerViewModel(
                     restTimer = timer,
                     restDefaults = chosen.rest,
                     formula = chosen.oneRepMaxFormula,
+                    units = chosen.units,
+                    rpe = chosen.rpe,
                     // A cell whose set was removed meanwhile is no longer being edited.
                     edit = cell?.takeIf { workout.find(it.cell.setId) != null },
                     invalid = error?.takeIf { workout.find(it.setId) != null },
@@ -338,28 +348,27 @@ class LoggerViewModel(
         val target = typingTarget(current) ?: return
         when (key) {
             is PadKey.Digit, PadKey.Decimal -> typeKey(current, target, key)
-            PadKey.Backspace -> type(current.cell, current.text?.dropLast(1).orEmpty(), target.trackingType)
+            PadKey.Backspace -> type(current.cell, current.text?.dropLast(1).orEmpty(), target)
             PadKey.Increase, PadKey.Decrease -> step(current, target, up = key == PadKey.Increase)
-            PadKey.Next -> next(current, target.trackingType)
+            PadKey.Next -> next(current, target)
             PadKey.Hide -> edit.value = null
         }
     }
 
-    /** The set being typed into, with how its exercise is tracked. */
+    /** The set being typed into, with how its exercise is tracked and the units it's typed in. */
     private class TypingTarget(
         val ref: SetRef,
         val trackingType: TrackingType,
+        val fields: List<SetField>,
         val placeholder: LoggedSet,
+        val units: Units,
     )
 
     private fun typingTarget(edit: CellEdit): TypingTarget? {
         val state = active ?: return null
         val ref = state.workout.find(edit.cell.setId) ?: return null
-        return TypingTarget(
-            ref,
-            state.trackingTypeOf(state.workout.exercises[ref.exerciseIndex].exerciseId),
-            state.placeholderFor(ref),
-        )
+        val trackingType = state.trackingTypeOf(state.workout.exercises[ref.exerciseIndex].exerciseId)
+        return TypingTarget(ref, trackingType, state.fieldsOf(trackingType), state.placeholderFor(ref), state.units)
     }
 
     private fun typeKey(
@@ -371,7 +380,7 @@ class LoggerViewModel(
             current.cell.field
                 .inputKind(target.trackingType)
                 .append(current.text, key) ?: return
-        type(current.cell, text, target.trackingType)
+        type(current.cell, text, target)
     }
 
     private fun step(
@@ -381,15 +390,17 @@ class LoggerViewModel(
     ) {
         edit.value = current.copy(text = null)
         clearInvalid(current.cell)
-        write(current.cell.setId) { stepped(current.cell.field, up, target.trackingType, target.placeholder) }
+        write(current.cell.setId) {
+            stepped(current.cell.field, up, target.trackingType, target.placeholder, target.units)
+        }
     }
 
     /** Moves along the set; on its last field, ticks it off. */
     private fun next(
         current: CellEdit,
-        trackingType: TrackingType,
+        target: TypingTarget,
     ) {
-        val fields = SetField.of(trackingType)
+        val fields = target.fields
         val following = fields.getOrNull(fields.indexOf(current.cell.field) + 1)
         if (following !=
             null
@@ -552,11 +563,11 @@ class LoggerViewModel(
     private fun type(
         cell: CellRef,
         text: String,
-        trackingType: TrackingType,
+        target: TypingTarget,
     ) {
         edit.value = CellEdit(cell, text)
         clearInvalid(cell)
-        write(cell.setId) { withTyped(cell.field, text, trackingType) }
+        write(cell.setId) { withTyped(cell.field, text, target.trackingType, target.units) }
     }
 
     private fun clearInvalid(cell: CellRef) {
@@ -568,7 +579,7 @@ class LoggerViewModel(
         ref: SetRef,
     ) {
         val exercise = state.workout.exercises[ref.exerciseIndex]
-        val field = SetField.of(state.trackingTypeOf(exercise.exerciseId)).firstOrNull() ?: return
+        val field = state.fieldsOf(state.trackingTypeOf(exercise.exerciseId)).firstOrNull() ?: return
         edit.value = CellEdit(CellRef(exercise.sets[ref.setIndex].id, field))
     }
 

@@ -18,15 +18,18 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import app.liora.core.data.AppStartup
 import app.liora.core.data.routine.RoutineRepository
+import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.model.Mass
 import app.liora.core.model.RepRange
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineExercise
 import app.liora.core.model.RoutineSet
 import app.liora.core.model.SetType
+import app.liora.core.model.WeightUnit
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -150,6 +153,46 @@ class RoutinesFlowTest {
         composeRule.onRoot().captureRoboImage("src/test/screenshots/fold_inner_routine_editor_dark.png")
         composeRule.onNodeWithContentDescription("Close").performClick()
         waitForText("Start workout")
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun targetsInPounds() {
+        runBlocking {
+            GlobalContext.get().get<SettingsRepository>().update {
+                it.copy(units = it.units.copy(weight = WeightUnit.Pound))
+            }
+        }
+        seedRoutines()
+        launch()
+        waitForText(PPL)
+        composeRule.onNodeWithText("Push").performClick()
+        waitForText("Start workout")
+        composeRule.onAllNodesWithText("176.37 lb × 8–12").assertCountEquals(3)
+
+        composeRule.onNodeWithContentDescription("Edit").performClick()
+        waitForText("Edit routine")
+        composeRule.onAllNodesWithText("lb").onFirst().assertIsDisplayed()
+        // The warm-up's 40 kg, retyped in pounds. "95." stays as typed although every keystroke is stored
+        // in kilograms and read back.
+        composeRule.onNode(hasSetTextAction() and hasText("88.18")).performTextReplacement("95.")
+        composeRule.onNode(hasSetTextAction() and hasText("95.")).performTextInput("5")
+        composeRule.onNode(hasSetTextAction() and hasText("95.5")).assertIsDisplayed()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/routine_editor_pounds_dark.png")
+
+        composeRule.onNodeWithText("Save").performClick()
+        waitForText("95.5 lb × 10")
+        val warmup = runBlocking { GlobalContext.get().get<RoutineRepository>().get("push")!! }
+        assertEquals(
+            95.5,
+            warmup.exercises
+                .first()
+                .sets
+                .first()
+                .weight!!
+                .inUnit(WeightUnit.Pound),
+            1e-9,
+        )
     }
 
     @Test

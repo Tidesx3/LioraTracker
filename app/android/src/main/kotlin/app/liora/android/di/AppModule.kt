@@ -18,7 +18,7 @@ val appModule =
         viewModelOf(::LioraAppViewModel)
         single<ExerciseSeedSource> { assetSeedSource(androidContext()) }
         single<PhotoStorage> { AndroidPhotoStorage(androidContext()) }
-        single { WorkoutNotifier(androidContext(), get(), get(), get(), get()) }
+        single { WorkoutNotifier(androidContext(), get(), get(), get(), get(), get()) }
         single { RestAlarmScheduler(androidContext(), get(), get()) }
     }
 

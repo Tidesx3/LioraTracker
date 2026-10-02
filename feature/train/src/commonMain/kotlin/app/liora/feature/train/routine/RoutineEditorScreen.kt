@@ -60,10 +60,11 @@ import app.liora.core.model.RoutineExercise
 import app.liora.core.model.RoutineSet
 import app.liora.core.model.SetType
 import app.liora.core.model.TrackingType
+import app.liora.core.ui.LocalUnits
 import app.liora.core.ui.RestTimePicker
 import app.liora.core.ui.SetTypeMenu
 import app.liora.core.ui.currentLanguage
-import app.liora.core.ui.distanceInKilometers
+import app.liora.core.ui.distanceFor
 import app.liora.core.ui.restLabel
 import app.liora.core.ui.setNumbers
 import app.liora.feature.train.resources.Res
@@ -74,9 +75,6 @@ import app.liora.feature.train.resources.cd_reorder
 import app.liora.feature.train.resources.editor_add_exercises
 import app.liora.feature.train.resources.editor_add_note
 import app.liora.feature.train.resources.editor_add_set
-import app.liora.feature.train.resources.editor_col_kg
-import app.liora.feature.train.resources.editor_col_km
-import app.liora.feature.train.resources.editor_col_m
 import app.liora.feature.train.resources.editor_col_reps
 import app.liora.feature.train.resources.editor_col_set
 import app.liora.feature.train.resources.editor_col_time
@@ -437,8 +435,9 @@ private fun SetHeader(
         horizontalArrangement = Arrangement.spacedBy(FIELD_GAP),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val units = LocalUnits.current
         HeaderText(stringResource(Res.string.editor_col_set), BADGE_WIDTH)
-        if (trackingType.usesWeight) HeaderText(stringResource(Res.string.editor_col_kg), WEIGHT_WIDTH)
+        if (trackingType.usesWeight) HeaderText(units.weight.symbol, WEIGHT_WIDTH)
         if (trackingType.usesReps) {
             HeaderText(
                 stringResource(Res.string.editor_col_reps),
@@ -446,12 +445,7 @@ private fun SetHeader(
             )
         }
         if (trackingType.usesDistance) {
-            HeaderText(
-                stringResource(
-                    if (trackingType.distanceInKilometers) Res.string.editor_col_km else Res.string.editor_col_m,
-                ),
-                WEIGHT_WIDTH,
-            )
+            HeaderText(units.distanceFor(trackingType).symbol, WEIGHT_WIDTH)
         }
         if (trackingType.usesDuration) HeaderText(stringResource(Res.string.editor_col_time), WEIGHT_WIDTH)
     }
@@ -480,6 +474,8 @@ private fun SetEditorRow(
     onRemove: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Typed in the chosen units, kept in kilograms and metres.
+    val units = LocalUnits.current
     Row(
         modifier,
         horizontalArrangement = Arrangement.spacedBy(FIELD_GAP),
@@ -488,8 +484,8 @@ private fun SetEditorRow(
         SetTypeMenu(set.type, number, onPick = { type -> onChange { copy(type = type) } })
         if (trackingType.usesWeight) {
             DecimalTargetField(
-                value = set.weight?.kilograms,
-                onValueChange = { kg -> onChange { copy(weight = kg?.let(::Mass)) } },
+                value = set.weight?.inUnit(units.weight),
+                onValueChange = { typed -> onChange { copy(weight = typed?.let { Mass.of(it, units.weight) }) } },
                 placeholder = "–",
                 modifier = Modifier.width(WEIGHT_WIDTH),
             )
@@ -510,10 +506,10 @@ private fun SetEditorRow(
             )
         }
         if (trackingType.usesDistance) {
-            val perUnit = if (trackingType.distanceInKilometers) METERS_PER_KM else 1.0
+            val unit = units.distanceFor(trackingType)
             DecimalTargetField(
-                value = set.distanceMeters?.let { it / perUnit },
-                onValueChange = { distance -> onChange { copy(distanceMeters = distance?.let { it * perUnit }) } },
+                value = set.distanceMeters?.let(unit::fromMeters),
+                onValueChange = { typed -> onChange { copy(distanceMeters = typed?.let(unit::toMeters)) } },
                 placeholder = "–",
                 modifier = Modifier.width(WEIGHT_WIDTH),
             )
@@ -536,4 +532,3 @@ private val WEIGHT_WIDTH = 72.dp
 private val REPS_WIDTH = 52.dp
 private val DASH_WIDTH = 8.dp
 private val FIELD_GAP = 6.dp
-private const val METERS_PER_KM = 1_000.0

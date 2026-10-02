@@ -141,7 +141,8 @@ internal fun ExerciseCard(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
             )
         }
-        SetHeader(trackingType, Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+        val columns = SetColumns(trackingType, state.fieldsOf(trackingType))
+        SetHeader(columns, Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
         val numbersOfSets = setNumbers(workoutExercise.sets.map { it.type })
         workoutExercise.sets.forEachIndexed { setIndex, set ->
             key(set.id) {
@@ -151,7 +152,7 @@ internal fun ExerciseCard(
                         SetRowState(
                             set = set,
                             number = numbersOfSets[setIndex],
-                            trackingType = trackingType,
+                            columns = columns,
                             hints =
                                 SetHints(
                                     previous = state.previousFor(ref),

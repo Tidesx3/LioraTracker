@@ -8,6 +8,10 @@ import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.RestDefaults
 import app.liora.core.domain.Settings
 import app.liora.core.domain.ThemeMode
+import app.liora.core.model.DistanceUnit
+import app.liora.core.model.LengthUnit
+import app.liora.core.model.Units
+import app.liora.core.model.WeightUnit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -66,11 +70,18 @@ internal class OfflineSettingsRepository(
 internal object SettingsCodec {
     private const val REST_WORKING = "rest.working_sec"
     private const val REST_WARMUP = "rest.warmup_sec"
+    private const val RPE = "logger.rpe"
+    private const val WEIGHT_UNIT = "units.weight"
+    private const val DISTANCE_UNIT = "units.distance"
+    private const val BODY_LENGTH_UNIT = "units.body_length"
     private const val FORMULA = "progress.e1rm_formula"
     private const val STALL_WINDOW = "progress.stall_window_days"
     private const val THEME = "appearance.theme"
     private const val DYNAMIC_COLOR = "appearance.dynamic_color"
 
+    private val weightUnits = mapOf(WeightUnit.Kilogram to "kg", WeightUnit.Pound to "lb")
+    private val distanceUnits = mapOf(DistanceUnit.Kilometer to "km", DistanceUnit.Mile to "mi")
+    private val bodyLengthUnits = mapOf(LengthUnit.Centimeter to "cm", LengthUnit.Inch to "in")
     private val formulas = mapOf(OneRepMaxFormula.Epley to "epley", OneRepMaxFormula.Brzycki to "brzycki")
     private val themes = mapOf(ThemeMode.System to "system", ThemeMode.Light to "light", ThemeMode.Dark to "dark")
 
@@ -82,6 +93,10 @@ internal object SettingsCodec {
             REST_WARMUP to
                 settings.rest.warmup.inWholeSeconds
                     .toString(),
+            RPE to settings.rpe.toString(),
+            WEIGHT_UNIT to weightUnits.getValue(settings.units.weight),
+            DISTANCE_UNIT to distanceUnits.getValue(settings.units.distance),
+            BODY_LENGTH_UNIT to bodyLengthUnits.getValue(settings.units.bodyLength),
             FORMULA to formulas.getValue(settings.oneRepMaxFormula),
             STALL_WINDOW to settings.stallWindow.inWholeDays.toString(),
             THEME to themes.getValue(settings.theme),
@@ -97,12 +112,23 @@ internal object SettingsCodec {
                     working = seconds(REST_WORKING) ?: defaults.rest.working,
                     warmup = seconds(REST_WARMUP) ?: defaults.rest.warmup,
                 ),
+            rpe = values[RPE]?.toBooleanStrictOrNull() ?: defaults.rpe,
+            units = decodeUnits(values, defaults.units),
             oneRepMaxFormula = values[FORMULA]?.let { formulas.keyFor(it) } ?: defaults.oneRepMaxFormula,
             stallWindow = values[STALL_WINDOW]?.toIntOrNull()?.takeIf { it > 0 }?.days ?: defaults.stallWindow,
             theme = values[THEME]?.let { themes.keyFor(it) } ?: defaults.theme,
             dynamicColor = values[DYNAMIC_COLOR]?.toBooleanStrictOrNull() ?: defaults.dynamicColor,
         )
     }
+
+    private fun decodeUnits(
+        values: Map<String, String>,
+        defaults: Units,
+    ) = Units(
+        weight = values[WEIGHT_UNIT]?.let { weightUnits.keyFor(it) } ?: defaults.weight,
+        distance = values[DISTANCE_UNIT]?.let { distanceUnits.keyFor(it) } ?: defaults.distance,
+        bodyLength = values[BODY_LENGTH_UNIT]?.let { bodyLengthUnits.keyFor(it) } ?: defaults.bodyLength,
+    )
 
     private fun <K> Map<K, String>.keyFor(value: String): K? = entries.firstOrNull { it.value == value }?.key
 }

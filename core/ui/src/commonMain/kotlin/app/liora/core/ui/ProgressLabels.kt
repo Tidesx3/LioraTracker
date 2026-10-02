@@ -6,8 +6,10 @@ import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.domain.ProgressMetric
 import app.liora.core.domain.RecordType
+import app.liora.core.model.LengthUnit
+import app.liora.core.model.Mass
 import app.liora.core.model.TrackingType
-import app.liora.core.model.WeightUnit
+import app.liora.core.model.Units
 import app.liora.core.ui.resources.Res
 import app.liora.core.ui.resources.metric_best_pace
 import app.liora.core.ui.resources.metric_estimated_1rm
@@ -83,7 +85,27 @@ val RecordType.unit: ValueUnit
             RecordType.BestPace -> ValueUnit.SecondsPerKilometer
         }
 
-/** [value] with its unit, the way the locale writes it: "116,7 kg", "12 Wdh.", "1:30", "5 km", "5:00 /km". */
+/**
+ * A stored value in the unit it's shown in: kilograms as pounds where chosen, metres as kilometres,
+ * miles, metres or yards, and a pace per kilometre as one per mile. Charts plot shown values, so their
+ * axis steps are round numbers in the unit read.
+ */
+fun ValueUnit.toShown(
+    value: Double,
+    units: Units,
+    trackingType: TrackingType,
+): Double =
+    when (this) {
+        ValueUnit.Kilograms -> Mass(value).inUnit(units.weight)
+        ValueUnit.Reps, ValueUnit.Seconds -> value
+        ValueUnit.Meters -> units.distanceFor(trackingType).fromMeters(value)
+        ValueUnit.SecondsPerKilometer -> value * units.distance.long.metersPerUnit / LengthUnit.Kilometer.metersPerUnit
+    }
+
+/**
+ * A stored [value] with its unit, as chosen and the way the locale writes it: "116,7 kg", "12 Wdh.",
+ * "1:30", "5 km", "5:00 /km".
+ */
 @Composable
 fun valueText(
     unit: ValueUnit,
@@ -91,57 +113,66 @@ fun valueText(
     trackingType: TrackingType,
 ): String {
     val numbers = rememberNumberFormatter()
+    val units = LocalUnits.current
+    val number = axisText(unit, unit.toShown(value, units, trackingType), numbers, trackingType)
     return when (unit) {
         ValueUnit.Reps -> {
             val reps = value.roundToInt()
-            pluralStringResource(Res.plurals.reps_count, reps, numbers.format(reps))
+            pluralStringResource(Res.plurals.reps_count, reps, number)
         }
 
         ValueUnit.Kilograms -> {
-            "${axisText(unit, value, numbers, trackingType)} ${WeightUnit.Kilogram.symbol}"
+            "$number ${units.weight.symbol}"
         }
 
         ValueUnit.Meters -> {
-            "${axisText(unit, value, numbers, trackingType)} ${if (trackingType.distanceInKilometers) "km" else "m"}"
+            "$number ${units.distanceFor(trackingType).symbol}"
         }
 
         ValueUnit.Seconds -> {
-            axisText(unit, value, numbers, trackingType)
+            number
         }
 
         ValueUnit.SecondsPerKilometer -> {
-            "${axisText(unit, value, numbers, trackingType)} /km"
+            "$number /${units.distance.long.symbol}"
         }
     }
 }
 
-/** [value] without its unit, for a chart axis whose title names it: "116,7", "12", "1:30". */
+/**
+ * A value already in the unit it's shown in ([toShown]), without the unit, for a chart axis whose
+ * title names it: "116,7", "12", "1:30".
+ */
 fun axisText(
     unit: ValueUnit,
-    value: Double,
+    shown: Double,
     numbers: NumberFormatter,
     trackingType: TrackingType,
 ): String =
     when (unit) {
         // A tonne of volume needs no decimals; a one-rep max reads to the half kilo.
         ValueUnit.Kilograms -> {
-            numbers.format(value, maxFractionDigits = if (value >= THOUSAND) 0 else 1)
+            numbers.format(shown, maxFractionDigits = if (shown >= THOUSAND) 0 else 1)
         }
 
         ValueUnit.Reps -> {
-            numbers.format(value.roundToInt())
+            numbers.format(shown.roundToInt())
         }
 
+        // A run to the ten metres, a carry to the metre.
         ValueUnit.Meters -> {
-            if (trackingType.distanceInKilometers) {
-                numbers.format(value / THOUSAND, maxFractionDigits = 2)
+            if (trackingType.longDistance) {
+                numbers.format(
+                    shown,
+                    maxFractionDigits = 2,
+                )
             } else {
-                numbers.format(value.roundToInt())
+                numbers.format(shown.roundToInt())
             }
         }
 
         ValueUnit.Seconds, ValueUnit.SecondsPerKilometer -> {
-            value.roundToInt().seconds.formatAsClock()
+            shown.roundToInt().seconds.formatAsClock()
         }
     }
 

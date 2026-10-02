@@ -8,6 +8,7 @@ import app.liora.core.model.Exercise
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.RestTimer
 import app.liora.core.model.TrackingType
+import app.liora.core.model.Units
 import kotlin.time.Instant
 
 /** What the workout notification shows. */
@@ -27,6 +28,8 @@ internal data class NextSet(
     /** Its values, with empty fields taken from last session or the routine's target. */
     val values: LoggedSet,
     val trackingType: TrackingType,
+    /** The units its values are shown in. */
+    val units: Units,
     /** Whether it can be ticked off from the notification, i.e. without typing anything. */
     val canLog: Boolean,
 )
@@ -37,6 +40,7 @@ internal fun workoutStatus(
     previous: Map<String, List<LoggedSet>>,
     exercises: Map<String, Exercise>,
     rest: RestTimer?,
+    units: Units,
     now: Instant,
 ): WorkoutStatus? {
     workout ?: return null
@@ -57,6 +61,7 @@ internal fun workoutStatus(
                 setCount = exercise.sets.size,
                 values = values,
                 trackingType = trackingType,
+                units = units,
                 canLog = SetPlaceholders.missingFields(trackingType, values).isEmpty(),
             )
         }

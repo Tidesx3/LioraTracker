@@ -16,8 +16,8 @@ import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.rememberNumberFormatter
-import app.liora.core.model.WeightUnit
 import app.liora.core.ui.durationLabel
+import app.liora.core.ui.volumeText
 import app.liora.feature.history.resources.Res
 import app.liora.feature.history.resources.cd_records
 import app.liora.feature.history.resources.stat_duration
@@ -45,7 +45,7 @@ internal fun WorkoutTotals(
         if (volumeKg > 0.0) {
             Total(
                 stringResource(Res.string.stat_volume),
-                "${numbers.format(volumeKg, maxFractionDigits = 0)} ${WeightUnit.Kilogram.symbol}",
+                volumeText(volumeKg),
                 valueStyle,
             )
         }

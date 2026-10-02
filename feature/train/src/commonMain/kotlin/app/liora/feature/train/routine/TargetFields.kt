@@ -30,6 +30,7 @@ import app.liora.core.domain.clockDigitsText
 import app.liora.core.domain.parseClockDigits
 import app.liora.core.domain.parseDecimalInput
 import app.liora.core.model.RepRange
+import kotlin.math.abs
 
 // Compact target inputs for the routine editor. Each keeps the text as typed ("82," while typing
 // 82,5) and only adopts the model's value when it changes from outside, e.g. a copied set.
@@ -44,7 +45,12 @@ internal fun DecimalTargetField(
 ) {
     val numbers = rememberNumberFormatter()
     var text by remember { mutableStateOf(value?.let(numbers::format).orEmpty()) }
-    LaunchedEffect(value) { if (parseDecimalInput(text) != value) text = value?.let(numbers::format).orEmpty() }
+    LaunchedEffect(value) {
+        // Pounds and miles come back from kilograms and metres with a rounding error far below what's shown.
+        val typed = parseDecimalInput(text)
+        val same = if (typed == null || value == null) typed == value else abs(typed - value) < SAME_VALUE
+        if (!same) text = value?.let(numbers::format).orEmpty()
+    }
     TargetField(
         value = TextFieldValue(text, TextRange(text.length)),
         onValueChange = { typed ->
@@ -171,3 +177,4 @@ internal fun RepRange?.withMax(max: Int?): RepRange? {
 
 private const val MAX_REP_DIGITS = 3
 private const val MAX_CLOCK_DIGITS = 5
+private const val SAME_VALUE = 1e-6

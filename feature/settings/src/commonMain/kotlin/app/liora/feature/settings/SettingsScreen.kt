@@ -34,6 +34,9 @@ import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.Settings
 import app.liora.core.domain.ThemeMode
+import app.liora.core.model.DistanceUnit
+import app.liora.core.model.Units
+import app.liora.core.model.WeightUnit
 import app.liora.core.ui.AppLanguage
 import app.liora.core.ui.AppLanguages
 import app.liora.core.ui.RestTimePicker
@@ -42,30 +45,24 @@ import app.liora.feature.settings.resources.Res
 import app.liora.feature.settings.resources.dialog_cancel
 import app.liora.feature.settings.resources.dynamic_color
 import app.liora.feature.settings.resources.formula
-import app.liora.feature.settings.resources.formula_brzycki
-import app.liora.feature.settings.resources.formula_brzycki_body
-import app.liora.feature.settings.resources.formula_epley
-import app.liora.feature.settings.resources.formula_epley_body
 import app.liora.feature.settings.resources.language
-import app.liora.feature.settings.resources.language_de
-import app.liora.feature.settings.resources.language_en
-import app.liora.feature.settings.resources.language_system
 import app.liora.feature.settings.resources.rest_hint
 import app.liora.feature.settings.resources.rest_warmup
 import app.liora.feature.settings.resources.rest_working
+import app.liora.feature.settings.resources.rpe
+import app.liora.feature.settings.resources.rpe_body
 import app.liora.feature.settings.resources.section_appearance
 import app.liora.feature.settings.resources.section_progress
+import app.liora.feature.settings.resources.section_units
 import app.liora.feature.settings.resources.section_workout
 import app.liora.feature.settings.resources.settings_title
-import app.liora.feature.settings.resources.stall_weeks
 import app.liora.feature.settings.resources.stall_window
 import app.liora.feature.settings.resources.theme
-import app.liora.feature.settings.resources.theme_dark
-import app.liora.feature.settings.resources.theme_light
-import app.liora.feature.settings.resources.theme_system
-import org.jetbrains.compose.resources.pluralStringResource
+import app.liora.feature.settings.resources.unit_body_length
+import app.liora.feature.settings.resources.unit_distance
+import app.liora.feature.settings.resources.unit_weight
 import org.jetbrains.compose.resources.stringResource
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun SettingsScreen(
@@ -76,38 +73,31 @@ internal fun SettingsScreen(
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     SettingsContent(
         settings = settings,
-        actions =
-            SettingsActions(
-                onBack = onBack,
-                onRestWorking = viewModel::setRestWorking,
-                onRestWarmup = viewModel::setRestWarmup,
-                onFormula = viewModel::setFormula,
-                onStallWindow = viewModel::setStallWindow,
-                onTheme = viewModel::setTheme,
-                onDynamicColor = viewModel::setDynamicColor,
-            ),
+        onBack = onBack,
+        onChange = viewModel::update,
         language = rememberAppLanguage(),
         modifier = modifier,
     )
 }
 
-internal class SettingsActions(
-    val onBack: () -> Unit,
-    val onRestWorking: (Int) -> Unit,
-    val onRestWarmup: (Int) -> Unit,
-    val onFormula: (OneRepMaxFormula) -> Unit,
-    val onStallWindow: (Duration) -> Unit,
-    val onTheme: (ThemeMode) -> Unit,
-    val onDynamicColor: (Boolean) -> Unit,
-)
-
 /** Which choice is open in a dialog. */
-private enum class Choice { RestWorking, RestWarmup, Formula, StallWindow, Theme, Language }
+private enum class Choice {
+    RestWorking,
+    RestWarmup,
+    Weight,
+    Distance,
+    BodyLength,
+    Formula,
+    StallWindow,
+    Theme,
+    Language,
+}
 
 @Composable
 private fun SettingsContent(
     settings: Settings?,
-    actions: SettingsActions,
+    onBack: () -> Unit,
+    onChange: (SettingsChange) -> Unit,
     language: AppLanguage,
     modifier: Modifier = Modifier,
 ) {
@@ -117,7 +107,7 @@ private fun SettingsContent(
         topBar = {
             LioraTopAppBar(
                 title = stringResource(Res.string.settings_title),
-                navigationIcon = { BackButton(onClick = actions.onBack) },
+                navigationIcon = { BackButton(onClick = onBack) },
             )
         },
     ) { padding ->
@@ -128,31 +118,59 @@ private fun SettingsContent(
         ) {
             item(key = "workout") {
                 SectionHeader(stringResource(Res.string.section_workout))
-                SettingRow(stringResource(Res.string.rest_working), settings.rest.working.formatAsClock(), onClick = {
-                    open =
-                        Choice.RestWorking
-                })
-                SettingRow(stringResource(Res.string.rest_warmup), settings.rest.warmup.formatAsClock(), onClick = {
-                    open =
-                        Choice.RestWarmup
-                })
+                SettingRow(
+                    stringResource(Res.string.rest_working),
+                    settings.rest.working.formatAsClock(),
+                    onClick = { open = Choice.RestWorking },
+                )
+                SettingRow(
+                    stringResource(Res.string.rest_warmup),
+                    settings.rest.warmup.formatAsClock(),
+                    onClick = { open = Choice.RestWarmup },
+                )
                 Text(
                     text = stringResource(Res.string.rest_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
+                SwitchRow(
+                    title = stringResource(Res.string.rpe),
+                    description = stringResource(Res.string.rpe_body),
+                    checked = settings.rpe,
+                    onCheckedChange = { on -> onChange { it.copy(rpe = on) } },
+                )
+            }
+            item(key = "units") {
+                SectionHeader(stringResource(Res.string.section_units))
+                SettingRow(
+                    stringResource(Res.string.unit_weight),
+                    weightUnitName(settings.units.weight),
+                    onClick = { open = Choice.Weight },
+                )
+                SettingRow(
+                    stringResource(Res.string.unit_distance),
+                    distanceUnitName(settings.units.distance),
+                    onClick = { open = Choice.Distance },
+                )
+                SettingRow(
+                    stringResource(Res.string.unit_body_length),
+                    bodyLengthUnitName(settings.units.bodyLength),
+                    onClick = { open = Choice.BodyLength },
+                )
             }
             item(key = "progress") {
                 SectionHeader(stringResource(Res.string.section_progress))
-                SettingRow(stringResource(Res.string.formula), formulaName(settings.oneRepMaxFormula), onClick = {
-                    open =
-                        Choice.Formula
-                })
-                SettingRow(stringResource(Res.string.stall_window), stallText(settings.stallWindow), onClick = {
-                    open =
-                        Choice.StallWindow
-                })
+                SettingRow(
+                    stringResource(Res.string.formula),
+                    formulaName(settings.oneRepMaxFormula),
+                    onClick = { open = Choice.Formula },
+                )
+                SettingRow(
+                    stringResource(Res.string.stall_window),
+                    stallText(settings.stallWindow),
+                    onClick = { open = Choice.StallWindow },
+                )
             }
             item(key = "appearance") {
                 SectionHeader(stringResource(Res.string.section_appearance))
@@ -162,25 +180,24 @@ private fun SettingsContent(
                     onClick = { open = Choice.Theme },
                 )
                 if (dynamicColorSupported) {
-                    ListItem(
-                        headlineContent = { Text(stringResource(Res.string.dynamic_color)) },
-                        trailingContent = {
-                            Switch(checked = settings.dynamicColor, onCheckedChange = actions.onDynamicColor)
-                        },
-                        modifier = Modifier.clickable { actions.onDynamicColor(!settings.dynamicColor) },
+                    SwitchRow(
+                        title = stringResource(Res.string.dynamic_color),
+                        checked = settings.dynamicColor,
+                        onCheckedChange = { on -> onChange { it.copy(dynamicColor = on) } },
                     )
                 }
                 if (language.available) {
-                    SettingRow(stringResource(Res.string.language), languageName(language.current), onClick = {
-                        open =
-                            Choice.Language
-                    })
+                    SettingRow(
+                        stringResource(Res.string.language),
+                        languageName(language.current),
+                        onClick = { open = Choice.Language },
+                    )
                 }
             }
         }
     }
     if (settings != null) {
-        ChoiceDialogs(open, settings, actions, language, onClose = { open = null })
+        ChoiceDialogs(open, settings, onChange, language, onClose = { open = null })
     }
 }
 
@@ -188,13 +205,13 @@ private fun SettingsContent(
 private fun ChoiceDialogs(
     open: Choice?,
     settings: Settings,
-    actions: SettingsActions,
+    onChange: (SettingsChange) -> Unit,
     language: AppLanguage,
     onClose: () -> Unit,
 ) {
-    val choose = { action: () -> Unit ->
+    val choose = { change: SettingsChange ->
         onClose()
-        action()
+        onChange(change)
     }
     when (open) {
         null -> {
@@ -206,11 +223,46 @@ private fun ChoiceDialogs(
             RestTimePicker(
                 current = (if (working) settings.rest.working else settings.rest.warmup).inWholeSeconds.toInt(),
                 onChoose = { seconds ->
-                    val chosen = seconds ?: return@RestTimePicker
-                    choose { if (working) actions.onRestWorking(chosen) else actions.onRestWarmup(chosen) }
+                    val chosen = seconds?.seconds ?: return@RestTimePicker
+                    choose {
+                        it.copy(rest = if (working) it.rest.copy(working = chosen) else it.rest.copy(warmup = chosen))
+                    }
                 },
                 onDismiss = onClose,
                 offerExerciseDefault = false,
+            )
+        }
+
+        Choice.Weight -> {
+            ChoiceDialog(
+                title = stringResource(Res.string.unit_weight),
+                options = WeightUnit.entries,
+                selected = settings.units.weight,
+                label = { weightUnitName(it) },
+                onChoose = { unit -> choose { it.copy(units = it.units.copy(weight = unit)) } },
+                onDismiss = onClose,
+            )
+        }
+
+        Choice.Distance -> {
+            ChoiceDialog(
+                title = stringResource(Res.string.unit_distance),
+                options = DistanceUnit.entries,
+                selected = settings.units.distance,
+                label = { distanceUnitName(it) },
+                onChoose = { unit -> choose { it.copy(units = it.units.copy(distance = unit)) } },
+                onDismiss = onClose,
+            )
+        }
+
+        Choice.BodyLength -> {
+            ChoiceDialog(
+                title = stringResource(Res.string.unit_body_length),
+                options = Units.BODY_LENGTHS,
+                selected = settings.units.bodyLength,
+                label = { bodyLengthUnitName(it) },
+                onChoose = { unit -> choose { it.copy(units = it.units.copy(bodyLength = unit)) } },
+                onDismiss = onClose,
             )
         }
 
@@ -221,7 +273,7 @@ private fun ChoiceDialogs(
                 selected = settings.oneRepMaxFormula,
                 label = { formulaName(it) },
                 description = { formulaDescription(it) },
-                onChoose = { choose { actions.onFormula(it) } },
+                onChoose = { formula -> choose { it.copy(oneRepMaxFormula = formula) } },
                 onDismiss = onClose,
             )
         }
@@ -232,7 +284,7 @@ private fun ChoiceDialogs(
                 options = Settings.STALL_WINDOWS,
                 selected = settings.stallWindow,
                 label = { stallText(it) },
-                onChoose = { choose { actions.onStallWindow(it) } },
+                onChoose = { window -> choose { it.copy(stallWindow = window) } },
                 onDismiss = onClose,
             )
         }
@@ -243,18 +295,22 @@ private fun ChoiceDialogs(
                 options = ThemeMode.entries,
                 selected = settings.theme,
                 label = { themeName(it) },
-                onChoose = { choose { actions.onTheme(it) } },
+                onChoose = { theme -> choose { it.copy(theme = theme) } },
                 onDismiss = onClose,
             )
         }
 
         Choice.Language -> {
+            // The OS keeps the app's language, not the synced settings.
             ChoiceDialog(
                 title = stringResource(Res.string.language),
                 options = listOf(null) + AppLanguages,
                 selected = language.current,
                 label = { languageName(it) },
-                onChoose = { choose { language.choose(it) } },
+                onChoose = {
+                    onClose()
+                    language.choose(it)
+                },
                 onDismiss = onClose,
             )
         }
@@ -273,6 +329,23 @@ private fun SettingRow(
         headlineContent = { Text(title) },
         supportingContent = { Text(value) },
         modifier = modifier.clickable(onClick = onClick),
+    )
+}
+
+/** A setting that's on or off; the whole row toggles it. */
+@Composable
+private fun SwitchRow(
+    title: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    description: String? = null,
+) {
+    ListItem(
+        headlineContent = { Text(title) },
+        supportingContent = description?.let { { Text(it) } },
+        trailingContent = { Switch(checked = checked, onCheckedChange = onCheckedChange) },
+        modifier = modifier.clickable { onCheckedChange(!checked) },
     )
 }
 
@@ -316,49 +389,3 @@ private fun <T> ChoiceDialog(
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.dialog_cancel)) } },
     )
 }
-
-@Composable
-private fun formulaName(formula: OneRepMaxFormula): String =
-    stringResource(
-        when (formula) {
-            OneRepMaxFormula.Epley -> Res.string.formula_epley
-            OneRepMaxFormula.Brzycki -> Res.string.formula_brzycki
-        },
-    )
-
-@Composable
-private fun formulaDescription(formula: OneRepMaxFormula): String =
-    stringResource(
-        when (formula) {
-            OneRepMaxFormula.Epley -> Res.string.formula_epley_body
-            OneRepMaxFormula.Brzycki -> Res.string.formula_brzycki_body
-        },
-    )
-
-@Composable
-private fun stallText(window: Duration): String {
-    val weeks = (window.inWholeDays / DAYS_PER_WEEK).toInt()
-    return pluralStringResource(Res.plurals.stall_weeks, weeks, weeks)
-}
-
-@Composable
-private fun themeName(theme: ThemeMode): String =
-    stringResource(
-        when (theme) {
-            ThemeMode.System -> Res.string.theme_system
-            ThemeMode.Light -> Res.string.theme_light
-            ThemeMode.Dark -> Res.string.theme_dark
-        },
-    )
-
-@Composable
-private fun languageName(language: String?): String =
-    stringResource(
-        when (language) {
-            null -> Res.string.language_system
-            "de" -> Res.string.language_de
-            else -> Res.string.language_en
-        },
-    )
-
-private const val DAYS_PER_WEEK = 7

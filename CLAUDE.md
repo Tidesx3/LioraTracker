@@ -37,7 +37,9 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 ## Data rules
 
 - **Ids:** UUIDv7 strings from `IdGenerator`, created on the client. Built-in exercises use stable seed ids (`fedb.<id>`, `liora.<slug>`) and are never synced.
-- **Units:** stored canonically (kg, m, s; body fat in percent). Display units are only a preference. `Mass` wraps kilograms. Body measurements convert for display only in `core:ui` `BodyLabels.kt` (circumferences show in cm).
+- **Units:** stored canonically (kg, m, s; body fat in percent). `Mass` wraps kilograms.
+  - Display units are a setting (`Units`: kg/lb, km and m or miles and yards, cm/in). Composables read them from `LocalUnits` (`core:ui` `UnitLabels.kt`), which `MainActivity` provides. ViewModels that convert typed input take them from `SettingsRepository`.
+  - Never hard-code kg, km or cm in UI. Show values through `weightText`, `volumeText` and `distanceText`, and body measurements through `BodyLabels.kt`. Convert typed values back with `Mass.of(value, unit)` and `LengthUnit.toMeters`.
 - **Syncable rows:** embed `SyncMetadata` (`created_at`, `hlc`, `deleted_at`, `dirty`).
   - Every write goes through `SyncStamper` (`newRow`, `touch`, `tombstone`).
   - Never hard-delete synced rows.
