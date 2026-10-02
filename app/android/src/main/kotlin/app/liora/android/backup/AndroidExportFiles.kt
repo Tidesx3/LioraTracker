@@ -31,6 +31,8 @@ internal class AndroidExportFiles(
         output(destination).use { it.write(text.encodeToByteArray()) }
     }
 
+    override suspend fun readText(source: String): String = io { input(source).use { it.readBytes().decodeToString() } }
+
     override suspend fun writeArchive(
         destination: String,
         entries: suspend ArchiveWriter.() -> Unit,

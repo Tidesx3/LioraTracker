@@ -44,9 +44,9 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - Every write goes through `SyncStamper` (`newRow`, `touch`, `tombstone`).
   - Never hard-delete synced rows.
   - Synced tables have no foreign-key constraints. Repositories keep references consistent and cascade tombstones.
-  - `ownerId` is a server-side concept, added in Phase 3. The local DB belongs to one user.
+  - `ownerId` is a server-side concept, added in Phase 4. The local DB belongs to one user.
 - **Local-only tables:** `local_meta` (device id, seed version, the running rest timer, the gym in use) and `exercise_name` (search index, rebuilt from the seed).
-- **Photos:** progress photos are files in app-private `files/photos` (never the shared gallery), written only through `PhotoStorage`. Their rows sync; the images will sync as blobs (Phase 2).
+- **Photos:** progress photos are files in app-private `files/photos` (never the shared gallery), written only through `PhotoStorage`. Their rows sync; the images will sync as blobs (Phase 3).
 - **Settings:** read them from `SettingsRepository` (`settings` Flow, or `current()` inside a transaction), never hard-coded defaults: the e1RM formula, stall window and rest defaults all come from there. One `preference` row per choice; add a key in `SettingsCodec` for a new one.
 - **Gyms and loads:** weights a user can load come from the gym in use (`GymProfileRepository.active`, per device). Round targets and steps through `LoadRounding` by the exercise's equipment, never a fixed 2.5 kg step. A gym keeps its own unit (pound plates stay 45 lb) while storing kilograms.
 - **Derived data:** PRs and stats caches are recomputed locally and never synced.
@@ -54,6 +54,9 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   merging row by row on HLC, like sync. The JSON format (`BackupFormat.kt`) is public and versioned: new fields
   are optional, and only a breaking change bumps `BackupJson.VERSION`. A new synced table also goes into the
   backup: `BackupDao`, `BackupFormat.kt`, `BackupRows.kt`, and the snapshot and merge in `BackupRepository`.
+- **Imports:** `core/domain/importing` reads Hevy and Strong CSVs and matches their exercise names
+  (`ExerciseMatcher`); `ImportRepository` writes them. A name is never merged into a different exercise
+  silently: anything not the same words becomes a custom variation. Tests use synthetic files in the real layouts.
 - **Schema:** Room schemas are exported to `core/database/schemas/` and committed. Schema v1 is live on devices, so every change needs a version bump plus a migration (or `AutoMigration`) and a migration test.
 - **Writes must outlive the screen:** don't pop a screen right after launching a write in its `viewModelScope`. Leaving the screen clears the ViewModel and cancels the write. Close in reaction to the new data instead (see `LoggerScreen`).
 
@@ -90,8 +93,8 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
     - Room emits off the main thread, so use `waitUntil` (see `LioraAppTest.waitForText`) rather than asserting immediately.
     - Screens that depend on "now" (Progress, stalls) get a fixed clock: override Koin's `Clock` with `loadKoinModules` before anything uses it (see `ProgressFlowTest`), so screenshots don't change from day to day.
 - **Translations:** `verifyTranslations` (part of `check`) fails when a `values/` string has no `values-de/` counterpart, or when a German string is stale. `translatable="false"` opts a string out.
-- **Personal data:** `sample/` holds the user's real exports (e.g. Hevy) and is gitignored, so it exists only on the dev machine. The repo is public: tests use synthetic fixtures only, and no real workout data goes into commits.
-- **Visual polish:** Phase 6 gives the app its character (playful design, motion). Until then, feature milestones keep visuals clean and standard rather than gold-plating them.
+- **Personal data:** `sample/` and `samples/` hold the user's real exports (e.g. Hevy) and are gitignored, so they exist only on the dev machine. The repo is public: tests use synthetic fixtures only, and no real workout data goes into commits.
+- **Visual polish:** Phase 2 gives the app its character (playful design, motion). Until then, feature milestones keep visuals clean and standard rather than gold-plating them.
 - **Foldables:** the Galaxy Z Fold 7 is the reference device. Its cover screen is about 411 dp wide (compact); the inner screen is about 984 × 1092 dp (expanded).
   - Layouts follow window size classes, never device checks. `currentWindowLayout()` (designsystem) holds the breakpoints: navigation rail from 600 dp, two panes from 840 dp.
   - Wide screens get a navigation rail and list-detail panes. Reading-heavy content is capped at about 600 dp with `Modifier.readableWidth()`.

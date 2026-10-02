@@ -26,6 +26,8 @@ import app.liora.feature.settings.resources.backup_workouts
 import app.liora.feature.settings.resources.csv_body
 import app.liora.feature.settings.resources.csv_title
 import app.liora.feature.settings.resources.dialog_cancel
+import app.liora.feature.settings.resources.import_row_body
+import app.liora.feature.settings.resources.import_row_title
 import app.liora.feature.settings.resources.message_backup_saved
 import app.liora.feature.settings.resources.message_csv_saved
 import app.liora.feature.settings.resources.message_newer_backup
@@ -57,6 +59,7 @@ import org.jetbrains.compose.resources.stringResource
 internal class DataActions(
     val onBackUp: () -> Unit,
     val onRestore: () -> Unit,
+    val onImport: () -> Unit,
     val onExportCsv: () -> Unit,
     val onConfirmRestore: () -> Unit,
     val onCancelRestore: () -> Unit,
@@ -96,6 +99,14 @@ internal fun DataSection(
                 ),
             enabled = working == null,
             onClick = actions.onRestore,
+        )
+        DataRow(
+            title = stringResource(Res.string.import_row_title),
+            body = stringResource(Res.string.import_row_body),
+            busy = false,
+            busyText = "",
+            enabled = working == null,
+            onClick = actions.onImport,
         )
         DataRow(
             title = stringResource(Res.string.csv_title),

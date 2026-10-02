@@ -2,16 +2,23 @@ package app.liora.feature.settings
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import app.liora.core.navigation.ExercisePickerRoute
 import app.liora.core.navigation.GymEditorRoute
 import app.liora.core.navigation.GymsRoute
+import app.liora.core.navigation.ImportRoute
+import app.liora.core.navigation.NavigationResultEffect
 import app.liora.core.navigation.Navigator
 import app.liora.core.navigation.SettingsRoute
+import app.liora.core.ui.currentLanguage
 import app.liora.feature.settings.data.DataViewModel
 import app.liora.feature.settings.gym.GymEditorScreen
 import app.liora.feature.settings.gym.GymEditorViewModel
 import app.liora.feature.settings.gym.GymsScreen
 import app.liora.feature.settings.gym.GymsViewModel
+import app.liora.feature.settings.importing.ImportScreen
+import app.liora.feature.settings.importing.ImportViewModel
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
@@ -23,6 +30,7 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: Navigator) {
             dataViewModel = koinViewModel(),
             onBack = navigator::goBack,
             onOpenGyms = { navigator.navigate(GymsRoute) },
+            onImport = { source -> navigator.navigate(ImportRoute(source)) },
         )
     }
     entry<GymsRoute> {
@@ -30,6 +38,18 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: Navigator) {
             viewModel = koinViewModel(),
             onBack = navigator::goBack,
             onOpen = { gymId -> navigator.navigate(GymEditorRoute(gymId)) },
+        )
+    }
+    entry<ImportRoute> { route ->
+        val language = currentLanguage()
+        val viewModel: ImportViewModel = koinViewModel(key = route.toString()) { parametersOf(route, language) }
+        NavigationResultEffect<List<String>>(navigator.results, PICK_EXERCISE) { ids ->
+            ids.firstOrNull()?.let(viewModel::onExercisePicked)
+        }
+        ImportScreen(
+            viewModel = viewModel,
+            onClose = navigator::goBack,
+            onPickExercise = { navigator.navigate(ExercisePickerRoute(PICK_EXERCISE, multiple = false)) },
         )
     }
     entry<GymEditorRoute> { route ->
@@ -40,10 +60,14 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: Navigator) {
     }
 }
 
+/** Where the exercise picker hands back the exercise chosen for a name in an import. */
+private const val PICK_EXERCISE = "import.exercise"
+
 val settingsModule =
     module {
         viewModelOf(::SettingsViewModel)
         viewModelOf(::DataViewModel)
         viewModelOf(::GymsViewModel)
         viewModelOf(::GymEditorViewModel)
+        viewModel { (route: ImportRoute, language: String) -> ImportViewModel(route, language, get(), get()) }
     }

@@ -26,6 +26,8 @@ class LocaleDateFormatterTest {
         assertEquals("Tue, Sep 29", english.shortDate(day))
         assertEquals("29. Sept.", german.dayAndMonth(day))
         assertEquals("Sep 29", english.dayAndMonth(day))
+        assertEquals("29. Sept. 2026", german.mediumDate(day))
+        assertEquals("Sep 29, 2026", english.mediumDate(day))
         assertEquals("Dienstag, 29. September 2026", german.longDate(day))
         assertEquals("Tuesday, September 29, 2026", english.longDate(day))
         assertEquals("September 2026", german.month(YearMonth(2026, Month.SEPTEMBER)))

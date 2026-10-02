@@ -59,8 +59,9 @@ class AndroidExportFilesTest {
     fun aFileThatIsntAnArchiveHoldsNothing() =
         runBlocking {
             val text = file("workouts.csv")
-            files.writeText(text.uri(), "start,end\r\n")
-            assertEquals("start,end\r\n", text.readText())
+            files.writeText(text.uri(), "start,end\r\nBankdrücken\r\n")
+            assertEquals("start,end\r\nBankdrücken\r\n", text.readText())
+            assertEquals("start,end\r\nBankdrücken\r\n", files.readText(text.uri()))
 
             var entries = 0
             files.readArchive(text.uri(), setOf("liora.json")) { _, _ -> entries++ }

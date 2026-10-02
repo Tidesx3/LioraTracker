@@ -12,6 +12,9 @@ interface MeasurementDao {
     @Query("SELECT * FROM measurement WHERE deleted_at IS NULL ORDER BY taken_at")
     fun observeAll(): Flow<List<MeasurementEntity>>
 
+    @Query("SELECT * FROM measurement WHERE deleted_at IS NULL ORDER BY taken_at")
+    suspend fun all(): List<MeasurementEntity>
+
     /** One type's live rows taken in `[from, until)`, oldest first. */
     @Query(
         """

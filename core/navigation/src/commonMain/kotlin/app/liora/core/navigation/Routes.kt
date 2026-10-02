@@ -63,6 +63,15 @@ data object MonthlyReportRoute : NavKey
 @Serializable
 data object SettingsRoute : NavKey
 
+/**
+ * A file exported from Hevy or Strong, shown before it's imported: what it holds and which exercise each
+ * name becomes. [source] is where the system's file picker found it.
+ */
+@Serializable
+data class ImportRoute(
+    val source: String,
+) : NavKey
+
 /** The gyms set up, and which one weights round to. */
 @Serializable
 data object GymsRoute : NavKey

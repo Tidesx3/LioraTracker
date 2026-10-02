@@ -133,4 +133,51 @@
   <string name="gym_discard_title">Änderungen verwerfen?</string>
   <string name="gym_discard">Verwerfen</string>
   <string name="gym_keep_editing">Weiter bearbeiten</string>
+  <string name="import_row_title">Aus Hevy oder Strong importieren</string>
+  <string name="import_row_body">Trainings und Körpermaße aus deren CSV-Export</string>
+  <string name="import_title">Importieren</string>
+  <string name="import_from_hevy">Import aus Hevy</string>
+  <string name="import_from_strong">Import aus Strong</string>
+  <string name="import_reading">Datei wird gelesen …</string>
+  <string name="import_not_an_export_title">Diese Datei stammt nicht aus Hevy oder Strong</string>
+  <string name="import_not_an_export_body">Exportiere in Hevy oder Strong deine Trainings oder Körpermaße als CSV und wähle dann diese Datei hier aus.</string>
+  <string name="import_unreadable_title">Die Datei konnte nicht gelesen werden</string>
+  <string name="import_unreadable_body">Vielleicht wurde sie verschoben, oder die App, in der sie liegt, lässt Liora sie nicht mehr öffnen. Wähle sie noch einmal aus.</string>
+  <string name="import_close">Schließen</string>
+  <string name="import_nothing_new">Alles aus dieser Datei ist schon da</string>
+  <string name="import_range">%1$s bis %2$s</string>
+  <plurals name="import_sets">
+    <item quantity="one">%1$d Satz</item>
+    <item quantity="other">%1$d Sätze</item>
+  </plurals>
+  <plurals name="import_workouts_here">
+    <item quantity="one">%1$d Training ist schon da und wird übersprungen.</item>
+    <item quantity="other">%1$d Trainings sind schon da und werden übersprungen.</item>
+  </plurals>
+  <plurals name="import_measurements_here">
+    <item quantity="one">%1$d Messwert ist schon da und wird übersprungen.</item>
+    <item quantity="other">%1$d Messwerte sind schon da und werden übersprungen.</item>
+  </plurals>
+  <string name="import_unit">Gewichte in dieser Datei</string>
+  <string name="import_unit_body">Strong schreibt die Einheit nicht in den Export. Wähle die, in der du geloggt hast.</string>
+  <string name="import_exercises_hint">Namen, die zu einer Übung hier passen, landen direkt bei ihr. Die anderen werden zu eigenen Übungen, jeweils als Variante der ähnlichsten, damit Gewichte von verschiedenen Geräten getrennt bleiben. Tippe eine an, um das zu ändern.</string>
+  <string name="import_section_new">Neue Übungen</string>
+  <string name="import_section_matched">Schon vorhanden</string>
+  <string name="import_goes_to">Kommt zu %1$s</string>
+  <string name="import_new_variation">Neu, Variante von %1$s</string>
+  <string name="import_new_exercise">Neue Übung</string>
+  <string name="import_misfit">Nicht alle Werte passen zu dieser Übung. Die übrigen fallen weg.</string>
+  <string name="import_choice_new">Als neue Übung anlegen</string>
+  <string name="import_choice_variation">Variante von %1$s</string>
+  <string name="import_choice_use">%1$s verwenden</string>
+  <string name="import_choice_use_body">Die Sätze kommen in ihren Verlauf</string>
+  <string name="import_choice_pick">Andere Übung wählen …</string>
+  <string name="import_confirm">Importieren</string>
+  <string name="import_working">Wird importiert …</string>
+  <string name="import_done_title">Importiert</string>
+  <plurals name="import_new_exercises">
+    <item quantity="one">%1$d neue Übung</item>
+    <item quantity="other">%1$d neue Übungen</item>
+  </plurals>
+  <string name="import_done">Fertig</string>
 </resources>

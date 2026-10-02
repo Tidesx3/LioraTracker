@@ -12,6 +12,9 @@ interface ExportFiles {
         text: String,
     )
 
+    /** Reads the file at [source] as UTF-8 text. */
+    suspend fun readText(source: String): String
+
     /** Writes a ZIP archive to [destination], replacing what was there; [entries] adds its files in order. */
     suspend fun writeArchive(
         destination: String,

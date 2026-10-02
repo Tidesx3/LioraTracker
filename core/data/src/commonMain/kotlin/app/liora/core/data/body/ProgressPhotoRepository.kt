@@ -85,7 +85,7 @@ internal class OfflineProgressPhotoRepository(
     private val stamper: SyncStamper,
     private val clock: Clock,
 ) : ProgressPhotoRepository {
-    // Photos synced from another device have no file here until Phase 2 downloads them.
+    // Photos synced from another device have no file here until Phase 3 downloads them.
     override val photos: Flow<List<ProgressPhoto>> = dao.observeAll().map { rows -> rows.mapNotNull { it.toModel() } }
 
     override suspend fun add(

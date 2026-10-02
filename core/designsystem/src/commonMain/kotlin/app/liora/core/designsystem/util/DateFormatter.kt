@@ -20,6 +20,9 @@ interface DateFormatter {
     /** "Sep 29" / "29. Sept.", where space is tight, such as a chart's axis. */
     fun dayAndMonth(date: LocalDate): String
 
+    /** "Sep 29, 2026" / "29. Sept. 2026", for spans that may cross years. */
+    fun mediumDate(date: LocalDate): String
+
     /** "Tuesday, September 29, 2026" / "Dienstag, 29. September 2026". */
     fun longDate(date: LocalDate): String
 

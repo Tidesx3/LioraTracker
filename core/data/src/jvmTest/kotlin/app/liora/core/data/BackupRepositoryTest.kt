@@ -530,6 +530,8 @@ class BackupRepositoryTest {
             text: String,
         ) = error("Backups are archives")
 
+        override suspend fun readText(source: String) = error("Backups are archives")
+
         override suspend fun writeArchive(
             destination: String,
             entries: suspend ArchiveWriter.() -> Unit,

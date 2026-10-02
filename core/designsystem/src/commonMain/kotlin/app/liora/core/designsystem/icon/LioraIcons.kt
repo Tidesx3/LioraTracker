@@ -39,6 +39,7 @@ import app.liora.core.designsystem.resources.ic_skip_next
 import app.liora.core.designsystem.resources.ic_swap_horiz
 import app.liora.core.designsystem.resources.ic_timer
 import app.liora.core.designsystem.resources.ic_trophy
+import app.liora.core.designsystem.resources.ic_unknown_document
 import app.liora.core.designsystem.resources.ic_view_agenda
 import app.liora.core.designsystem.resources.ic_visibility_off
 import org.jetbrains.compose.resources.DrawableResource
@@ -86,4 +87,5 @@ object LioraIcons {
     val Camera: DrawableResource = Res.drawable.ic_photo_camera
     val Photos: DrawableResource = Res.drawable.ic_photo_library
     val Compare: DrawableResource = Res.drawable.ic_compare
+    val UnknownFile: DrawableResource = Res.drawable.ic_unknown_document
 }

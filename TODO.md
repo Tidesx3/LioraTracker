@@ -33,5 +33,11 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
   and time it with a real photo library. Tests cover the format, the merge and the ZIP through `file://`
   locations; real document providers (Drive in particular, and its handling of the `"wt"` write mode)
   are only seen on a device.
+- **Imports: check on a device.** Import a real Hevy export (workouts and measurements) from the phone and
+  from Drive, then a newer export of the same account, which should add only the new workouts. Tests cover
+  the parsing, matching and writing with synthetic files; real document providers are only seen on a device.
+- **Strong exports from a German phone are untested.** The parser reads Strong's English column names in
+  both layouts, with decimal commas. If Strong localizes its headers, the file is reported as "not from Hevy
+  or Strong"; a sample would tell which names to add (`StrongCsv`).
 - **Robolectric: a text field in a dialog never lets Compose go idle.** Find the cause, so the rename
   and save-as-routine dialogs can get UI tests.

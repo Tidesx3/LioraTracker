@@ -90,6 +90,7 @@ internal fun SettingsScreen(
     dataViewModel: DataViewModel,
     onBack: () -> Unit,
     onOpenGyms: () -> Unit,
+    onImport: (source: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
@@ -103,6 +104,7 @@ internal fun SettingsScreen(
     val backupSaver = rememberFileSaver(BACKUP_TYPE) { dataViewModel.backUp(it) }
     val backupOpener = rememberFileOpener(BACKUP_TYPES) { dataViewModel.read(it) }
     val csvSaver = rememberFileSaver(CSV_TYPE) { dataViewModel.exportCsv(it, exerciseLanguage, untitled) }
+    val importOpener = rememberFileOpener(IMPORT_TYPES, onImport)
     SettingsContent(
         settings = settings,
         gym = gym,
@@ -114,6 +116,7 @@ internal fun SettingsScreen(
             DataActions(
                 onBackUp = { backupSaver.save(backupName) },
                 onRestore = backupOpener::open,
+                onImport = importOpener::open,
                 onExportCsv = { csvSaver.save(csvName) },
                 onConfirmRestore = dataViewModel::restore,
                 onCancelRestore = dataViewModel::cancelRestore,
@@ -129,6 +132,10 @@ private const val CSV_TYPE = "text/csv"
 
 /** Some places label a ZIP archive differently, or not at all. */
 private val BACKUP_TYPES = listOf(BACKUP_TYPE, "application/x-zip-compressed", "application/octet-stream")
+
+/** CSV files go by many types, depending on where they're kept. */
+private val IMPORT_TYPES =
+    listOf("text/*", "application/csv", "application/vnd.ms-excel", "application/octet-stream")
 
 /** Which choice is open in a dialog. */
 private enum class Choice {

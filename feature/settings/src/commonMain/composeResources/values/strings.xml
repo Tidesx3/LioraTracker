@@ -135,4 +135,51 @@
   <string name="gym_discard_title">Discard changes?</string>
   <string name="gym_discard">Discard</string>
   <string name="gym_keep_editing">Keep editing</string>
+  <string name="import_row_title">Import from Hevy or Strong</string>
+  <string name="import_row_body">Workouts and body measurements from their CSV exports</string>
+  <string name="import_title">Import</string>
+  <string name="import_from_hevy">Import from Hevy</string>
+  <string name="import_from_strong">Import from Strong</string>
+  <string name="import_reading">Reading the file…</string>
+  <string name="import_not_an_export_title">That file isn’t from Hevy or Strong</string>
+  <string name="import_not_an_export_body">In Hevy or Strong, export your workouts or body measurements as CSV, then pick that file here.</string>
+  <string name="import_unreadable_title">Couldn’t read the file</string>
+  <string name="import_unreadable_body">It may have moved, or the app it’s in no longer lets Liora open it. Pick it again.</string>
+  <string name="import_close">Close</string>
+  <string name="import_nothing_new">Everything in this file is here already</string>
+  <string name="import_range">%1$s to %2$s</string>
+  <plurals name="import_sets">
+    <item quantity="one">%1$d set</item>
+    <item quantity="other">%1$d sets</item>
+  </plurals>
+  <plurals name="import_workouts_here">
+    <item quantity="one">%1$d workout is here already and is skipped.</item>
+    <item quantity="other">%1$d workouts are here already and are skipped.</item>
+  </plurals>
+  <plurals name="import_measurements_here">
+    <item quantity="one">%1$d measurement is here already and is skipped.</item>
+    <item quantity="other">%1$d measurements are here already and are skipped.</item>
+  </plurals>
+  <string name="import_unit">Weights in this file</string>
+  <string name="import_unit_body">Strong doesn’t write its unit into the export. Pick the one you logged in.</string>
+  <string name="import_exercises_hint">Names that match an exercise here go straight to it. The others become exercises of your own, each a variation of the closest one, so weights from different machines stay apart. Tap one to change it.</string>
+  <string name="import_section_new">New exercises</string>
+  <string name="import_section_matched">Already here</string>
+  <string name="import_goes_to">Goes to %1$s</string>
+  <string name="import_new_variation">New, a variation of %1$s</string>
+  <string name="import_new_exercise">New exercise</string>
+  <string name="import_misfit">Not every logged value fits this exercise. The others are left out.</string>
+  <string name="import_choice_new">Add as a new exercise</string>
+  <string name="import_choice_variation">A variation of %1$s</string>
+  <string name="import_choice_use">Use %1$s</string>
+  <string name="import_choice_use_body">These sets join its history</string>
+  <string name="import_choice_pick">Choose another exercise…</string>
+  <string name="import_confirm">Import</string>
+  <string name="import_working">Importing…</string>
+  <string name="import_done_title">Imported</string>
+  <plurals name="import_new_exercises">
+    <item quantity="one">%1$d new exercise</item>
+    <item quantity="other">%1$d new exercises</item>
+  </plurals>
+  <string name="import_done">Done</string>
 </resources>

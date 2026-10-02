@@ -43,8 +43,8 @@ As of 2026-10-02:
     on their day. The gallery groups them by day with that day's weight, filters by pose, and opens a photo to
     correct its pose or day, or delete it. Compare puts two side by side (`ProgressPhotos.opening`: first and
     latest in the pose photographed last), with the time between them and the change in bodyweight; tapping a side
-    and then a photo swaps it. Photos sync as blobs in Phase 2; until then `blob_id` stays empty.
-- **Milestone 9 (settings, import and export)** is in progress, split into five parts, each committed on its own:
+    and then a photo swaps it. Photos sync as blobs in Phase 3; until then `blob_id` stays empty.
+- **Milestone 9 (settings, import and export)** is done, in five parts, each committed on its own:
   - **9a (done, `3ec369b`): settings and synced preferences.** `Settings` and `ThemeMode` in `core/domain`;
     `PreferenceDao` over the existing `preference` table (no schema change); `SettingsRepository` with
     `SettingsCodec` in `core/data/settings` (one row per choice; `update` writes only the choices that changed,
@@ -65,7 +65,7 @@ As of 2026-10-02:
     10 m or yd). The RPE column (`SetField.Rpe`, after reps, only for exercises counted in reps) takes 1–10 in
     half points, is never needed to tick a set off and never pre-filled; a recorded RPE also shows in workout
     detail ("· RPE 8"), even with the column switched off.
-  - **9c (done): gym profiles.** `GymProfile` in `core/model`: a name, the unit its equipment is labelled in,
+  - **9c (done, `1a6aaf3`): gym profiles.** `GymProfile` in `core/model`: a name, the unit its equipment is labelled in,
     barbell and EZ bar, plate pairs, dumbbell runs and the stack step, with weights stored in kg.
     `GymProfiles.standard(unit)` in `core/domain` stands in until a gym is set up. `LoadRounding` rounds down
     to what the gym can load by equipment (plates for barbells and EZ bars, the dumbbell rack, the stack for
@@ -84,7 +84,7 @@ As of 2026-10-02:
       a switch sits on the same line. The exercise menu offers "Add warm-up sets" for weight × reps
       exercises that have no warm-ups and nothing logged yet. It ramps to the first working set's weight or
       placeholder, and `SetLogger.addWarmups` puts the sets before the working ones.
-  - **9d (done): backup, restore and the CSV export.** Settings has a "Your data" section with three rows,
+  - **9d (done, `bfd25c7`): backup, restore and the CSV export.** Settings has a "Your data" section with three rows,
     each going through the system file picker (`rememberFileSaver` and `rememberFileOpener` in `core:ui`, the
     Storage Access Framework, no permissions).
     - **Back up everything** writes one ZIP file: `liora.json` and each progress photo's image under
@@ -103,8 +103,31 @@ As of 2026-10-02:
       in the app's language.
     - The platform side is `ExportFiles` (`AndroidExportFiles`: ZIP archives through the content resolver).
       Backups and restores finish even when Settings closes mid-way.
-  - **Next: 9e**, Hevy and Strong CSV import with the matching review screen; then Milestone 9 and Phase 1
-    are done.
+  - **9e (done): Hevy and Strong import.** "Import from Hevy or Strong" in Your data opens a CSV through the
+    file picker, shows what it holds (`ImportRoute`, `feature/settings/importing`), and imports it on
+    confirmation. No schema change.
+    - **Reading** (`core/domain/importing`): `ImportReader` tells the files apart by their columns. Hevy's
+      workouts (`HevyCsv`: dates in the phone's language such as `30 Sept. 2026, 17:39`, `weight_kg` or
+      `weight_lbs`, set types, supersets, notes) and measurements (bodyweight, body fat and every
+      circumference, one value per type and day), and Strong's workouts in both layouts (`StrongCsv`: Set
+      Order's W/D/F, rest-timer rows skipped, per-row units in the older layout). `Csv` handles quotes,
+      line breaks in notes, semicolons and decimal commas; `ExportDates` reads English and German month names.
+    - **Matching** (`ExerciseMatcher`): a name is the same exercise when it has the same words as one of
+      an exercise's names or aliases in any language and order, give or take small words and equipment words
+      that agree with its equipment ("Bench Press (Barbell)", "Beinpresse (Maschine)"). Weight logged on a
+      bodyweight exercise goes to its weighted variant. Any other name becomes a custom exercise, a variation
+      of the closest built-in by shared words (Dice, at least a third), tracked to fit what was logged
+      (`SetFields.trackingTypeFor`). A real German Hevy export matched 53 of 70 names; the rest were
+      gym-specific machines.
+    - **Review:** how many workouts, sets and days, what's here already, then "New exercises" and "Already
+      here" with where each name goes. Tapping one offers a new exercise, the closest one, or any exercise from
+      the picker. A file without units (Strong's newer layout) gets a kg/lb switch.
+    - **Writing** (`ImportRepository`): one transaction, finishing even if the screen closes. Workouts that
+      started in the same minute as one here, and measurements of a type on a day that has one, are here
+      already, so a newer export adds only what's new. Sets are ticked off across the workout's time, and keep
+      only the values their exercise has columns for.
+- **Phase 1 is done**, and Phase 2 (design and motion polish) moved up to follow it on 2026-10-02 on request.
+  **Next:** Phase 2's planning pass, starting with the design audit.
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a
   milestone go in TODO.md.
@@ -191,8 +214,8 @@ LioraTracker/
     body/         bodyweight, measurements, progress photos
     settings/     units, rest defaults, gym profiles, theme, backup/import/export, sync setup
   platform/android/          rest-timer notification + alarms, WorkManager sync jobs, file pickers (SAF)
-  integration/healthconnect/ Android: write sessions, read bodyweight (Phase 2)
-  sync/gdrive/               Android: Drive appDataFolder backend (Phase 2)
+  integration/healthconnect/ Android: write sessions, read bodyweight (Phase 3)
+  sync/gdrive/               Android: Drive appDataFolder backend (Phase 3)
   app/android/               Application, Koin graph, NavDisplay host, manifest
   # later: core/api-contract (DTOs), sync/server, server/ (Ktor), app/web (CMP wasm)
 ```
@@ -266,12 +289,12 @@ Every syncable row carries `id` (UUIDv7, created on the client), `ownerId`, `cre
 - **The local DB is the source of truth.** Repositories bump `updatedAt` using the HLC and set `dirty=1` on every write.
 - `SyncEngine.sync()` does three things: it pushes dirty rows as a `ChangeSet`, pulls remote changes since the last cursor, and merges them. The merge rule is **last-writer-wins per row by HLC**, and tombstones win over older edits. The merge code lives in `core/sync` and is reused unchanged by the server.
 - **`SyncBackend` interface:** `pull(cursor)`, `push(changeSet)`, `putBlob`, `getBlob`.
-  - **Google Drive backend (Phase 2):**
+  - **Google Drive backend (Phase 3):**
     - Uses the `drive.appdata` scope: a hidden per-app folder that counts against the user's own quota.
     - Auth runs through Credential Manager and `AuthorizationClient`. The legacy GoogleSignIn API was removed in play-services-auth 22.
     - Calls the REST v3 API through the Ktor client.
     - Layout: each device only appends its own `changes/<deviceId>/<seq>.json.gz` batches, so there is no write contention. Any device can occasionally compact everything into `snapshot-<hlc>.json.gz`. Photos are stored under `blobs/`.
-  - **Server backend (Phase 3):** `GET /sync/pull?cursor=` and `POST /sync/push` using the same ChangeSet DTOs. The server assigns a monotonic `serverSeq` that clients use as their cursor.
+  - **Server backend (Phase 4):** `GET /sync/pull?cursor=` and `POST /sync/push` using the same ChangeSet DTOs. The server assigns a monotonic `serverSeq` that clients use as their cursor.
 - Sync is triggered by WorkManager: when a workout finishes, periodically, and manually. It requires network.
 - Switching backends means a full push of the local DB.
 - **Manual backup** (JSON export and import via SAF) always works, independent of sync.
@@ -280,7 +303,7 @@ Every syncable row carries `id` (UUIDv7, created on the client), `ownerId`, `cre
 
 ## Roadmap
 
-**Phase 0 and Phase 1 are executed milestone by milestone.** Each milestone is built, tested and committed before the next starts. Phases 2–5 each get a short planning pass when we reach them.
+**Phase 0 and Phase 1 are executed milestone by milestone.** Each milestone is built, tested and committed before the next starts. Phases 2–6 each get a short planning pass when we reach them.
 
 ### Phase 0: Environment and scaffold
 1. **Install tools** (needs your OK, since this changes the system):
@@ -369,45 +392,10 @@ Every syncable row carries `id` (UUIDv7, created on the client), `ownerId`, `cre
        - The review screen lets the user merge where they want to.
        - If a source set has weights but the matched exercise's tracking type has no weight column, a weighted variant is picked instead, so no data is lost.
 
-### Phase 2: Sync and integrations
-- `sync/gdrive` backend and the sync settings screen (connect, last sync, sync now).
-  - One-time setup on your side: a Google Cloud project with an Android OAuth client (debug + release SHA-1). Testing mode is enough for personal use.
-- Health Connect:
-  - Writes a finished workout as an `ExerciseSessionRecord` (strength training).
-  - Reads `WeightRecord` and `BodyFatRecord` into Body.
-
-### Phase 3: Self-hosted server
-- `server/`: Ktor, PostgreSQL, Exposed, Flyway, Argon2 passwords, JWT access tokens plus refresh tokens per device.
-- `core/api-contract` DTOs, the `/sync` endpoints, a blob store on a filesystem volume, and a read-only `/api/v1` REST API with OpenAPI docs.
-- `docker-compose.yml` with the server and Postgres.
-- `sync/server` client backend, and moving from Drive to the server from the app.
-
-### Phase 4: Web GUI, programs, extras
-- `app/web`: Compose Multiplatform (wasmJs) reusing `designsystem`, with desktop layouts. It is served by the Ktor server and offers a history browser, dashboards, a routine editor, and import/export.
-  - Re-check Compose Web maturity before starting: it is Beta as of Compose Multiplatform 1.12.
-- Programs and progression engine: multi-week blocks, and rules like double progression or linear progression with deload (5/3/1, GZCLP).
-  - **Progression rules** (added 2026-09-30 on request): a pure `core/domain` function takes a rule and the recent
-    history and returns the next session's targets (weight and reps per set) plus the reason, e.g. "8 reps on
-    all 3 sets at 80 kg last time, so +2.5 kg". Target weights go through the active gym profile's load rounding.
-  - The reason is structured (a reason type plus its values), not an English sentence, so the UI renders it in
-    English or German with locale-aware numbers.
-  - **Safety bound:** a target more than X % (default 10 %) above the recent best (by e1RM, over the last few
-    weeks) is flagged before it is shown. The same check guards AI suggestions in Phase 5.
-- Wear OS companion, home-screen widget.
-
-### Phase 5: AI (opt-in; runs server-side, so API keys never sit on the phone)
-- Claude API with tool use over read-only domain queries (`get_workouts`, `get_exercise_history`, `get_prs`, `propose_routine`). Features:
-  - "Ask your log" (e.g. "how has my bench moved since March?").
-  - Post-workout and weekly insights.
-  - Natural-language or voice logging into the active workout.
-  - Routine and program generation that respects your equipment (the gym profiles) and history.
-  - Plateau and deload suggestions on top of the deterministic engine (stall detection and progression rules).
-  - Every suggested weight passes load rounding and the safety bound, like the engine's own targets.
-- Optionally, an **MCP server** endpoint so Claude Desktop or other clients can query your own data.
-
-### Phase 6: Design and motion polish (low priority; added 2026-09-30 on request)
+### Phase 2: Design and motion polish (added 2026-09-30 on request; moved up to follow Phase 1 on 2026-10-02)
 The app works but feels a bit soulless. This phase gives it character: a little quirky and playful, with
-animations that make logging feel good. It depends on no other phase, so it can move earlier at any time.
+animations that make logging feel good. It depends on no other phase, so it comes right after the MVP:
+the app gets its character before sync, the server and the web GUI build on it.
 - **Design audit:** go through every screen on the cover and inner displays, then settle the visual
   identity: palette, a display typeface with personality for big numbers and headings, shapes, and
   illustrated empty states instead of plain icons.
@@ -422,6 +410,42 @@ animations that make logging feel good. It depends on no other phase, so it can 
   - Fold and unfold keep their place smoothly.
 - **Haptics:** set completion, records, rest over.
 - **Respect "remove animations":** everything falls back to simple fades when the system scale is off.
+
+### Phase 3: Sync and integrations
+- `sync/gdrive` backend and the sync settings screen (connect, last sync, sync now).
+  - One-time setup on your side: a Google Cloud project with an Android OAuth client (debug + release SHA-1). Testing mode is enough for personal use.
+- Health Connect:
+  - Writes a finished workout as an `ExerciseSessionRecord` (strength training).
+  - Reads `WeightRecord` and `BodyFatRecord` into Body.
+
+### Phase 4: Self-hosted server
+- `server/`: Ktor, PostgreSQL, Exposed, Flyway, Argon2 passwords, JWT access tokens plus refresh tokens per device.
+- `core/api-contract` DTOs, the `/sync` endpoints, a blob store on a filesystem volume, and a read-only `/api/v1` REST API with OpenAPI docs.
+- `docker-compose.yml` with the server and Postgres.
+- `sync/server` client backend, and moving from Drive to the server from the app.
+
+### Phase 5: Web GUI, programs, extras
+- `app/web`: Compose Multiplatform (wasmJs) reusing `designsystem`, with desktop layouts. It is served by the Ktor server and offers a history browser, dashboards, a routine editor, and import/export.
+  - Re-check Compose Web maturity before starting: it is Beta as of Compose Multiplatform 1.12.
+- Programs and progression engine: multi-week blocks, and rules like double progression or linear progression with deload (5/3/1, GZCLP).
+  - **Progression rules** (added 2026-09-30 on request): a pure `core/domain` function takes a rule and the recent
+    history and returns the next session's targets (weight and reps per set) plus the reason, e.g. "8 reps on
+    all 3 sets at 80 kg last time, so +2.5 kg". Target weights go through the active gym profile's load rounding.
+  - The reason is structured (a reason type plus its values), not an English sentence, so the UI renders it in
+    English or German with locale-aware numbers.
+  - **Safety bound:** a target more than X % (default 10 %) above the recent best (by e1RM, over the last few
+    weeks) is flagged before it is shown. The same check guards AI suggestions in Phase 6.
+- Wear OS companion, home-screen widget.
+
+### Phase 6: AI (opt-in; runs server-side, so API keys never sit on the phone)
+- Claude API with tool use over read-only domain queries (`get_workouts`, `get_exercise_history`, `get_prs`, `propose_routine`). Features:
+  - "Ask your log" (e.g. "how has my bench moved since March?").
+  - Post-workout and weekly insights.
+  - Natural-language or voice logging into the active workout.
+  - Routine and program generation that respects your equipment (the gym profiles) and history.
+  - Plateau and deload suggestions on top of the deterministic engine (stall detection and progression rules).
+  - Every suggested weight passes load rounding and the safety bound, like the engine's own targets.
+- Optionally, an **MCP server** endpoint so Claude Desktop or other clients can query your own data.
 
 ---
 
@@ -457,4 +481,4 @@ animations that make logging feel good. It depends on no other phase, so it can 
     - Start a workout on the cover screen, unfold mid-set, and check that the logger switches to two panes with the timer and typed values intact.
     - Fold back.
     - Stand the phone half-open in tabletop posture and check the logger splits across the hinge.
-11. **Phase 2:** use two devices on the same Google account, edit on each, sync, and confirm they converge. The workout also shows up in the Health Connect app.
+11. **Phase 3:** use two devices on the same Google account, edit on each, sync, and confirm they converge. The workout also shows up in the Health Connect app.

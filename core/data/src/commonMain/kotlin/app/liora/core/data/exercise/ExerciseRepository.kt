@@ -89,7 +89,7 @@ internal class OfflineExerciseRepository(
         val id = ids.newId()
         transactions.inTransaction {
             exerciseDao.upsertExercises(listOf(draft.toEntity(id, stamper.newRow())))
-            exerciseDao.upsertNames(listOf(customName(id, draft)))
+            exerciseDao.upsertNames(listOf(customName(id, draft.name)))
         }
         return id
     }
@@ -109,7 +109,7 @@ internal class OfflineExerciseRepository(
             }
             exerciseDao.upsertExercises(listOf(draft.toEntity(id, stamper.touch(existing.sync))))
             exerciseDao.deleteNames(id)
-            exerciseDao.upsertNames(listOf(customName(id, draft)))
+            exerciseDao.upsertNames(listOf(customName(id, draft.name)))
         }
     }
 
@@ -147,14 +147,15 @@ internal class OfflineExerciseRepository(
             exerciseDao.getSettings(id)?.let { exerciseDao.upsertSettings(it.copy(sync = stamper.tombstone(it.sync))) }
         }
     }
-
-    private fun customName(
-        id: String,
-        draft: ExerciseDraft,
-    ) = ExerciseNameEntity(id, ExerciseNameEntity.LOCALE_ANY, draft.name.trim(), isAlias = false)
 }
 
-private fun ExerciseDraft.toEntity(
+/** A custom exercise is found by the one name the user gave it, in any language. */
+internal fun customName(
+    id: String,
+    name: String,
+) = ExerciseNameEntity(id, ExerciseNameEntity.LOCALE_ANY, name.trim(), isAlias = false)
+
+internal fun ExerciseDraft.toEntity(
     id: String,
     sync: SyncMetadata,
 ) = ExerciseEntity(

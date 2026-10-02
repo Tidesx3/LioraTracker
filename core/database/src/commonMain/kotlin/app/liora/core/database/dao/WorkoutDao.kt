@@ -156,6 +156,10 @@ interface WorkoutDao {
     @Query(FINISHED_WORKOUTS)
     fun observeFinished(): Flow<List<WorkoutEntity>>
 
+    /** When each finished workout started: how an import knows the workouts that are here already. */
+    @Query("SELECT started_at FROM workout WHERE ended_at IS NOT NULL AND deleted_at IS NULL")
+    suspend fun finishedStarts(): List<Long>
+
     @Query(EXERCISES_OF_FINISHED)
     fun observeFinishedExercises(): Flow<List<WorkoutExerciseEntity>>
 

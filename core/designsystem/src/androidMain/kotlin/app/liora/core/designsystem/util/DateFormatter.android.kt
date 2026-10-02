@@ -33,6 +33,7 @@ internal class LocaleDateFormatter(
 ) : DateFormatter {
     private val short = pattern("EEEMMMd")
     private val dayMonth = pattern("MMMd")
+    private val medium = pattern("yMMMd")
     private val long = pattern("EEEEyMMMMd")
     private val monthYear = pattern("yMMMM")
     private val clock = pattern(if (use24Hours) "Hm" else "hma")
@@ -42,6 +43,8 @@ internal class LocaleDateFormatter(
     override fun shortDate(date: LocalDate): String = short.format(date.toJavaLocalDate())
 
     override fun dayAndMonth(date: LocalDate): String = dayMonth.format(date.toJavaLocalDate())
+
+    override fun mediumDate(date: LocalDate): String = medium.format(date.toJavaLocalDate())
 
     override fun longDate(date: LocalDate): String = long.format(date.toJavaLocalDate())
 

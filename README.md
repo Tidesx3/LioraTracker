@@ -4,7 +4,7 @@ A workout tracker that is fast to log with, owned by its user, and built to grow
 an offline-first Android app now, then sync to your own Google Drive, a self-hosted server with a web
 GUI, and AI features on top.
 
-**Status:** Phase 1 (the offline MVP) is in progress. The database, domain logic, exercise library with
+**Status:** Phase 1, the offline MVP, is done. The database, domain logic, exercise library with
 custom exercises, German, the foldable layouts, routines with folders and supersets, and the logger
 (number pad, rest timer, live workout notification, personal records, tabletop mode) are done. History
 is done too: list, calendar, workout detail (repeat, save as routine, delete) and editing past workouts
@@ -18,8 +18,10 @@ or inches, shown and typed everywhere), the e1RM formula, the stall window, them
 describe their bars, plates, dumbbells and machine stacks: the logger's ± steps go to weights the gym
 can load, show the plates per side for a barbell, and add warm-up sets. Everything backs up into one
 file (readable JSON plus the photos) that restores on another phone without overwriting newer changes,
-and workouts export as CSV for spreadsheets. Next is importing from Hevy and Strong. Details and
-progress are in [docs/PLAN.md](docs/PLAN.md).
+and workouts export as CSV for spreadsheets. Workouts and body measurements import from Hevy and Strong
+exports, with a review of which exercise each name becomes; gym-specific machines become variations of
+their own. Next is Phase 2: design and motion polish. Details and progress are in
+[docs/PLAN.md](docs/PLAN.md).
 
 ## Principles
 
@@ -68,9 +70,9 @@ build-logic        Gradle convention plugins (liora.kmp.library, liora.cmp.featu
    rest timer and a live workout notification (next set, rest countdown, lock-screen actions),
    history, progress charts and PRs, body metrics and photos, JSON/CSV export, Hevy/Strong import,
    and English + German
-2. Google Drive (appDataFolder) sync and Health Connect
-3. Self-hosted Ktor + PostgreSQL server (Docker)
-4. Web GUI, programs with auto-progression, Wear OS
-5. Opt-in AI: ask your log, insights, natural-language logging, program generation
-6. Design and motion polish (low priority): more character, a bit quirky and playful, with animations
-   that make logging feel good
+2. Design and motion polish: more character, a bit quirky and playful, with animations that make
+   logging feel good
+3. Google Drive (appDataFolder) sync and Health Connect
+4. Self-hosted Ktor + PostgreSQL server (Docker)
+5. Web GUI, programs with auto-progression, Wear OS
+6. Opt-in AI: ask your log, insights, natural-language logging, program generation
