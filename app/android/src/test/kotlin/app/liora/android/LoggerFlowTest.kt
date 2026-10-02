@@ -1,5 +1,6 @@
 package app.liora.android
 
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
@@ -17,10 +18,13 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.window.testing.layout.FoldingFeature
 import androidx.window.testing.layout.TestWindowLayoutInfo
 import androidx.window.testing.layout.WindowLayoutInfoPublisherRule
@@ -335,6 +339,25 @@ class LoggerFlowTest {
         listOf("8", "2", ",", "5").forEach { padKey(it).performClick() }
         waitForText("82,5")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/de_logger_pad_dark.png")
+    }
+
+    @Test
+    @Config(qualifiers = "de-$COVER")
+    fun germanRestPillKeepsTheTimeOnOneLine() {
+        logLastSession()
+        launch()
+        waitForText("Starten")
+        composeRule.onNodeWithText("Starten").performClick()
+        waitForText("Beenden")
+        composeRule.onAllNodesWithContentDescription("Satz abhaken").onFirst().performClick()
+        waitForText("Überspringen")
+        // German's longer buttons leave no room for "Pause" on the cover screen, so the time takes it.
+        val layouts = mutableListOf<TextLayoutResult>()
+        composeRule.onNodeWithTag(LoggerTags.REST_TIME).performSemanticsAction(SemanticsActions.GetTextLayoutResult) {
+            it(layouts)
+        }
+        assertEquals(1, layouts.single().lineCount)
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/de_logger_resting_dark.png")
     }
 
     /** A finished Push session: every set 80 kg × 10. */

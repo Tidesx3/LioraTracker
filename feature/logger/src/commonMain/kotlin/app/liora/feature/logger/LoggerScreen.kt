@@ -483,6 +483,9 @@ object LoggerTags {
     const val CELL = "logger.cell"
     const val PAD = "logger.pad"
 
+    /** The time left in the rest pill. */
+    const val REST_TIME = "logger.rest.time"
+
     /** The plates per side above the pad. */
     const val PLATES = "logger.plates"
     const val TABLETOP = "logger.tabletop"

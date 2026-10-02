@@ -39,7 +39,11 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.theme.LioraTheme
@@ -119,6 +123,8 @@ private fun fractionOf(
 /**
  * The rest countdown on phones: a pill floating above the pad, like the tabs, with −15 s, +15 s and
  * skip. The time left runs around its outline, from the top middle, and shrinks back as rest runs out.
+ * The buttons get their room first and the time stays on one line; the word "Rest" shows only when
+ * there's room left for it, as there isn't for German's longer buttons on a narrow phone.
  */
 @Composable
 internal fun RestTimerBar(
@@ -128,14 +134,13 @@ internal fun RestTimerBar(
     modifier: Modifier = Modifier,
 ) {
     val container = MaterialTheme.colorScheme.primaryContainer
-    // The violet on the pale container in light; the container is the violet itself in dark.
+    // The violet on the pale container in light. In dark the container is the violet itself, so the
+    // line is a light violet: still the accent, and clear against it.
     val line =
-        if (container.luminance() >
-            HALF
-        ) {
+        if (container.luminance() > HALF) {
             MaterialTheme.colorScheme.primary
         } else {
-            MaterialTheme.colorScheme.onPrimaryContainer
+            lerp(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimaryContainer, LINE_LIGHTER)
         }
     Surface(
         modifier = modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
@@ -153,17 +158,25 @@ internal fun RestTimerBar(
                     }.padding(start = 20.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(painterResource(LioraIcons.Timer), contentDescription = null, modifier = Modifier.size(20.dp))
-            Text(
-                text = stringResource(Res.string.rest_title),
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp),
-            )
-            Text(
-                text = progress.remaining.formatAsClock(),
-                style = MaterialTheme.typography.titleLarge.tabularNumbers(),
-                modifier = Modifier.weight(1f),
-            )
+            // Weighted, so it's measured after the buttons and takes the room they leave.
+            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                Icon(painterResource(LioraIcons.Timer), contentDescription = null, modifier = Modifier.size(20.dp))
+                WholeOrNothing(Modifier.weight(1f, fill = false)) {
+                    Text(
+                        text = stringResource(Res.string.rest_title),
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 1,
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                }
+                Text(
+                    text = progress.remaining.formatAsClock(),
+                    style = MaterialTheme.typography.titleLarge.tabularNumbers(),
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier.padding(start = 8.dp).testTag(LoggerTags.REST_TIME),
+                )
+            }
             // The pill's own text color: the accent would vanish on the accent.
             val buttons = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current)
             TextButton(onClick = { onAdjust(-ADJUST_SECONDS) }, colors = buttons) {
@@ -173,6 +186,22 @@ internal fun RestTimerBar(
                 Text(stringResource(Res.string.rest_plus))
             }
             TextButton(onClick = onSkip, colors = buttons) { Text(stringResource(Res.string.rest_skip)) }
+        }
+    }
+}
+
+/** [content] at its own width when that fits, and nothing otherwise, rather than wrapped or cut off. */
+@Composable
+private fun WholeOrNothing(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Layout(content, modifier) { measurables, constraints ->
+        val placeable = measurables.single().measure(Constraints(maxHeight = constraints.maxHeight))
+        if (placeable.width > constraints.maxWidth) {
+            layout(0, 0) {}
+        } else {
+            layout(placeable.width, placeable.height) { placeable.place(0, 0) }
         }
     }
 }
@@ -260,5 +289,6 @@ private const val FLOATING_ELEVATION = 6
 private const val OUTLINE_WIDTH = 3
 private const val TRACK_ALPHA = 0.2f
 private const val HALF = 0.5f
+private const val LINE_LIGHTER = 0.3f
 private const val QUARTER_TURN = 90f
 private const val HALF_TURN = 180f
