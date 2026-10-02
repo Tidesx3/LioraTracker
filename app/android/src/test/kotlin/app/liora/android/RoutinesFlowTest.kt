@@ -98,6 +98,8 @@ class RoutinesFlowTest {
         composeRule.onNodeWithText("2 exercises · 6 sets").assertIsDisplayed()
         composeRule.onNodeWithText("80 kg × 8–12").assertIsDisplayed()
         composeRule.onNodeWithText("Superset").assertIsDisplayed()
+        // The exercises' names come from the catalog a moment after the routine.
+        waitForText(FLYES)
         composeRule.onRoot().captureRoboImage("src/test/screenshots/routine_detail_dark.png")
 
         composeRule.onNodeWithText("Start workout").performClick()

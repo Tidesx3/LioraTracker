@@ -27,15 +27,12 @@ import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.domain.MonthlyReport
 import app.liora.core.domain.TrainingCalendar
 import app.liora.core.ui.BodyHeatmap
-import app.liora.core.ui.headlineRecords
 import app.liora.core.ui.label
-import app.liora.core.ui.recordLabel
 import app.liora.core.ui.volumeText
 import app.liora.feature.progress.resources.Res
 import app.liora.feature.progress.resources.progress_sets_count
 import app.liora.feature.progress.resources.report_exercise_line
 import app.liora.feature.progress.resources.report_muscle_legend
-import app.liora.feature.progress.resources.report_record_line
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -110,27 +107,6 @@ private fun MonthGrid(
                     }
                 }
             }
-        }
-    }
-}
-
-/** The records set this month, an exercise a line, counted and named like a workout's. */
-@Composable
-internal fun RecordLines(
-    state: MonthlyReportUiState.Loaded,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        state.report.records.forEach { (exerciseId, keys) ->
-            Text(
-                text =
-                    stringResource(
-                        Res.string.report_record_line,
-                        state.nameOf(exerciseId),
-                        headlineRecords(keys).map { recordLabel(it) }.joinToString(", "),
-                    ),
-                style = MaterialTheme.typography.bodyMedium,
-            )
         }
     }
 }

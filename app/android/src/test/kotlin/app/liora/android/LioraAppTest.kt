@@ -1,6 +1,7 @@
 package app.liora.android
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
@@ -87,15 +88,15 @@ class LioraAppTest {
         setApp(darkTheme = true)
 
         composeRule.onNodeWithText("Progress").performClick()
-        composeRule.onNodeWithText("Nothing to chart yet").assertIsDisplayed()
+        waitUntilDisplayed("Nothing to chart yet")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/progress_dark.png")
 
         composeRule.onNodeWithText("Body").performClick()
-        composeRule.onNodeWithText("Track your body").assertIsDisplayed()
+        waitUntilDisplayed("Track your body")
         composeRule.onNodeWithContentDescription("Back").performClick()
 
         composeRule.onNodeWithText("History").performClick()
-        composeRule.onNodeWithText("No workouts yet").assertIsDisplayed()
+        waitUntilDisplayed("No workouts yet")
     }
 
     @Test
@@ -156,6 +157,13 @@ class LioraAppTest {
     // Room emits on a background dispatcher that Compose's idling doesn't track, so wait explicitly.
     private fun waitForText(text: String) =
         composeRule.waitUntil(TIMEOUT_MS) { composeRule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty() }
+
+    // A screen can be composed before it's shown: it loads from Room, or still fades in.
+    private fun waitUntilDisplayed(text: String) =
+        composeRule.waitUntil(TIMEOUT_MS) {
+            composeRule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty() &&
+                composeRule.onNodeWithText(text).isDisplayed()
+        }
 
     private fun waitForContentDescription(description: String) =
         composeRule.waitUntil(TIMEOUT_MS) {

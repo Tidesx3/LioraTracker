@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.Stat
+import app.liora.core.designsystem.component.StatRow
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.designsystem.theme.tabularNumbers
@@ -28,43 +30,44 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration
 
-/** Duration, volume, sets and (when there are any) records, side by side. */
+/** Duration, volume, sets and, when there are any, records, in equal columns. */
 @Composable
 internal fun WorkoutTotals(
     duration: Duration,
     volumeKg: Double,
     sets: Int,
-    records: Int,
     modifier: Modifier = Modifier,
+    records: Int = 0,
     valueStyle: TextStyle = MaterialTheme.typography.titleMedium,
 ) {
     val numbers = rememberNumberFormatter()
-    Row(modifier, horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-        Total(stringResource(Res.string.stat_duration), durationLabel(duration), valueStyle)
-        // Bodyweight and cardio days move no counted load; "0 kg" would only look like a mistake.
-        if (volumeKg > 0.0) {
-            Total(
-                stringResource(Res.string.stat_volume),
-                volumeText(volumeKg),
-                valueStyle,
+    StatRow(modifier) {
+        Stat(
+            durationLabel(duration),
+            stringResource(Res.string.stat_duration),
+            Modifier.weight(1f),
+            valueStyle = valueStyle,
+        )
+        // Bodyweight and cardio days move no counted load: a dash, as "0 kg" would look like a mistake.
+        Stat(
+            if (volumeKg > 0.0) volumeText(volumeKg) else NONE,
+            stringResource(Res.string.stat_volume),
+            Modifier.weight(1f),
+            valueStyle = valueStyle,
+        )
+        Stat(numbers.format(sets), stringResource(Res.string.stat_sets), Modifier.weight(1f), valueStyle = valueStyle)
+        if (records > 0) {
+            Stat(
+                numbers.format(records),
+                stringResource(Res.string.stat_records),
+                Modifier.weight(1f),
+                valueStyle = valueStyle,
             )
         }
-        Total(stringResource(Res.string.stat_sets), numbers.format(sets), valueStyle)
-        if (records > 0) Total(stringResource(Res.string.stat_records), numbers.format(records), valueStyle)
     }
 }
 
-@Composable
-private fun Total(
-    label: String,
-    value: String,
-    valueStyle: TextStyle,
-) {
-    Column {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = valueStyle.tabularNumbers())
-    }
-}
+private const val NONE = "–"
 
 /** A gold trophy with the number of records a workout set. */
 @Composable

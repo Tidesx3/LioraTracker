@@ -29,12 +29,3 @@ fun recordLabel(key: RecordKey): String =
         RecordType.LongestDistance -> stringResource(Res.string.record_longest_distance)
         RecordType.BestPace -> stringResource(Res.string.record_best_pace)
     }
-
-/**
- * The records worth naming out of [keys], most telling first. A heavier set breaks a whole row of
- * rep maxes at once; they're only named when nothing else was broken, and then just the best one.
- */
-fun headlineRecords(keys: Collection<RecordKey>): List<RecordKey> {
-    val main = keys.filter { it.type != RecordType.RepMax }.distinctBy { it.type }.sortedBy { it.type.ordinal }
-    return main.ifEmpty { listOfNotNull(keys.maxByOrNull { it.reps ?: 0 }) }
-}

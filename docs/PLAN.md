@@ -127,7 +127,25 @@ As of 2026-10-02:
       already, so a newer export adds only what's new. Sets are ticked off across the workout's time, and keep
       only the values their exercise has columns for.
 - **Phase 1 is done**, and Phase 2 (design and motion polish) moved up to follow it on 2026-10-02 on request.
-  **Next:** Phase 2's planning pass, starting with the design audit.
+- **Phase 2** is planned in parts 2a–2e (see the Phase 2 roadmap below).
+  - **2a (done): the look.** A design lab rendered eight looks on the real app, side by side and switchable
+    on the phone; the user chose **Violet**, and the lab, the preview setting and the other fonts went.
+    - Colors (`Color.kt`): #5504CF is the accent in light, on white cards over a pale lavender grey; in dark
+      it fills bars and ticks on near black, and a lighter violet of the same hue (#A57BFF) carries text and
+      buttons. Done sets take the violet, drop sets turn pink so they don't read as the accent, records stay
+      gold. The workout notification takes the violet too (`liora_accent`).
+    - Type: Sora (OFL, bundled), digits made equal with `tabularNumbers()` where numbers change live.
+    - Shapes and parts: generous corners; cards are `LioraCard` (white on a soft shadow in light, a lighter
+      shade in dark); round checks that fill in; the tabs and the rest timer float as pills, and the time
+      left runs around the rest pill's outline.
+  - **2b (in progress): screens.** Done so far: one `Stat`/`StatRow` for every row of figures (equal columns,
+    big numbers with small units, the label underneath, shrinking rather than wrapping), so stats line up
+    from card to card; one `RecordsCard` listing each record with the value it was set at
+    (`RecordHighlights` in `core/domain`), on workout detail, the finish sheet and the monthly report; history
+    cards show the name, date, duration, volume and sets only; the consistency grid is drawn, so its rows
+    line up; the monthly report's figures sit two to a row; an exercise's sessions list their sets as chips,
+    alike sets counted; charts label their axes in Sora. Next in 2b: illustrated empty states and a pass
+    over the remaining screens on the phone.
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a
   milestone go in TODO.md.
@@ -410,6 +428,30 @@ the app gets its character before sync, the server and the web GUI build on it.
   - Fold and unfold keep their place smoothly.
 - **Haptics:** set completion, records, rest over.
 - **Respect "remove animations":** everything falls back to simple fades when the system scale is off.
+
+**How it runs** (planned 2026-10-02):
+- **The look is chosen on the real app, not on mockups.** Every color, typeface, shape and the few component
+  styles that differ go through `LioraTheme`, so a design is a set of tokens the app can switch between.
+- **The user's direction:** calm, soft, rounded cards on tinted surfaces; color carries meaning (done, the one
+  accent) but not per muscle group, which would get overwhelming; big round checks that fill in; clean bold
+  type; floating pieces such as a pill nav bar and a timer pill. Playfulness lives in motion and copy more
+  than in the look. Reference screenshots stay in the gitignored `samples/`.
+- **Logging speed stays first:** no animation blocks or delays a tap, celebrations never hold the screen,
+  and the logger keeps its density (previous values, kg, reps, the pad).
+- **Parts:**
+  - **2a, audit and identity:** a screenshot sweep of every screen, and a design lab of five directions
+    (Lagoon, Paper, Tide, Ember, Volt) on the real app, plus three from colors the user picked (Indigo #340396,
+    Cobalt #02519C, Violet #5504CF). The user picks or mixes; the winner becomes the
+    theme, the others and the preview setting go, and the unused fonts leave the APK.
+  - **2b, screens:** the identity on the most-used surfaces (logger rows, pad, rest timer, Train, finish sheet,
+    Progress cards, body heatmap) and illustrated empty states; fixes from the audit (e.g. Progress stats
+    that wrap in wider typefaces).
+  - **2c, motion in the logging loop:** check pop and row fill, odometer numbers, rest ring pulse, haptics.
+  - **2d, celebrations and navigation:** the record burst, list-to-detail transitions, predictive back,
+    fold and unfold continuity.
+  - **2e, voice:** the playful copy, in English and German written each on its own.
+- **Testing motion:** screenshots at fixed points of an animation with the test clock paused, and a short
+  device checklist at the end of 2c and 2d: only the phone tells whether it feels good.
 
 ### Phase 3: Sync and integrations
 - `sync/gdrive` backend and the sync settings screen (connect, last sync, sync now).

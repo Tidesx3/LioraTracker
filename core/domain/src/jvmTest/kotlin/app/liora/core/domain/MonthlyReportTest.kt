@@ -68,8 +68,18 @@ class MonthlyReportTest {
     @Test
     fun recordsTopExercisesAndMuscles() {
         // The heavier bench broke records; the flyes' first session is a baseline.
-        assertEquals(listOf("bench"), report.records.keys.toList())
-        assertEquals(true, RecordKey(RecordType.HeaviestWeight) in report.records.getValue("bench"))
+        val (bench) = report.records
+        assertEquals("bench", bench.exerciseId)
+        // Named with the values they were set at; the rep maxes it also broke go unnamed.
+        assertEquals(
+            listOf(
+                RecordHighlight(RecordKey(RecordType.HeaviestWeight), 85.0),
+                RecordHighlight(RecordKey(RecordType.EstimatedOneRepMax), estimateOneRepMax(Mass(85.0), 8)!!.kilograms),
+                RecordHighlight(RecordKey(RecordType.BestSetVolume), 680.0),
+            ),
+            bench.records,
+        )
+        assertEquals(1, report.records.size)
         assertEquals(
             listOf(ExerciseShare("bench", 6, 3_960.0), ExerciseShare("flyes", 2, 480.0)),
             report.topExercises,

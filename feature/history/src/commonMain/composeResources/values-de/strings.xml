@@ -25,10 +25,6 @@
   <string name="stat_volume">Volumen</string>
   <string name="stat_sets">Sätze</string>
   <string name="stat_records">Rekorde</string>
-  <plurals name="more_exercises">
-    <item quantity="one">+ %1$d weitere Übung</item>
-    <item quantity="other">+ %1$d weitere Übungen</item>
-  </plurals>
 
   <string name="detail_repeat">Training wiederholen</string>
   <string name="menu_save_as_routine">Als Routine speichern</string>

@@ -10,13 +10,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.unit.dp
 
+/** Soft, generous corners: cards float as rounded tiles, bars and buttons as pills. */
 internal val LioraShapes =
     Shapes(
         extraSmall = RoundedCornerShape(6.dp),
-        small = RoundedCornerShape(10.dp),
-        medium = RoundedCornerShape(16.dp),
-        large = RoundedCornerShape(24.dp),
-        extraLarge = RoundedCornerShape(32.dp),
+        small = RoundedCornerShape(12.dp),
+        medium = RoundedCornerShape(22.dp),
+        large = RoundedCornerShape(28.dp),
+        extraLarge = RoundedCornerShape(36.dp),
     )
 
 /**
@@ -32,12 +33,11 @@ fun LioraTheme(
     val colorScheme =
         (if (dynamicColor) platformDynamicColorScheme(darkTheme) else null)
             ?: if (darkTheme) LioraDarkColorScheme else LioraLightColorScheme
-    val lioraColors = if (darkTheme) DarkLioraColors else LightLioraColors
 
-    CompositionLocalProvider(LocalLioraColors provides lioraColors) {
+    CompositionLocalProvider(LocalLioraColors provides if (darkTheme) DarkLioraColors else LightLioraColors) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = LioraTypography,
+            typography = lioraTypography(),
             shapes = LioraShapes,
             content = content,
         )

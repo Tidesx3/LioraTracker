@@ -7,12 +7,12 @@ import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.domain.HistoryRecords
 import app.liora.core.domain.OneRepMaxFormula
+import app.liora.core.domain.RecordHighlights
 import app.liora.core.domain.TrainingCalendar
 import app.liora.core.domain.volumeOf
 import app.liora.core.model.Exercise
 import app.liora.core.model.FinishedWorkout
 import app.liora.core.model.TrackingType
-import app.liora.core.ui.headlineRecords
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,13 +45,6 @@ data class WorkoutItem(
     val volumeKg: Double,
     val sets: Int,
     val records: Int,
-    /** Its exercises in order, each with the number of sets done. */
-    val exercises: List<ExerciseLine>,
-)
-
-data class ExerciseLine(
-    val name: String,
-    val sets: Int,
 )
 
 sealed interface HistoryUiState {
@@ -130,14 +123,7 @@ internal fun items(
             // Counted the way the finish sheet counts them, so the numbers match.
             records =
                 workout.exercises.sumOf { exercise ->
-                    headlineRecords(exercise.sets.flatMap { records[it.id].orEmpty() }).size
-                },
-            exercises =
-                workout.exercises.map { exercise ->
-                    ExerciseLine(
-                        name = exercises[exercise.exerciseId]?.name.orEmpty(),
-                        sets = exercise.sets.count { it.isCompleted },
-                    )
+                    RecordHighlights.headline(exercise.sets.flatMap { records[it.id].orEmpty() }).size
                 },
         )
     }

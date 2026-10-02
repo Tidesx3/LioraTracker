@@ -49,9 +49,9 @@ import app.liora.core.model.WorkoutExercise
 import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
 import app.liora.core.ui.ExerciseThumbnail
+import app.liora.core.ui.RecordsCard
 import app.liora.core.ui.SetTypeBadge
 import app.liora.core.ui.currentLanguage
-import app.liora.core.ui.recordLabel
 import app.liora.core.ui.setNumbers
 import app.liora.core.ui.setSummary
 import app.liora.feature.history.WorkoutTotals
@@ -177,9 +177,13 @@ private fun WorkoutDetailContent(
                 PaddingValues(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding() + 16.dp),
         ) {
             item(key = "header") { Header(state, Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) }
-            if (state.recordLines.isNotEmpty()) {
+            if (state.recordEntries.isNotEmpty()) {
                 item(key = "records") {
-                    Records(state.recordLines, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                    RecordsCard(
+                        title = pluralStringResource(Res.plurals.detail_records, state.recordCount, state.recordCount),
+                        entries = state.recordEntries,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
                 }
             }
             items(workout.exercises, key = { it.id }) { done ->
@@ -215,47 +219,11 @@ private fun Header(
             duration = workout.duration,
             volumeKg = state.volumeKg,
             sets = state.sets,
-            records = state.recordLines.sumOf { it.second.size },
+            records = state.recordCount,
             valueStyle = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(vertical = 8.dp),
         )
         workout.notes?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
-    }
-}
-
-/** The records this workout set, gold like the trophies on their sets. */
-@Composable
-private fun Records(
-    lines: List<Pair<String, List<RecordKey>>>,
-    modifier: Modifier = Modifier,
-) {
-    val count = lines.sumOf { it.second.size }
-    Surface(
-        shape = MaterialTheme.shapes.medium,
-        color = LioraTheme.colors.personalRecord.copy(alpha = RECORD_BACKGROUND_ALPHA),
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painterResource(LioraIcons.Record),
-                    contentDescription = null,
-                    tint = LioraTheme.colors.personalRecord,
-                    modifier = Modifier.size(20.dp),
-                )
-                Text(
-                    text = pluralStringResource(Res.plurals.detail_records, count, count),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(start = 8.dp),
-                )
-            }
-            lines.forEach { (exercise, keys) ->
-                Text(
-                    text = "$exercise: ${keys.map { recordLabel(it) }.joinToString(", ")}",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-        }
     }
 }
 
@@ -360,5 +328,3 @@ private fun DetailMenu(
         }
     }
 }
-
-private const val RECORD_BACKGROUND_ALPHA = 0.14f

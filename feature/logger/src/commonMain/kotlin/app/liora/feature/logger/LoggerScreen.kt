@@ -45,6 +45,8 @@ import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
+import app.liora.core.designsystem.component.Stat
+import app.liora.core.designsystem.component.StatRow
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.layout.currentWindowLayout
 import app.liora.core.designsystem.layout.readableWidth
@@ -461,41 +463,15 @@ private fun WorkoutStats(
     // A finished workout's clock has stopped.
     val duration = state.endedAt?.let { it - state.workout.startedAt } ?: rememberElapsedTime(state.workout.startedAt)
     val numbers = rememberNumberFormatter()
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
+    StatRow(modifier) {
         Stat(
-            label = stringResource(Res.string.logger_stat_duration),
             value = duration.formatAsClock(),
+            label = stringResource(Res.string.logger_stat_duration),
+            modifier = Modifier.weight(1f),
             highlight = !state.isFinished,
         )
-        Stat(
-            label = stringResource(Res.string.logger_stat_volume),
-            value = volumeText(state.volumeKg),
-        )
-        Stat(label = stringResource(Res.string.logger_stat_sets), value = numbers.format(state.completedSets))
-    }
-}
-
-@Composable
-private fun Stat(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    highlight: Boolean = false,
-) {
-    Column(modifier = modifier) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleLarge.tabularNumbers(),
-            color = if (highlight) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-        )
+        Stat(volumeText(state.volumeKg), stringResource(Res.string.logger_stat_volume), Modifier.weight(1f))
+        Stat(numbers.format(state.completedSets), stringResource(Res.string.logger_stat_sets), Modifier.weight(1f))
     }
 }
 

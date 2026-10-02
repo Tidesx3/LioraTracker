@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,10 +25,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.liora.core.designsystem.component.ChartPoint
 import app.liora.core.designsystem.component.LineChart
+import app.liora.core.designsystem.component.Stat
+import app.liora.core.designsystem.component.StatRow
 import app.liora.core.designsystem.theme.tabularNumbers
+import app.liora.core.designsystem.util.NumberFormatter
 import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.designsystem.util.workoutDisplayName
@@ -52,6 +57,7 @@ import app.liora.feature.exercises.resources.detail_latest
 import app.liora.feature.exercises.resources.detail_one_session
 import app.liora.feature.exercises.resources.detail_rep_max
 import app.liora.feature.exercises.resources.detail_rep_maxes
+import app.liora.feature.exercises.resources.detail_set_count
 import app.liora.feature.exercises.resources.detail_show_all
 import app.liora.feature.exercises.resources.detail_stalled
 import app.liora.feature.exercises.resources.detail_stalled_body
@@ -109,9 +115,20 @@ internal fun ProgressChart(
         val best = state.best
         val latest = state.points.lastOrNull()
         if (best != null && latest != null) {
-            Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
-                PointStat(stringResource(Res.string.detail_best), best, state.metric, trackingType)
-                PointStat(stringResource(Res.string.detail_latest), latest, state.metric, trackingType)
+            val dates = rememberDateFormatter()
+            StatRow {
+                Stat(
+                    valueText(state.metric.unit, best.value, trackingType),
+                    stringResource(Res.string.detail_best),
+                    Modifier.weight(1f),
+                    detail = dates.shortDate(best.at.localDate()),
+                )
+                Stat(
+                    valueText(state.metric.unit, latest.value, trackingType),
+                    stringResource(Res.string.detail_latest),
+                    Modifier.weight(1f),
+                    detail = dates.shortDate(latest.at.localDate()),
+                )
             }
         }
         state.stall?.let { stall ->
@@ -148,28 +165,6 @@ internal fun ProgressChart(
                 modifier = Modifier.fillMaxWidth().height(ChartHeight).testTag(ExerciseDetailTags.CHART),
             )
         }
-    }
-}
-
-@Composable
-private fun PointStat(
-    label: String,
-    point: ProgressPoint,
-    metric: ProgressMetric,
-    trackingType: TrackingType,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(
-            text = valueText(metric.unit, point.value, trackingType),
-            style = MaterialTheme.typography.titleLarge.tabularNumbers(),
-        )
-        Text(
-            text = rememberDateFormatter().shortDate(point.at.localDate()),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
     }
 }
 
@@ -258,6 +253,7 @@ internal fun SessionList(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SessionRow(
     session: ExerciseSession,
@@ -265,27 +261,72 @@ private fun SessionRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // The work done; warm-ups only when nothing else was logged.
+    // The work done; warm-ups only when nothing else was logged. Sets alike in a row show once, counted.
     val sets = session.sets.filter { it.isWorkingSet }.ifEmpty { session.sets }
-    val summary =
-        sets
-            .map { set ->
-                setSummary(trackingType, set.weight, set.reps?.let(::RepRange), set.duration, set.distanceMeters)
-            }.joinToString(" · ")
+    val summaries =
+        sets.map { set ->
+            setSummary(trackingType, set.weight, set.reps?.let(::RepRange), set.duration, set.distanceMeters)
+        }
+    val runs =
+        summaries.fold(mutableListOf<Pair<String, Int>>()) { runs, summary ->
+            if (runs.lastOrNull()?.first ==
+                summary
+            ) {
+                runs[runs.lastIndex] = summary to runs.last().second + 1
+            } else {
+                runs += summary to 1
+            }
+            runs
+        }
+    val numbers = rememberNumberFormatter()
     Column(
         modifier = modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 20.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(
-            text = workoutDisplayName(session.workoutName),
-            style = MaterialTheme.typography.titleSmall,
-        )
-        Text(
-            text = rememberDateFormatter().longDate(session.startedAt.localDate()),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(summary, style = MaterialTheme.typography.bodyMedium)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = workoutDisplayName(session.workoutName),
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f).padding(end = 12.dp),
+            )
+            Text(
+                text = rememberDateFormatter().mediumDate(session.startedAt.localDate()),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            runs.forEach { (summary, count) -> SetChip(summary, count, numbers) }
+        }
+    }
+}
+
+/** A set as a chip: "87.5 kg × 5", or "3× 87.5 kg × 5" for three alike in a row. */
+@Composable
+private fun SetChip(
+    summary: String,
+    count: Int,
+    numbers: NumberFormatter,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.small,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    ) {
+        Row(Modifier.padding(horizontal = 10.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (count > 1) {
+                Text(
+                    text = stringResource(Res.string.detail_set_count, numbers.format(count)),
+                    style = MaterialTheme.typography.labelLarge.tabularNumbers(),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(end = 6.dp),
+                )
+            }
+            Text(summary, style = MaterialTheme.typography.bodyMedium.tabularNumbers())
+        }
     }
 }
 

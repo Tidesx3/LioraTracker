@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,6 +27,8 @@ import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
+import app.liora.core.designsystem.component.Stat
+import app.liora.core.designsystem.component.StatRow
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.theme.tabularNumbers
@@ -34,6 +37,8 @@ import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.domain.MonthTotals
 import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
+import app.liora.core.ui.RecordsCard
+import app.liora.core.ui.RecordsCardEntry
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.durationLabel
 import app.liora.core.ui.volumeText
@@ -44,13 +49,14 @@ import app.liora.feature.progress.resources.report_days
 import app.liora.feature.progress.resources.report_last_month
 import app.liora.feature.progress.resources.report_muscles
 import app.liora.feature.progress.resources.report_none
-import app.liora.feature.progress.resources.report_records
+import app.liora.feature.progress.resources.report_records_count
 import app.liora.feature.progress.resources.report_sets
 import app.liora.feature.progress.resources.report_time
 import app.liora.feature.progress.resources.report_title
 import app.liora.feature.progress.resources.report_top
 import app.liora.feature.progress.resources.report_volume
 import app.liora.feature.progress.resources.report_workouts
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -113,8 +119,19 @@ private fun MonthlyReportContent(
             item(key = "calendar") { MonthDays(report, Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) }
             if (report.records.isNotEmpty()) {
                 item(key = "records") {
-                    SectionHeader(stringResource(Res.string.report_records))
-                    RecordLines(state, Modifier.padding(horizontal = 20.dp))
+                    val count = report.records.sumOf { it.records.size }
+                    RecordsCard(
+                        title = pluralStringResource(Res.plurals.report_records_count, count, count),
+                        entries =
+                            report.records.map {
+                                RecordsCardEntry(
+                                    state.nameOf(it.exerciseId),
+                                    state.trackingTypeOf(it.exerciseId),
+                                    it.records,
+                                )
+                            },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
                 }
             }
             item(key = "top") {
@@ -157,7 +174,7 @@ private fun MonthSwitcher(
     }
 }
 
-/** The month's numbers, each with last month's beneath it. */
+/** The month's numbers, two to a row, each with last month's beneath it. */
 @Composable
 private fun Totals(
     totals: MonthTotals,
@@ -165,44 +182,48 @@ private fun Totals(
     modifier: Modifier = Modifier,
 ) {
     val numbers = rememberNumberFormatter()
-    FlowRow(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Total(
-            stringResource(Res.string.report_workouts),
-            numbers.format(totals.workouts),
-            numbers.format(previous.workouts),
-        )
-        Total(
-            stringResource(Res.string.report_days),
-            numbers.format(totals.trainingDays),
-            numbers.format(previous.trainingDays),
-        )
-        Total(stringResource(Res.string.report_time), durationLabel(totals.duration), durationLabel(previous.duration))
-        Total(stringResource(Res.string.report_volume), volumeText(totals.volumeKg), volumeText(previous.volumeKg))
-        Total(stringResource(Res.string.report_sets), numbers.format(totals.sets), numbers.format(previous.sets))
-    }
-}
 
-@Composable
-private fun Total(
-    label: String,
-    value: String,
-    previous: String,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier.width(TotalWidth)) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.titleLarge.tabularNumbers())
-        Text(
-            text = stringResource(Res.string.report_last_month, previous),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+    @Composable
+    fun lastMonth(value: String) = stringResource(Res.string.report_last_month, value)
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        StatRow {
+            Stat(
+                numbers.format(totals.workouts),
+                stringResource(Res.string.report_workouts),
+                Modifier.weight(1f),
+                detail = lastMonth(numbers.format(previous.workouts)),
+            )
+            Stat(
+                numbers.format(totals.trainingDays),
+                stringResource(Res.string.report_days),
+                Modifier.weight(1f),
+                detail = lastMonth(numbers.format(previous.trainingDays)),
+            )
+        }
+        StatRow {
+            Stat(
+                durationLabel(totals.duration),
+                stringResource(Res.string.report_time),
+                Modifier.weight(1f),
+                detail = lastMonth(durationLabel(previous.duration)),
+            )
+            Stat(
+                volumeText(totals.volumeKg),
+                stringResource(Res.string.report_volume),
+                Modifier.weight(1f),
+                detail = lastMonth(volumeText(previous.volumeKg)),
+            )
+        }
+        StatRow {
+            Stat(
+                numbers.format(totals.sets),
+                stringResource(Res.string.report_sets),
+                Modifier.weight(1f),
+                detail = lastMonth(numbers.format(previous.sets)),
+            )
+            Spacer(Modifier.weight(1f))
+        }
     }
 }
 
 private val ArrowSize = 48.dp
-private val TotalWidth = 104.dp

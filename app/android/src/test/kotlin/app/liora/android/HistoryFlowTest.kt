@@ -98,7 +98,9 @@ class HistoryFlowTest {
         composeRule.onNodeWithText("3 workouts").assertIsDisplayed()
         // The time follows the phone's clock setting; the date is what matters here.
         waitForText("Tue, Aug 11 · ")
-        composeRule.onAllNodesWithText("3 × $BENCH").onFirst().assertIsDisplayed()
+        // A card names the workout and its totals; the exercises are one tap away.
+        composeRule.onAllNodesWithText("3,015 kg").onFirst().assertIsDisplayed()
+        composeRule.onAllNodesWithText("3 × $BENCH").assertCountEquals(0)
         composeRule.onRoot().captureRoboImage("src/test/screenshots/history_dark.png")
 
         // The heavier Push: its records, with a trophy on the sets that set them.
@@ -106,7 +108,10 @@ class HistoryFlowTest {
         waitForText("Repeat workout")
         waitForText("Tuesday, August 11, 2026 · ")
         waitForText("82.5 kg × 10")
-        composeRule.onNodeWithText("$BENCH: Heaviest weight, Best estimated 1RM, Best set volume").assertIsDisplayed()
+        // Each record on a row of its own, with the value it was set at.
+        composeRule.onNodeWithText("3 personal records").assertIsDisplayed()
+        composeRule.onNodeWithText("Heaviest weight").assertIsDisplayed()
+        composeRule.onNodeWithText("82.5 kg").assertIsDisplayed()
         composeRule.onRoot().captureRoboImage("src/test/screenshots/workout_detail_dark.png")
 
         // What else it offers. The save dialog's name field isn't driven here: under Robolectric, a text

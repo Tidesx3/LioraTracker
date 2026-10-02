@@ -18,6 +18,7 @@ import app.liora.core.domain.GymProfiles
 import app.liora.core.domain.LoadRounding
 import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.PlateLoad
+import app.liora.core.domain.RecordHighlights
 import app.liora.core.domain.RecordKey
 import app.liora.core.domain.RestDefaults
 import app.liora.core.domain.RoutineUpdate
@@ -45,7 +46,7 @@ import app.liora.core.model.SetType
 import app.liora.core.model.TrackingType
 import app.liora.core.model.Units
 import app.liora.core.model.WeightUnit
-import app.liora.core.ui.headlineRecords
+import app.liora.core.ui.RecordsCardEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -154,11 +155,11 @@ sealed interface LoggerUiState {
                 volumeKg = volumeKg,
                 records =
                     workout.exercises.mapNotNull { exercise ->
-                        val keys = exercise.sets.flatMap { newRecords[it.id].orEmpty() }
-                        headlineRecords(keys).takeIf { it.isNotEmpty() }?.let {
-                            exercises[exercise.exerciseId]?.name.orEmpty() to
-                                it
-                        }
+                        val trackingType = trackingTypeOf(exercise.exerciseId)
+                        RecordHighlights
+                            .of(exercise.sets, newRecords, trackingType, formula)
+                            .takeIf { it.isNotEmpty() }
+                            ?.let { RecordsCardEntry(exercises[exercise.exerciseId]?.name.orEmpty(), trackingType, it) }
                     },
                 routineToUpdate = routine?.name?.takeIf { updated != null && RoutineUpdate.changes(routine, updated) },
             )
@@ -230,8 +231,8 @@ data class FinishSummary(
     /** Planned sets that weren't done; finishing drops them. */
     val openSets: Int,
     val volumeKg: Double,
-    /** Exercise names with the records they broke today, in workout order. */
-    val records: List<Pair<String, List<RecordKey>>>,
+    /** The records each exercise broke today, in workout order, at the values they were set at. */
+    val records: List<RecordsCardEntry>,
     /** The routine's name, when updating it with today's values would change it. */
     val routineToUpdate: String?,
 )

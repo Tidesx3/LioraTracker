@@ -39,6 +39,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.EmptyState
+import app.liora.core.designsystem.component.LioraCard
+import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
@@ -330,14 +332,16 @@ private fun RoutineCard(
 ) {
     val routine = card.routine
     val copyName = stringResource(Res.string.routine_copy_name, routine.name)
-    Card(
+    LioraCard(
         onClick = { actions.onOpen(routine.id) },
         modifier = modifier.fillMaxWidth().semantics { if (selected) this.selected = true },
-        colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    with(MaterialTheme.colorScheme) { if (selected) secondaryContainer else surfaceContainer },
-            ),
+        containerColor =
+            if (selected) {
+                MaterialTheme.colorScheme.secondaryContainer
+            } else {
+                LioraCardDefaults
+                    .containerColor()
+            },
         border = if (selected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
     ) {
         Column(Modifier.padding(start = 20.dp, end = 8.dp, top = 12.dp, bottom = 16.dp)) {
@@ -418,9 +422,8 @@ private fun QuickStartCard(
     onResumeWorkout: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card(
+    LioraCard(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
         Column(
             modifier = Modifier.padding(20.dp),

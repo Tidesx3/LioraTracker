@@ -17,17 +17,17 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.LioraCard
+import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.designsystem.util.workoutDisplayName
 import app.liora.feature.history.resources.Res
 import app.liora.feature.history.resources.date_time
-import app.liora.feature.history.resources.exercise_sets
-import app.liora.feature.history.resources.more_exercises
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** A finished workout in the list: when, how long and how much, and the first few exercises. */
+/** A finished workout in the list: its name, when, and how long, how much and how many sets. */
 @Composable
 internal fun WorkoutCard(
     item: WorkoutItem,
@@ -36,15 +36,16 @@ internal fun WorkoutCard(
     modifier: Modifier = Modifier,
 ) {
     val dates = rememberDateFormatter()
-    val numbers = rememberNumberFormatter()
-    Card(
+    LioraCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth().semantics { if (selected) this.selected = true },
-        colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    with(MaterialTheme.colorScheme) { if (selected) secondaryContainer else surfaceContainer },
-            ),
+        containerColor =
+            if (selected) {
+                MaterialTheme.colorScheme.secondaryContainer
+            } else {
+                LioraCardDefaults
+                    .containerColor()
+            },
         border = if (selected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
     ) {
         Column(
@@ -70,28 +71,8 @@ internal fun WorkoutCard(
                 duration = item.duration,
                 volumeKg = item.volumeKg,
                 sets = item.sets,
-                records = 0,
-                modifier = Modifier.padding(vertical = 8.dp),
+                modifier = Modifier.padding(top = 10.dp),
             )
-            item.exercises.take(SHOWN_EXERCISES).forEach { exercise ->
-                Text(
-                    text = stringResource(Res.string.exercise_sets, numbers.format(exercise.sets), exercise.name),
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            val more = item.exercises.size - SHOWN_EXERCISES
-            if (more > 0) {
-                Text(
-                    text = pluralStringResource(Res.plurals.more_exercises, more, more),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
         }
     }
 }
-
-/** Enough to recognize the day at a glance; the rest is one tap away. */
-private const val SHOWN_EXERCISES = 3

@@ -35,7 +35,7 @@ data class MonthlyReport(
     /** The days with a workout. */
     val trainingDays: Set<LocalDate>,
     /** The records set during the month by exercise, in the order they were first set. */
-    val records: Map<String, Set<RecordKey>>,
+    val records: List<ExerciseRecords>,
     /** The exercises with the most working sets, most first. */
     val topExercises: List<ExerciseShare>,
     /** Hard sets per muscle over the month, see [setsPerMuscle]. */
@@ -60,13 +60,18 @@ object MonthlyReports {
         val monthOf = { workout: FinishedWorkout -> TrainingCalendar.dayOf(workout.startedAt, zone).yearMonth }
         val inMonth = workouts.filter { monthOf(it) == month }.sortedBy { it.startedAt }
         val recordsBySet = HistoryRecords.of(workouts, formula, trackingTypeOf)
-        val records = linkedMapOf<String, MutableSet<RecordKey>>()
-        for (workout in inMonth) {
-            for (exercise in workout.exercises) {
-                val keys = exercise.sets.flatMap { recordsBySet[it.id].orEmpty() }
-                if (keys.isNotEmpty()) records.getOrPut(exercise.exerciseId) { linkedSetOf() } += keys
-            }
-        }
+        val records =
+            inMonth
+                .flatMap { it.exercises }
+                .filter { exercise -> exercise.sets.any { recordsBySet[it.id].orEmpty().isNotEmpty() } }
+                .groupBy { it.exerciseId }
+                .map { (exerciseId, instances) ->
+                    val sets = instances.flatMap { it.sets }
+                    ExerciseRecords(
+                        exerciseId,
+                        RecordHighlights.of(sets, recordsBySet, trackingTypeOf(exerciseId), formula),
+                    )
+                }
         val shares =
             inMonth
                 .flatMap { it.exercises }

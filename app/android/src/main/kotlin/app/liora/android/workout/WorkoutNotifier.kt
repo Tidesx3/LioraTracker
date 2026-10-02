@@ -96,6 +96,7 @@ class WorkoutNotifier(
             NotificationCompat
                 .Builder(context, WorkoutNotifications.CHANNEL_REST_OVER)
                 .setSmallIcon(R.drawable.ic_notification)
+                .setColor(accent())
                 .setContentTitle(context.getString(R.string.notif_rest_over_title))
                 .setContentText(next?.let(text::describe))
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
@@ -143,6 +144,7 @@ class WorkoutNotifier(
             NotificationCompat
                 .Builder(context, WorkoutNotifications.CHANNEL_WORKOUT)
                 .setSmallIcon(R.drawable.ic_notification)
+                .setColor(accent())
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
                 .setSilent(true)
@@ -201,11 +203,14 @@ class WorkoutNotifier(
         val elapsed = (clock.now() - rest.startedAt).inWholeMilliseconds.coerceIn(0, total)
         return NotificationCompat
             .ProgressStyle()
-            .setProgressSegments(listOf(NotificationCompat.ProgressStyle.Segment(total.toInt())))
+            .setProgressSegments(listOf(NotificationCompat.ProgressStyle.Segment(total.toInt()).setColor(accent())))
             .setProgress(elapsed.toInt())
     }
 
     private fun action(name: String) = WorkoutNotifications.action(context, name)
+
+    /** Liora's violet, which the system tints the icon, the actions and the rest bar with; lighter at night. */
+    private fun accent(): Int = ContextCompat.getColor(context, R.color.liora_accent)
 
     private fun language(): String =
         context.resources.configuration.locales[0]

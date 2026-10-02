@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
+import app.liora.core.designsystem.component.LioraCard
+import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
@@ -176,10 +178,10 @@ private fun PhotosCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card(
+    LioraCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth().semantics { if (selected) this.selected = true },
-        colors = CardDefaults.cardColors(containerColor = cardColor(selected)),
+        containerColor = cardColor(selected),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -226,7 +228,7 @@ private fun PhotosCard(
 
 @Composable
 private fun cardColor(selected: Boolean) =
-    if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainer
+    if (selected) MaterialTheme.colorScheme.secondaryContainer else LioraCardDefaults.containerColor()
 
 /** Bodyweight up front: the latest, how it moved over the month, and its curve. */
 @Composable
@@ -236,13 +238,11 @@ private fun BodyweightCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card(
+    LioraCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth().semantics { if (selected) this.selected = true },
-        colors =
-            CardDefaults.cardColors(
-                containerColor = cardColor(selected),
-            ),
+        containerColor =
+            cardColor(selected),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(

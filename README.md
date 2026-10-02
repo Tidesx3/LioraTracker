@@ -4,7 +4,8 @@ A workout tracker that is fast to log with, owned by its user, and built to grow
 an offline-first Android app now, then sync to your own Google Drive, a self-hosted server with a web
 GUI, and AI features on top.
 
-**Status:** Phase 1, the offline MVP, is done. The database, domain logic, exercise library with
+**Status:** Phase 1, the offline MVP, is done, and Phase 2 (design and motion) is under way: the app has
+its look, a vivid violet with the Sora typeface, floating cards and pills. The database, domain logic, exercise library with
 custom exercises, German, the foldable layouts, routines with folders and supersets, and the logger
 (number pad, rest timer, live workout notification, personal records, tabletop mode) are done. History
 is done too: list, calendar, workout detail (repeat, save as routine, delete) and editing past workouts

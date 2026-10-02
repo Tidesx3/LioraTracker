@@ -16,15 +16,17 @@ data class LioraColors(
     val onCompleted: Color,
 )
 
+// A done set takes the violet; drop sets are pink, so they don't read as the accent.
+
 internal val DarkLioraColors =
     LioraColors(
         personalRecord = Color(0xFFFFC857),
         onPersonalRecord = Color(0xFF3D2A00),
         warmupSet = Color(0xFFF2B84B),
-        dropSet = Color(0xFFB79CFF),
+        dropSet = Color(0xFFFF8AD0),
         failureSet = Color(0xFFFF7A7A),
-        completed = Color(0xFF5BD68A),
-        onCompleted = Color(0xFF003919),
+        completed = Color(0xFF6F2BF2),
+        onCompleted = Color(0xFFFFFFFF),
     )
 
 internal val LightLioraColors =
@@ -32,9 +34,9 @@ internal val LightLioraColors =
         personalRecord = Color(0xFFB07A00),
         onPersonalRecord = Color(0xFFFFFFFF),
         warmupSet = Color(0xFF976800),
-        dropSet = Color(0xFF6B4FD8),
+        dropSet = Color(0xFFC2185B),
         failureSet = Color(0xFFC62828),
-        completed = Color(0xFF1E8E4E),
+        completed = Color(0xFF5504CF),
         onCompleted = Color(0xFFFFFFFF),
     )
 

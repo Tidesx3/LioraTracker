@@ -138,9 +138,9 @@ class ProgressFlowTest {
         waitForText("Last month: 8")
         composeRule.onNode(hasTestTag(ReportTags.CALENDAR)).assertIsDisplayed()
         composeRule.onRoot().captureRoboImage("src/test/screenshots/monthly_report_dark.png")
-        // Flyes and pull-ups set records; the stalled bench didn't.
-        scrollTo("Dumbbell Flyes: ", substring = true)
-        composeRule.onAllNodesWithText("Barbell Bench Press: ", substring = true).assertCountEquals(0)
+        // Flyes and pull-ups set records, the stalled bench none: three for the flyes, one for the pull-ups.
+        scrollTo("4 personal records")
+        composeRule.onNodeWithText("Most reps").assertExists()
 
         // July is the first month with training: nothing before it.
         composeRule.onNodeWithContentDescription("Previous month").performClick()

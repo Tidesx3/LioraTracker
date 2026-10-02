@@ -30,13 +30,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.Stat
+import app.liora.core.designsystem.component.StatRow
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.designsystem.util.rememberElapsedTime
 import app.liora.core.designsystem.util.rememberNumberFormatter
-import app.liora.core.ui.recordLabel
+import app.liora.core.ui.RecordsCard
 import app.liora.core.ui.volumeText
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.finish_empty_body
@@ -96,7 +98,10 @@ internal fun FinishSheet(
             }
             Text(stringResource(Res.string.finish_title), style = MaterialTheme.typography.headlineSmall)
             Totals(summary, startedAt)
-            if (summary.records.isNotEmpty()) Records(summary)
+            if (summary.records.isNotEmpty()) {
+                val count = summary.records.sumOf { it.records.size }
+                RecordsCard(pluralStringResource(Res.plurals.finish_records, count, count), summary.records)
+            }
             if (summary.openSets > 0) {
                 Text(
                     text = pluralStringResource(Res.plurals.finish_open_sets, summary.openSets, summary.openSets),
@@ -133,57 +138,10 @@ private fun Totals(
 ) {
     val numbers = rememberNumberFormatter()
     val elapsed = rememberElapsedTime(startedAt)
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Total(stringResource(Res.string.logger_stat_duration), elapsed.formatAsClock())
-        Total(
-            stringResource(Res.string.logger_stat_volume),
-            volumeText(summary.volumeKg),
-        )
-        Total(stringResource(Res.string.logger_stat_sets), numbers.format(summary.completedSets))
-    }
-}
-
-@Composable
-private fun Total(
-    label: String,
-    value: String,
-) {
-    Column {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.titleLarge.tabularNumbers())
-    }
-}
-
-/** Today's records, gold like the trophy on the sets that set them. */
-@Composable
-private fun Records(summary: FinishSummary) {
-    val count = summary.records.sumOf { it.second.size }
-    Surface(
-        shape = MaterialTheme.shapes.medium,
-        color = LioraTheme.colors.personalRecord.copy(alpha = RECORD_BACKGROUND_ALPHA),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painterResource(LioraIcons.Record),
-                    contentDescription = null,
-                    tint = LioraTheme.colors.personalRecord,
-                    modifier = Modifier.size(20.dp),
-                )
-                Text(
-                    text = pluralStringResource(Res.plurals.finish_records, count, count),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(start = 8.dp),
-                )
-            }
-            summary.records.forEach { (exercise, keys) ->
-                Text(
-                    text = "$exercise: ${keys.map { recordLabel(it) }.joinToString(", ")}",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-        }
+    StatRow {
+        Stat(elapsed.formatAsClock(), stringResource(Res.string.logger_stat_duration), Modifier.weight(1f))
+        Stat(volumeText(summary.volumeKg), stringResource(Res.string.logger_stat_volume), Modifier.weight(1f))
+        Stat(numbers.format(summary.completedSets), stringResource(Res.string.logger_stat_sets), Modifier.weight(1f))
     }
 }
 
@@ -213,5 +171,3 @@ private fun Buttons(
         }
     }
 }
-
-private const val RECORD_BACKGROUND_ALPHA = 0.14f

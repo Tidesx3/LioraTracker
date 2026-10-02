@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="liora_window_background">#FF0D1014</color>
+  <color name="liora_window_background">#FF0B0B0F</color>
+  <!-- #5504CF is too dark to read on a dark notification shade; the same hue, lighter. -->
+  <color name="liora_accent">#FFA57BFF</color>
 </resources>

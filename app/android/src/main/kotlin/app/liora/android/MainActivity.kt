@@ -52,7 +52,10 @@ class MainActivity : ComponentActivity() {
                 )
                 onDispose {}
             }
-            LioraTheme(darkTheme = dark, dynamicColor = settings.dynamicColor) {
+            LioraTheme(
+                darkTheme = dark,
+                dynamicColor = settings.dynamicColor,
+            ) {
                 CompositionLocalProvider(LocalUnits provides settings.units) {
                     LioraApp(openLogger = openLogger, onOpenLoggerHandle = { openLogger = false })
                 }

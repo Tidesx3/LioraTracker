@@ -49,6 +49,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import app.liora.core.designsystem.component.LioraCard
+import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.icon.LioraIcons
@@ -310,15 +312,17 @@ private fun ReorderableCollectionItemScope.ExerciseEditorCard(
 ) {
     val trackingType = exercise?.trackingType ?: TrackingType.WeightReps
     var choosingRest by rememberSaveable { mutableStateOf(false) }
-    Card(
+    LioraCard(
         modifier = modifier.fillMaxWidth(),
-        colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    with(MaterialTheme.colorScheme) { if (dragging) surfaceContainerHighest else surfaceContainer },
-            ),
+        containerColor =
+            if (dragging) {
+                MaterialTheme.colorScheme.surfaceContainerHighest
+            } else {
+                LioraCardDefaults
+                    .containerColor()
+            },
         border = if (planned.supersetGroup != null) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
-        elevation = CardDefaults.cardElevation(defaultElevation = if (dragging) 8.dp else 0.dp),
+        elevation = if (dragging) 8.dp else 0.dp,
     ) {
         Column(Modifier.padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

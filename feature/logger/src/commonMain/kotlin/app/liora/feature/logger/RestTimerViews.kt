@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -27,9 +30,19 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.model.RestTimer
@@ -103,7 +116,10 @@ private fun fractionOf(
     return (timer.remaining(clock.now()).inWholeMilliseconds.toFloat() / total).coerceIn(0f, 1f)
 }
 
-/** The rest countdown on phones: a strip above the pad, with −15 s, +15 s and skip. */
+/**
+ * The rest countdown on phones: a pill floating above the pad, like the tabs, with −15 s, +15 s and
+ * skip. The time left runs around its outline, from the top middle, and shrinks back as rest runs out.
+ */
 @Composable
 internal fun RestTimerBar(
     progress: RestProgress,
@@ -111,39 +127,84 @@ internal fun RestTimerBar(
     onSkip: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val container = MaterialTheme.colorScheme.primaryContainer
+    // The violet on the pale container in light; the container is the violet itself in dark.
+    val line =
+        if (container.luminance() >
+            HALF
+        ) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onPrimaryContainer
+        }
     Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.primaryContainer,
+        modifier = modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+        shape = CircleShape,
+        color = container,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        shadowElevation = FLOATING_ELEVATION.dp,
     ) {
-        Column {
-            LinearProgressIndicator(
-                progress = { progress.fraction },
-                modifier = Modifier.fillMaxWidth(),
-                drawStopIndicator = {},
-                gapSize = 0.dp,
+        Row(
+            modifier =
+                Modifier
+                    .drawWithContent {
+                        drawContent()
+                        drawPillProgress(progress.fraction, line, OUTLINE_WIDTH.dp.toPx())
+                    }.padding(start = 20.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(painterResource(LioraIcons.Timer), contentDescription = null, modifier = Modifier.size(20.dp))
+            Text(
+                text = stringResource(Res.string.rest_title),
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp),
             )
-            Row(
-                modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(painterResource(LioraIcons.Timer), contentDescription = null, modifier = Modifier.size(20.dp))
-                Text(
-                    text = stringResource(Res.string.rest_title),
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.padding(start = 8.dp, end = 8.dp),
-                )
-                Text(
-                    text = progress.remaining.formatAsClock(),
-                    style = MaterialTheme.typography.titleLarge.tabularNumbers(),
-                    modifier = Modifier.weight(1f),
-                )
-                TextButton(onClick = { onAdjust(-ADJUST_SECONDS) }) { Text(stringResource(Res.string.rest_minus)) }
-                TextButton(onClick = { onAdjust(ADJUST_SECONDS) }) { Text(stringResource(Res.string.rest_plus)) }
-                TextButton(onClick = onSkip) { Text(stringResource(Res.string.rest_skip)) }
+            Text(
+                text = progress.remaining.formatAsClock(),
+                style = MaterialTheme.typography.titleLarge.tabularNumbers(),
+                modifier = Modifier.weight(1f),
+            )
+            // The pill's own text color: the accent would vanish on the accent.
+            val buttons = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current)
+            TextButton(onClick = { onAdjust(-ADJUST_SECONDS) }, colors = buttons) {
+                Text(stringResource(Res.string.rest_minus))
             }
+            TextButton(onClick = { onAdjust(ADJUST_SECONDS) }, colors = buttons) {
+                Text(stringResource(Res.string.rest_plus))
+            }
+            TextButton(onClick = onSkip, colors = buttons) { Text(stringResource(Res.string.rest_skip)) }
         }
     }
+}
+
+/**
+ * [fraction] of the pill's outline, inside its edge: a faint track all around, and the time left from
+ * the top middle, clockwise.
+ */
+private fun DrawScope.drawPillProgress(
+    fraction: Float,
+    color: Color,
+    width: Float,
+) {
+    val inset = width / 2
+    val right = size.width - inset
+    val bottom = size.height - inset
+    val radius = (bottom - inset) / 2
+    val outline =
+        Path().apply {
+            moveTo(size.width / 2, inset)
+            lineTo(right - radius, inset)
+            arcTo(Rect(right - 2 * radius, inset, right, bottom), -QUARTER_TURN, HALF_TURN, false)
+            lineTo(inset + radius, bottom)
+            arcTo(Rect(inset, inset, inset + 2 * radius, bottom), QUARTER_TURN, HALF_TURN, false)
+            close()
+        }
+    drawPath(outline, color.copy(alpha = TRACK_ALPHA), style = Stroke(width))
+    if (fraction <= 0f) return
+    val measure = PathMeasure().apply { setPath(outline, forceClosed = false) }
+    val left = Path()
+    measure.getSegment(0f, measure.length * fraction, left, startWithMoveTo = true)
+    drawPath(left, color, style = Stroke(width, cap = StrokeCap.Round, join = StrokeJoin.Round))
 }
 
 /** The rest countdown on wide screens and in tabletop posture: a big ring, readable from the bench. */
@@ -194,3 +255,10 @@ internal fun RestTimerRing(
 private val TICK = 200.milliseconds
 private val RING_SIZE = 200.dp
 private const val ADJUST_SECONDS = 15
+
+private const val FLOATING_ELEVATION = 6
+private const val OUTLINE_WIDTH = 3
+private const val TRACK_ALPHA = 0.2f
+private const val HALF = 0.5f
+private const val QUARTER_TURN = 90f
+private const val HALF_TURN = 180f

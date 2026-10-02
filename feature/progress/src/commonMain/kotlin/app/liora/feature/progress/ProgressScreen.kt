@@ -22,8 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.EmptyState
+import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
+import app.liora.core.designsystem.component.Stat
+import app.liora.core.designsystem.component.StatRow
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.theme.tabularNumbers
@@ -162,35 +165,23 @@ private fun Summary(
     modifier: Modifier = Modifier,
 ) {
     val numbers = rememberNumberFormatter()
-    // Equal thirds, so longer German labels wrap instead of pushing the last one off.
-    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        SummaryStat(
-            stringResource(Res.string.progress_streak),
+    // Equal thirds; the figures stay on one line, and a longer German label wraps below them.
+    StatRow(modifier) {
+        Stat(
             pluralStringResource(Res.plurals.progress_streak_weeks, state.streakWeeks, state.streakWeeks),
+            stringResource(Res.string.progress_streak),
             Modifier.weight(1f),
         )
-        SummaryStat(
-            stringResource(Res.string.progress_this_week),
+        Stat(
             pluralStringResource(Res.plurals.progress_workouts, state.workoutsThisWeek, state.workoutsThisWeek),
+            stringResource(Res.string.progress_this_week),
             Modifier.weight(1f),
         )
-        SummaryStat(
-            stringResource(Res.string.progress_sets_this_week),
+        Stat(
             numbers.format(state.setsThisWeek),
+            stringResource(Res.string.progress_sets_this_week),
             Modifier.weight(1f),
         )
-    }
-}
-
-@Composable
-private fun SummaryStat(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.titleLarge.tabularNumbers())
     }
 }
 
@@ -203,10 +194,9 @@ private fun LinkCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card(
+    LioraCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     ) {
         ListItem(
             headlineContent = { Text(title) },

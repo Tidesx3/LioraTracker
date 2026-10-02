@@ -79,7 +79,7 @@ class ExerciseProgressFlowTest {
         waitForText("87.5 kg")
 
         // The newest session opens its workout.
-        val session = hasText("Tuesday, August 4, 2026")
+        val session = hasText("Aug 4, 2026")
         composeRule.onNode(hasScrollToIndexAction()).performScrollToNode(session)
         composeRule.onNode(session).performClick()
         waitForText("Repeat workout")

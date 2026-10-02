@@ -39,5 +39,9 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 - **Strong exports from a German phone are untested.** The parser reads Strong's English column names in
   both layouts, with decimal commas. If Strong localizes its headers, the file is reported as "not from Hevy
   or Strong"; a sample would tell which names to add (`StrongCsv`).
+- **Violet: check on the phone.** The workout notification's tint in light and dark, the rest pill's
+  outline counting down, the floating tabs over long lists, and Sora's numbers on the cover screen.
+- **Logger in pounds: the "Previous" column cuts off** converted weights such as "176.37 lb × 10". Round
+  converted values for display, or give the column more room.
 - **Robolectric: a text field in a dialog never lets Compose go idle.** Find the cause, so the rename
   and save-as-routine dialogs can get UI tests.

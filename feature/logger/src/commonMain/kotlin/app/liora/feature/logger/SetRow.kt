@@ -1,5 +1,6 @@
 package app.liora.feature.logger
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -302,12 +304,14 @@ private fun CheckButton(
     onClick: () -> Unit,
 ) {
     val description = stringResource(if (completed) Res.string.cd_reopen_set else Res.string.cd_complete_set)
+    // A ring until the set is done, then it fills in.
     Surface(
         onClick = onClick,
         modifier = Modifier.size(CheckSize).semantics { contentDescription = description },
-        shape = MaterialTheme.shapes.small,
-        color = if (completed) LioraTheme.colors.completed else MaterialTheme.colorScheme.surfaceContainerHighest,
-        contentColor = if (completed) LioraTheme.colors.onCompleted else MaterialTheme.colorScheme.onSurfaceVariant,
+        shape = CircleShape,
+        color = if (completed) LioraTheme.colors.completed else Color.Transparent,
+        contentColor = if (completed) LioraTheme.colors.onCompleted else MaterialTheme.colorScheme.outline,
+        border = if (completed) null else BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(painterResource(LioraIcons.Check), contentDescription = null)

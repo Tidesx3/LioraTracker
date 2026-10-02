@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -32,6 +34,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -45,6 +48,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import app.liora.core.designsystem.component.ActiveWorkoutBar
 import app.liora.core.designsystem.component.ActiveWorkoutRailButton
+import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.layout.currentWindowLayout
 import app.liora.core.designsystem.util.workoutDisplayName
 import app.liora.core.model.ActiveWorkout
@@ -163,37 +167,49 @@ private fun AskForNotificationsDuringWorkouts(workoutRunning: Boolean) {
     }
 }
 
+/** The tabs as a pill floating above the bottom edge, with the workout in progress above them. */
 @Composable
 private fun BottomChrome(
     navigator: Navigator,
     activeWorkout: ActiveWorkout?,
     modifier: Modifier = Modifier,
 ) {
-    Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainer) {
-        Column {
-            if (activeWorkout != null) {
-                ActiveWorkoutBar(
-                    title = workoutDisplayName(activeWorkout.name),
-                    startedAt = activeWorkout.startedAt,
-                    onClick = { navigator.navigate(LoggerRoute) },
-                )
-            }
-            NavigationBar(
-                modifier = Modifier.testTag(ShellTags.NAVIGATION_BAR),
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
-            ) {
-                TopLevelDestination.entries.forEach { destination ->
-                    NavigationBarItem(
-                        selected = navigator.topLevelRoute == destination.route,
-                        onClick = { navigator.selectTopLevel(destination.route) },
-                        icon = { Icon(painterResource(destination.icon), contentDescription = null) },
-                        label = { Text(stringResource(destination.label)) },
-                    )
-                }
-            }
+    Column(modifier.navigationBarsPadding().padding(bottom = 8.dp)) {
+        if (activeWorkout != null) {
+            ActiveWorkoutBar(
+                title = workoutDisplayName(activeWorkout.name),
+                startedAt = activeWorkout.startedAt,
+                onClick = { navigator.navigate(LoggerRoute) },
+            )
+        }
+        Surface(
+            modifier = Modifier.padding(horizontal = 12.dp),
+            shape = CircleShape,
+            color = LioraCardDefaults.containerColor(),
+            shadowElevation = FLOATING_ELEVATION,
+        ) { NavigationTabs(navigator) }
+    }
+}
+
+@Composable
+private fun NavigationTabs(navigator: Navigator) {
+    NavigationBar(
+        modifier = Modifier.testTag(ShellTags.NAVIGATION_BAR),
+        containerColor = Color.Transparent,
+        windowInsets = WindowInsets(0),
+    ) {
+        TopLevelDestination.entries.forEach { destination ->
+            NavigationBarItem(
+                selected = navigator.topLevelRoute == destination.route,
+                onClick = { navigator.selectTopLevel(destination.route) },
+                icon = { Icon(painterResource(destination.icon), contentDescription = null) },
+                label = { Text(stringResource(destination.label)) },
+            )
         }
     }
 }
+
+private val FLOATING_ELEVATION = 8.dp
 
 @Composable
 private fun NavigationSideRail(

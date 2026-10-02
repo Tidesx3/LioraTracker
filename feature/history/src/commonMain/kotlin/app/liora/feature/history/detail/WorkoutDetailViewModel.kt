@@ -7,12 +7,14 @@ import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.domain.HistoryRecords
+import app.liora.core.domain.OneRepMaxFormula
+import app.liora.core.domain.RecordHighlights
 import app.liora.core.domain.RecordKey
 import app.liora.core.domain.volumeOf
 import app.liora.core.model.Exercise
 import app.liora.core.model.FinishedWorkout
 import app.liora.core.model.TrackingType
-import app.liora.core.ui.headlineRecords
+import app.liora.core.ui.RecordsCardEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,18 +52,25 @@ sealed interface WorkoutDetailUiState {
         val records: Map<String, Set<RecordKey>>,
         val hasActiveWorkout: Boolean,
         val dialog: WorkoutDialog?,
+        /** How estimated one-rep maxes are worked out, for the records' values. */
+        val formula: OneRepMaxFormula = OneRepMaxFormula.Epley,
     ) : WorkoutDetailUiState {
         val sets: Int = workout.exercises.sumOf { exercise -> exercise.sets.count { it.isCompleted } }
 
         val volumeKg: Double = workout.exercises.sumOf { volumeOf(trackingTypeOf(it.exerciseId), it.sets) }
 
-        /** Exercise names with the records worth naming, in workout order; counted like the finish sheet. */
-        val recordLines: List<Pair<String, List<RecordKey>>> =
+        /** The records worth naming, by exercise in workout order, at the values they were set at. */
+        val recordEntries: List<RecordsCardEntry> =
             workout.exercises.mapNotNull { exercise ->
-                headlineRecords(exercise.sets.flatMap { records[it.id].orEmpty() })
+                val trackingType = exercises[exercise.exerciseId]?.trackingType ?: TrackingType.WeightReps
+                RecordHighlights
+                    .of(exercise.sets, records, trackingType, formula)
                     .takeIf { it.isNotEmpty() }
-                    ?.let { exercises[exercise.exerciseId]?.name.orEmpty() to it }
+                    ?.let { RecordsCardEntry(exercises[exercise.exerciseId]?.name.orEmpty(), trackingType, it) }
             }
+
+        /** Counted like the finish sheet counts them, so the numbers match. */
+        val recordCount: Int = recordEntries.sumOf { it.records.size }
 
         fun trackingTypeOf(exerciseId: String): TrackingType =
             exercises[exerciseId]?.trackingType ?: TrackingType.WeightReps
@@ -99,7 +108,7 @@ class WorkoutDetailViewModel(
                         exercisesById[it]?.trackingType ?: TrackingType.WeightReps
                     }
                 val setIds = workout.exercises.flatMap { exercise -> exercise.sets.map { it.id } }.toSet()
-                Triple(workout, exercisesById, records.filterKeys { it in setIds })
+                Found(workout, exercisesById, records.filterKeys { it in setIds }, chosen.oneRepMaxFormula)
             }
         }.flowOn(Dispatchers.Default)
 
@@ -108,8 +117,14 @@ class WorkoutDetailViewModel(
             if (found == null) {
                 WorkoutDetailUiState.Gone
             } else {
-                val (workout, exercisesById, records) = found
-                WorkoutDetailUiState.Loaded(workout, exercisesById, records, active != null, openDialog)
+                WorkoutDetailUiState.Loaded(
+                    workout = found.workout,
+                    exercises = found.exercises,
+                    records = found.records,
+                    hasActiveWorkout = active != null,
+                    dialog = openDialog,
+                    formula = found.formula,
+                )
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WorkoutDetailUiState.Loading)
 
@@ -151,3 +166,11 @@ class WorkoutDetailViewModel(
         viewModelScope.launch { history.delete(workoutId) }
     }
 }
+
+/** The workout, its exercises and the records its sets broke. */
+private class Found(
+    val workout: FinishedWorkout,
+    val exercises: Map<String, Exercise>,
+    val records: Map<String, Set<RecordKey>>,
+    val formula: OneRepMaxFormula,
+)

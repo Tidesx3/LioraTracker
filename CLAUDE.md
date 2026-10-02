@@ -81,7 +81,8 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - When adding one, delete the `android:tint` attribute but keep the `>` that closes the tag.
   - Replace `@android:color/white` with `#FFFFFFFF`.
   - Expose it through `LioraIcons`.
-- **Colors:** use `MaterialTheme.colorScheme` for standard roles and `LioraTheme.colors` for set types, PRs and completion. Numbers that change live (timers, weights) get `.tabularNumbers()`.
+- **Colors:** use `MaterialTheme.colorScheme` for standard roles and `LioraTheme.colors` for set types, PRs and completion. The accent is violet (#5504CF; #A57BFF for text and buttons in dark). Numbers that change live (timers, weights) get `.tabularNumbers()`.
+- **Building blocks:** cards are `LioraCard`; rows of figures are `Stat`s in a `StatRow` (designsystem), never hand-made label/value columns; records are listed with `RecordsCard` (`core:ui`), with values from `RecordHighlights`. Avoid sentences that pack data together ("Bench: heaviest, best 1RM"): give each item a row or a chip.
 - **Charts:** use the wrappers in `designsystem` (`LineChart`); only they touch Vico. Progress values and records format through `valueText`/`axisText` in `core:ui`, so units and locales stay consistent.
 - **Versions:** all in `gradle/libs.versions.toml`. SDK levels and the JVM target are in `build-logic/.../LioraConfig.kt`.
 - **Tests:**
@@ -94,7 +95,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
     - Screens that depend on "now" (Progress, stalls) get a fixed clock: override Koin's `Clock` with `loadKoinModules` before anything uses it (see `ProgressFlowTest`), so screenshots don't change from day to day.
 - **Translations:** `verifyTranslations` (part of `check`) fails when a `values/` string has no `values-de/` counterpart, or when a German string is stale. `translatable="false"` opts a string out.
 - **Personal data:** `sample/` and `samples/` hold the user's real exports (e.g. Hevy) and are gitignored, so they exist only on the dev machine. The repo is public: tests use synthetic fixtures only, and no real workout data goes into commits.
-- **Visual polish:** Phase 2 gives the app its character (playful design, motion). Until then, feature milestones keep visuals clean and standard rather than gold-plating them.
+- **Visual polish:** Phase 2 gives the app its character (playful design, motion); the look (Violet) is settled, see PLAN.md. Typeface is Sora, bundled in `designsystem` with its OFL licence.
 - **Foldables:** the Galaxy Z Fold 7 is the reference device. Its cover screen is about 411 dp wide (compact); the inner screen is about 984 × 1092 dp (expanded).
   - Layouts follow window size classes, never device checks. `currentWindowLayout()` (designsystem) holds the breakpoints: navigation rail from 600 dp, two panes from 840 dp.
   - Wide screens get a navigation rail and list-detail panes. Reading-heavy content is capped at about 600 dp with `Modifier.readableWidth()`.

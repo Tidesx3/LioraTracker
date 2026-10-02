@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.util.NumberFormatter
@@ -90,9 +91,8 @@ internal fun ExerciseCard(
     var noteOpen by rememberSaveable { mutableStateOf(false) }
     val inSuperset = workoutExercise.supersetGroup != null
 
-    Card(
+    LioraCard(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         border = if (inSuperset) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
     ) {
         // The photo and the name open the exercise with its instructions and history.

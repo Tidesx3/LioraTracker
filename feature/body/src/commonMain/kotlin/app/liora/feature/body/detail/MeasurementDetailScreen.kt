@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,6 +25,8 @@ import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
+import app.liora.core.designsystem.component.Stat
+import app.liora.core.designsystem.component.StatRow
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.theme.tabularNumbers
@@ -149,18 +152,23 @@ private fun Overview(
 ) {
     val type = summary.type
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(32.dp)) {
+        StatRow {
             Stat(
-                label = stringResource(Res.string.detail_latest),
                 value = measurementText(type, summary.latest.value),
+                label = stringResource(Res.string.detail_latest),
+                modifier = Modifier.weight(1f),
                 detail = rememberDateFormatter().shortDate(summary.latest.day),
             )
-            summary.change?.let { change ->
+            val change = summary.change
+            if (change != null) {
                 Stat(
-                    label = stringResource(Res.string.detail_change),
                     value = measurementChangeText(type, change.amount),
+                    label = stringResource(Res.string.detail_change),
+                    modifier = Modifier.weight(1f),
                     detail = stringResource(Res.string.detail_since, rememberDateFormatter().shortDate(change.since)),
                 )
+            } else {
+                Spacer(Modifier.weight(1f))
             }
         }
         if (summary.days.size > 1) {
@@ -172,20 +180,6 @@ private fun Overview(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-    }
-}
-
-@Composable
-private fun Stat(
-    label: String,
-    value: String,
-    detail: String,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.titleLarge.tabularNumbers())
-        Text(detail, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

@@ -12,6 +12,7 @@ import com.patrykandpatrick.vico.multiplatform.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.multiplatform.cartesian.Zoom
 import com.patrykandpatrick.vico.multiplatform.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.multiplatform.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.multiplatform.cartesian.axis.rememberAxisLabelComponent
 import com.patrykandpatrick.vico.multiplatform.cartesian.data.CartesianChartModel
 import com.patrykandpatrick.vico.multiplatform.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.multiplatform.cartesian.data.CartesianValueFormatter
@@ -69,6 +70,11 @@ fun LineChart(
     val axis = remember(values) { ValueAxis.of(values) }
 
     ProvideVicoTheme(rememberM3VicoTheme()) {
+        // In the app's typeface, like the rest of the screen.
+        val labels =
+            rememberAxisLabelComponent(
+                style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+            )
         val line =
             LineCartesianLayer.rememberLine(
                 fill = remember(primary) { LineCartesianLayer.LineFill.single(Fill(primary)) },
@@ -91,11 +97,13 @@ fun LineChart(
                 ),
                 startAxis =
                     VerticalAxis.rememberStart(
+                        label = labels,
                         valueFormatter = valueLabels,
                         itemPlacer = remember(axis) { VerticalAxis.ItemPlacer.step({ axis.step }) },
                     ),
                 bottomAxis =
                     HorizontalAxis.rememberBottom(
+                        label = labels,
                         valueFormatter = dateLabels,
                         itemPlacer = remember(labelSpacing) { HorizontalAxis.ItemPlacer.aligned({ labelSpacing }) },
                     ),

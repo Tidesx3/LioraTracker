@@ -127,7 +127,9 @@ class LoggerFlowTest {
         composeRule.onNodeWithText("Finish").performClick()
         waitForText("Finish workout?")
         composeRule.onNodeWithText("3 personal records").assertIsDisplayed()
-        composeRule.onNodeWithText("$BENCH: Heaviest weight, Best estimated 1RM, Best set volume").assertIsDisplayed()
+        // Each record on a row of its own, with the value it was set at.
+        composeRule.onNodeWithText("Heaviest weight").assertIsDisplayed()
+        composeRule.onNodeWithText("85 kg").assertIsDisplayed()
         composeRule.onNodeWithText("1 planned set wasn’t logged and won’t be saved.").assertIsDisplayed()
         composeRule.onNodeWithText("Update “Push” with today’s weights and reps").assertIsDisplayed()
         composeRule.onRoot().captureRoboImage("src/test/screenshots/logger_finish_dark.png")

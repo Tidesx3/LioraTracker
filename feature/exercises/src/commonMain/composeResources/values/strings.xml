@@ -78,4 +78,5 @@
   <string name="editor_notes">Notes</string>
   <string name="editor_notes_hint">Seat height, grip, cues…</string>
   <string name="editor_variation_name">%1$s (variation)</string>
+  <string name="detail_set_count" translatable="false">%1$s×</string>
 </resources>

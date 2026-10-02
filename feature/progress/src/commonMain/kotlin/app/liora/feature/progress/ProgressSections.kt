@@ -1,10 +1,12 @@
 package app.liora.feature.progress
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +29,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -84,31 +90,29 @@ internal fun ConsistencyGrid(
     val weeks = TrainingCalendar.recentWeeks(today, dates.firstDayOfWeek, WEEKS)
     val trained = MaterialTheme.colorScheme.primary
     val rest = MaterialTheme.colorScheme.surfaceContainerHigh
+    val todayOutline = MaterialTheme.colorScheme.outline
     Column(modifier.testTag(ProgressTags.CONSISTENCY), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(CELL_GAP)) {
-            weeks.forEach { week ->
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(CELL_GAP)) {
-                    week.forEach { day ->
-                        val shape = RoundedCornerShape(3.dp)
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(1f)
-                                .clip(shape)
-                                .then(
-                                    when {
-                                        day > today -> Modifier
-                                        day in trainingDays -> Modifier.background(trained)
-                                        else -> Modifier.background(rest)
-                                    },
-                                ).then(
-                                    if (day == today) {
-                                        Modifier.border(1.dp, MaterialTheme.colorScheme.outline, shape)
-                                    } else {
-                                        Modifier
-                                    },
-                                ),
-                        )
+        // Drawn rather than laid out: equal columns round to whole pixels unevenly, and squares in the
+        // wider ones would sit a pixel taller, so the rows wouldn't line up.
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val cell = (maxWidth - CELL_GAP * (weeks.size - 1)) / weeks.size
+            val rows = weeks.maxOf { it.size }
+            Canvas(Modifier.fillMaxWidth().height(cell * rows + CELL_GAP * (rows - 1))) {
+                val size = cell.toPx()
+                val step = size + CELL_GAP.toPx()
+                val corner = CornerRadius(CELL_CORNER.toPx())
+                weeks.forEachIndexed { column, week ->
+                    week.forEachIndexed { row, day ->
+                        val topLeft = Offset(column * step, row * step)
+                        val square = Size(size, size)
+                        when {
+                            day > today -> Unit
+                            day in trainingDays -> drawRoundRect(trained, topLeft, square, corner)
+                            else -> drawRoundRect(rest, topLeft, square, corner)
+                        }
+                        if (day == today) {
+                            drawRoundRect(todayOutline, topLeft, square, corner, style = Stroke(TODAY_OUTLINE.toPx()))
+                        }
                     }
                 }
             }
@@ -370,6 +374,8 @@ private const val WEEKS = 16
 private const val DAYS_PER_WEEK = 7
 private const val BOARD_ROWS = 8
 private val CELL_GAP = 3.dp
+private val CELL_CORNER = 4.dp
+private val TODAY_OUTLINE = 1.5.dp
 private val ArrowSize = 48.dp
 private val MuscleNameWidth = 112.dp
 private val SetsWidth = 72.dp
