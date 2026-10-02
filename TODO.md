@@ -45,3 +45,15 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
   converted values for display, or give the column more room.
 - **Robolectric: a text field in a dialog never lets Compose go idle.** Find the cause, so the rename
   and save-as-routine dialogs can get UI tests.
+- **Variations: show the base exercise's picture.** A custom exercise that is a variation of a built-in one
+  (`Exercise.variationOf`, from "Create variation" or a Hevy/Strong import) has no photo of its own, so its
+  thumbnail and picture fall back to its initial. Use the base exercise's images when it has none; a photo
+  of its own still wins. Likely in `ExerciseRepository`'s mapping, so every screen gets it.
+- **Finishing a workout from a routine: show what the update changes.** The finish sheet already offers
+  "Update “Push” with today’s weights and reps" (ticked by default) whenever the routine would change, and
+  the update does take on replaced exercises and added or deleted sets (`RoutineUpdate.fromWorkout`). But
+  the label only mentions weights and reps, so a swapped exercise or a different number of sets isn't
+  visible when deciding. Name the changes instead, one row or chip each (e.g. "Bench Press → Dumbbell Bench
+  Press", "Incline Press: 4 sets, was 3"), and keep the plain label when only values changed.
+  - Decide with it: a planned set that was left unlogged drops out of the routine just like a deleted one.
+    A set skipped on a tired day probably shouldn't shrink the plan; one that was deleted should.
