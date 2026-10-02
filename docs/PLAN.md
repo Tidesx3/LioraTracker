@@ -44,7 +44,36 @@ As of 2026-10-02:
     correct its pose or day, or delete it. Compare puts two side by side (`ProgressPhotos.opening`: first and
     latest in the pose photographed last), with the time between them and the change in bodyweight; tapping a side
     and then a photo swaps it. Photos sync as blobs in Phase 2; until then `blob_id` stays empty.
-- **Next: Milestone 9** (settings, import and export).
+- **Milestone 9 (settings, import and export)** is in progress, split into five parts, each committed on its own:
+  - **9a, settings and synced preferences (in progress).** Done so far: `Settings` and `ThemeMode` in `core/domain`
+    (rest defaults, e1RM formula, stall window, theme, dynamic color; `Settings.STALL_WINDOWS`), `PreferenceDao`
+    over the existing `preference` table (no schema change), and `SettingsRepository` with `SettingsCodec` in
+    `core/data/settings` (one row per choice; `update` writes only the choices that changed, so a new device
+    can't overwrite another device's choices with its defaults). Still to do for 9a:
+    - Register `OfflineSettingsRepository` in `DataModule` and drop `single { RestDefaults() }`.
+    - Rest defaults: give `OfflineActiveWorkoutRepository`/`OfflineSetLogger` a `suspend () -> RestDefaults`
+      read from settings at completion time (keep a default so existing tests compile); `LoggerViewModel`
+      takes `SettingsRepository` instead of `RestDefaults` and combines it into `uiState`.
+    - e1RM formula and stall window: pass `settings.oneRepMaxFormula` (and `stallWindow`) into every
+      computation that defaults to Epley: `ExerciseDetailViewModel` (`PersonalRecords.compute`, `Stalls.of`,
+      `ExerciseProgress.series`), `HistoryViewModel` and `WorkoutDetailViewModel` (`HistoryRecords.of`),
+      `ProgressViewModel` (`RecordsBoard.of`, which also needs a stall window parameter for `Stalls.of`),
+      `MonthlyReportViewModel` (`MonthlyReports.of`), and the logger's `SessionRecords.of`.
+    - Theme: `MainActivity` collects settings for `LioraTheme(darkTheme, dynamicColor)` and sets system bar
+      styles with `enableEdgeToEdge(SystemBarStyle.auto(...) { dark })`, since the in-app dark mode doesn't
+      follow the system's.
+    - Language: System / English / Deutsch through Android 13+ `LocaleManager` (an expect/actual in
+      `core:ui`; the row is hidden below Android 13). The OS keeps this choice, so it isn't a preference row.
+    - The Settings screen (`feature/settings`, replacing the placeholder): sections Workout (rest after
+      working sets and after warm-ups, reusing `RestTimePicker` with its "exercise default" option turned
+      off), Progress (formula, stall window), Appearance (theme, dynamic color, language), as radio dialogs.
+    - Tests: `SettingsRepository` (only changed keys written, defaults for unknown values) in `core/data`,
+      UI tests with screenshots at cover and inner sizes plus German, then `check`, docs and the commit.
+  - **9b:** units (kg/lb, km/mi) everywhere values are shown and typed, and the logger's RPE column toggle.
+  - **9c:** gym profiles (synced `gym_profile` table, schema v3 with a migration test), load rounding, the plate
+    calculator in the logger, and "add warm-up sets".
+  - **9d:** JSON export and import (lossless) and a CSV export.
+  - **9e:** Hevy and Strong CSV import with the matching review screen; then Milestone 9 and Phase 1 are done.
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a
   milestone go in TODO.md.

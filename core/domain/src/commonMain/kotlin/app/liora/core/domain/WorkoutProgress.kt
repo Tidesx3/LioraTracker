@@ -102,7 +102,7 @@ object WorkoutOrder {
     }
 }
 
-/** Rest when neither the workout nor the exercise sets its own. Settings will make these adjustable. */
+/** Rest when neither the workout nor the exercise sets its own; adjustable in Settings. */
 data class RestDefaults(
     val working: Duration = 2.minutes,
     val warmup: Duration = 1.minutes,
