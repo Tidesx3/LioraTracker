@@ -96,4 +96,23 @@
 
   <string name="duration_minutes">%1$s Min.</string>
   <string name="duration_hours">%1$s Std. %2$s Min.</string>
+
+  <string name="measurement_bodyweight">Körpergewicht</string>
+  <string name="measurement_body_fat">Körperfett</string>
+  <string name="measurement_neck">Hals</string>
+  <string name="measurement_shoulders">Schultern</string>
+  <string name="measurement_chest">Brust</string>
+  <string name="measurement_biceps_left">Bizeps links</string>
+  <string name="measurement_biceps_right">Bizeps rechts</string>
+  <string name="measurement_forearm_left">Unterarm links</string>
+  <string name="measurement_forearm_right">Unterarm rechts</string>
+  <string name="measurement_abdomen">Bauch</string>
+  <string name="measurement_waist">Taille</string>
+  <string name="measurement_hips">Hüfte</string>
+  <string name="measurement_thigh_left">Oberschenkel links</string>
+  <string name="measurement_thigh_right">Oberschenkel rechts</string>
+  <string name="measurement_calf_left">Wade links</string>
+  <string name="measurement_calf_right">Wade rechts</string>
+  <!-- German puts a space before the percent sign. -->
+  <string name="value_percent">%1$s %</string>
 </resources>

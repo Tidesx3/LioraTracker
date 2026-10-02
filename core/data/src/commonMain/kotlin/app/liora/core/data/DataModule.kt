@@ -2,6 +2,8 @@ package app.liora.core.data
 
 import app.liora.core.common.HybridLogicalClock
 import app.liora.core.common.IdGenerator
+import app.liora.core.data.body.BodyRepository
+import app.liora.core.data.body.OfflineBodyRepository
 import app.liora.core.data.exercise.ExerciseRepository
 import app.liora.core.data.exercise.OfflineExerciseRepository
 import app.liora.core.data.routine.OfflineRoutineRepository
@@ -41,6 +43,7 @@ val dataModule =
         singleOf(::OfflineRoutineRepository) bind RoutineRepository::class
         singleOf(::OfflineActiveWorkoutRepository) bind ActiveWorkoutRepository::class
         singleOf(::OfflineWorkoutHistoryRepository) bind WorkoutHistoryRepository::class
+        singleOf(::OfflineBodyRepository) bind BodyRepository::class
         // The workout in progress has one set logger, shared by the logger and the notification.
         single<SetLogger> { get<ActiveWorkoutRepository>().sets }
         singleOf(::LocalRestTimerRepository) bind RestTimerRepository::class

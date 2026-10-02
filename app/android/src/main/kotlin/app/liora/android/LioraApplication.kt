@@ -8,6 +8,7 @@ import app.liora.android.workout.WorkoutNotifier
 import app.liora.core.data.AppStartup
 import app.liora.core.data.dataModule
 import app.liora.core.database.androidDatabaseModule
+import app.liora.feature.body.bodyModule
 import app.liora.feature.exercises.exercisesModule
 import app.liora.feature.history.historyModule
 import app.liora.feature.logger.loggerModule
@@ -40,6 +41,7 @@ open class LioraApplication : Application() {
                         loggerModule,
                         exercisesModule,
                         progressModule,
+                        bodyModule,
                     ),
             )
         }

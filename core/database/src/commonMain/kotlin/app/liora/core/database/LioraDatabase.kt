@@ -12,6 +12,7 @@ import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.liora.core.database.dao.ExerciseDao
 import app.liora.core.database.dao.LocalMetaDao
+import app.liora.core.database.dao.MeasurementDao
 import app.liora.core.database.dao.RoutineDao
 import app.liora.core.database.dao.WorkoutDao
 import app.liora.core.database.model.ExerciseEntity
@@ -64,6 +65,8 @@ abstract class LioraDatabase : RoomDatabase() {
     abstract fun routineDao(): RoutineDao
 
     abstract fun localMetaDao(): LocalMetaDao
+
+    abstract fun measurementDao(): MeasurementDao
 }
 
 // Room generates the actual implementations for each platform.

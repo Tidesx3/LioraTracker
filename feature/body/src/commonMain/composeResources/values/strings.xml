@@ -3,4 +3,29 @@
   <string name="body_title">Body</string>
   <string name="body_empty_title">Track your body</string>
   <string name="body_empty_body">Log bodyweight, measurements and progress photos. No limits, no paywall.</string>
+  <string name="body_log">Log measurements</string>
+  <string name="body_measurements">Measurements</string>
+  <string name="body_change_since">%1$s since %2$s</string>
+  <string name="body_pick_title">Pick a measurement</string>
+  <string name="body_pick_body">Its chart and every entry show here.</string>
+
+  <string name="detail_latest">Latest</string>
+  <string name="detail_change">Change</string>
+  <string name="detail_since">since %1$s</string>
+  <string name="detail_one_day">Log another day to see a chart.</string>
+  <string name="detail_empty">Nothing logged yet.</string>
+  <plurals name="detail_entries">
+    <item quantity="one">%1$d entry</item>
+    <item quantity="other">%1$d entries</item>
+  </plurals>
+
+  <string name="log_save">Save</string>
+  <string name="log_circumferences">Circumferences</string>
+  <string name="log_clear_hint">Empty a field and save to remove that entry.</string>
+  <string name="log_invalid">Check this value</string>
+  <string name="log_pick_day">Change the day</string>
+
+  <string name="cd_close">Close</string>
+  <string name="dialog_ok">OK</string>
+  <string name="dialog_cancel">Cancel</string>
 </resources>

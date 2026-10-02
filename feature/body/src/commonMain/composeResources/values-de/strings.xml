@@ -3,4 +3,29 @@
   <string name="body_title">Körper</string>
   <string name="body_empty_title">Behalte deinen Körper im Blick</string>
   <string name="body_empty_body">Körpergewicht, Maße und Fortschrittsfotos loggen. Ohne Limits, ohne Paywall.</string>
+  <string name="body_log">Maße eintragen</string>
+  <string name="body_measurements">Maße</string>
+  <string name="body_change_since">%1$s seit %2$s</string>
+  <string name="body_pick_title">Wähle ein Maß</string>
+  <string name="body_pick_body">Hier erscheinen sein Verlauf und alle Einträge.</string>
+
+  <string name="detail_latest">Aktuell</string>
+  <string name="detail_change">Veränderung</string>
+  <string name="detail_since">seit %1$s</string>
+  <string name="detail_one_day">Trag einen weiteren Tag ein, dann erscheint der Verlauf.</string>
+  <string name="detail_empty">Noch nichts eingetragen.</string>
+  <plurals name="detail_entries">
+    <item quantity="one">%1$d Eintrag</item>
+    <item quantity="other">%1$d Einträge</item>
+  </plurals>
+
+  <string name="log_save">Speichern</string>
+  <string name="log_circumferences">Umfänge</string>
+  <string name="log_clear_hint">Leere ein Feld und speichere, um den Eintrag zu entfernen.</string>
+  <string name="log_invalid">Wert prüfen</string>
+  <string name="log_pick_day">Tag ändern</string>
+
+  <string name="cd_close">Schließen</string>
+  <string name="dialog_ok">OK</string>
+  <string name="dialog_cancel">Abbrechen</string>
 </resources>

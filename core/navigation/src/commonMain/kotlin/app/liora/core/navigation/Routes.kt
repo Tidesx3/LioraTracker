@@ -26,6 +26,18 @@ data object LoggerRoute : NavKey
 @Serializable
 data object BodyRoute : NavKey
 
+/** One measurement's chart and entries, by its type's stable key (e.g. `bodyweight`). */
+@Serializable
+data class MeasurementDetailRoute(
+    val typeKey: String,
+) : NavKey
+
+/** What was measured on one day, to log or correct; [day] is an ISO date such as `2026-10-02`, null for today. */
+@Serializable
+data class LogMeasurementsRoute(
+    val day: String? = null,
+) : NavKey
+
 /** A month looked back on, starting with the current one. */
 @Serializable
 data object MonthlyReportRoute : NavKey

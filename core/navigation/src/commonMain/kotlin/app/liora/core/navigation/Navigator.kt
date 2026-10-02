@@ -83,6 +83,16 @@ class Navigator(
         goBack()
     }
 
+    /**
+     * Closes [route] together with everything opened on top of it, e.g. a list and the detail beside
+     * it. A route that isn't open closes the current screen instead.
+     */
+    fun close(route: NavKey) {
+        val stack = stacks.getValue(topLevelRoute)
+        val index = stack.lastIndexOf(route)
+        if (index > 0) stack.removeRange(index, stack.size) else goBack()
+    }
+
     fun goBack() {
         val stack = stacks.getValue(topLevelRoute)
         when {

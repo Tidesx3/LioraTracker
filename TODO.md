@@ -22,5 +22,8 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
   gotcha in CLAUDE.md); saving itself is covered in `core:data`.
 - **Editing a past workout: check the start and end time pickers on a device.** UI tests drive the date
   picker only. The time math is covered in `core:domain` (`WorkoutTimesTest`), the writes in `core:data`.
+- **Exercise library: the "New custom exercise" button has no accessible name.** Material's
+  `ExtendedFloatingActionButton` clears its text's semantics, so TalkBack announces only "Button". Body's
+  button sets a content description to fix this (`BodyScreen`); do the same here.
 - **Robolectric: a text field in a dialog never lets Compose go idle.** Find the cause, so the rename
   and save-as-routine dialogs can get UI tests.

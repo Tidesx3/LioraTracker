@@ -96,4 +96,22 @@
 
   <string name="duration_minutes">%1$s min</string>
   <string name="duration_hours">%1$s h %2$s min</string>
+
+  <string name="measurement_bodyweight">Bodyweight</string>
+  <string name="measurement_body_fat">Body fat</string>
+  <string name="measurement_neck">Neck</string>
+  <string name="measurement_shoulders">Shoulders</string>
+  <string name="measurement_chest">Chest</string>
+  <string name="measurement_biceps_left">Left biceps</string>
+  <string name="measurement_biceps_right">Right biceps</string>
+  <string name="measurement_forearm_left">Left forearm</string>
+  <string name="measurement_forearm_right">Right forearm</string>
+  <string name="measurement_abdomen">Abdomen</string>
+  <string name="measurement_waist">Waist</string>
+  <string name="measurement_hips">Hips</string>
+  <string name="measurement_thigh_left">Left thigh</string>
+  <string name="measurement_thigh_right">Right thigh</string>
+  <string name="measurement_calf_left">Left calf</string>
+  <string name="measurement_calf_right">Right calf</string>
+  <string name="value_percent">%1$s%</string>
 </resources>

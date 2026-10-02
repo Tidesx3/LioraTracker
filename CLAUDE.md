@@ -37,7 +37,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 ## Data rules
 
 - **Ids:** UUIDv7 strings from `IdGenerator`, created on the client. Built-in exercises use stable seed ids (`fedb.<id>`, `liora.<slug>`) and are never synced.
-- **Units:** stored canonically (kg, m, s). Display units are only a preference. `Mass` wraps kilograms.
+- **Units:** stored canonically (kg, m, s; body fat in percent). Display units are only a preference. `Mass` wraps kilograms. Body measurements convert for display only in `core:ui` `BodyLabels.kt` (circumferences show in cm).
 - **Syncable rows:** embed `SyncMetadata` (`created_at`, `hlc`, `deleted_at`, `dirty`).
   - Every write goes through `SyncStamper` (`newRow`, `touch`, `tombstone`).
   - Never hard-delete synced rows.

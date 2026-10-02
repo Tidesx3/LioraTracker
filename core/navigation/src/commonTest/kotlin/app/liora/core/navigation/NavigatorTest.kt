@@ -20,6 +20,16 @@ class NavigatorTest {
     }
 
     @Test
+    fun closingAListClosesWhatItOpened() {
+        navigator.navigate(BodyRoute)
+        navigator.openFromList(BodyRoute, MeasurementDetailRoute("waist"))
+
+        navigator.close(BodyRoute)
+
+        assertEquals(listOf(TrainRoute), navigator.backStack)
+    }
+
+    @Test
     fun openingFromAListNotOnTheStackJustNavigates() {
         navigator.navigate(LoggerRoute)
         navigator.openFromList(ExercisesRoute, ExerciseDetailRoute("bench"))

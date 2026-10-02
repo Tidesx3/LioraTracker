@@ -6,15 +6,18 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-/** A body measurement in canonical units (kg, cm, %), keyed by a stable type key like `waist`. */
+/**
+ * A body measurement in canonical units (kg, %, m), keyed by a stable type key like `waist`. Keys this
+ * app version doesn't know (synced from a newer one) stay in the table and are skipped when read.
+ */
 @Entity(tableName = "measurement", indices = [Index("type", "taken_at")])
 data class MeasurementEntity(
-    @PrimaryKey val id: String,
+    @PrimaryKey override val id: String,
     @ColumnInfo(name = "taken_at") val takenAt: Long,
     val type: String,
     val value: Double,
-    @Embedded val sync: SyncMetadata,
-)
+    @Embedded override val sync: SyncMetadata,
+) : SyncedRow
 
 @Entity(tableName = "progress_photo", indices = [Index("taken_at")])
 data class ProgressPhotoEntity(

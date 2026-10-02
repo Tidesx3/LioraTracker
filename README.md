@@ -11,7 +11,8 @@ is done too: list, calendar, workout detail (repeat, save as routine, delete) an
 in the logger, times included. Each exercise's page charts its progress (e1RM, weight, volume, reps),
 lists its records and sessions, and flags a stall. The Progress tab shows the weekly streak, a
 consistency grid, sets per muscle on a body heatmap, every exercise's best, and a monthly report.
-Next are body metrics, then settings with import and export. Details and progress are in
+Body tracks bodyweight, body fat and circumferences day by day, with a chart and the change over the
+month. Next are progress photos, then settings with import and export. Details and progress are in
 [docs/PLAN.md](docs/PLAN.md).
 
 ## Principles

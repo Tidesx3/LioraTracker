@@ -5,7 +5,7 @@ Check it when a milestone or phase starts, and keep **Progress** below current w
 
 ## Progress
 
-As of 2026-10-01:
+As of 2026-10-02:
 
 - **Phase 0** is done.
 - **Phase 1**, milestones 1–5 are done: database and seed, domain, exercises and foldables, routines, and the logger
@@ -28,7 +28,16 @@ As of 2026-10-01:
   - **7c:** the monthly report (`MonthlyReports`, `MonthlyReportRoute`), from a card on the Progress tab: workouts,
     training days, time, volume and sets against the month before, a calendar of training days, the records set,
     the most trained exercises, and muscles shaded by the average week. Months page back to the first with training.
-- **Next: Milestone 8 (body).** Then 9 (settings, import and export).
+- **Milestone 8 (body)** is in progress, in two parts:
+  - **8a is done:** bodyweight, body fat and 14 circumferences (`MeasurementType`), stored in the existing
+    `measurement` table (no schema change) and kept to one value per type per day (`BodyRepository.saveDay`).
+    The Body page (from the Progress tab) shows bodyweight with its chart, then every other measurement's latest
+    value and its change over the month (`BodyMeasurements`). Each opens a page with its chart and every day,
+    and a day opens the form to correct it. "Log measurements" is one form for a day, in pairs, with the last
+    value as a hint; emptying a field removes that entry. On the inner screen a measurement opens beside the
+    overview. Custom measurement types are left for later: they need a synced table for their names.
+  - **Next: 8b**, progress photos: taken or picked, stored in app storage, and compared side by side.
+- Then 9 (settings, import and export).
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a
   milestone go in TODO.md.

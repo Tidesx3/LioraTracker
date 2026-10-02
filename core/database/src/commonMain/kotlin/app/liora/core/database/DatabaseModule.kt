@@ -16,4 +16,5 @@ val databaseModule =
         single { get<LioraDatabase>().workoutDao() }
         single { get<LioraDatabase>().routineDao() }
         single { get<LioraDatabase>().localMetaDao() }
+        single { get<LioraDatabase>().measurementDao() }
     }
