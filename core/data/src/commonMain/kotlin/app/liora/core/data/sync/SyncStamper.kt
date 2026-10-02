@@ -1,5 +1,6 @@
 package app.liora.core.data.sync
 
+import app.liora.core.common.Hlc
 import app.liora.core.common.HybridLogicalClock
 import app.liora.core.common.IdGenerator
 import app.liora.core.database.dao.LocalMetaDao
@@ -22,6 +23,18 @@ class SyncStamper(
 
     suspend fun tombstone(existing: SyncMetadata): SyncMetadata =
         existing.copy(deletedAt = nowMillis(), hlc = hlc.now().encoded, dirty = true)
+
+    /**
+     * A row restored from a backup. It keeps the [hlc] it was written with, so it merges like any other
+     * version of the row, and the clock moves past it, so edits made here afterwards still win.
+     */
+    suspend fun restored(
+        createdAt: Long,
+        hlc: String,
+    ): SyncMetadata {
+        this.hlc.receive(Hlc.parse(hlc))
+        return SyncMetadata(createdAt = createdAt, hlc = hlc, dirty = true)
+    }
 }
 
 /** This installation's stable id, used as the HLC node so concurrent edits from two devices never tie. */

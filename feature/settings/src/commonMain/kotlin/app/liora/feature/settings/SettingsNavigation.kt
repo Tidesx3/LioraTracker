@@ -6,6 +6,7 @@ import app.liora.core.navigation.GymEditorRoute
 import app.liora.core.navigation.GymsRoute
 import app.liora.core.navigation.Navigator
 import app.liora.core.navigation.SettingsRoute
+import app.liora.feature.settings.data.DataViewModel
 import app.liora.feature.settings.gym.GymEditorScreen
 import app.liora.feature.settings.gym.GymEditorViewModel
 import app.liora.feature.settings.gym.GymsScreen
@@ -19,6 +20,7 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: Navigator) {
     entry<SettingsRoute> {
         SettingsScreen(
             viewModel = koinViewModel(),
+            dataViewModel = koinViewModel(),
             onBack = navigator::goBack,
             onOpenGyms = { navigator.navigate(GymsRoute) },
         )
@@ -41,6 +43,7 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: Navigator) {
 val settingsModule =
     module {
         viewModelOf(::SettingsViewModel)
+        viewModelOf(::DataViewModel)
         viewModelOf(::GymsViewModel)
         viewModelOf(::GymEditorViewModel)
     }

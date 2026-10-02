@@ -29,5 +29,9 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
   and on a phone short of memory Android may end the process. The back stack isn't restored after that,
   so the gallery that asked for the photo isn't there to receive it. Saving the navigator's back stack
   (it's serializable route keys) would fix this, and other screens too.
+- **Backups: check on a device.** Save one to Google Drive and to the phone, restore it after a reinstall,
+  and time it with a real photo library. Tests cover the format, the merge and the ZIP through `file://`
+  locations; real document providers (Drive in particular, and its handling of the `"wt"` write mode)
+  are only seen on a device.
 - **Robolectric: a text field in a dialog never lets Compose go idle.** Find the cause, so the rename
   and save-as-routine dialogs can get UI tests.

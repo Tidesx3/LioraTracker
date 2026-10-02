@@ -16,7 +16,7 @@ import app.liora.core.model.TrackingType
  */
 @Entity(tableName = "exercise")
 data class ExerciseEntity(
-    @PrimaryKey val id: String,
+    @PrimaryKey override val id: String,
     /** English name for built-ins, the user's text for custom exercises. */
     val name: String,
     @ColumnInfo(name = "tracking_type") val trackingType: TrackingType,
@@ -30,8 +30,8 @@ data class ExerciseEntity(
     @ColumnInfo(name = "variation_of") val variationOf: String?,
     val notes: String?,
     val rank: Int?,
-    @Embedded val sync: SyncMetadata,
-)
+    @Embedded override val sync: SyncMetadata,
+) : SyncedRow
 
 /**
  * Localized names and search aliases. Not synced: rebuilt from the seed for built-ins and from the
@@ -61,5 +61,5 @@ data class ExerciseSettingsEntity(
     @ColumnInfo(name = "rest_working_sec") val restWorkingSeconds: Int?,
     @ColumnInfo(name = "rest_warmup_sec") val restWarmupSeconds: Int?,
     val archived: Boolean,
-    @Embedded val sync: SyncMetadata,
-)
+    @Embedded override val sync: SyncMetadata,
+) : Syncable

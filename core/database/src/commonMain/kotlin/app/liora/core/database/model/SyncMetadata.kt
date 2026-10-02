@@ -14,8 +14,12 @@ data class SyncMetadata(
     @ColumnInfo(name = "dirty") val dirty: Boolean = true,
 )
 
-/** A synced row with its own id, so repositories can diff and stamp rows generically. */
-interface SyncedRow {
-    val id: String
+/** A row that syncs, whatever its key. */
+interface Syncable {
     val sync: SyncMetadata
+}
+
+/** A synced row with its own id, so repositories can diff and stamp rows generically. */
+interface SyncedRow : Syncable {
+    val id: String
 }

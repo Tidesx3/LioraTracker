@@ -13,12 +13,16 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -31,6 +35,7 @@ import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.theme.dynamicColorSupported
 import app.liora.core.designsystem.util.formatAsClock
+import app.liora.core.designsystem.util.workoutDisplayName
 import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.Settings
 import app.liora.core.domain.ThemeMode
@@ -41,9 +46,20 @@ import app.liora.core.model.WeightUnit
 import app.liora.core.ui.AppLanguage
 import app.liora.core.ui.AppLanguages
 import app.liora.core.ui.RestTimePicker
+import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.rememberAppLanguage
+import app.liora.core.ui.rememberFileOpener
+import app.liora.core.ui.rememberFileSaver
+import app.liora.feature.settings.data.DataActions
+import app.liora.feature.settings.data.DataSection
+import app.liora.feature.settings.data.DataUiState
+import app.liora.feature.settings.data.DataViewModel
+import app.liora.feature.settings.data.RestoreDialog
+import app.liora.feature.settings.data.text
 import app.liora.feature.settings.gym.gymName
 import app.liora.feature.settings.resources.Res
+import app.liora.feature.settings.resources.backup_file_name
+import app.liora.feature.settings.resources.csv_file_name
 import app.liora.feature.settings.resources.dialog_cancel
 import app.liora.feature.settings.resources.dynamic_color
 import app.liora.feature.settings.resources.formula
@@ -64,28 +80,55 @@ import app.liora.feature.settings.resources.theme
 import app.liora.feature.settings.resources.unit_body_length
 import app.liora.feature.settings.resources.unit_distance
 import app.liora.feature.settings.resources.unit_weight
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun SettingsScreen(
     viewModel: SettingsViewModel,
+    dataViewModel: DataViewModel,
     onBack: () -> Unit,
     onOpenGyms: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val gym by viewModel.gym.collectAsStateWithLifecycle()
+    val data by dataViewModel.uiState.collectAsStateWithLifecycle()
+    val exerciseLanguage = currentLanguage()
+    val untitled = workoutDisplayName(null)
+    val today = dataViewModel.today().toString()
+    val backupName = stringResource(Res.string.backup_file_name, today)
+    val csvName = stringResource(Res.string.csv_file_name, today)
+    val backupSaver = rememberFileSaver(BACKUP_TYPE) { dataViewModel.backUp(it) }
+    val backupOpener = rememberFileOpener(BACKUP_TYPES) { dataViewModel.read(it) }
+    val csvSaver = rememberFileSaver(CSV_TYPE) { dataViewModel.exportCsv(it, exerciseLanguage, untitled) }
     SettingsContent(
         settings = settings,
         gym = gym,
+        data = data,
         onBack = onBack,
         onOpenGyms = onOpenGyms,
         onChange = viewModel::update,
+        dataActions =
+            DataActions(
+                onBackUp = { backupSaver.save(backupName) },
+                onRestore = backupOpener::open,
+                onExportCsv = { csvSaver.save(csvName) },
+                onConfirmRestore = dataViewModel::restore,
+                onCancelRestore = dataViewModel::cancelRestore,
+                onMessageShown = dataViewModel::messageShown,
+            ),
         language = rememberAppLanguage(),
         modifier = modifier,
     )
 }
+
+private const val BACKUP_TYPE = "application/zip"
+private const val CSV_TYPE = "text/csv"
+
+/** Some places label a ZIP archive differently, or not at all. */
+private val BACKUP_TYPES = listOf(BACKUP_TYPE, "application/x-zip-compressed", "application/octet-stream")
 
 /** Which choice is open in a dialog. */
 private enum class Choice {
@@ -104,13 +147,21 @@ private enum class Choice {
 private fun SettingsContent(
     settings: Settings?,
     gym: GymProfile?,
+    data: DataUiState,
     onBack: () -> Unit,
     onOpenGyms: () -> Unit,
     onChange: (SettingsChange) -> Unit,
+    dataActions: DataActions,
     language: AppLanguage,
     modifier: Modifier = Modifier,
 ) {
     var open by rememberSaveable { mutableStateOf<Choice?>(null) }
+    val snackbar = remember { SnackbarHostState() }
+    LaunchedEffect(data.message) {
+        val message = data.message ?: return@LaunchedEffect
+        snackbar.showSnackbar(getString(message.text()))
+        dataActions.onMessageShown()
+    }
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -119,6 +170,7 @@ private fun SettingsContent(
                 navigationIcon = { BackButton(onClick = onBack) },
             )
         },
+        snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         if (settings == null) return@Scaffold
         LazyColumn(
@@ -208,10 +260,16 @@ private fun SettingsContent(
                     )
                 }
             }
+            item(key = "data") {
+                DataSection(working = data.working, actions = dataActions)
+            }
         }
     }
     if (settings != null) {
         ChoiceDialogs(open, settings, onChange, language, onClose = { open = null })
+    }
+    data.pending?.let { summary ->
+        RestoreDialog(summary, onRestore = dataActions.onConfirmRestore, onDismiss = dataActions.onCancelRestore)
     }
 }
 

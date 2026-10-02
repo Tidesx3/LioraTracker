@@ -84,8 +84,27 @@ As of 2026-10-02:
       a switch sits on the same line. The exercise menu offers "Add warm-up sets" for weight × reps
       exercises that have no warm-ups and nothing logged yet. It ramps to the first working set's weight or
       placeholder, and `SetLogger.addWarmups` puts the sets before the working ones.
-  - **Next: 9d**, JSON export and import (lossless) and a CSV export.
-  - **9e:** Hevy and Strong CSV import with the matching review screen; then Milestone 9 and Phase 1 are done.
+  - **9d (done): backup, restore and the CSV export.** Settings has a "Your data" section with three rows,
+    each going through the system file picker (`rememberFileSaver` and `rememberFileOpener` in `core:ui`, the
+    Storage Access Framework, no permissions).
+    - **Back up everything** writes one ZIP file: `liora.json` and each progress photo's image under
+      `photos/<id>.jpg`. The JSON (`BackupFormat.kt` in `core/data/backup`, format version 1) holds custom
+      exercises, exercise settings, routine folders and routines, finished workouts, body measurements,
+      photo rows, gyms and settings. Workouts and routines nest their exercises and sets; times are ISO 8601,
+      kinds are the stable keys, and units are in the field names. Every row keeps its id, creation time and
+      HLC. Built-in exercises, the workout in progress and device-local state stay out.
+    - **Restore a backup** reads the file, shows what it holds and when it was made, and on confirmation
+      merges it row by row like sync will: a row missing here is added, a newer version replaces the one
+      here, and anything changed or deleted here since stays (`BackupRepository.restore`). Restored rows keep
+      their HLC and the clock moves past them (`SyncStamper.restored`); images are restored through
+      `PhotoStorage.restore` before the rows that point at them. Restoring the same file twice changes nothing.
+    - **Export workouts as CSV** (`WorkoutCsv` in `core/domain`): one row per logged set, RFC 4180 with dot
+      decimals, weights and distances in the user's units named in the header, local times, exercise names
+      in the app's language.
+    - The platform side is `ExportFiles` (`AndroidExportFiles`: ZIP archives through the content resolver).
+      Backups and restores finish even when Settings closes mid-way.
+  - **Next: 9e**, Hevy and Strong CSV import with the matching review screen; then Milestone 9 and Phase 1
+    are done.
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a
   milestone go in TODO.md.

@@ -37,8 +37,8 @@ data class ProgressPhotoEntity(
 data class PreferenceEntity(
     @PrimaryKey val key: String,
     val value: String,
-    @Embedded val sync: SyncMetadata,
-)
+    @Embedded override val sync: SyncMetadata,
+) : Syncable
 
 /** Device-local bookkeeping that must never sync (device id, seed version, sync cursors). */
 @Entity(tableName = "local_meta")

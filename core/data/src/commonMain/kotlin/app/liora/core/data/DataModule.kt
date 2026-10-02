@@ -2,6 +2,10 @@ package app.liora.core.data
 
 import app.liora.core.common.HybridLogicalClock
 import app.liora.core.common.IdGenerator
+import app.liora.core.data.backup.BackupRepository
+import app.liora.core.data.backup.OfflineBackupRepository
+import app.liora.core.data.backup.OfflineWorkoutCsvExport
+import app.liora.core.data.backup.WorkoutCsvExport
 import app.liora.core.data.body.BodyRepository
 import app.liora.core.data.body.OfflineBodyRepository
 import app.liora.core.data.body.OfflineProgressPhotoRepository
@@ -32,7 +36,7 @@ import kotlin.time.Clock
 
 /**
  * Repositories and their plumbing. The app also has to provide the platform database module, an
- * `ExerciseSeedSource` and a `PhotoStorage`.
+ * `ExerciseSeedSource`, a `PhotoStorage` and `ExportFiles`.
  */
 val dataModule =
     module {
@@ -57,6 +61,8 @@ val dataModule =
         singleOf(::OfflineWorkoutHistoryRepository) bind WorkoutHistoryRepository::class
         singleOf(::OfflineBodyRepository) bind BodyRepository::class
         singleOf(::OfflineProgressPhotoRepository) bind ProgressPhotoRepository::class
+        singleOf(::OfflineBackupRepository) bind BackupRepository::class
+        singleOf(::OfflineWorkoutCsvExport) bind WorkoutCsvExport::class
         // The workout in progress has one set logger, shared by the logger and the notification.
         single<SetLogger> { get<ActiveWorkoutRepository>().sets }
         singleOf(::LocalRestTimerRepository) bind RestTimerRepository::class

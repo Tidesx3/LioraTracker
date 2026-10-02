@@ -18,6 +18,9 @@ import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.toInstant
 import java.io.File
 import java.io.IOException
+import java.io.OutputStream
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.time.Instant
@@ -87,18 +90,47 @@ internal class AndroidPhotoStorage(
             null
         }
 
+    override suspend fun read(path: String): ByteArray? =
+        withContext(Dispatchers.IO) {
+            try {
+                File(path).takeIf { it.isFile }?.readBytes()
+            } catch (_: IOException) {
+                null
+            }
+        }
+
+    override suspend fun restore(
+        id: String,
+        bytes: ByteArray,
+    ): String? {
+        // The id names the file, so one from a tampered backup mustn't reach outside the directory.
+        if (!SAFE_ID.matches(id)) return null
+        return withContext(Dispatchers.IO) {
+            try {
+                write(id) { it.write(bytes) }
+            } catch (_: IOException) {
+                null
+            }
+        }
+    }
+
     /** Saves [bitmap] as [id]'s JPEG and returns its path. */
     private fun store(
         bitmap: Bitmap,
         id: String,
+    ): String = write(id) { bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, it) }.also { bitmap.recycle() }
+
+    /** Writes [id]'s JPEG with [content] and returns its path. */
+    private fun write(
+        id: String,
+        content: (OutputStream) -> Unit,
     ): String {
         directory.mkdirs()
         val file = File(directory, "$id.jpg")
-        // Written aside and renamed, so a crash midway never leaves half an image.
+        // Written aside and moved, so a crash midway never leaves half an image.
         val partial = File(directory, "$id.part")
-        partial.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, it) }
-        bitmap.recycle()
-        if (!partial.renameTo(file)) throw IOException("Couldn't store $id")
+        partial.outputStream().use(content)
+        Files.move(partial.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING)
         return file.absolutePath
     }
 
@@ -115,6 +147,9 @@ internal class AndroidPhotoStorage(
         const val DIRECTORY = "photos"
         const val MAX_EDGE = 2048
         const val JPEG_QUALITY = 88
+
+        /** Ids as `IdGenerator` makes them: letters, digits and dashes. */
+        val SAFE_ID = Regex("[A-Za-z0-9][A-Za-z0-9_-]*")
     }
 }
 

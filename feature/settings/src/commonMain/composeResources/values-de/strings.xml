@@ -41,6 +41,53 @@
   <string name="language">Sprache</string>
   <string name="language_system">Wie das Handy</string>
 
+  <string name="section_data">Deine Daten</string>
+  <string name="backup_title">Alles sichern</string>
+  <string name="backup_body">Trainings, Routinen, Körperwerte, Fotos und Einstellungen in einer Datei</string>
+  <string name="backup_file_name">liora-sicherung-%1$s.zip</string>
+  <string name="restore_title">Sicherung wiederherstellen</string>
+  <string name="restore_body">Holt den Inhalt einer Sicherung auf dieses Handy</string>
+  <string name="csv_title">Trainings als CSV exportieren</string>
+  <string name="csv_body">Eine Zeile pro Satz, für Tabellenkalkulationen</string>
+  <string name="csv_file_name">liora-trainings-%1$s.csv</string>
+  <string name="working_backup">Sicherung wird gespeichert …</string>
+  <string name="working_read">Sicherung wird gelesen …</string>
+  <string name="working_restore">Wird wiederhergestellt …</string>
+  <string name="working_csv">Wird exportiert …</string>
+  <string name="restore_question">Diese Sicherung wiederherstellen?</string>
+  <string name="restore_made">Erstellt am %1$s um %2$s</string>
+  <string name="restore_empty">Sie ist noch leer.</string>
+  <string name="restore_keeps">Was du seitdem auf diesem Handy geändert hast, bleibt so, und nichts wird gelöscht.</string>
+  <string name="restore_confirm">Wiederherstellen</string>
+  <plurals name="backup_workouts">
+    <item quantity="one">%1$d Training</item>
+    <item quantity="other">%1$d Trainings</item>
+  </plurals>
+  <plurals name="backup_routines">
+    <item quantity="one">%1$d Routine</item>
+    <item quantity="other">%1$d Routinen</item>
+  </plurals>
+  <plurals name="backup_exercises">
+    <item quantity="one">%1$d eigene Übung</item>
+    <item quantity="other">%1$d eigene Übungen</item>
+  </plurals>
+  <plurals name="backup_measurements">
+    <item quantity="one">%1$d Körpermaß</item>
+    <item quantity="other">%1$d Körpermaße</item>
+  </plurals>
+  <plurals name="backup_photos">
+    <item quantity="one">%1$d Fortschrittsfoto</item>
+    <item quantity="other">%1$d Fortschrittsfotos</item>
+  </plurals>
+  <string name="message_backup_saved">Sicherung gespeichert</string>
+  <string name="message_restored">Sicherung wiederhergestellt</string>
+  <string name="message_nothing_new">Alles aus dieser Sicherung ist schon auf diesem Handy</string>
+  <string name="message_csv_saved">Trainings exportiert</string>
+  <string name="message_save_failed">Die Datei konnte nicht gespeichert werden</string>
+  <string name="message_read_failed">Die Datei konnte nicht gelesen werden</string>
+  <string name="message_not_a_backup">Diese Datei ist keine Liora-Sicherung</string>
+  <string name="message_newer_backup">Diese Sicherung stammt aus einer neueren Liora-Version. Aktualisiere die App, um sie wiederherzustellen.</string>
+
   <string name="dialog_cancel">Abbrechen</string>
 
   <string name="gym">Studio</string>

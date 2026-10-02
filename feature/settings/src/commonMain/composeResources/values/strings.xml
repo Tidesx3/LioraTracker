@@ -43,6 +43,53 @@
   <string name="language_en" translatable="false">English</string>
   <string name="language_de" translatable="false">Deutsch</string>
 
+  <string name="section_data">Your data</string>
+  <string name="backup_title">Back up everything</string>
+  <string name="backup_body">Workouts, routines, body, photos and settings in one file</string>
+  <string name="backup_file_name">liora-backup-%1$s.zip</string>
+  <string name="restore_title">Restore a backup</string>
+  <string name="restore_body">Adds what’s in a backup to this phone</string>
+  <string name="csv_title">Export workouts as CSV</string>
+  <string name="csv_body">One row per set, for spreadsheets</string>
+  <string name="csv_file_name">liora-workouts-%1$s.csv</string>
+  <string name="working_backup">Saving the backup…</string>
+  <string name="working_read">Reading the backup…</string>
+  <string name="working_restore">Restoring…</string>
+  <string name="working_csv">Exporting…</string>
+  <string name="restore_question">Restore this backup?</string>
+  <string name="restore_made">Made on %1$s at %2$s</string>
+  <string name="restore_empty">There’s nothing in it yet.</string>
+  <string name="restore_keeps">What you’ve changed on this phone since stays as it is, and nothing is deleted.</string>
+  <string name="restore_confirm">Restore</string>
+  <plurals name="backup_workouts">
+    <item quantity="one">%1$d workout</item>
+    <item quantity="other">%1$d workouts</item>
+  </plurals>
+  <plurals name="backup_routines">
+    <item quantity="one">%1$d routine</item>
+    <item quantity="other">%1$d routines</item>
+  </plurals>
+  <plurals name="backup_exercises">
+    <item quantity="one">%1$d custom exercise</item>
+    <item quantity="other">%1$d custom exercises</item>
+  </plurals>
+  <plurals name="backup_measurements">
+    <item quantity="one">%1$d body measurement</item>
+    <item quantity="other">%1$d body measurements</item>
+  </plurals>
+  <plurals name="backup_photos">
+    <item quantity="one">%1$d progress photo</item>
+    <item quantity="other">%1$d progress photos</item>
+  </plurals>
+  <string name="message_backup_saved">Backup saved</string>
+  <string name="message_restored">Backup restored</string>
+  <string name="message_nothing_new">This phone already has everything in that backup</string>
+  <string name="message_csv_saved">Workouts exported</string>
+  <string name="message_save_failed">Couldn’t save the file</string>
+  <string name="message_read_failed">Couldn’t read the file</string>
+  <string name="message_not_a_backup">That file isn’t a Liora backup</string>
+  <string name="message_newer_backup">That backup is from a newer version of Liora. Update the app to restore it.</string>
+
   <string name="dialog_cancel">Cancel</string>
 
   <string name="gym">Gym</string>

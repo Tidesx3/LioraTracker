@@ -132,6 +132,13 @@ class ProgressPhotoRepositoryTest {
             files -= path
         }
 
+        override suspend fun read(path: String): ByteArray? = null
+
+        override suspend fun restore(
+            id: String,
+            bytes: ByteArray,
+        ): String? = null
+
         companion object {
             const val BROKEN = "content://not-an-image"
         }

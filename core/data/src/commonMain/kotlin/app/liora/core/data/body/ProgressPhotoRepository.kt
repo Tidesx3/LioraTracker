@@ -28,6 +28,18 @@ interface PhotoStorage {
     ): ImportedPhoto?
 
     suspend fun delete(path: String)
+
+    /** The stored image at [path], for a backup; null when it's gone. */
+    suspend fun read(path: String): ByteArray?
+
+    /**
+     * Stores an image from a backup under [id] as it is (it was imported once already) and returns its
+     * path; null when it can't be stored.
+     */
+    suspend fun restore(
+        id: String,
+        bytes: ByteArray,
+    ): String?
 }
 
 /** An image in storage, and when the camera says it was taken, if it says. */

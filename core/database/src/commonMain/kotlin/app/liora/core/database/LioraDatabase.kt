@@ -10,6 +10,7 @@ import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import app.liora.core.database.dao.BackupDao
 import app.liora.core.database.dao.ExerciseDao
 import app.liora.core.database.dao.GymProfileDao
 import app.liora.core.database.dao.LocalMetaDao
@@ -80,6 +81,8 @@ abstract class LioraDatabase : RoomDatabase() {
     abstract fun preferenceDao(): PreferenceDao
 
     abstract fun gymProfileDao(): GymProfileDao
+
+    abstract fun backupDao(): BackupDao
 }
 
 // Room generates the actual implementations for each platform.

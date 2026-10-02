@@ -50,6 +50,10 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - **Settings:** read them from `SettingsRepository` (`settings` Flow, or `current()` inside a transaction), never hard-coded defaults: the e1RM formula, stall window and rest defaults all come from there. One `preference` row per choice; add a key in `SettingsCodec` for a new one.
 - **Gyms and loads:** weights a user can load come from the gym in use (`GymProfileRepository.active`, per device). Round targets and steps through `LoadRounding` by the exercise's equipment, never a fixed 2.5 kg step. A gym keeps its own unit (pound plates stay 45 lb) while storing kilograms.
 - **Derived data:** PRs and stats caches are recomputed locally and never synced.
+- **Backups:** `BackupRepository` (`core/data/backup`) writes a ZIP of `liora.json` and the photos, and restores by
+  merging row by row on HLC, like sync. The JSON format (`BackupFormat.kt`) is public and versioned: new fields
+  are optional, and only a breaking change bumps `BackupJson.VERSION`. A new synced table also goes into the
+  backup: `BackupDao`, `BackupFormat.kt`, `BackupRows.kt`, and the snapshot and merge in `BackupRepository`.
 - **Schema:** Room schemas are exported to `core/database/schemas/` and committed. Schema v1 is live on devices, so every change needs a version bump plus a migration (or `AutoMigration`) and a migration test.
 - **Writes must outlive the screen:** don't pop a screen right after launching a write in its `viewModelScope`. Leaving the screen clears the ViewModel and cancels the write. Close in reaction to the new data instead (see `LoggerScreen`).
 
@@ -108,5 +112,6 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - **Material3 version:** CMP `material3` is pinned to 1.9.0 (= androidx material3 1.4.0, the stable BOM version), not the alpha that ships alongside CMP 1.12.
 - **Compose string resources** (`composeResources/**/strings.xml`) do not unescape `\'` the way Android `res/` does; the backslash shows up in the UI. Write a typographic apostrophe (`’`) instead.
 - **Escaping in shell edits:** shell heredocs and sed here mangle backslashes and quotes. Make escaping-sensitive edits with the file edit tools, or with a script file, not inline shell text.
+- **Invisible characters:** write them as `Char(0xFEFF)`, not `'﻿'`. The edit tools can turn the escape into the raw character, which Spotless then strips without a word.
 - **Navigation 3 metadata** is stored under each `NavMetadataKey`'s `toString()`, so keys override it with a namespaced name (see `ListDetail.kt`).
 - **Pinned versions:** `androidx.navigation3:navigation3-runtime` stays at 1.1.7 to match JB `navigation3-ui` 1.1.2, and `sqlite-bundled` stays at 2.6.2 to match Room 2.8.5. Lint's "newer version available" warnings on these two are expected.
