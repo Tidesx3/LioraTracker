@@ -29,11 +29,5 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
   and on a phone short of memory Android may end the process. The back stack isn't restored after that,
   so the gallery that asked for the photo isn't there to receive it. Saving the navigator's back stack
   (it's serializable route keys) would fix this, and other screens too.
-- **App UI tests: an occasional failure cascades through the rest of the run** (seen 2026-10-02, once in
-  several runs). `WorkoutNotifier` posts from `LioraApplication`'s process scope on `Dispatchers.Default`,
-  and that scope outlives each test. A post that lands after Robolectric tore a test down throws (null
-  `ActivityThread` in `checkSelfPermission`). The next test then fails before its `@After`, so Koin is
-  never stopped, and every later test in that JVM fails with "A Koin Application has already been
-  started". Fix: let tests cancel the process scope when Koin stops (e.g. hold it in Koin with `onClose`).
 - **Robolectric: a text field in a dialog never lets Compose go idle.** Find the cause, so the rename
   and save-as-routine dialogs can get UI tests.

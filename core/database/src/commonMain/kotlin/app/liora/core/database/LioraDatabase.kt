@@ -11,6 +11,7 @@ import androidx.room.useWriterConnection
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.liora.core.database.dao.ExerciseDao
+import app.liora.core.database.dao.GymProfileDao
 import app.liora.core.database.dao.LocalMetaDao
 import app.liora.core.database.dao.MeasurementDao
 import app.liora.core.database.dao.PreferenceDao
@@ -20,6 +21,7 @@ import app.liora.core.database.dao.WorkoutDao
 import app.liora.core.database.model.ExerciseEntity
 import app.liora.core.database.model.ExerciseNameEntity
 import app.liora.core.database.model.ExerciseSettingsEntity
+import app.liora.core.database.model.GymProfileEntity
 import app.liora.core.database.model.LocalMetaEntity
 import app.liora.core.database.model.MeasurementEntity
 import app.liora.core.database.model.PreferenceEntity
@@ -50,11 +52,14 @@ import kotlinx.coroutines.IO
         ProgressPhotoEntity::class,
         PreferenceEntity::class,
         LocalMetaEntity::class,
+        GymProfileEntity::class,
     ],
-    version = 2,
+    version = 3,
     autoMigrations = [
         // v2: workout_set.target_reps_min/max, so a workout started from a routine keeps its rep targets.
         AutoMigration(from = 1, to = 2),
+        // v3: gym_profile, the gyms whose plates, dumbbells and stacks weights round to.
+        AutoMigration(from = 2, to = 3),
     ],
 )
 @ConstructedBy(LioraDatabaseConstructor::class)
@@ -73,6 +78,8 @@ abstract class LioraDatabase : RoomDatabase() {
     abstract fun progressPhotoDao(): ProgressPhotoDao
 
     abstract fun preferenceDao(): PreferenceDao
+
+    abstract fun gymProfileDao(): GymProfileDao
 }
 
 // Room generates the actual implementations for each platform.

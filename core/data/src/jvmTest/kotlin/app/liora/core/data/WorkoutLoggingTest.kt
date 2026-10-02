@@ -11,6 +11,9 @@ import app.liora.core.data.workout.SetCompletion
 import app.liora.core.database.TransactionRunner
 import app.liora.core.database.inMemoryLioraDatabase
 import app.liora.core.domain.SetField
+import app.liora.core.domain.WarmupSet
+import app.liora.core.domain.WorkoutOrder
+import app.liora.core.domain.setAt
 import app.liora.core.model.ActiveWorkout
 import app.liora.core.model.Equipment
 import app.liora.core.model.ExerciseDraft
@@ -307,6 +310,34 @@ class WorkoutLoggingTest {
                         it.reps
                 },
             )
+        }
+
+    @Test
+    fun warmupsGoBeforeTheWorkingSets() =
+        runTest {
+            val bench = exercise("Bench", TrackingType.WeightReps)
+            workouts.startEmptyWorkout()
+            editor.addExercises(listOf(bench))
+            val exercise = current().exercises.single()
+            logger.updateSet(exercise.sets.first().id) { copy(weight = Mass(100.0), reps = 5) }
+
+            logger.addWarmups(exercise.id, listOf(WarmupSet(Mass(20.0), 10), WarmupSet(Mass(60.0), 5)))
+
+            val sets = current().exercises.single().sets
+            assertEquals(
+                listOf(SetType.Warmup, SetType.Warmup, SetType.Normal, SetType.Normal, SetType.Normal),
+                sets.map { it.type },
+            )
+            assertEquals(
+                listOf(Mass(20.0) to 10, Mass(60.0) to 5, Mass(100.0) to 5),
+                sets.take(3).map {
+                    it.weight to
+                        it.reps
+                },
+            )
+            // Filled in, still to be done: the bar comes first.
+            assertTrue(sets.none { it.isCompleted })
+            assertEquals(sets.first().id, WorkoutOrder.current(current())?.let { current().setAt(it).id })
         }
 
     private suspend fun current(): ActiveWorkout = workouts.activeWorkout.first()!!

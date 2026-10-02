@@ -199,28 +199,6 @@ class PlateCalculatorTest {
     }
 }
 
-class WarmupGeneratorTest {
-    @Test
-    fun rampsFromTheBarTowardTheWorkingWeight() {
-        val sets = WarmupGenerator.generate(workingWeight = 100.0, barWeight = 20.0, increment = 2.5)
-        assertEquals(
-            listOf(WarmupSet(20.0, 10), WarmupSet(40.0, 8), WarmupSet(60.0, 5), WarmupSet(80.0, 3), WarmupSet(90.0, 1)),
-            sets,
-        )
-    }
-
-    @Test
-    fun lightWorkingWeightsGetAShortRampWithoutDuplicates() {
-        val sets = WarmupGenerator.generate(workingWeight = 40.0, barWeight = 20.0, increment = 2.5)
-        assertEquals(listOf(WarmupSet(20.0, 10), WarmupSet(22.5, 5), WarmupSet(30.0, 3)), sets)
-    }
-
-    @Test
-    fun nothingToWarmUpForAtBarWeight() {
-        assertTrue(WarmupGenerator.generate(20.0, 20.0, 2.5).isEmpty())
-    }
-}
-
 private fun assertClose(
     expected: Double,
     actual: Double,

@@ -56,4 +56,36 @@ class MigrationTest {
         }
         migrated.close()
     }
+
+    @Test
+    fun v2To3KeepsPreferencesAndAddsGymProfiles() {
+        helper.createDatabase(2).apply {
+            execSQL(
+                """
+                INSERT INTO preference (`key`, value, created_at, hlc, deleted_at, dirty)
+                VALUES ('units.weight', 'lb', 1000, 'hlc', NULL, 1)
+                """.trimIndent(),
+            )
+            close()
+        }
+
+        val migrated = helper.runMigrationsAndValidate(3)
+        migrated.prepare("SELECT value FROM preference WHERE `key` = 'units.weight'").use { row ->
+            assertTrue(row.step())
+            assertEquals("lb", row.getText(0))
+        }
+        migrated.execSQL(
+            """
+            INSERT INTO gym_profile (id, name, unit, barbell_kg, ez_bar_kg, plates, dumbbells, stack_step_kg,
+                created_at, hlc, deleted_at, dirty)
+            VALUES ('g1', 'Studio Nord', 'kg', 20.0, 10.0, '[]', '[]', 5.0, 2000, 'hlc', NULL, 1)
+            """.trimIndent(),
+        )
+        migrated.prepare("SELECT name, stack_step_kg FROM gym_profile").use { row ->
+            assertTrue(row.step())
+            assertEquals("Studio Nord", row.getText(0))
+            assertEquals(5.0, row.getDouble(1))
+        }
+        migrated.close()
+    }
 }

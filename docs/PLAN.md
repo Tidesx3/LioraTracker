@@ -65,8 +65,24 @@ As of 2026-10-02:
     10 m or yd). The RPE column (`SetField.Rpe`, after reps, only for exercises counted in reps) takes 1–10 in
     half points, is never needed to tick a set off and never pre-filled; a recorded RPE also shows in workout
     detail ("· RPE 8"), even with the column switched off.
-  - **Next: 9c**, gym profiles (synced `gym_profile` table, schema v3 with a migration test), load rounding, the
-    plate calculator in the logger, and "add warm-up sets".
+  - **9c, gym profiles (in progress).** Done so far: `GymProfile` in `core/model` (name, the unit its equipment
+    is labelled in, barbell and EZ bar, plate pairs, dumbbell runs, stack step; weights stored in kg) and
+    `GymProfiles.standard(unit)` in `core/domain`. `LoadRounding` rounds down to what the gym can load by
+    equipment, steps to the next loadable weight, and gives the plates per side; `WarmupGenerator` rounds
+    through it (no bar step for dumbbells and machines). The synced `gym_profile` table (schema v3,
+    `AutoMigration` 2→3 with a migration test) and `GymProfileRepository` in `core/data/gym`: the gym in use
+    is per device in `local_meta`, else the first gym, else standard equipment in the display unit; a new gym
+    becomes the one in use. `SetLogger.addWarmups` puts warm-ups before an exercise's sets. Still to do:
+    - Settings: a Gyms row (the gym in use, or "Standard equipment") opening a list of gyms (pick the one in
+      use, add, open) and an editor (name, unit, barbell, EZ bar, plates with pairs, dumbbell runs, stack
+      step; delete). Routes in `core/navigation`, English and German strings.
+    - Logger: `LoggerUiState` carries the gym in use and how many gyms there are. Above the pad, for barbell
+      and EZ bar weights, the plates per side (`LoadRounding.plates`), and a gym switch with two or more
+      gyms. ± on a weight steps through `LoadRounding.step` by the exercise's equipment (`CellInput.stepped`).
+      The exercise menu offers "Add warm-up sets" for weight × reps exercises without warm-ups yet, ramping
+      to the first working set's weight or placeholder (`WarmupGenerator`, then `SetLogger.addWarmups`).
+    - UI tests and screenshots (gyms list and editor at cover and inner sizes, German; the logger's plates
+      and warm-ups), then PLAN, README and CLAUDE.md.
   - **9d:** JSON export and import (lossless) and a CSV export.
   - **9e:** Hevy and Strong CSV import with the matching review screen; then Milestone 9 and Phase 1 are done.
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.

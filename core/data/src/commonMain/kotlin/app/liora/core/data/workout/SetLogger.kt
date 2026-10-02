@@ -9,6 +9,7 @@ import app.liora.core.database.model.WorkoutSetEntity
 import app.liora.core.domain.RestDefaults
 import app.liora.core.domain.SetField
 import app.liora.core.domain.SetPlaceholders
+import app.liora.core.domain.WarmupSet
 import app.liora.core.domain.WorkoutOrder
 import app.liora.core.domain.find
 import app.liora.core.domain.restAfter
@@ -41,6 +42,15 @@ sealed interface SetCompletion {
 interface SetLogger {
     /** Adds a set to the exercise, repeating the last one's values so a working set needs no typing. */
     suspend fun addSet(workoutExerciseId: String)
+
+    /**
+     * Puts [warmups] before the exercise's sets as warm-up sets, weight and reps filled in and not yet
+     * ticked off. The sets already there follow them in their order.
+     */
+    suspend fun addWarmups(
+        workoutExerciseId: String,
+        warmups: List<WarmupSet>,
+    )
 
     /** Changes a set's values or type; it stays completed or open as it was. */
     suspend fun updateSet(
@@ -91,6 +101,27 @@ internal class OfflineSetLogger(
                     set.copy(id = row.id, type = set.type.afterAdding(), completedAt = null, rpe = null)
                 }
             workoutDao.upsertSet(copied?.let(row::withValues) ?: row)
+        }
+    }
+
+    override suspend fun addWarmups(
+        workoutExerciseId: String,
+        warmups: List<WarmupSet>,
+    ) {
+        if (warmups.isEmpty()) return
+        transactions.inTransaction {
+            val rows = target.rows(workoutDao) ?: return@inTransaction
+            if (rows.exercises.none { it.id == workoutExerciseId }) return@inTransaction
+            val added =
+                warmups.mapIndexed { index, warmup ->
+                    val row = emptySetRow(ids.newId(), workoutExerciseId, index, SetType.Warmup, stamper.newRow())
+                    row.copy(weightKg = warmup.weight.kilograms, reps = warmup.reps)
+                }
+            val following =
+                rows.setsOf(workoutExerciseId).mapIndexed { index, row ->
+                    row.copy(position = warmups.size + index, sync = stamper.touch(row.sync))
+                }
+            workoutDao.upsertSets(added + following)
         }
     }
 
