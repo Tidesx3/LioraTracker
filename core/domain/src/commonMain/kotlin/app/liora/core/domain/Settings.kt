@@ -11,6 +11,8 @@ import kotlin.time.Duration.Companion.days
 data class Settings(
     /** Rest when neither the workout nor the exercise sets its own. */
     val rest: RestDefaults = RestDefaults(),
+    /** What plays when a rest runs out. */
+    val restSound: RestSound = RestSound.Chime,
     /** An RPE column in the logger, to rate how hard each set was. Off for those who don't rate their sets. */
     val rpe: Boolean = false,
     val units: Units = Units(),
@@ -28,6 +30,9 @@ data class Settings(
         private const val DAYS_PER_WEEK = 7
     }
 }
+
+/** The sound that ends a rest, or none. The vibration comes either way, with the notification. */
+enum class RestSound { Chime, Bell, Marimba, Off }
 
 /** Light or dark, or as the phone is set. */
 enum class ThemeMode { System, Light, Dark }

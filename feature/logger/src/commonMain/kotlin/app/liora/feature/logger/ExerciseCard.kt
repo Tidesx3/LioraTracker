@@ -9,14 +9,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -27,8 +25,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraIconButton
@@ -36,25 +32,28 @@ import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.util.NumberFormatter
 import app.liora.core.domain.SetRef
 import app.liora.core.domain.restAfter
+import app.liora.core.model.Exercise
 import app.liora.core.model.ExerciseSettings
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.WorkoutExercise
+import app.liora.core.ui.ExerciseNoteField
 import app.liora.core.ui.ExerciseThumbnail
+import app.liora.core.ui.NoteKind
 import app.liora.core.ui.RestTimePicker
 import app.liora.core.ui.restLabel
 import app.liora.core.ui.setNumbers
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.cd_more
 import app.liora.feature.logger.resources.logger_add_set
-import app.liora.feature.logger.resources.menu_add_note
 import app.liora.feature.logger.resources.menu_add_warmups
+import app.liora.feature.logger.resources.menu_exercise_note
 import app.liora.feature.logger.resources.menu_remove
 import app.liora.feature.logger.resources.menu_reorder
 import app.liora.feature.logger.resources.menu_replace
 import app.liora.feature.logger.resources.menu_rest
 import app.liora.feature.logger.resources.menu_superset_next
 import app.liora.feature.logger.resources.menu_superset_remove
-import app.liora.feature.logger.resources.note_hint
+import app.liora.feature.logger.resources.menu_workout_note
 import app.liora.feature.logger.resources.superset
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
@@ -67,12 +66,16 @@ internal class ExerciseActions(
     val onSupersetChange: (id: String, link: Boolean) -> Unit,
     val onRemove: (String) -> Unit,
     val onRestChange: (id: String, seconds: Int?) -> Unit,
-    val onNotesChange: (id: String, notes: String?) -> Unit,
+    /**
+     * A note on the exercise: its own ([NoteKind.Exercise], by the exercise's id), which shows every time
+     * it's done, or this workout's ([NoteKind.Workout], by the workout exercise's id).
+     */
+    val onNoteChange: (kind: NoteKind, id: String, note: String?) -> Unit,
     /** Adds a set at the end, or with [warmups] the ramp of warm-up sets before the first. */
     val onAddSets: (id: String, warmups: Boolean) -> Unit,
 )
 
-/** One exercise of the workout: name and rest, its note, and a row per set. */
+/** One exercise of the workout: name and rest, its notes, and a row per set. */
 @Composable
 internal fun ExerciseCard(
     index: Int,
@@ -82,14 +85,17 @@ internal fun ExerciseCard(
     onTextFocus: () -> Unit,
     onOpenExercise: (exerciseId: String) -> Unit,
     numbers: NumberFormatter,
+    place: WorkoutListPlace,
     modifier: Modifier = Modifier,
 ) {
     val workoutExercise = state.workout.exercises[index]
     val exercise = state.exercises[workoutExercise.exerciseId]
     val trackingType = state.trackingTypeOf(workoutExercise.exerciseId)
     var choosingRest by rememberSaveable { mutableStateOf(false) }
-    var noteOpen by rememberSaveable { mutableStateOf(false) }
+    // A note added from the menu shows before it has any text, and goes again if left empty.
+    var adding by rememberSaveable { mutableStateOf<NoteKind?>(null) }
     val inSuperset = workoutExercise.supersetGroup != null
+    val exerciseNote = exercise?.settings?.stickyNote
 
     LioraCard(
         modifier = modifier.fillMaxWidth(),
@@ -129,21 +135,22 @@ internal fun ExerciseCard(
             ExerciseMenu(
                 workoutExercise = workoutExercise,
                 isLast = index == state.workout.exercises.lastIndex,
-                hasNote = workoutExercise.notes != null || noteOpen,
                 canAddWarmups = state.warmupsFor(index).isNotEmpty(),
                 onChooseRest = { choosingRest = true }.takeUnless { state.isFinished },
-                onAddNote = { noteOpen = true },
+                onAddNote = { kind: NoteKind -> adding = kind }.takeIf { exercise != null },
+                hasExerciseNote = exerciseNote != null || adding == NoteKind.Exercise,
+                hasWorkoutNote = workoutExercise.notes != null || adding == NoteKind.Workout,
                 actions = actions,
             )
         }
-        if (workoutExercise.notes != null || noteOpen) {
-            NoteField(
-                workoutExercise = workoutExercise,
-                onNotesChange = actions.onNotesChange,
-                onFocus = onTextFocus,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-            )
-        }
+        CardNotes(
+            exercise = exercise,
+            workoutExercise = workoutExercise,
+            adding = adding,
+            onNoteChange = actions.onNoteChange,
+            onTextFocus = onTextFocus,
+            onLeaveEmpty = { kind -> if (adding == kind) adding = null },
+        )
         val columns = SetColumns(trackingType, state.fieldsOf(trackingType))
         SetHeader(columns, Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
         val numbersOfSets = setNumbers(workoutExercise.sets.map { it.type })
@@ -168,6 +175,7 @@ internal fun ExerciseCard(
                         ),
                     actions = setActions,
                     numbers = numbers,
+                    onReveal = place::opened.takeIf { place.openingSetId == set.id },
                 )
             }
         }
@@ -199,25 +207,63 @@ private fun effectiveRestSeconds(
     state: LoggerUiState.Active,
 ): Int = restAfter(LoggedSet(id = ""), workoutExercise, settings, state.restDefaults)?.inWholeSeconds?.toInt() ?: 0
 
+/**
+ * The exercise's notes under its name: its own first, as it's there every time, then this workout's.
+ * One being [adding] from the menu shows before it has any text.
+ */
+@Composable
+private fun CardNotes(
+    exercise: Exercise?,
+    workoutExercise: WorkoutExercise,
+    adding: NoteKind?,
+    onNoteChange: (kind: NoteKind, id: String, note: String?) -> Unit,
+    onTextFocus: () -> Unit,
+    onLeaveEmpty: (NoteKind) -> Unit,
+) {
+    val exerciseNote = exercise?.settings?.stickyNote
+    if (exercise != null && (exerciseNote != null || adding == NoteKind.Exercise)) {
+        NoteField(
+            note = exerciseNote,
+            kind = NoteKind.Exercise,
+            justAdded = adding == NoteKind.Exercise,
+            onNoteChange = { onNoteChange(NoteKind.Exercise, exercise.id, it) },
+            onTextFocus = onTextFocus,
+            onLeaveEmpty = { onLeaveEmpty(NoteKind.Exercise) },
+        )
+    }
+    if (workoutExercise.notes != null || adding == NoteKind.Workout) {
+        NoteField(
+            note = workoutExercise.notes,
+            kind = NoteKind.Workout,
+            justAdded = adding == NoteKind.Workout,
+            onNoteChange = { onNoteChange(NoteKind.Workout, workoutExercise.id, it) },
+            onTextFocus = onTextFocus,
+            onLeaveEmpty = { onLeaveEmpty(NoteKind.Workout) },
+        )
+    }
+}
+
+/**
+ * One of the exercise's notes, written on the card. Typing in it puts the number pad away; one just
+ * added from the menu gets the cursor, and goes again when left without text.
+ */
 @Composable
 private fun NoteField(
-    workoutExercise: WorkoutExercise,
-    onNotesChange: (String, String?) -> Unit,
-    onFocus: () -> Unit,
-    modifier: Modifier = Modifier,
+    note: String?,
+    kind: NoteKind,
+    justAdded: Boolean,
+    onNoteChange: (String) -> Unit,
+    onTextFocus: () -> Unit,
+    onLeaveEmpty: () -> Unit,
 ) {
-    // Typed text stays local: waiting for each keystroke's round trip through the database would make
-    // the cursor jump.
-    var text by rememberSaveable(workoutExercise.id) { mutableStateOf(workoutExercise.notes.orEmpty()) }
-    OutlinedTextField(
-        value = text,
-        onValueChange = {
-            text = it
-            onNotesChange(workoutExercise.id, it)
-        },
-        placeholder = { Text(stringResource(Res.string.note_hint)) },
-        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-        modifier = modifier.fillMaxWidth().onFocusChanged { if (it.isFocused) onFocus() },
+    ExerciseNoteField(
+        note = note,
+        kind = kind,
+        onNoteChange = onNoteChange,
+        focusOnStart = justAdded,
+        onFocusChange = { focused -> if (focused) onTextFocus() },
+        onLeaveEmpty = onLeaveEmpty,
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 3.dp),
     )
 }
 
@@ -225,11 +271,13 @@ private fun NoteField(
 private fun ExerciseMenu(
     workoutExercise: WorkoutExercise,
     isLast: Boolean,
-    hasNote: Boolean,
     canAddWarmups: Boolean,
     /** Null where rest doesn't apply. */
     onChooseRest: (() -> Unit)?,
-    onAddNote: () -> Unit,
+    /** Null while the exercise isn't known yet. */
+    onAddNote: ((NoteKind) -> Unit)?,
+    hasExerciseNote: Boolean,
+    hasWorkoutNote: Boolean,
     actions: ExerciseActions,
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -246,7 +294,12 @@ private fun ExerciseMenu(
                 add(Res.string.menu_superset_remove to { actions.onSupersetChange(id, false) })
             }
             onChooseRest?.let { add(Res.string.menu_rest to it) }
-            if (!hasNote) add(Res.string.menu_add_note to onAddNote)
+            if (onAddNote != null && !hasExerciseNote) {
+                add(Res.string.menu_exercise_note to { onAddNote(NoteKind.Exercise) })
+            }
+            if (onAddNote != null && !hasWorkoutNote) {
+                add(Res.string.menu_workout_note to { onAddNote(NoteKind.Workout) })
+            }
             add(Res.string.menu_remove to { actions.onRemove(id) })
         }
     LioraIconButton(LioraIcons.More, stringResource(Res.string.cd_more), { expanded = true })

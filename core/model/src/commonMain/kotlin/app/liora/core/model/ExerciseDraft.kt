@@ -7,6 +7,7 @@ data class ExerciseDraft(
     val equipment: Equipment = Equipment.Other,
     val primaryMuscles: Set<Muscle> = emptySet(),
     val secondaryMuscles: Set<Muscle> = emptySet(),
+    /** The exercise's own note, as in [ExerciseSettings.stickyNote]: shown wherever the exercise appears. */
     val notes: String = "",
     /** The built-in exercise this one is a variation of, if any. */
     val variationOf: String? = null,
@@ -34,7 +35,8 @@ data class ExerciseDraft(
                 equipment = exercise.equipment,
                 primaryMuscles = exercise.primaryMuscles,
                 secondaryMuscles = exercise.secondaryMuscles,
-                notes = exercise.notes.orEmpty(),
+                // Notes from before they moved to the settings are picked up, and move there on saving.
+                notes = exercise.settings.stickyNote ?: exercise.notes.orEmpty(),
                 variationOf = exercise.variationOf,
             )
     }

@@ -70,7 +70,7 @@ class FoldableLayoutTest {
         composeRule.onAllNodesWithText(BENCH).onFirst().performClick()
         waitForText("How to")
         // The exercise replaces the library, with a way back to it.
-        composeRule.onAllNodes(hasSetTextAction()).assertCountEquals(0)
+        composeRule.onAllNodes(librarySearch).assertCountEquals(0)
         composeRule.onNodeWithContentDescription("Back").assertIsDisplayed()
     }
 
@@ -89,13 +89,13 @@ class FoldableLayoutTest {
         composeRule.onAllNodesWithText(BENCH).onFirst().performClick()
         waitForText("How to")
         // Both panes: the search stays, the open exercise is highlighted, and nothing needs a back arrow.
-        composeRule.onNode(hasSetTextAction()).assertIsDisplayed()
+        composeRule.onNode(librarySearch).assertIsDisplayed()
         composeRule.onNode(isSelected() and hasText(BENCH)).assertIsDisplayed()
         composeRule.onAllNodesWithContentDescription("Back").assertCountEquals(0)
         composeRule.onRoot().captureRoboImage("src/test/screenshots/fold_inner_exercises_dark.png")
 
         // Picking another exercise replaces the open one, so back returns straight to the empty pane.
-        composeRule.onNode(hasSetTextAction()).performTextInput("deadlift")
+        composeRule.onNode(librarySearch).performTextInput("deadlift")
         waitForText(DEADLIFT)
         composeRule.onAllNodesWithText(DEADLIFT).onFirst().performClick()
         composeRule.waitUntil(TIMEOUT_MS) { nodeExists(isSelected() and hasText(DEADLIFT)) }
@@ -127,22 +127,22 @@ class FoldableLayoutTest {
         val controller = launch()
         composeRule.onNodeWithText("Exercises").performClick()
         waitForText(BENCH)
-        composeRule.onNode(hasSetTextAction()).performTextInput("deadlift")
+        composeRule.onNode(librarySearch).performTextInput("deadlift")
         waitForText(DEADLIFT)
         composeRule.onAllNodesWithText(DEADLIFT).onFirst().performClick()
         waitForText("How to")
 
         // Unfold: the library comes back beside the exercise, search as typed.
         controller.resize(INNER_SIZE)
-        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasSetTextAction() and hasText("deadlift")) }
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(librarySearch and hasText("deadlift")) }
         composeRule.onNodeWithTag(ShellTags.NAVIGATION_RAIL).assertIsDisplayed()
         composeRule.onNode(isSelected() and hasText(DEADLIFT)).assertIsDisplayed()
 
         // Fold: one screen again, still the deadlift, and back returns to the same search.
         controller.resize(COVER_SIZE)
-        composeRule.waitUntil(TIMEOUT_MS) { !nodeExists(hasSetTextAction()) }
+        composeRule.waitUntil(TIMEOUT_MS) { !nodeExists(librarySearch) }
         composeRule.onNodeWithContentDescription("Back").performClick()
-        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasSetTextAction() and hasText("deadlift")) }
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(librarySearch and hasText("deadlift")) }
     }
 
     private fun launch(): ActivityController<MainActivity> =
@@ -163,6 +163,9 @@ class FoldableLayoutTest {
         composeRule.waitUntil(TIMEOUT_MS) { composeRule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty() }
 
     private val openWorkout = hasContentDescription("Open workout")
+
+    /** The library's search, not the exercise page's note (empty here, so it shows its hint). */
+    private val librarySearch = hasSetTextAction() and !hasText("Shows every time: seat height, grip, the plan")
 
     private companion object {
         const val COVER_SIZE = "w411dp-h960dp"

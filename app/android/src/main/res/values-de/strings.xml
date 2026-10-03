@@ -8,7 +8,7 @@
   <string name="notif_channel_workout">Laufendes Training</string>
   <string name="notif_channel_workout_desc">Das Training, das du gerade loggst: der nächste Satz und der Pausen-Countdown.</string>
   <string name="notif_channel_rest">Pause vorbei</string>
-  <string name="notif_channel_rest_desc">Meldet sich, wenn deine Pause um ist.</string>
+  <string name="notif_channel_rest_desc">Vibriert, wenn deine Pause um ist. Den Ton wählst du in Lioras Einstellungen.</string>
   <string name="notif_workout_default_title">Training</string>
   <string name="notif_rest_remaining">Pause %1$s</string>
   <string name="notif_rest_over_title">Pause vorbei, weiter geht’s</string>

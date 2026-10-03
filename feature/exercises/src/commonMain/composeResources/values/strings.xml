@@ -29,7 +29,6 @@
   <string name="detail_primary">Primary</string>
   <string name="detail_secondary">Secondary</string>
   <string name="detail_instructions">How to</string>
-  <string name="detail_notes">Notes</string>
   <string name="detail_history">History</string>
   <string name="detail_progress">Progress</string>
   <string name="detail_records">Records</string>
@@ -75,8 +74,8 @@
   <string name="editor_equipment">Equipment</string>
   <string name="editor_primary">Primary muscles</string>
   <string name="editor_secondary">Secondary muscles</string>
-  <string name="editor_notes">Notes</string>
-  <string name="editor_notes_hint">Seat height, grip, cues…</string>
+  <string name="editor_notes">Exercise note</string>
+  <string name="editor_notes_hint">Shows every time: seat height, grip, the plan</string>
   <string name="editor_variation_name">%1$s (variation)</string>
   <string name="detail_set_count" translatable="false">%1$s×</string>
 </resources>

@@ -19,6 +19,7 @@ import app.liora.core.designsystem.resources.ic_exercise
 import app.liora.core.designsystem.resources.ic_fitness_center
 import app.liora.core.designsystem.resources.ic_folder
 import app.liora.core.designsystem.resources.ic_history
+import app.liora.core.designsystem.resources.ic_keep
 import app.liora.core.designsystem.resources.ic_keyboard_arrow_down
 import app.liora.core.designsystem.resources.ic_keyboard_arrow_up
 import app.liora.core.designsystem.resources.ic_keyboard_hide
@@ -38,6 +39,7 @@ import app.liora.core.designsystem.resources.ic_settings
 import app.liora.core.designsystem.resources.ic_skip_next
 import app.liora.core.designsystem.resources.ic_swap_horiz
 import app.liora.core.designsystem.resources.ic_timer
+import app.liora.core.designsystem.resources.ic_today
 import app.liora.core.designsystem.resources.ic_trophy
 import app.liora.core.designsystem.resources.ic_view_agenda
 import app.liora.core.designsystem.resources.ic_visibility_off
@@ -86,4 +88,10 @@ object LioraIcons {
     val Camera: DrawableResource = Res.drawable.ic_photo_camera
     val Photos: DrawableResource = Res.drawable.ic_photo_library
     val Compare: DrawableResource = Res.drawable.ic_compare
+
+    /** The exercise's own note, pinned wherever the exercise appears. */
+    val Pin: DrawableResource = Res.drawable.ic_keep
+
+    /** A note for one workout only. */
+    val Today: DrawableResource = Res.drawable.ic_today
 }

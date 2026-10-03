@@ -62,7 +62,9 @@ import app.liora.core.model.RoutineExercise
 import app.liora.core.model.RoutineSet
 import app.liora.core.model.SetType
 import app.liora.core.model.TrackingType
+import app.liora.core.ui.ExerciseNoteField
 import app.liora.core.ui.LocalUnits
+import app.liora.core.ui.NoteKind
 import app.liora.core.ui.RestTimePicker
 import app.liora.core.ui.SetTypeMenu
 import app.liora.core.ui.currentLanguage
@@ -88,7 +90,6 @@ import app.liora.feature.train.resources.editor_empty
 import app.liora.feature.train.resources.editor_keep_editing
 import app.liora.feature.train.resources.editor_name
 import app.liora.feature.train.resources.editor_new_title
-import app.liora.feature.train.resources.editor_note_hint
 import app.liora.feature.train.resources.editor_notes
 import app.liora.feature.train.resources.editor_remove_exercise
 import app.liora.feature.train.resources.editor_reps_max_hint
@@ -150,6 +151,7 @@ internal fun RoutineEditorScreen(
                             onSetChange = viewModel::updateSet,
                         ),
                 ),
+            onExerciseNoteChange = viewModel::setExerciseNote,
             modifier = modifier,
         )
     }
@@ -204,6 +206,8 @@ internal class ExerciseActions(
 private fun RoutineEditorContent(
     state: RoutineEditorUiState,
     actions: EditorActions,
+    /** An exercise's own note, by its catalog id: it belongs to the exercise, not to the routine. */
+    onExerciseNoteChange: (exerciseId: String, note: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val routine = state.routine
@@ -273,6 +277,7 @@ private fun RoutineEditorContent(
                         isLast = index == routine.exercises.lastIndex,
                         dragging = isDragging,
                         actions = actions.exercise,
+                        onNoteChange = onExerciseNoteChange,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                     )
                 }
@@ -308,10 +313,14 @@ private fun ReorderableCollectionItemScope.ExerciseEditorCard(
     isLast: Boolean,
     dragging: Boolean,
     actions: ExerciseActions,
+    onNoteChange: (exerciseId: String, note: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val trackingType = exercise?.trackingType ?: TrackingType.WeightReps
     var choosingRest by rememberSaveable { mutableStateOf(false) }
+    // A note added from the menu shows before it has any text, and goes again if left empty.
+    var addingNote by rememberSaveable { mutableStateOf(false) }
+    val note = exercise?.settings?.stickyNote
     LioraCard(
         modifier = modifier.fillMaxWidth(),
         containerColor =
@@ -346,16 +355,18 @@ private fun ReorderableCollectionItemScope.ExerciseEditorCard(
                     planned = planned,
                     isLast = isLast,
                     onChooseRest = { choosingRest = true },
+                    onAddNote = { addingNote = true }.takeIf { exercise != null && note == null && !addingNote },
                     actions = actions,
                 )
             }
-            planned.notes?.let { notes ->
-                OutlinedTextField(
-                    value = notes,
-                    onValueChange = { notes -> actions.onChange(planned.id) { copy(notes = notes) } },
-                    placeholder = { Text(stringResource(Res.string.editor_note_hint)) },
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+            if (exercise != null && (note != null || addingNote)) {
+                ExerciseNoteField(
+                    note = note,
+                    kind = NoteKind.Exercise,
+                    onNoteChange = { onNoteChange(exercise.id, it) },
+                    focusOnStart = addingNote,
+                    onLeaveEmpty = { addingNote = false },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 )
             }
             SetHeader(trackingType, Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
@@ -394,6 +405,8 @@ private fun ExerciseMenu(
     planned: RoutineExercise,
     isLast: Boolean,
     onChooseRest: () -> Unit,
+    /** Null when the exercise has a note already. */
+    onAddNote: (() -> Unit)?,
     actions: ExerciseActions,
     modifier: Modifier = Modifier,
 ) {
@@ -407,11 +420,7 @@ private fun ExerciseMenu(
                 add(Res.string.editor_superset_remove to { actions.onUnlink(planned.id) })
             }
             add(Res.string.editor_rest to onChooseRest)
-            if (planned.notes ==
-                null
-            ) {
-                add(Res.string.editor_add_note to { actions.onChange(planned.id) { copy(notes = "") } })
-            }
+            onAddNote?.let { add(Res.string.editor_add_note to it) }
             add(Res.string.editor_remove_exercise to { actions.onRemove(planned.id) })
         }
     LioraIconButton(LioraIcons.More, stringResource(Res.string.cd_more), { expanded = true }, modifier)

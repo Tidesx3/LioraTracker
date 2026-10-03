@@ -48,7 +48,8 @@ object RoutineUpdate {
                     exerciseId = done.exerciseId,
                     supersetGroup = done.supersetGroup,
                     restSeconds = done.restSeconds,
-                    notes = done.notes,
+                    // Today's notes stay with the workout; they don't become the plan.
+                    notes = match?.notes,
                     sets = sets,
                 )
             }

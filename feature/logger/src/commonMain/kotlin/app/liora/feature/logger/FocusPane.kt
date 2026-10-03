@@ -27,7 +27,9 @@ import app.liora.core.domain.SetRef
 import app.liora.core.domain.find
 import app.liora.core.domain.setAt
 import app.liora.core.model.RepRange
+import app.liora.core.ui.ExerciseNote
 import app.liora.core.ui.ExercisePicture
+import app.liora.core.ui.NoteKind
 import app.liora.core.ui.setSummary
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.focus_all_done
@@ -127,6 +129,10 @@ internal fun UpNext(
             text = stringResource(Res.string.focus_set, ref.setIndex + 1, exercise.sets.size),
             style = MaterialTheme.typography.titleMedium,
         )
+        // Seat height and the plan, readable from the bench.
+        state.exercises[exercise.exerciseId]?.settings?.stickyNote?.let {
+            ExerciseNote(it, NoteKind.Exercise, Modifier.padding(vertical = 4.dp))
+        }
         state.previousFor(ref)?.let { previous ->
             Text(
                 text =

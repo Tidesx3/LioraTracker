@@ -4,8 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.gym.GymProfileRepository
 import app.liora.core.data.settings.SettingsRepository
+import app.liora.core.data.workout.RestSoundPlayer
+import app.liora.core.domain.RestSound
 import app.liora.core.domain.Settings
 import app.liora.core.model.GymProfile
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -18,7 +21,10 @@ internal typealias SettingsChange = (Settings) -> Settings
 class SettingsViewModel(
     private val repository: SettingsRepository,
     gyms: GymProfileRepository,
+    private val sounds: RestSoundPlayer,
 ) : ViewModel() {
+    private var preview: Job? = null
+
     val settings: StateFlow<Settings?> =
         repository.settings.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
@@ -31,5 +37,11 @@ class SettingsViewModel(
      */
     internal fun update(change: SettingsChange) {
         viewModelScope.launch { repository.update(change) }
+    }
+
+    /** Plays [sound] as it's picked, cutting off the one picked before. */
+    internal fun preview(sound: RestSound) {
+        preview?.cancel()
+        preview = viewModelScope.launch { sounds.play(sound) }
     }
 }

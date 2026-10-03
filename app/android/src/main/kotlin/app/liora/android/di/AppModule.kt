@@ -4,11 +4,13 @@ import android.content.Context
 import app.liora.android.backup.AndroidExportFiles
 import app.liora.android.photos.AndroidPhotoStorage
 import app.liora.android.ui.LioraAppViewModel
+import app.liora.android.workout.AndroidRestSoundPlayer
 import app.liora.android.workout.RestAlarmScheduler
 import app.liora.android.workout.WorkoutNotifier
 import app.liora.core.data.backup.ExportFiles
 import app.liora.core.data.body.PhotoStorage
 import app.liora.core.data.seed.ExerciseSeedSource
+import app.liora.core.data.workout.RestSoundPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -29,6 +31,7 @@ val appModule =
         single<ExportFiles> { AndroidExportFiles(androidContext()) }
         single { WorkoutNotifier(androidContext(), get(), get(), get(), get(), get()) }
         single { RestAlarmScheduler(androidContext(), get(), get()) }
+        single<RestSoundPlayer> { AndroidRestSoundPlayer(androidContext()) }
     }
 
 /** The catalog built by `tools/seed/build-seed.mjs`, shipped in `assets/seed/`. */

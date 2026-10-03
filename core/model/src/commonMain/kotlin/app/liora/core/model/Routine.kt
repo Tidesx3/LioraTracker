@@ -26,6 +26,10 @@ data class RoutineExercise(
     val supersetGroup: Int? = null,
     /** Rest after a set of this exercise; null uses the exercise's own default. */
     val restSeconds: Int? = null,
+    /**
+     * A note the routine kept on the exercise, from before notes moved to the exercise itself
+     * ([ExerciseSettings.stickyNote]). Moved there at startup; new ones aren't written.
+     */
     val notes: String? = null,
     val sets: List<RoutineSet> = emptyList(),
 )

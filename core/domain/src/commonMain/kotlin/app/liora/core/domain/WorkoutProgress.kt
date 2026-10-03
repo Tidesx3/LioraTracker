@@ -63,13 +63,16 @@ object WorkoutOrder {
      */
     fun current(workout: ActiveWorkout): SetRef? {
         val order = of(workout)
-        val lastDone =
-            order.indices
-                .filter { workout.setAt(order[it]).isCompleted }
-                .maxByOrNull { workout.setAt(order[it]).completedAt!! }
+        val lastDone = lastLogged(workout)?.let(order::indexOf)
         val isOpen = { ref: SetRef -> !workout.setAt(ref).isCompleted }
         return lastDone?.let { done -> order.drop(done + 1).firstOrNull(isOpen) } ?: order.firstOrNull(isOpen)
     }
+
+    /** The set ticked off most recently, or null before the first. */
+    fun lastLogged(workout: ActiveWorkout): SetRef? =
+        of(workout)
+            .filter { workout.setAt(it).isCompleted }
+            .maxByOrNull { workout.setAt(it).completedAt!! }
 
     /**
      * Whether rest follows [ref]. Inside a superset the exercises of a round follow each other without

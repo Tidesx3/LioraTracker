@@ -34,9 +34,9 @@
   <string name="menu_superset_next">Superset with next</string>
   <string name="menu_superset_remove">Remove from superset</string>
   <string name="menu_rest">Rest timer</string>
-  <string name="menu_add_note">Add note</string>
+  <string name="menu_exercise_note">Add exercise note</string>
+  <string name="menu_workout_note">Add note for this workout</string>
   <string name="menu_remove">Remove exercise</string>
-  <string name="note_hint">Note for this exercise</string>
 
   <string name="rest_title">Rest</string>
   <string name="rest_minus" translatable="false">−15 s</string>

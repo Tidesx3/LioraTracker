@@ -197,7 +197,9 @@ internal class OfflineActiveWorkoutRepository(
                     position = position,
                     supersetGroup = planned.supersetGroup,
                     restSeconds = planned.restSeconds,
-                    notes = planned.notes,
+                    // A workout's notes start empty: the exercise's own note shows anyway, and what's
+                    // written today stays with today.
+                    notes = null,
                     sync = stamper.newRow(),
                 )
             exercises += exercise

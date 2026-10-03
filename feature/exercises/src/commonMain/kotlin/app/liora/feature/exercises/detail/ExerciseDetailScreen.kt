@@ -57,6 +57,8 @@ import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
 import app.liora.core.navigation.SharedKeys
 import app.liora.core.navigation.rememberSharedContainer
+import app.liora.core.ui.ExerciseNoteField
+import app.liora.core.ui.NoteKind
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.customExerciseBadge
 import app.liora.core.ui.label
@@ -76,7 +78,6 @@ import app.liora.feature.exercises.resources.detail_in_use_hide
 import app.liora.feature.exercises.resources.detail_in_use_title
 import app.liora.feature.exercises.resources.detail_instructions
 import app.liora.feature.exercises.resources.detail_muscles
-import app.liora.feature.exercises.resources.detail_notes
 import app.liora.feature.exercises.resources.detail_primary
 import app.liora.feature.exercises.resources.detail_progress
 import app.liora.feature.exercises.resources.detail_records
@@ -102,6 +103,7 @@ private class ExerciseDetailActions(
     val onHiddenChange: (Boolean) -> Unit,
     val onDelete: () -> Unit,
     val onSelectMetric: (ProgressMetric) -> Unit,
+    val onNoteChange: (String) -> Unit,
 )
 
 @Composable
@@ -127,6 +129,7 @@ internal fun ExerciseDetailScreen(
                 onHiddenChange = viewModel::setHidden,
                 onDelete = viewModel::requestDelete,
                 onSelectMetric = viewModel::selectMetric,
+                onNoteChange = viewModel::setNote,
             ),
         modifier = modifier,
     )
@@ -210,6 +213,15 @@ private fun ExerciseDetailContent(
                 item { ExerciseImages(exercise.imageUrls, Modifier.padding(horizontal = 16.dp)) }
             }
             item { Header(state, Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) }
+            // The note that shows under the exercise in every workout: written here or there.
+            item(key = "note") {
+                ExerciseNoteField(
+                    note = exercise.settings.stickyNote,
+                    kind = NoteKind.Exercise,
+                    onNoteChange = actions.onNoteChange,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                )
+            }
             // Once trained, how it's going comes first; the how-to is for learning it.
             state.progress?.let { progress -> progressItems(progress, actions) }
             item {
@@ -217,16 +229,6 @@ private fun ExerciseDetailContent(
                 Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     MuscleLine(stringResource(Res.string.detail_primary), exercise.primaryMuscles, primary = true)
                     MuscleLine(stringResource(Res.string.detail_secondary), exercise.secondaryMuscles, primary = false)
-                }
-            }
-            exercise.notes?.let { notes ->
-                item {
-                    SectionHeader(stringResource(Res.string.detail_notes))
-                    Text(
-                        text = notes,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                    )
                 }
             }
             if (exercise.instructions.isNotEmpty()) {

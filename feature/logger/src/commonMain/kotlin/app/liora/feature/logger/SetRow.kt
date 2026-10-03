@@ -34,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -172,15 +173,25 @@ internal fun SetRow(
     actions: SetRowActions,
     numbers: NumberFormatter,
     modifier: Modifier = Modifier,
+    /** Given for the set the logger opens at: the row brings itself on screen, then calls it. */
+    onReveal: (() -> Unit)? = null,
 ) {
     val set = state.set
     // Records already set when the logger opens just show their trophy; a new one is celebrated.
     val wasRecord = remember { state.hints.isRecord }
     val dismiss = rememberSwipeToDismissBoxState()
+    val revealer = remember { BringIntoViewRequester() }
+    val revealing = onReveal != null
+    val currentOnRevealed by rememberUpdatedState(onReveal)
+    LaunchedEffect(revealing) {
+        if (!revealing) return@LaunchedEffect
+        revealer.bringIntoView()
+        currentOnRevealed?.invoke()
+    }
     SwipeToDismissBox(
         state = dismiss,
         // Above the rows around it, so a record's confetti flies over them.
-        modifier = modifier.zIndex(if (state.hints.isRecord) 1f else 0f),
+        modifier = modifier.bringIntoViewRequester(revealer).zIndex(if (state.hints.isRecord) 1f else 0f),
         enableDismissFromStartToEnd = false,
         onDismiss = { actions.onRemove(set.id) },
         backgroundContent = {

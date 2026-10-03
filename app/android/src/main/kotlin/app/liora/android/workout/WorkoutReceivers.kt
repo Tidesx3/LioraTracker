@@ -3,8 +3,11 @@ package app.liora.android.workout
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import app.liora.core.data.settings.SettingsRepository
+import app.liora.core.data.workout.RestSoundPlayer
 import app.liora.core.data.workout.RestTimerRepository
 import app.liora.core.data.workout.SetLogger
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
@@ -44,7 +47,10 @@ class WorkoutActionReceiver :
     }
 }
 
-/** Fires when a rest ends: the heads-up with sound and vibration, and the notification back to the next set. */
+/**
+ * Fires when a rest ends: the sound chosen in Settings, the heads-up that vibrates, and the notification
+ * back to the next set. Whether the logger is open or the phone is locked, this is the one place it ends.
+ */
 class RestAlarmReceiver :
     BroadcastReceiver(),
     KoinComponent {
@@ -56,13 +62,18 @@ class RestAlarmReceiver :
         val pending = goAsync()
         receiverScope.launch {
             try {
-                val timers = get<RestTimerRepository>()
-                // A rest that was extended or restarted since has an alarm of its own.
-                if (timers.current()?.endsAt?.toEpochMilliseconds() == endsAt) {
-                    timers.stop()
-                    get<WorkoutNotifier>().alertRestOver()
+                // The receiver holds on until the sound has played, too.
+                coroutineScope {
+                    val timers = get<RestTimerRepository>()
+                    // A rest that was extended or restarted since has an alarm of its own.
+                    if (timers.current()?.endsAt?.toEpochMilliseconds() == endsAt) {
+                        timers.stop()
+                        // Alongside the heads-up, so the sound and the buzz land together.
+                        launch { get<RestSoundPlayer>().play(get<SettingsRepository>().current().restSound) }
+                        get<WorkoutNotifier>().alertRestOver()
+                    }
+                    get<WorkoutNotifier>().refresh()
                 }
-                get<WorkoutNotifier>().refresh()
             } finally {
                 pending.finish()
             }

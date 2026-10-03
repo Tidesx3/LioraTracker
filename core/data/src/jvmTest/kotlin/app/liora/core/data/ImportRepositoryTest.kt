@@ -189,6 +189,59 @@ class ImportRepositoryTest {
         }
 
     @Test
+    fun aNoteFromTheLastTimeBecomesTheExercisesOwn() =
+        runTest {
+            val header = HEVY_WORKOUTS.lines().first()
+            files.texts[HEVY] =
+                (
+                    listOf(header) +
+                        // Rows: the latest workout first, as Hevy writes them.
+                        hevyRow("Pull", "30 Sept. 2026, 17:39", "Klimmzug", note = "") +
+                        hevyRow("Pull", "23 Sept. 2026, 17:39", "Klimmzug", note = "3x 12-15") +
+                        hevyRow("Push", "12 Sept. 2026, 18:05", "Bankdrücken (Langhantel)", note = "Seat on 4") +
+                        hevyRow("Push", "12 Sept. 2026, 18:05", "Bankdrücken (Langhantel)", note = "", superset = "0")
+                ).joinToString("\n")
+            imports.import(imports.read(HEVY, zone), emptyMap())
+
+            val byId = exercises.observeExercises("de").first().associateBy { it.id }
+            assertEquals("Seat on 4", byId.getValue(BENCH).settings.stickyNote)
+            // Last time it had none: the plan from a week before has had its day, and stays with that workout.
+            assertNull(byId.getValue(WEIGHTED_PULL_UP).settings.stickyNote)
+            assertEquals(
+                listOf("3x 12-15"),
+                history.workouts
+                    .first()
+                    .flatMap { it.exercises }
+                    .filter { it.exerciseId == WEIGHTED_PULL_UP }
+                    .mapNotNull { it.notes },
+            )
+        }
+
+    @Test
+    fun aNoteHereIsNeverReplaced() =
+        runTest {
+            exercises.setNote(BENCH, "Grip narrow")
+            files.texts[HEVY] = HEVY_WORKOUTS
+            imports.import(imports.read(HEVY, zone), emptyMap())
+            assertEquals(
+                "Grip narrow",
+                exercises
+                    .observeExercise(BENCH, "de")
+                    .first()
+                    ?.settings
+                    ?.stickyNote,
+            )
+        }
+
+    private fun hevyRow(
+        title: String,
+        start: String,
+        exercise: String,
+        note: String,
+        superset: String = "",
+    ) = "\"$title\",\"$start\",\"$start\",\"\",\"$exercise\",$superset,\"$note\",0,\"normal\",10,8,,,"
+
+    @Test
     fun aNewerExportAddsOnlyWhatsNew() =
         runTest {
             val header = HEVY_WORKOUTS.lines().first()

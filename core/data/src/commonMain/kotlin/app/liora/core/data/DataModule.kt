@@ -11,6 +11,7 @@ import app.liora.core.data.body.OfflineBodyRepository
 import app.liora.core.data.body.OfflineProgressPhotoRepository
 import app.liora.core.data.body.ProgressPhotoRepository
 import app.liora.core.data.exercise.ExerciseRepository
+import app.liora.core.data.exercise.LegacyNotes
 import app.liora.core.data.exercise.OfflineExerciseRepository
 import app.liora.core.data.gym.GymProfileRepository
 import app.liora.core.data.gym.OfflineGymProfileRepository
@@ -49,6 +50,7 @@ val dataModule =
         single { HybridLogicalClock(clock = get()) { get<DeviceIdentity>().deviceId() } }
         singleOf(::SyncStamper)
         singleOf(::ExerciseCatalogSeeder)
+        singleOf(::LegacyNotes)
         singleOf(::AppStartup)
         singleOf(::OfflineExerciseRepository) bind ExerciseRepository::class
         singleOf(::OfflineRoutineRepository) bind RoutineRepository::class
@@ -74,8 +76,10 @@ val dataModule =
 /** Work that runs once per process start, off the main thread. */
 class AppStartup(
     private val seeder: ExerciseCatalogSeeder,
+    private val legacyNotes: LegacyNotes,
 ) {
     suspend fun run() {
         seeder.seedIfNeeded()
+        legacyNotes.move()
     }
 }

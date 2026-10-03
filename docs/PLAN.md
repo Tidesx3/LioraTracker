@@ -132,7 +132,7 @@ As of 2026-10-03:
     on the phone; the user chose **Violet**, and the lab, the preview setting and the other fonts went.
     - Colors (`Color.kt`): #5504CF is the accent in light, on white cards over a pale lavender grey; in dark
       it fills bars and ticks on near black, and a lighter violet of the same hue (#A57BFF) carries text and
-      buttons. Done sets take the violet, drop sets turn pink so they don't read as the accent, records stay
+      buttons. Done sets took the violet (emerald since 2026-10-03), drop sets turn pink so they don't read as the accent, records stay
       gold. The workout notification takes the violet too (`liora_accent`).
     - Type: Sora (OFL, bundled), digits made equal with `tabularNumbers()` where numbers change live.
     - Shapes and parts: generous corners; cards are `LioraCard` (white on a soft shadow in light, a lighter
@@ -200,6 +200,25 @@ As of 2026-10-03:
     delete, restore or explain stay plain.
 - **Phase 2 is done**, pending the device checks for motion in TODO.md. Phase 3 (Google Drive sync and
   Health Connect) is next.
+- **After the first real workout (2026-10-03):** fixes from logging one on the phone. No schema change.
+  - Done sets turn emerald (`LioraColors.completed`, #0E9F6E in light, #34D399 with a dark tick in dark),
+    so done reads apart from the violet that marks what's next.
+  - The logger has one list for all its layouts (`WorkoutListPlace`): it opens at the set that's up next
+    (or the one logged last), from the workout bar too, and keeps its place when the phone turns or folds.
+    Turned sideways, the cover screen is wide enough for two panes, which used to start a list of their own.
+  - Rest over plays a sound Liora makes itself (`tools/sound/MakeSounds.java`, synthesized struck bars:
+    chime, bell, marimba). Settings › Workout picks one or none, playing each as it's picked
+    (`RestSound` in `Settings`). `AndroidRestSoundPlayer` plays it on the media stream from the rest alarm,
+    so vibrate mode doesn't mute it and it comes through headphones, ducking music while Liora is on
+    screen. The rest channel (`rest_end`, replacing `rest_over`) only vibrates.
+  - Two notes per exercise. The exercise's own (`exercise_settings.sticky_note`, `ExerciseRepository.setNote`)
+    is pinned under it in the logger, the up-next pane, routines and on its page, and the custom exercise
+    editor writes it too. Each workout keeps its own (`workout_exercise.notes`), shown in history. Both edit
+    in place on the card (`ExerciseNoteField` in `core:ui`). Starting a routine no longer copies its notes
+    into the workout, and updating a routine no longer takes today's notes. `LegacyNotes` moves custom
+    exercises' notes and routines' exercise notes onto the exercise's note at startup. An import makes the
+    note from an exercise's last session its note, when it has none: Hevy copies routine notes into every
+    workout, so one still there last time is the plan.
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a
   milestone go in TODO.md.

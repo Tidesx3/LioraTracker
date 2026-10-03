@@ -20,6 +20,7 @@ data class WorkoutExercise(
     /** Adjacent exercises that share a group form a superset. */
     val supersetGroup: Int? = null,
     val restSeconds: Int? = null,
+    /** This workout's note on the exercise ("only 8 reps, shoulder sore"); it stays with this workout. */
     val notes: String? = null,
     val sets: List<LoggedSet> = emptyList(),
 )

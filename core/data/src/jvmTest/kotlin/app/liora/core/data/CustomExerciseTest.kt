@@ -144,6 +144,36 @@ class CustomExerciseTest {
             assertEquals(emptyList(), repository.observeExercise(a, "de").first()?.imageUrls)
         }
 
+    @Test
+    fun theNoteIsTheExercisesOwnForBuiltInAndCustomExercisesAlike() =
+        runTest {
+            // The editor's note lands where a built-in's goes, not on the exercise row.
+            val id = repository.createCustom(legPressInternat)
+            assertEquals(
+                "Sitz auf Stufe 4",
+                repository
+                    .observeExercise(id, "de")
+                    .first()
+                    ?.settings
+                    ?.stickyNote,
+            )
+            assertNull(assertNotNull(database.exerciseDao().get(id)).notes)
+
+            database.exerciseDao().upsertExercises(listOf(builtIn("fedb.Leg_Press", emptyList())))
+            repository.setNote("fedb.Leg_Press", "  Sitz auf 5\nbreit ")
+            val legPress = repository.observeExercise("fedb.Leg_Press", "de").first()
+            assertEquals("Sitz auf 5\nbreit", legPress?.settings?.stickyNote)
+
+            repository.setNote("fedb.Leg_Press", " ")
+            assertNull(
+                repository
+                    .observeExercise("fedb.Leg_Press", "de")
+                    .first()
+                    ?.settings
+                    ?.stickyNote,
+            )
+        }
+
     private fun builtIn(
         id: String,
         images: List<String>,

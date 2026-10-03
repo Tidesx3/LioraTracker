@@ -15,7 +15,12 @@ import kotlinx.coroutines.SupervisorJob
 
 internal object WorkoutNotifications {
     const val CHANNEL_WORKOUT = "workout"
-    const val CHANNEL_REST_OVER = "rest_over"
+
+    /** Vibrates only: Liora plays the sound itself (`AndroidRestSoundPlayer`), so vibrate mode doesn't mute it. */
+    const val CHANNEL_REST_OVER = "rest_end"
+
+    /** The first rest channel, which played the system's notification sound; channels can't change their sound. */
+    private const val CHANNEL_REST_OVER_WITH_SOUND = "rest_over"
     const val ID_WORKOUT = 1
     const val ID_REST_OVER = 2
 
@@ -31,8 +36,8 @@ internal object WorkoutNotifications {
     const val EXTRA_ENDS_AT = "ends_at"
 
     /**
-     * The ongoing workout notification stays quiet; the end of a rest gets its own channel with sound and
-     * vibration, so each can be tuned in the system settings on its own.
+     * The ongoing workout notification stays quiet; the end of a rest gets its own channel that vibrates,
+     * so each can be tuned in the system settings on its own.
      */
     fun createChannels(context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java)
@@ -53,10 +58,12 @@ internal object WorkoutNotifications {
                 NotificationManager.IMPORTANCE_HIGH,
             ).apply {
                 description = context.getString(R.string.notif_channel_rest_desc)
+                setSound(null, null)
                 enableVibration(true)
                 vibrationPattern = REST_OVER_VIBRATION
             },
         )
+        manager.deleteNotificationChannel(CHANNEL_REST_OVER_WITH_SOUND)
     }
 
     fun openLogger(context: Context): PendingIntent =

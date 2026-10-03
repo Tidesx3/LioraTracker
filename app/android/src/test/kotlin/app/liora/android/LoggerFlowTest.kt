@@ -27,6 +27,7 @@ import androidx.window.testing.layout.FoldingFeature
 import androidx.window.testing.layout.TestWindowLayoutInfo
 import androidx.window.testing.layout.WindowLayoutInfoPublisherRule
 import app.liora.core.data.AppStartup
+import app.liora.core.data.exercise.ExerciseRepository
 import app.liora.core.data.gym.GymProfileRepository
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.settings.SettingsRepository
@@ -56,6 +57,7 @@ import org.koin.core.context.GlobalContext
 import org.koin.core.context.stopKoin
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
@@ -433,6 +435,94 @@ class LoggerFlowTest {
         composeRule.onRoot().captureRoboImage("src/test/screenshots/de_logger_resting_dark.png")
     }
 
+    @Test
+    @Config(qualifiers = COVER)
+    fun theWorkoutBarOpensTheLoggerAtTheSetUpNext() {
+        halfwayThroughLegDay()
+        launch()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasContentDescription("Open workout")) }
+        composeRule.onNodeWithContentDescription("Open workout").performClick()
+        waitForText("Finish")
+        // Four exercises done: the list opens at the fifth, not back at the top.
+        waitForText("Leg Press")
+        composeRule.onNodeWithText("Leg Press").assertIsDisplayed()
+        assertTrue(composeRule.onAllNodesWithText("Barbell Squat").fetchSemanticsNodes().isEmpty())
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun turningThePhoneSidewaysKeepsThePlace() {
+        halfwayThroughLegDay()
+        val activity = Robolectric.buildActivity(MainActivity::class.java).setup()
+        composeRule.waitForIdle()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasContentDescription("Open workout")) }
+        composeRule.onNodeWithContentDescription("Open workout").performClick()
+        waitForText("Leg Press")
+
+        // Sideways the cover screen is wide enough for two panes: a different layout, the same place.
+        RuntimeEnvironment.setQualifiers("+$COVER_SIDEWAYS")
+        activity.configurationChange()
+        composeRule.waitForIdle()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasTestTag(LoggerTags.PAD)) }
+        assertTrue(composeRule.onAllNodesWithText("Barbell Squat").fetchSemanticsNodes().isEmpty())
+
+        RuntimeEnvironment.setQualifiers("+$COVER")
+        activity.configurationChange()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Leg Press").assertIsDisplayed()
+        assertTrue(composeRule.onAllNodesWithText("Barbell Squat").fetchSemanticsNodes().isEmpty())
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun theExercisesNoteStaysWithItAndTodaysWithToday() {
+        launch()
+        waitForText("Start")
+        composeRule.onNodeWithText("Start").performClick()
+        waitForText("Finish")
+        composeRule.onNodeWithContentDescription("More options").performClick()
+        composeRule.onNodeWithText("Add exercise note").performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasSetTextAction()) }
+        composeRule.onNode(hasSetTextAction()).performTextInput("Seat on 4")
+        composeRule.onNodeWithContentDescription("More options").performClick()
+        composeRule.onNodeWithText("Add note for this workout").performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { composeRule.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().size == 2 }
+        composeRule.onAllNodes(hasSetTextAction())[1].performTextInput("Only 8 reps today")
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/logger_notes_dark.png")
+
+        // Away and back: both come from the database now.
+        composeRule.onNodeWithContentDescription("Minimize workout").performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasContentDescription("Open workout")) }
+        composeRule.onNodeWithContentDescription("Open workout").performClick()
+        waitForText("Seat on 4")
+        waitForText("Only 8 reps today")
+
+        val koin = GlobalContext.get()
+        val bench =
+            runBlocking {
+                koin
+                    .get<ExerciseRepository>()
+                    .observeExercise(PUSH.exercises.single().exerciseId, "en")
+                    .first()
+            }
+        assertEquals("Seat on 4", bench?.settings?.stickyNote)
+        val today = runBlocking { koin.get<ActiveWorkoutRepository>().activeWorkout.first()!! }
+        assertEquals("Only 8 reps today", today.exercises.single().notes)
+    }
+
+    /** Leg day in progress: the first four of six exercises done, the fifth (leg press) up next. */
+    private fun halfwayThroughLegDay() =
+        runBlocking {
+            val koin = GlobalContext.get()
+            koin.get<RoutineRepository>().save(LEG_DAY)
+            val workout = koin.get<ActiveWorkoutRepository>().startFromRoutine(LEG_DAY.id)
+            val sets = koin.get<SetLogger>()
+            workout.exercises.take(4).flatMap { it.sets }.forEach { set ->
+                sets.updateSet(set.id) { copy(weight = Mass(60.0), reps = 8) }
+                sets.completeSet(set.id)
+            }
+        }
+
     /** A finished Push session: every set 80 kg × 10. */
     private fun logLastSession() =
         runBlocking {
@@ -494,6 +584,9 @@ class LoggerFlowTest {
         const val COVER = "w411dp-h960dp-night-xxhdpi"
         const val INNER = "w984dp-h1092dp-night-xhdpi"
 
+        /** The cover screen turned sideways. */
+        const val COVER_SIDEWAYS = "w960dp-h411dp-land"
+
         /** The inner screen turned sideways, so the hinge runs across. */
         const val TABLETOP_SIZE = "w1092dp-h984dp-night-xhdpi"
         const val BENCH = "Barbell Bench Press"
@@ -501,6 +594,27 @@ class LoggerFlowTest {
         /** Five warm-ups of two cells each come before the first working set. */
         const val WORKING_SET_CELL = 10
         const val TIMEOUT_MS = 10_000L
+
+        val LEG_DAY =
+            Routine(
+                id = "legs",
+                name = "Leg day",
+                exercises =
+                    listOf(
+                        "fedb.Barbell_Squat",
+                        "fedb.Barbell_Deadlift",
+                        "fedb.Pullups",
+                        "fedb.Seated_Cable_Rows",
+                        "fedb.Leg_Press",
+                        "fedb.Dumbbell_Bicep_Curl",
+                    ).map { exerciseId ->
+                        RoutineExercise(
+                            id = "legs-$exerciseId",
+                            exerciseId = exerciseId,
+                            sets = List(4) { RoutineSet("legs-$exerciseId-$it", reps = RepRange(8)) },
+                        )
+                    },
+            )
 
         val PUSH =
             Routine(

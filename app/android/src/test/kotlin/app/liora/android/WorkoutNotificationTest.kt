@@ -14,6 +14,7 @@ import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.RestTimerRepository
 import app.liora.core.data.workout.SetLogger
+import app.liora.core.domain.RestSound
 import app.liora.core.model.ActiveWorkout
 import app.liora.core.model.Mass
 import app.liora.core.model.RepRange
@@ -120,6 +121,10 @@ class WorkoutNotificationTest {
         awaitTimer { it == null }
         val alert = awaitNotification(WorkoutNotifications.ID_REST_OVER) { it.title == "Break’s over" }
         assertEquals(WorkoutNotifications.CHANNEL_REST_OVER, alert.channelId)
+        // Liora plays the sound itself, so the channel only vibrates and vibrate mode doesn't mute it.
+        assertEquals(listOf(RestSound.Chime), koin.get<RecordingRestSoundPlayer>().played)
+        val channel = notifications.getNotificationChannel(alert.channelId)
+        assertNull(channel.sound)
         awaitNotification { it.title == "Push" && it.text.startsWith("Barbell Bench Press · Set 2 of 3") }
     }
 

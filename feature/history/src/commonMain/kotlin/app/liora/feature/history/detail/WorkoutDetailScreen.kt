@@ -52,7 +52,9 @@ import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
 import app.liora.core.navigation.SharedKeys
 import app.liora.core.navigation.rememberSharedContainer
+import app.liora.core.ui.ExerciseNote
 import app.liora.core.ui.ExerciseThumbnail
+import app.liora.core.ui.NoteKind
 import app.liora.core.ui.RecordsCard
 import app.liora.core.ui.SetTypeBadge
 import app.liora.core.ui.currentLanguage
@@ -249,9 +251,8 @@ private fun DoneExercise(
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             DoneExerciseHeader(done, exercise, onOpenExercise)
-            done.notes?.let {
-                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            // That day's note; the exercise's own is on its page, and in the logger.
+            done.notes?.let { ExerciseNote(it, NoteKind.Workout) }
             DoneSets(done, trackingType, records)
         }
     }

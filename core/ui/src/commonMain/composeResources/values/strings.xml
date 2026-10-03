@@ -119,4 +119,9 @@
   <string name="pose_front">Front</string>
   <string name="pose_side">Side</string>
   <string name="pose_back">Back</string>
+
+  <string name="note_exercise">Exercise note</string>
+  <string name="note_exercise_hint">Shows every time: seat height, grip, the plan</string>
+  <string name="note_workout">Note for this workout</string>
+  <string name="note_workout_hint">Just for this workout: how it went, what to watch</string>
 </resources>

@@ -29,7 +29,6 @@
   <string name="detail_primary">Primär</string>
   <string name="detail_secondary">Sekundär</string>
   <string name="detail_instructions">Ausführung</string>
-  <string name="detail_notes">Notizen</string>
   <string name="detail_history">Verlauf</string>
   <string name="detail_progress">Fortschritt</string>
   <string name="detail_records">Rekorde</string>
@@ -75,7 +74,7 @@
   <string name="editor_equipment">Equipment</string>
   <string name="editor_primary">Hauptmuskeln</string>
   <string name="editor_secondary">Nebenmuskeln</string>
-  <string name="editor_notes">Notizen</string>
-  <string name="editor_notes_hint">Sitzhöhe, Griff, Hinweise …</string>
+  <string name="editor_notes">Übungsnotiz</string>
+  <string name="editor_notes_hint">Steht jedes Mal hier: Sitzhöhe, Griff, der Plan</string>
   <string name="editor_variation_name">%1$s (Variante)</string>
 </resources>

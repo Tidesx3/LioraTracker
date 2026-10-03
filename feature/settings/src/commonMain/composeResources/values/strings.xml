@@ -6,6 +6,16 @@
   <string name="rest_working">Rest between sets</string>
   <string name="rest_warmup">Rest after warm-up sets</string>
   <string name="rest_hint">When the exercise has no rest of its own</string>
+  <string name="rest_sound">Sound when rest is up</string>
+  <string name="rest_sound_hint">Plays at media volume, through headphones too, and even with the phone on vibrate. Tap one to hear it.</string>
+  <string name="rest_sound_chime">Chime</string>
+  <string name="rest_sound_chime_body">Two bright notes, up</string>
+  <string name="rest_sound_bell">Bell</string>
+  <string name="rest_sound_bell_body">Ding ding, next round</string>
+  <string name="rest_sound_marimba">Marimba</string>
+  <string name="rest_sound_marimba_body">Three quick wooden notes</string>
+  <string name="rest_sound_off">No sound</string>
+  <string name="rest_sound_off_body">Just the vibration</string>
   <string name="rpe">RPE column</string>
   <string name="rpe_body">Rate how hard each set was, from 1 to 10</string>
 
@@ -91,6 +101,7 @@
   <string name="message_newer_backup">That backup is from a newer version of Liora. Update the app to restore it.</string>
 
   <string name="dialog_cancel">Cancel</string>
+  <string name="dialog_done">Done</string>
 
   <string name="gym">Gym</string>
   <string name="gym_standard">Standard equipment</string>

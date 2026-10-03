@@ -40,6 +40,7 @@ import app.liora.core.designsystem.theme.dynamicColorSupported
 import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.designsystem.util.workoutDisplayName
 import app.liora.core.domain.OneRepMaxFormula
+import app.liora.core.domain.RestSound
 import app.liora.core.domain.Settings
 import app.liora.core.domain.ThemeMode
 import app.liora.core.model.DistanceUnit
@@ -64,11 +65,14 @@ import app.liora.feature.settings.resources.Res
 import app.liora.feature.settings.resources.backup_file_name
 import app.liora.feature.settings.resources.csv_file_name
 import app.liora.feature.settings.resources.dialog_cancel
+import app.liora.feature.settings.resources.dialog_done
 import app.liora.feature.settings.resources.dynamic_color
 import app.liora.feature.settings.resources.formula
 import app.liora.feature.settings.resources.gym
 import app.liora.feature.settings.resources.language
 import app.liora.feature.settings.resources.rest_hint
+import app.liora.feature.settings.resources.rest_sound
+import app.liora.feature.settings.resources.rest_sound_hint
 import app.liora.feature.settings.resources.rest_warmup
 import app.liora.feature.settings.resources.rest_working
 import app.liora.feature.settings.resources.rpe
@@ -83,6 +87,7 @@ import app.liora.feature.settings.resources.theme
 import app.liora.feature.settings.resources.unit_body_length
 import app.liora.feature.settings.resources.unit_distance
 import app.liora.feature.settings.resources.unit_weight
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.seconds
@@ -115,6 +120,7 @@ internal fun SettingsScreen(
         onBack = onBack,
         onOpenGyms = onOpenGyms,
         onChange = viewModel::update,
+        onPreviewSound = viewModel::preview,
         dataActions =
             DataActions(
                 onBackUp = { backupSaver.save(backupName) },
@@ -144,6 +150,7 @@ private val IMPORT_TYPES =
 private enum class Choice {
     RestWorking,
     RestWarmup,
+    RestSound,
     Weight,
     Distance,
     BodyLength,
@@ -161,6 +168,7 @@ private fun SettingsContent(
     onBack: () -> Unit,
     onOpenGyms: () -> Unit,
     onChange: (SettingsChange) -> Unit,
+    onPreviewSound: (RestSound) -> Unit,
     dataActions: DataActions,
     language: AppLanguage,
     modifier: Modifier = Modifier,
@@ -204,6 +212,11 @@ private fun SettingsContent(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                    )
+                    SettingRow(
+                        stringResource(Res.string.rest_sound),
+                        restSoundName(settings.restSound),
+                        onClick = { open = Choice.RestSound },
                     )
                     SwitchRow(
                         title = stringResource(Res.string.rpe),
@@ -280,7 +293,7 @@ private fun SettingsContent(
         }
     }
     if (settings != null) {
-        ChoiceDialogs(open, settings, onChange, language, onClose = { open = null })
+        ChoiceDialogs(open, settings, onChange, onPreviewSound, language, onClose = { open = null })
     }
     data.pending?.let { summary ->
         RestoreDialog(summary, onRestore = dataActions.onConfirmRestore, onDismiss = dataActions.onCancelRestore)
@@ -292,6 +305,7 @@ private fun ChoiceDialogs(
     open: Choice?,
     settings: Settings,
     onChange: (SettingsChange) -> Unit,
+    onPreviewSound: (RestSound) -> Unit,
     language: AppLanguage,
     onClose: () -> Unit,
 ) {
@@ -316,6 +330,24 @@ private fun ChoiceDialogs(
                 },
                 onDismiss = onClose,
                 offerExerciseDefault = false,
+            )
+        }
+
+        Choice.RestSound -> {
+            // Stays open, so each sound can be heard before settling on one.
+            ChoiceDialog(
+                title = stringResource(Res.string.rest_sound),
+                note = stringResource(Res.string.rest_sound_hint),
+                options = RestSound.entries,
+                selected = settings.restSound,
+                label = { restSoundName(it) },
+                description = { restSoundDescription(it) },
+                onChoose = { sound ->
+                    onChange { it.copy(restSound = sound) }
+                    onPreviewSound(sound)
+                },
+                onDismiss = onClose,
+                dismissLabel = Res.string.dialog_done,
             )
         }
 
@@ -462,12 +494,23 @@ private fun <T> ChoiceDialog(
     onChoose: (T) -> Unit,
     onDismiss: () -> Unit,
     description: (@Composable (T) -> String)? = null,
+    /** A line above the options. */
+    note: String? = null,
+    dismissLabel: StringResource = Res.string.dialog_cancel,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
             Column(Modifier.selectableGroup()) {
+                note?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+                }
                 options.forEach { option ->
                     Row(
                         modifier = Modifier.fillMaxWidth().clickable { onChoose(option) }.padding(vertical = 4.dp),
@@ -489,6 +532,6 @@ private fun <T> ChoiceDialog(
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.dialog_cancel)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(dismissLabel)) } },
     )
 }

@@ -47,7 +47,9 @@ import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
 import app.liora.core.navigation.SharedKeys
 import app.liora.core.navigation.rememberSharedContainer
+import app.liora.core.ui.ExerciseNote
 import app.liora.core.ui.ExerciseThumbnail
+import app.liora.core.ui.NoteKind
 import app.liora.core.ui.SetTypeBadge
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.restLabel
@@ -242,9 +244,7 @@ private fun PlannedExercise(
                     }
                 }
             }
-            planned.notes?.let {
-                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            exercise?.settings?.stickyNote?.let { ExerciseNote(it, NoteKind.Exercise) }
             val numbers = setNumbers(planned.sets.map { it.type })
             planned.sets.forEachIndexed { index, set ->
                 Row(verticalAlignment = Alignment.CenterVertically) {

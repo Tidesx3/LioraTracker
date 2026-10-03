@@ -45,6 +45,15 @@ interface RoutineDao {
     )
     suspend fun setsOf(routineId: String): List<RoutineSetEntity>
 
+    /** Exercises of live routines that carry a note of their own, from before notes moved to the exercise. */
+    @Query(
+        """
+        SELECT re.* FROM routine_exercise re JOIN routine r ON r.id = re.routine_id
+        WHERE re.notes IS NOT NULL AND re.deleted_at IS NULL AND r.deleted_at IS NULL
+        """,
+    )
+    suspend fun exercisesWithNotes(): List<RoutineExerciseEntity>
+
     @Query("SELECT COALESCE(MAX(position), -1) FROM routine WHERE deleted_at IS NULL")
     suspend fun maxRoutinePosition(): Int
 

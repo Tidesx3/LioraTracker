@@ -18,6 +18,7 @@ data class Exercise(
     val isCustom: Boolean,
     /** For custom variations: the built-in exercise this one was derived from. */
     val variationOf: String?,
+    /** A custom exercise's notes from before they moved to [ExerciseSettings.stickyNote]; null once moved. */
     val notes: String?,
     /** Popularity rank for built-ins (1 = most common); null for rarely used or custom exercises. */
     val rank: Int?,
@@ -26,6 +27,10 @@ data class Exercise(
 
 /** Per-user overrides that apply to built-in and custom exercises alike. */
 data class ExerciseSettings(
+    /**
+     * The exercise's own note: seat height, grip, the plan. It shows under the exercise every time, in
+     * workouts and routines alike; a workout's own note for it is `WorkoutExercise.notes`.
+     */
     val stickyNote: String? = null,
     val restWorkingSeconds: Int? = null,
     val restWarmupSeconds: Int? = null,

@@ -18,6 +18,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - `./gradlew :app:android:assembleDebug` or `installDebug`.
 - `./gradlew :app:android:recordRoborazziDebug`: re-renders screenshots to `app/android/src/test/screenshots/`. Read the PNGs to review UI changes.
 - `java tools/icons/MakeIcons.java logo.png app/android/src/main/res build/icon-preview.png`: rebuilds the launcher and notification icons from `logo.png` (light artwork on black) and writes a preview sheet to check them by eye.
+- `java tools/sound/MakeSounds.java app/android/src/main/res/raw build/sound-preview.png`: rebuilds the end-of-rest sounds (synthesized, no samples) and writes their waveforms to check for clipping and clicks.
 
 ## Architecture rules
 
@@ -47,6 +48,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - `ownerId` is a server-side concept, added in Phase 4. The local DB belongs to one user.
 - **Local-only tables:** `local_meta` (device id, seed version, the running rest timer, the gym in use) and `exercise_name` (search index, rebuilt from the seed).
 - **Photos:** progress photos are files in app-private `files/photos` (never the shared gallery), written only through `PhotoStorage`. Their rows sync; the images will sync as blobs (Phase 3).
+- **Notes:** an exercise has its own note (`exercise_settings.sticky_note`, written through `ExerciseRepository.setNote`), shown wherever it appears; each workout has its own per exercise (`workout_exercise.notes`). Never copy one into the other. Routine exercise notes and custom exercise `notes` are legacy: `LegacyNotes` moves them onto the exercise's note at startup.
 - **Settings:** read them from `SettingsRepository` (`settings` Flow, or `current()` inside a transaction), never hard-coded defaults: the e1RM formula, stall window and rest defaults all come from there. One `preference` row per choice; add a key in `SettingsCodec` for a new one.
 - **Gyms and loads:** weights a user can load come from the gym in use (`GymProfileRepository.active`, per device). Round targets and steps through `LoadRounding` by the exercise's equipment, never a fixed 2.5 kg step. A gym keeps its own unit (pound plates stay 45 lb) while storing kilograms.
 - **Derived data:** PRs and stats caches are recomputed locally and never synced.

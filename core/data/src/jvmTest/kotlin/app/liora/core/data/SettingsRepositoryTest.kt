@@ -8,6 +8,7 @@ import app.liora.core.database.inMemoryLioraDatabase
 import app.liora.core.database.model.PreferenceEntity
 import app.liora.core.database.model.SyncMetadata
 import app.liora.core.domain.OneRepMaxFormula
+import app.liora.core.domain.RestSound
 import app.liora.core.domain.Settings
 import app.liora.core.domain.ThemeMode
 import app.liora.core.model.DistanceUnit
@@ -92,6 +93,19 @@ class SettingsRepositoryTest {
             // Only pounds back to kilograms: the distance stays in miles.
             settings.update { it.copy(units = it.units.copy(weight = WeightUnit.Kilogram)) }
             assertEquals(Units(WeightUnit.Kilogram, DistanceUnit.Mile, LengthUnit.Inch), settings.current().units)
+        }
+
+    @Test
+    fun theRestSoundIsKept() =
+        runTest {
+            assertEquals(RestSound.Chime, settings.current().restSound)
+
+            settings.update { it.copy(restSound = RestSound.Marimba) }
+            assertEquals(RestSound.Marimba, settings.settings.first().restSound)
+            assertEquals(mapOf("rest.sound" to "marimba"), dao.all().associate { it.key to it.value })
+
+            settings.update { it.copy(restSound = RestSound.Off) }
+            assertEquals(RestSound.Off, settings.current().restSound)
         }
 
     @Test

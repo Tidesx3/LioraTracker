@@ -9,7 +9,7 @@
   <string name="notif_channel_workout">Workout in progress</string>
   <string name="notif_channel_workout_desc">The workout you’re logging: the next set and the rest countdown.</string>
   <string name="notif_channel_rest">Rest over</string>
-  <string name="notif_channel_rest_desc">Lets you know when your rest is up.</string>
+  <string name="notif_channel_rest_desc">Buzzes when your rest is up. The sound is chosen in Liora’s settings.</string>
   <string name="notif_workout_default_title">Workout</string>
   <string name="notif_rest_remaining">Rest %1$s</string>
   <string name="notif_rest_over_title">Break’s over</string>

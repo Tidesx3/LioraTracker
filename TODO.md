@@ -4,6 +4,16 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
+- **Rest sound: check on the phone** (added 2026-10-03). The sounds were made without listening to
+  them, so pick one in Settings › Workout and say if it needs to change (`tools/sound/MakeSounds.java`).
+  - Let a rest run out locked, with the phone on vibrate, and with music in headphones. It plays at media
+    volume. Music should duck while Liora is on screen; in the background Android 15 and up don't let
+    an app duck others, so it plays over the music.
+  - The old "Rest over" channel is replaced by one that only vibrates, so any changes made to it in the
+    system settings are gone.
+- **Notes: check typing on the cover screen.** Add an exercise note and a note for the workout from the
+  card's menu: the keyboard comes up, the number pad goes away, and the note stays above the keyboard.
+
 - **Exercise picker: fast scrolling stutters, and photos seem to load again** (reported 2026-09-30 on
   the Fold 7). Scrolling the list of exercises quickly, e.g. when adding one to a workout, isn't smooth
   any more. Thumbnails look like they're loaded again each time a row comes back into view. Places to

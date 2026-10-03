@@ -70,6 +70,17 @@ class FinishWorkoutTest {
     }
 
     @Test
+    fun todaysNotesStayWithTheWorkout() {
+        val routine = pushRoutine()
+        val workout = pushWorkout()
+        val noted =
+            workout.copy(exercises = workout.exercises.map { it.copy(notes = "Only 8 reps today, shoulder sore") })
+        val updated = RoutineUpdate.fromWorkout(routine, noted) { "new" }
+        assertEquals(routine.exercises.map { it.notes }, updated.exercises.take(2).map { it.notes })
+        assertEquals(null, updated.exercises[2].notes)
+    }
+
+    @Test
     fun aSkippedSetStaysInThePlanAndADeletedOneLeavesIt() {
         val routine = threeSets()
         val skipped =

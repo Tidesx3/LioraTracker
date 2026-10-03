@@ -1,6 +1,8 @@
 package app.liora.android
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasScrollToNodeAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
@@ -10,9 +12,11 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import app.liora.core.data.AppStartup
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.domain.OneRepMaxFormula
+import app.liora.core.domain.RestSound
 import app.liora.core.domain.ThemeMode
 import app.liora.core.model.DistanceUnit
 import app.liora.core.model.LengthUnit
@@ -45,6 +49,7 @@ class SettingsFlowTest {
     val composeRule = createEmptyComposeRule()
 
     private val settings get() = GlobalContext.get().get<SettingsRepository>()
+    private val sounds get() = GlobalContext.get().get<RecordingRestSoundPlayer>()
 
     @Before
     fun seed() = runBlocking { GlobalContext.get().get<AppStartup>().run() }
@@ -71,8 +76,18 @@ class SettingsFlowTest {
         composeRule.onNodeWithText("2:30").performClick()
         waitForText("2:30")
 
+        // Each sound plays as it's picked, and the dialog stays open to try the next.
+        composeRule.onNodeWithText("Sound when rest is up").performClick()
+        composeRule.onNodeWithText("Bell").performClick()
+        composeRule.onNodeWithText("Marimba").performClick()
+        composeRule.onNodeWithText("Done").performClick()
+        waitForText("Marimba")
+        composeRule.waitUntil(TIMEOUT_MS) { sounds.played.size == 2 }
+        assertEquals(listOf(RestSound.Bell, RestSound.Marimba), sounds.played)
+
         // The light theme applies at once, everywhere.
-        composeRule.onNodeWithText("Theme").performScrollTo().performClick()
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Theme"))
+        composeRule.onNodeWithText("Theme").performClick()
         composeRule.onNodeWithText("Light").performClick()
         waitForText("Light")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/settings_light.png")
@@ -81,6 +96,7 @@ class SettingsFlowTest {
         assertEquals(OneRepMaxFormula.Brzycki, saved.oneRepMaxFormula)
         assertEquals(28.days, saved.stallWindow)
         assertEquals(150.seconds, saved.rest.working)
+        assertEquals(RestSound.Marimba, saved.restSound)
         assertEquals(ThemeMode.Light, saved.theme)
     }
 

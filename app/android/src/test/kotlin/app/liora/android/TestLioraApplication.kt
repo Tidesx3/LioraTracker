@@ -4,21 +4,27 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.AndroidSQLiteDriver
+import app.liora.core.data.workout.RestSoundPlayer
 import app.liora.core.database.LioraDatabase
+import app.liora.core.domain.RestSound
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.imageDecoderEnabled
 import coil3.serviceLoaderEnabled
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.loadKoinModules
 import org.koin.core.module.Module
+import org.koin.dsl.bind
 import org.koin.dsl.module
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * The real app with an in-memory database on the framework SQLite driver: Robolectric provides
  * framework SQLite for the host OS, while the bundled driver only ships Android binaries. Image loading
  * has no network fetcher, so tests never hit the internet, and it decodes on the main thread, which
- * Compose's idling waits for, so local photos are in the screenshots.
+ * Compose's idling waits for, so local photos are in the screenshots. Rest sounds aren't played, only
+ * noted ([RecordingRestSoundPlayer]).
  */
 class TestLioraApplication : LioraApplication() {
     override fun onCreate() {
@@ -32,6 +38,7 @@ class TestLioraApplication : LioraApplication() {
                 .imageDecoderEnabled(false)
                 .build(),
         )
+        loadKoinModules(module { single { RecordingRestSoundPlayer() } bind RestSoundPlayer::class })
     }
 
     override fun databaseModules(): List<Module> =
@@ -43,4 +50,13 @@ class TestLioraApplication : LioraApplication() {
                 single<SQLiteDriver> { AndroidSQLiteDriver() }
             },
         )
+}
+
+/** Notes the rest sounds asked for instead of playing them. */
+class RecordingRestSoundPlayer : RestSoundPlayer {
+    val played: MutableList<RestSound> = CopyOnWriteArrayList()
+
+    override suspend fun play(sound: RestSound) {
+        played += sound
+    }
 }

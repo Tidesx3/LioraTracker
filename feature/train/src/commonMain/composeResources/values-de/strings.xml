@@ -73,8 +73,7 @@
   <string name="editor_superset_next">Supersatz mit nächster Übung</string>
   <string name="editor_superset_remove">Aus Supersatz lösen</string>
   <string name="editor_rest">Pausentimer</string>
-  <string name="editor_add_note">Notiz hinzufügen</string>
-  <string name="editor_note_hint">Notiz zu dieser Übung</string>
+  <string name="editor_add_note">Übungsnotiz hinzufügen</string>
   <string name="editor_remove_exercise">Übung entfernen</string>
   <string name="editor_discard_title">Änderungen verwerfen?</string>
   <string name="editor_discard_body">Deine Änderungen an dieser Routine gehen verloren.</string>

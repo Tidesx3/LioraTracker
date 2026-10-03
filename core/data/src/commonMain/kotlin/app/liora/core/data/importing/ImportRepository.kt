@@ -5,6 +5,7 @@ import app.liora.core.data.backup.ExportFileException
 import app.liora.core.data.backup.ExportFiles
 import app.liora.core.data.exercise.ExerciseRepository
 import app.liora.core.data.exercise.customName
+import app.liora.core.data.exercise.editSettings
 import app.liora.core.data.exercise.toEntity
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.sync.SyncStamper
@@ -241,6 +242,7 @@ internal class OfflineImportRepository(
                     if (written > 0) saved++
                     sets += written
                 }
+                adoptNotes(exerciseDao, stamper, workouts) { name -> targets[name]?.exerciseId }
                 ImportResult(
                     workouts = saved,
                     sets = sets,
@@ -411,3 +413,33 @@ private fun ImportedSet.toRow(
     completedAt = completedAt,
     sync = sync,
 )
+
+/**
+ * Each exercise's note from the last time it was done in [workouts] becomes the exercise's own note,
+ * where it has none yet; [exerciseIdOf] says which exercise a name in the file goes to. Hevy copies a
+ * routine's notes into every workout, so a note that's still there last time is the plan, while older
+ * ones have had their day; they stay with their workouts.
+ */
+private suspend fun adoptNotes(
+    exerciseDao: ExerciseDao,
+    stamper: SyncStamper,
+    workouts: List<ImportedWorkout>,
+    exerciseIdOf: (name: String) -> String?,
+) {
+    val lastNote = mutableMapOf<String, String?>()
+    for (workout in workouts.sortedBy { it.startedAt }) {
+        // An exercise done twice in a workout (once in a superset, say) has its note on one of them.
+        workout.exercises.groupBy { exerciseIdOf(it.name) }.forEach { (exerciseId, done) ->
+            if (exerciseId !=
+                null
+            ) {
+                lastNote[exerciseId] = done.firstNotNullOfOrNull { it.notes?.trim()?.ifEmpty { null } }
+            }
+        }
+    }
+    for ((exerciseId, note) in lastNote) {
+        if (note == null) continue
+        val current = exerciseDao.getSettings(exerciseId)?.takeIf { it.sync.deletedAt == null }?.stickyNote
+        if (current == null) editSettings(exerciseDao, stamper, exerciseId) { copy(stickyNote = note) }
+    }
+}

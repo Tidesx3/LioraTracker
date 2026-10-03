@@ -6,6 +6,7 @@ import app.liora.core.database.dao.PreferenceDao
 import app.liora.core.database.model.PreferenceEntity
 import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.RestDefaults
+import app.liora.core.domain.RestSound
 import app.liora.core.domain.Settings
 import app.liora.core.domain.ThemeMode
 import app.liora.core.model.DistanceUnit
@@ -70,6 +71,7 @@ internal class OfflineSettingsRepository(
 internal object SettingsCodec {
     private const val REST_WORKING = "rest.working_sec"
     private const val REST_WARMUP = "rest.warmup_sec"
+    private const val REST_SOUND = "rest.sound"
     private const val RPE = "logger.rpe"
     private const val WEIGHT_UNIT = "units.weight"
     private const val DISTANCE_UNIT = "units.distance"
@@ -83,6 +85,13 @@ internal object SettingsCodec {
     private val distanceUnits = mapOf(DistanceUnit.Kilometer to "km", DistanceUnit.Mile to "mi")
     private val bodyLengthUnits = mapOf(LengthUnit.Centimeter to "cm", LengthUnit.Inch to "in")
     private val formulas = mapOf(OneRepMaxFormula.Epley to "epley", OneRepMaxFormula.Brzycki to "brzycki")
+    private val restSounds =
+        mapOf(
+            RestSound.Chime to "chime",
+            RestSound.Bell to "bell",
+            RestSound.Marimba to "marimba",
+            RestSound.Off to "off",
+        )
     private val themes = mapOf(ThemeMode.System to "system", ThemeMode.Light to "light", ThemeMode.Dark to "dark")
 
     fun encode(settings: Settings): Map<String, String> =
@@ -93,6 +102,7 @@ internal object SettingsCodec {
             REST_WARMUP to
                 settings.rest.warmup.inWholeSeconds
                     .toString(),
+            REST_SOUND to restSounds.getValue(settings.restSound),
             RPE to settings.rpe.toString(),
             WEIGHT_UNIT to weightUnits.getValue(settings.units.weight),
             DISTANCE_UNIT to distanceUnits.getValue(settings.units.distance),
@@ -112,6 +122,7 @@ internal object SettingsCodec {
                     working = seconds(REST_WORKING) ?: defaults.rest.working,
                     warmup = seconds(REST_WARMUP) ?: defaults.rest.warmup,
                 ),
+            restSound = values[REST_SOUND]?.let { restSounds.keyFor(it) } ?: defaults.restSound,
             rpe = values[RPE]?.toBooleanStrictOrNull() ?: defaults.rpe,
             units = decodeUnits(values, defaults.units),
             oneRepMaxFormula = values[FORMULA]?.let { formulas.keyFor(it) } ?: defaults.oneRepMaxFormula,

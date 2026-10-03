@@ -33,9 +33,9 @@
   <string name="menu_superset_next">Supersatz mit nächster Übung</string>
   <string name="menu_superset_remove">Aus Supersatz lösen</string>
   <string name="menu_rest">Pausentimer</string>
-  <string name="menu_add_note">Notiz hinzufügen</string>
+  <string name="menu_exercise_note">Übungsnotiz hinzufügen</string>
+  <string name="menu_workout_note">Notiz zu diesem Training</string>
   <string name="menu_remove">Übung entfernen</string>
-  <string name="note_hint">Notiz zu dieser Übung</string>
 
   <string name="rest_title">Pause</string>
   <string name="rest_skip">Überspringen</string>

@@ -52,6 +52,16 @@ class WorkoutProgressTest {
     }
 
     @Test
+    fun theLastSetLoggedIsTheOneTickedOffMostRecently() {
+        val start = workout(exercise("squat", sets = 2), exercise("bench", sets = 2))
+        assertNull(WorkoutOrder.lastLogged(start))
+
+        // By time, not by place: bench was done before the squat set that comes ahead of it.
+        val done = start.complete(SetRef(1, 0), at = 10).complete(SetRef(0, 0), at = 20)
+        assertEquals(SetRef(0, 0), WorkoutOrder.lastLogged(done))
+    }
+
+    @Test
     fun restComesAfterTheRoundOfASuperset() {
         val workout =
             workout(

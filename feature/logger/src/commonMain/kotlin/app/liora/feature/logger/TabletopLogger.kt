@@ -34,6 +34,7 @@ import app.liora.core.designsystem.layout.currentHingeBounds
 internal fun TabletopLogger(
     state: LoggerUiState.Active,
     actions: LoggerActions,
+    list: WorkoutListPlace,
     modifier: Modifier = Modifier,
 ) {
     val hinge = currentHingeBounds()
@@ -68,7 +69,7 @@ internal fun TabletopLogger(
         }
         hinge?.let { Spacer(Modifier.height(with(density) { it.height.toDp() })) }
         Row(Modifier.weight(1f)) {
-            WorkoutList(state, actions, Modifier.weight(1f).fillMaxHeight())
+            WorkoutList(state, actions, list, Modifier.weight(1f).fillMaxHeight())
             VerticalDivider()
             PadFor(state, actions, Modifier.width(PadWidth), canHide = false)
         }

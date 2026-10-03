@@ -20,6 +20,7 @@ import app.liora.core.model.ExerciseSession
 import app.liora.core.model.TrackingType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 
 sealed interface ExerciseDetailUiState {
@@ -172,6 +174,11 @@ class ExerciseDetailViewModel(
 
     fun setHidden(hidden: Boolean) {
         viewModelScope.launch { repository.setArchived(exerciseId, hidden) }
+    }
+
+    /** The exercise's own note, saved as it's typed; it finishes even if the page closes meanwhile. */
+    fun setNote(note: String) {
+        viewModelScope.launch { withContext(NonCancellable) { repository.setNote(exerciseId, note) } }
     }
 
     /** Asks for confirmation, or explains why deleting isn't possible. */

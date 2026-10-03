@@ -127,6 +127,9 @@ sealed interface LoggerUiState {
         /** The set that's up next. */
         val current: SetRef? = WorkoutOrder.current(workout)
 
+        /** Where the logger opens: the set that's up next, or once everything is done, the one logged last. */
+        val opening: SetRef? get() = current ?: WorkoutOrder.lastLogged(workout)
+
         val completedSets: Int = workout.exercises.sumOf { exercise -> exercise.sets.count { it.isCompleted } }
 
         /** Sets not ticked off; finishing, or closing a finished workout, drops them. */
@@ -293,7 +296,7 @@ class LoggerViewModel(
     private val history: WorkoutHistoryRepository,
     private val restTimers: RestTimerRepository,
     settings: SettingsRepository,
-    exerciseRepository: ExerciseRepository,
+    private val exerciseRepository: ExerciseRepository,
     routines: RoutineRepository,
     private val gymProfiles: GymProfileRepository,
 ) : ViewModel() {
@@ -624,6 +627,12 @@ class LoggerViewModel(
         workoutExerciseId: String,
         notes: String?,
     ) = launch { editor.setNotes(workoutExerciseId, notes) }
+
+    /** The exercise's own note, which shows every time it's done; [setNotes] is this workout's. */
+    fun setExerciseNote(
+        exerciseId: String,
+        note: String?,
+    ) = launch { exerciseRepository.setNote(exerciseId, note) }
 
     // Workout
 

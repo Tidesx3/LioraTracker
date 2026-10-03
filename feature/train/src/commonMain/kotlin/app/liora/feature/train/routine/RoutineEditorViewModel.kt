@@ -13,6 +13,7 @@ import app.liora.core.model.RoutineSet
 import app.liora.core.navigation.RoutineEditorRoute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +26,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class RoutineEditorUiState(
     val loading: Boolean = true,
@@ -47,7 +49,7 @@ data class RoutineEditorUiState(
 class RoutineEditorViewModel(
     route: RoutineEditorRoute,
     private val routines: RoutineRepository,
-    exerciseRepository: ExerciseRepository,
+    private val exerciseRepository: ExerciseRepository,
     private val ids: IdGenerator,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
@@ -100,6 +102,17 @@ class RoutineEditorViewModel(
     fun onNameChange(name: String) = edit { copy(name = name) }
 
     fun onNotesChange(notes: String) = edit { copy(notes = notes.ifEmpty { null }) }
+
+    /**
+     * The exercise's own note, written at once rather than on saving: it belongs to the exercise, and
+     * shows in every routine and workout with it. Finishes even if the editor closes meanwhile.
+     */
+    fun setExerciseNote(
+        exerciseId: String,
+        note: String,
+    ) {
+        viewModelScope.launch { withContext(NonCancellable) { exerciseRepository.setNote(exerciseId, note) } }
+    }
 
     /** Adds picked exercises at the end, each with a starting set count that suits how it's tracked. */
     fun addExercises(exerciseIds: List<String>) {

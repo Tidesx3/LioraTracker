@@ -22,6 +22,10 @@ interface ExerciseDao {
     @Query("SELECT * FROM exercise WHERE id = :id")
     suspend fun get(id: String): ExerciseEntity?
 
+    /** Custom exercises whose notes still sit on the exercise row, from before notes moved to the settings. */
+    @Query("SELECT * FROM exercise WHERE is_custom = 1 AND notes IS NOT NULL AND deleted_at IS NULL")
+    suspend fun customWithNotes(): List<ExerciseEntity>
+
     @Query("SELECT id FROM exercise WHERE is_custom = 0")
     suspend fun builtInIds(): List<String>
 

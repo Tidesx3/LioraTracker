@@ -39,6 +39,15 @@ interface ExerciseRepository {
         draft: ExerciseDraft,
     )
 
+    /**
+     * The exercise's own note (seat height, grip, the plan), shown under it in every workout and routine
+     * and on its page, for built-in and custom exercises alike. A blank note clears it.
+     */
+    suspend fun setNote(
+        id: String,
+        note: String?,
+    )
+
     /** Hides an exercise from pickers and the library; its history stays intact. */
     suspend fun setArchived(
         id: String,
@@ -93,6 +102,7 @@ internal class OfflineExerciseRepository(
         transactions.inTransaction {
             exerciseDao.upsertExercises(listOf(draft.toEntity(id, stamper.newRow())))
             exerciseDao.upsertNames(listOf(customName(id, draft.name)))
+            writeNote(id, draft.notes)
         }
         return id
     }
@@ -113,27 +123,31 @@ internal class OfflineExerciseRepository(
             exerciseDao.upsertExercises(listOf(draft.toEntity(id, stamper.touch(existing.sync))))
             exerciseDao.deleteNames(id)
             exerciseDao.upsertNames(listOf(customName(id, draft.name)))
+            writeNote(id, draft.notes)
         }
+    }
+
+    override suspend fun setNote(
+        id: String,
+        note: String?,
+    ) {
+        transactions.inTransaction { writeNote(id, note) }
     }
 
     override suspend fun setArchived(
         id: String,
         archived: Boolean,
     ) {
-        transactions.inTransaction {
-            val existing = exerciseDao.getSettings(id)
-            val updated =
-                existing?.copy(archived = archived, sync = stamper.touch(existing.sync))
-                    ?: ExerciseSettingsEntity(
-                        exerciseId = id,
-                        stickyNote = null,
-                        restWorkingSeconds = null,
-                        restWarmupSeconds = null,
-                        archived = archived,
-                        sync = stamper.newRow(),
-                    )
-            exerciseDao.upsertSettings(updated)
-        }
+        transactions.inTransaction { editSettings(exerciseDao, stamper, id) { copy(archived = archived) } }
+    }
+
+    private suspend fun writeNote(
+        id: String,
+        note: String?,
+    ) {
+        val text = note?.trim()?.ifEmpty { null }
+        if (exerciseDao.getSettings(id)?.takeIf { it.sync.deletedAt == null }?.stickyNote == text) return
+        editSettings(exerciseDao, stamper, id) { copy(stickyNote = text) }
     }
 
     override suspend fun isInUse(id: String): Boolean = exerciseDao.isInUse(id)
@@ -150,6 +164,30 @@ internal class OfflineExerciseRepository(
             exerciseDao.getSettings(id)?.let { exerciseDao.upsertSettings(it.copy(sync = stamper.tombstone(it.sync))) }
         }
     }
+}
+
+/**
+ * Changes an exercise's settings row, creating it with nothing overridden if there is none yet. Call it
+ * inside a transaction.
+ */
+internal suspend fun editSettings(
+    exerciseDao: ExerciseDao,
+    stamper: SyncStamper,
+    id: String,
+    change: ExerciseSettingsEntity.() -> ExerciseSettingsEntity,
+) {
+    val existing = exerciseDao.getSettings(id)
+    val base =
+        existing?.copy(sync = stamper.touch(existing.sync).copy(deletedAt = null))
+            ?: ExerciseSettingsEntity(
+                exerciseId = id,
+                stickyNote = null,
+                restWorkingSeconds = null,
+                restWarmupSeconds = null,
+                archived = false,
+                sync = stamper.newRow(),
+            )
+    exerciseDao.upsertSettings(base.change())
 }
 
 /** A custom exercise is found by the one name the user gave it, in any language. */
@@ -180,7 +218,8 @@ internal fun ExerciseDraft.toEntity(
     imagePaths = emptyList(),
     isCustom = true,
     variationOf = variationOf,
-    notes = notes.trim().ifEmpty { null },
+    // The note is the exercise's own, kept in its settings like a built-in's (see `setNote`).
+    notes = null,
     rank = null,
     sync = sync,
 )

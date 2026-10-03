@@ -26,6 +26,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,6 +60,8 @@ import app.liora.core.designsystem.util.rememberElapsedTime
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.designsystem.util.workoutDisplayName
 import app.liora.core.domain.find
+import app.liora.core.domain.setAt
+import app.liora.core.ui.NoteKind
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.volumeText
 import app.liora.feature.logger.resources.Res
@@ -222,7 +225,9 @@ private fun loggerActions(
             onSupersetChange = { id, link -> if (link) viewModel.linkWithNext(id) else viewModel.unlink(id) },
             onRemove = viewModel::removeExercise,
             onRestChange = viewModel::setRest,
-            onNotesChange = viewModel::setNotes,
+            onNoteChange = { kind, id, note ->
+                if (kind == NoteKind.Exercise) viewModel.setExerciseNote(id, note) else viewModel.setNotes(id, note)
+            },
             onAddSets = { id, warmups -> if (warmups) viewModel.addWarmups(id) else viewModel.addSet(id) },
         ),
     set =
@@ -305,22 +310,23 @@ private fun LoggerContent(
             }
             WorkoutStats(state, Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            val list = rememberWorkoutListPlace(state)
             val layout = currentWindowLayout()
             when {
                 layout.tabletop -> {
-                    TabletopLogger(state, actions, Modifier.weight(1f))
+                    TabletopLogger(state, actions, list, Modifier.weight(1f))
                 }
 
                 layout.twoPane -> {
                     Row(Modifier.weight(1f)) {
-                        WorkoutList(state, actions, Modifier.weight(1f).fillMaxHeight())
+                        WorkoutList(state, actions, list, Modifier.weight(1f).fillMaxHeight())
                         VerticalDivider()
                         FocusPane(state, actions, Modifier.width(FocusPaneWidth).fillMaxHeight())
                     }
                 }
 
                 else -> {
-                    CompactLogger(state, actions, Modifier.weight(1f))
+                    CompactLogger(state, actions, list, Modifier.weight(1f))
                 }
             }
         }
@@ -332,10 +338,11 @@ private fun LoggerContent(
 private fun CompactLogger(
     state: LoggerUiState.Active,
     actions: LoggerActions,
+    list: WorkoutListPlace,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
-        WorkoutList(state, actions, Modifier.weight(1f))
+        WorkoutList(state, actions, list, Modifier.weight(1f))
         rememberRestProgress(state.restTimer)?.let { rest ->
             RestTimerBar(rest, onAdjust = actions.rest.onAdjust, onSkip = actions.rest.onSkip)
         }
@@ -384,10 +391,11 @@ internal fun PadFor(
 internal fun WorkoutList(
     state: LoggerUiState.Active,
     actions: LoggerActions,
+    place: WorkoutListPlace,
     modifier: Modifier = Modifier,
 ) {
     val numbers = rememberNumberFormatter()
-    val listState = rememberLazyListState()
+    val listState = place.listState
     ScrollToEditedExercise(state, listState)
     LazyColumn(
         state = listState,
@@ -413,6 +421,7 @@ internal fun WorkoutList(
                     onTextFocus = actions.pad.onTextFocus,
                     onOpenExercise = actions.navigation.onOpenExercise,
                     numbers = numbers,
+                    place = place,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                 )
             }

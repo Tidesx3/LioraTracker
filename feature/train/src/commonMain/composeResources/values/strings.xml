@@ -73,8 +73,7 @@
   <string name="editor_superset_next">Superset with next</string>
   <string name="editor_superset_remove">Remove from superset</string>
   <string name="editor_rest">Rest timer</string>
-  <string name="editor_add_note">Add note</string>
-  <string name="editor_note_hint">Note for this exercise</string>
+  <string name="editor_add_note">Add exercise note</string>
   <string name="editor_remove_exercise">Remove exercise</string>
   <string name="editor_discard_title">Discard changes?</string>
   <string name="editor_discard_body">Your edits to this routine will be lost.</string>
