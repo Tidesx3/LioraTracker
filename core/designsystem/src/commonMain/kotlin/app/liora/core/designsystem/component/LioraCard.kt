@@ -4,6 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ListItemColors
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -50,6 +52,10 @@ object LioraCardDefaults {
     @Composable
     fun containerColor(): Color =
         with(MaterialTheme.colorScheme) { if (isDark()) surfaceContainerHigh else surfaceContainerLowest }
+
+    /** For a `ListItem` on a card: the card shows through, so its rows sit on it as one group. */
+    @Composable
+    fun listItemColors(): ListItemColors = ListItemDefaults.colors(containerColor = Color.Transparent)
 }
 
 /** Whether the theme is a dark one, from its surface, so wallpaper colors count too. */

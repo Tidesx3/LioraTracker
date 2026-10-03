@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.AlertDialog
@@ -36,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
+import app.liora.core.designsystem.component.LioraCard
+import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
@@ -105,8 +107,15 @@ internal fun LazyListScope.exerciseSection(
 ) {
     if (rows.isEmpty()) return
     item(key = key) { SectionHeader(stringResource(title)) }
-    items(rows, key = { "$key:${it.name}" }) { row ->
-        ExerciseRow(row, enabled = !importing, onClick = { onOpen(row.name) })
+    // A file names a few dozen exercises at most, so each section is one card.
+    item(key = "$key:rows") {
+        LioraCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
+            Column(Modifier.padding(vertical = 4.dp)) {
+                rows.forEach { row ->
+                    key(row.name) { ExerciseRow(row, enabled = !importing, onClick = { onOpen(row.name) }) }
+                }
+            }
+        }
     }
 }
 
@@ -133,6 +142,7 @@ private fun ExerciseRow(
                 style = MaterialTheme.typography.labelMedium,
             )
         },
+        colors = LioraCardDefaults.listItemColors(),
         modifier = modifier.clickable(enabled = enabled, onClick = onClick),
     )
 }

@@ -1,5 +1,6 @@
 package app.liora.feature.history.detail
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.BackButton
+import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.icon.LioraIcons
@@ -193,7 +195,7 @@ private fun WorkoutDetailContent(
                     trackingType = state.trackingTypeOf(done.exerciseId),
                     records = state.records,
                     onOpenExercise = { onOpenExercise(done.exerciseId) },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                 )
             }
         }
@@ -237,16 +239,37 @@ private fun DoneExercise(
     onOpenExercise: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        if (done.supersetGroup != null) SupersetLabel()
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            exercise?.let {
-                ExerciseThumbnail(
-                    exercise = it,
-                    size = 40.dp,
-                    modifier = Modifier.padding(end = 12.dp).clickable(onClick = onOpenExercise),
-                )
+    // A card per exercise, as in the logger; a superset's cards share the accent outline.
+    LioraCard(
+        modifier = modifier.fillMaxWidth(),
+        border = if (done.supersetGroup != null) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            DoneExerciseHeader(done, exercise, onOpenExercise)
+            done.notes?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
+            DoneSets(done, trackingType, records)
+        }
+    }
+}
+
+@Composable
+private fun DoneExerciseHeader(
+    done: WorkoutExercise,
+    exercise: Exercise?,
+    onOpenExercise: () -> Unit,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        exercise?.let {
+            ExerciseThumbnail(
+                exercise = it,
+                size = 40.dp,
+                modifier = Modifier.padding(end = 12.dp).clickable(onClick = onOpenExercise),
+            )
+        }
+        Column {
+            if (done.supersetGroup != null) SupersetLabel()
             Text(
                 text = exercise?.name.orEmpty(),
                 style = MaterialTheme.typography.titleMedium,
@@ -254,35 +277,40 @@ private fun DoneExercise(
                 modifier = Modifier.clickable(enabled = exercise != null, onClick = onOpenExercise),
             )
         }
-        done.notes?.let {
-            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        val numbers = setNumbers(done.sets.map { it.type })
-        done.sets.forEachIndexed { index, set ->
-            Row(Modifier.padding(start = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                SetTypeBadge(set.type, numbers[index])
-                Spacer(Modifier.width(12.dp))
-                Text(
-                    text =
-                        setSummary(
-                            trackingType,
-                            set.weight,
-                            set.reps?.let(::RepRange),
-                            set.duration,
-                            set.distanceMeters,
-                            set.rpe,
-                        ),
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f),
+    }
+}
+
+@Composable
+private fun DoneSets(
+    done: WorkoutExercise,
+    trackingType: TrackingType,
+    records: Map<String, Set<RecordKey>>,
+) {
+    val numbers = setNumbers(done.sets.map { it.type })
+    done.sets.forEachIndexed { index, set ->
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SetTypeBadge(set.type, numbers[index])
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text =
+                    setSummary(
+                        trackingType,
+                        set.weight,
+                        set.reps?.let(::RepRange),
+                        set.duration,
+                        set.distanceMeters,
+                        set.rpe,
+                    ),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f),
+            )
+            if (!records[set.id].isNullOrEmpty()) {
+                Icon(
+                    painterResource(LioraIcons.Record),
+                    contentDescription = stringResource(Res.string.cd_records),
+                    tint = LioraTheme.colors.personalRecord,
+                    modifier = Modifier.size(20.dp),
                 )
-                if (!records[set.id].isNullOrEmpty()) {
-                    Icon(
-                        painterResource(LioraIcons.Record),
-                        contentDescription = stringResource(Res.string.cd_records),
-                        tint = LioraTheme.colors.personalRecord,
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
             }
         }
     }

@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import app.liora.core.data.AppStartup
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.domain.OneRepMaxFormula
@@ -71,7 +72,7 @@ class SettingsFlowTest {
         waitForText("2:30")
 
         // The light theme applies at once, everywhere.
-        composeRule.onNodeWithText("Theme").performClick()
+        composeRule.onNodeWithText("Theme").performScrollTo().performClick()
         composeRule.onNodeWithText("Light").performClick()
         waitForText("Light")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/settings_light.png")

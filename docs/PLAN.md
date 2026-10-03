@@ -138,7 +138,7 @@ As of 2026-10-03:
     - Shapes and parts: generous corners; cards are `LioraCard` (white on a soft shadow in light, a lighter
       shade in dark); round checks that fill in; the tabs and the rest timer float as pills, and the time
       left runs around the rest pill's outline.
-  - **2b (in progress): screens.** Done so far: one `Stat`/`StatRow` for every row of figures (equal columns,
+  - **2b (done): screens.** One `Stat`/`StatRow` for every row of figures (equal columns,
     big numbers with small units, the label underneath, shrinking rather than wrapping), so stats line up
     from card to card; one `RecordsCard` listing each record with the value it was set at
     (`RecordHighlights` in `core/domain`), on workout detail, the finish sheet and the monthly report; history
@@ -149,8 +149,12 @@ As of 2026-10-03:
     eleven small scenes drawn in code on a soft blob of the accent (routines, a barbell, a calendar, a chart,
     search, a kettlebell, a scale, photos, plates, an unreadable file, a tick in confetti). Their colors are
     tints of the theme's, so they follow dark mode and wallpaper colors; `IllustrationsTest` renders them
-    all on one sheet. The list-detail placeholders use their feature's scene. Next in 2b: a pass over the
-    remaining screens on the phone.
+    all on one sheet. The list-detail placeholders use their feature's scene. A last pass at phone size put
+    the remaining flat lists on cards: Settings groups each section on one (`SettingsGroup`), and gyms,
+    body measurements and the import review's names sit on cards too, their rows letting the card show
+    through (`LioraCardDefaults.listItemColors`). Workout detail and routine detail give each exercise a
+    card with its picture, a superset's cards sharing the accent outline as in the logger. The exercise
+    thumbnail's tile is a tint of the accent, so it shows on cards.
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a
   milestone go in TODO.md.

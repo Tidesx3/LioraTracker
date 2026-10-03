@@ -35,7 +35,8 @@ fun ExerciseThumbnail(
             modifier
                 .size(size)
                 .clip(MaterialTheme.shapes.small)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                // A tint of the accent rather than a surface color, so the tile shows on cards as well.
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = TILE_ALPHA)),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -84,3 +85,4 @@ fun ExercisePicture(
 
 /** Same frame as the exercise page's photos. */
 private const val PICTURE_ASPECT = 4f / 3f
+private const val TILE_ALPHA = 0.14f

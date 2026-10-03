@@ -324,7 +324,7 @@ private fun ReorderableCollectionItemScope.ExerciseEditorCard(
         border = if (planned.supersetGroup != null) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
         elevation = if (dragging) 8.dp else 0.dp,
     ) {
-        Column(Modifier.padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 8.dp)) {
+        Column(Modifier.padding(start = 4.dp, end = 4.dp, top = 10.dp, bottom = 8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = {}, modifier = Modifier.draggableHandle()) {
                     Icon(

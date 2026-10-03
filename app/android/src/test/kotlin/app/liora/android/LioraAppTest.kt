@@ -58,6 +58,7 @@ class LioraAppTest {
     @Test
     fun trainTab_dark() {
         setApp(darkTheme = true)
+        waitForText("No routines yet")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/train_dark.png")
     }
 

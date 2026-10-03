@@ -13,8 +13,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import app.liora.core.designsystem.component.SectionHeader
+import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.util.rememberDateFormatter
+import app.liora.feature.settings.SettingsGroup
 import app.liora.feature.settings.resources.Res
 import app.liora.feature.settings.resources.backup_body
 import app.liora.feature.settings.resources.backup_exercises
@@ -73,8 +74,7 @@ internal fun DataSection(
     actions: DataActions,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier) {
-        SectionHeader(stringResource(Res.string.section_data))
+    SettingsGroup(stringResource(Res.string.section_data), modifier) {
         DataRow(
             title = stringResource(Res.string.backup_title),
             body = stringResource(Res.string.backup_body),
@@ -138,6 +138,7 @@ private fun DataRow(
             } else {
                 null
             },
+        colors = LioraCardDefaults.listItemColors(),
         modifier = modifier.clickable(enabled = enabled, onClick = onClick),
     )
 }

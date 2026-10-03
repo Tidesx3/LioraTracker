@@ -1,14 +1,11 @@
 package app.liora.feature.train.routine
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -16,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -37,17 +34,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.BackButton
+import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.util.formatAsClock
-import app.liora.core.domain.Supersets
 import app.liora.core.model.Exercise
 import app.liora.core.model.RoutineExercise
 import app.liora.core.model.TrackingType
 import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
+import app.liora.core.ui.ExerciseThumbnail
 import app.liora.core.ui.SetTypeBadge
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.restLabel
@@ -140,7 +138,6 @@ private fun RoutineDetailContent(
     modifier: Modifier = Modifier,
 ) {
     val routine = state.routine
-    val groups = routine.exercises.map { it.supersetGroup }
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -204,57 +201,43 @@ private fun RoutineDetailContent(
                     routine.notes?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
                 }
             }
-            itemsIndexed(routine.exercises, key = { _, exercise -> exercise.id }) { index, planned ->
-                // Exercises of one superset sit flush, so their bar reads as one.
-                val linkedAbove = Supersets.continuesAbove(groups, index)
-                val linkedBelow = index < groups.lastIndex && Supersets.continuesAbove(groups, index + 1)
+            items(routine.exercises, key = { it.id }) { planned ->
                 PlannedExercise(
                     planned = planned,
                     exercise = state.exercises[planned.exerciseId],
-                    inSuperset = planned.supersetGroup != null,
-                    startsSuperset = planned.supersetGroup != null && !linkedAbove,
-                    modifier =
-                        Modifier.padding(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = if (linkedAbove) 0.dp else 4.dp,
-                            bottom = if (linkedBelow) 0.dp else 4.dp,
-                        ),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                 )
             }
         }
     }
 }
 
-/** One exercise of the plan with its sets; supersets share a colored bar down the side. */
+/** One exercise of the plan with its sets, on a card; a superset's cards share the accent outline. */
 @Composable
 private fun PlannedExercise(
     planned: RoutineExercise,
     exercise: Exercise?,
-    inSuperset: Boolean,
-    startsSuperset: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val trackingType = exercise?.trackingType ?: TrackingType.WeightReps
-    Row(modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
-        Box(
-            Modifier
-                .width(4.dp)
-                .fillMaxHeight()
-                .background(if (inSuperset) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface),
-        )
-        Column(
-            Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            if (startsSuperset) SupersetLabel()
-            Text(exercise?.name.orEmpty(), style = MaterialTheme.typography.titleMedium)
-            planned.restSeconds?.let { seconds ->
-                Text(
-                    text = restLabel(seconds),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+    LioraCard(
+        modifier = modifier.fillMaxWidth(),
+        border = if (planned.supersetGroup != null) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                exercise?.let { ExerciseThumbnail(it, size = 40.dp, modifier = Modifier.padding(end = 12.dp)) }
+                Column {
+                    if (planned.supersetGroup != null) SupersetLabel()
+                    Text(exercise?.name.orEmpty(), style = MaterialTheme.typography.titleMedium)
+                    planned.restSeconds?.let { seconds ->
+                        Text(
+                            text = restLabel(seconds),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
             planned.notes?.let {
                 Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

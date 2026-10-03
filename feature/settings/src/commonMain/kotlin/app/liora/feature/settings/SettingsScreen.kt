@@ -2,6 +2,7 @@ package app.liora.feature.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.BackButton
+import app.liora.core.designsystem.component.LioraCard
+import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.layout.readableWidth
@@ -185,86 +188,90 @@ private fun SettingsContent(
             contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 32.dp),
         ) {
             item(key = "workout") {
-                SectionHeader(stringResource(Res.string.section_workout))
-                SettingRow(
-                    stringResource(Res.string.rest_working),
-                    settings.rest.working.formatAsClock(),
-                    onClick = { open = Choice.RestWorking },
-                )
-                SettingRow(
-                    stringResource(Res.string.rest_warmup),
-                    settings.rest.warmup.formatAsClock(),
-                    onClick = { open = Choice.RestWarmup },
-                )
-                Text(
-                    text = stringResource(Res.string.rest_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                )
-                SwitchRow(
-                    title = stringResource(Res.string.rpe),
-                    description = stringResource(Res.string.rpe_body),
-                    checked = settings.rpe,
-                    onCheckedChange = { on -> onChange { it.copy(rpe = on) } },
-                )
-                SettingRow(
-                    stringResource(Res.string.gym),
-                    gym?.let { gymName(it) }.orEmpty(),
-                    onClick = onOpenGyms,
-                )
-            }
-            item(key = "units") {
-                SectionHeader(stringResource(Res.string.section_units))
-                SettingRow(
-                    stringResource(Res.string.unit_weight),
-                    weightUnitName(settings.units.weight),
-                    onClick = { open = Choice.Weight },
-                )
-                SettingRow(
-                    stringResource(Res.string.unit_distance),
-                    distanceUnitName(settings.units.distance),
-                    onClick = { open = Choice.Distance },
-                )
-                SettingRow(
-                    stringResource(Res.string.unit_body_length),
-                    bodyLengthUnitName(settings.units.bodyLength),
-                    onClick = { open = Choice.BodyLength },
-                )
-            }
-            item(key = "progress") {
-                SectionHeader(stringResource(Res.string.section_progress))
-                SettingRow(
-                    stringResource(Res.string.formula),
-                    formulaName(settings.oneRepMaxFormula),
-                    onClick = { open = Choice.Formula },
-                )
-                SettingRow(
-                    stringResource(Res.string.stall_window),
-                    stallText(settings.stallWindow),
-                    onClick = { open = Choice.StallWindow },
-                )
-            }
-            item(key = "appearance") {
-                SectionHeader(stringResource(Res.string.section_appearance))
-                SettingRow(
-                    stringResource(Res.string.theme),
-                    themeName(settings.theme),
-                    onClick = { open = Choice.Theme },
-                )
-                if (dynamicColorSupported) {
+                SettingsGroup(stringResource(Res.string.section_workout)) {
+                    SettingRow(
+                        stringResource(Res.string.rest_working),
+                        settings.rest.working.formatAsClock(),
+                        onClick = { open = Choice.RestWorking },
+                    )
+                    SettingRow(
+                        stringResource(Res.string.rest_warmup),
+                        settings.rest.warmup.formatAsClock(),
+                        onClick = { open = Choice.RestWarmup },
+                    )
+                    Text(
+                        text = stringResource(Res.string.rest_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                    )
                     SwitchRow(
-                        title = stringResource(Res.string.dynamic_color),
-                        checked = settings.dynamicColor,
-                        onCheckedChange = { on -> onChange { it.copy(dynamicColor = on) } },
+                        title = stringResource(Res.string.rpe),
+                        description = stringResource(Res.string.rpe_body),
+                        checked = settings.rpe,
+                        onCheckedChange = { on -> onChange { it.copy(rpe = on) } },
+                    )
+                    SettingRow(
+                        stringResource(Res.string.gym),
+                        gym?.let { gymName(it) }.orEmpty(),
+                        onClick = onOpenGyms,
                     )
                 }
-                if (language.available) {
+            }
+            item(key = "units") {
+                SettingsGroup(stringResource(Res.string.section_units)) {
                     SettingRow(
-                        stringResource(Res.string.language),
-                        languageName(language.current),
-                        onClick = { open = Choice.Language },
+                        stringResource(Res.string.unit_weight),
+                        weightUnitName(settings.units.weight),
+                        onClick = { open = Choice.Weight },
                     )
+                    SettingRow(
+                        stringResource(Res.string.unit_distance),
+                        distanceUnitName(settings.units.distance),
+                        onClick = { open = Choice.Distance },
+                    )
+                    SettingRow(
+                        stringResource(Res.string.unit_body_length),
+                        bodyLengthUnitName(settings.units.bodyLength),
+                        onClick = { open = Choice.BodyLength },
+                    )
+                }
+            }
+            item(key = "progress") {
+                SettingsGroup(stringResource(Res.string.section_progress)) {
+                    SettingRow(
+                        stringResource(Res.string.formula),
+                        formulaName(settings.oneRepMaxFormula),
+                        onClick = { open = Choice.Formula },
+                    )
+                    SettingRow(
+                        stringResource(Res.string.stall_window),
+                        stallText(settings.stallWindow),
+                        onClick = { open = Choice.StallWindow },
+                    )
+                }
+            }
+            item(key = "appearance") {
+                SettingsGroup(stringResource(Res.string.section_appearance)) {
+                    SettingRow(
+                        stringResource(Res.string.theme),
+                        themeName(settings.theme),
+                        onClick = { open = Choice.Theme },
+                    )
+                    if (dynamicColorSupported) {
+                        SwitchRow(
+                            title = stringResource(Res.string.dynamic_color),
+                            checked = settings.dynamicColor,
+                            onCheckedChange = { on -> onChange { it.copy(dynamicColor = on) } },
+                        )
+                    }
+                    if (language.available) {
+                        SettingRow(
+                            stringResource(Res.string.language),
+                            languageName(language.current),
+                            onClick = { open = Choice.Language },
+                        )
+                    }
                 }
             }
             item(key = "data") {
@@ -396,6 +403,21 @@ private fun ChoiceDialogs(
     }
 }
 
+/** A section of settings: its heading, then its rows on one card. */
+@Composable
+internal fun SettingsGroup(
+    title: String,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(modifier) {
+        SectionHeader(title)
+        LioraCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
+            Column(Modifier.padding(vertical = 4.dp), content = content)
+        }
+    }
+}
+
 /** A setting: its name, and what it's set to. */
 @Composable
 private fun SettingRow(
@@ -407,6 +429,7 @@ private fun SettingRow(
     ListItem(
         headlineContent = { Text(title) },
         supportingContent = { Text(value) },
+        colors = LioraCardDefaults.listItemColors(),
         modifier = modifier.clickable(onClick = onClick),
     )
 }
@@ -424,6 +447,7 @@ private fun SwitchRow(
         headlineContent = { Text(title) },
         supportingContent = description?.let { { Text(it) } },
         trailingContent = { Switch(checked = checked, onCheckedChange = onCheckedChange) },
+        colors = LioraCardDefaults.listItemColors(),
         modifier = modifier.clickable { onCheckedChange(!checked) },
     )
 }

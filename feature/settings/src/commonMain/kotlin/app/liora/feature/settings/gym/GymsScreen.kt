@@ -1,10 +1,12 @@
 package app.liora.feature.settings.gym
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -13,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -20,10 +23,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
+import app.liora.core.designsystem.component.LioraCard
+import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.layout.readableWidth
+import app.liora.core.model.GymProfile
 import app.liora.feature.settings.resources.Res
 import app.liora.feature.settings.resources.cd_use_gym
 import app.liora.feature.settings.resources.gyms_add
@@ -89,26 +95,47 @@ private fun GymsContent(
             else -> {
                 LazyColumn(
                     modifier = Modifier.readableWidth(),
-                    contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 96.dp),
+                    contentPadding = PaddingValues(top = padding.calculateTopPadding() + 8.dp, bottom = 96.dp),
                 ) {
-                    items(state.gyms, key = { it.id }) { gym ->
-                        val name = gymName(gym)
-                        val useLabel = stringResource(Res.string.cd_use_gym, name)
-                        ListItem(
-                            headlineContent = { Text(name) },
-                            supportingContent = { Text(gymSummary(gym)) },
-                            leadingContent = {
-                                RadioButton(
-                                    selected = gym.id == state.inUse,
-                                    onClick = { onUse(gym.id) },
-                                    modifier = Modifier.semantics { contentDescription = useLabel },
-                                )
-                            },
-                            modifier = Modifier.clickable { onOpen(gym.id) },
-                        )
+                    // A few gyms at most, on one card: one of them is in use.
+                    item(key = "gyms") {
+                        LioraCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                            Column(Modifier.selectableGroup().padding(vertical = 4.dp)) {
+                                state.gyms.forEach { gym ->
+                                    key(gym.id) {
+                                        GymRow(gym, inUse = gym.id == state.inUse, onOpen = onOpen, onUse = onUse)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun GymRow(
+    gym: GymProfile,
+    inUse: Boolean,
+    onOpen: (gymId: String?) -> Unit,
+    onUse: (gymId: String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val name = gymName(gym)
+    val useLabel = stringResource(Res.string.cd_use_gym, name)
+    ListItem(
+        headlineContent = { Text(name) },
+        supportingContent = { Text(gymSummary(gym)) },
+        leadingContent = {
+            RadioButton(
+                selected = inUse,
+                onClick = { onUse(gym.id) },
+                modifier = Modifier.semantics { contentDescription = useLabel },
+            )
+        },
+        colors = LioraCardDefaults.listItemColors(),
+        modifier = modifier.clickable { onOpen(gym.id) },
+    )
 }

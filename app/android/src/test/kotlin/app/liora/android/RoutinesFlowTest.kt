@@ -97,7 +97,8 @@ class RoutinesFlowTest {
         composeRule.onNodeWithText("Push day").assertIsDisplayed()
         composeRule.onNodeWithText("2 exercises · 6 sets").assertIsDisplayed()
         composeRule.onNodeWithText("80 kg × 8–12").assertIsDisplayed()
-        composeRule.onNodeWithText("Superset").assertIsDisplayed()
+        // Each exercise of the superset says so, as in the logger.
+        composeRule.onAllNodesWithText("Superset").assertCountEquals(2)
         // The exercises' names come from the catalog a moment after the routine.
         waitForText(FLYES)
         composeRule.onRoot().captureRoboImage("src/test/screenshots/routine_detail_dark.png")
@@ -208,7 +209,7 @@ class RoutinesFlowTest {
         composeRule.onNodeWithText("Push").performClick()
         waitForText("Training starten")
         composeRule.onNodeWithText("3 Übungen · 8 Sätze").assertIsDisplayed()
-        composeRule.onNodeWithText("Supersatz").assertIsDisplayed()
+        composeRule.onAllNodesWithText("Supersatz").onFirst().assertIsDisplayed()
         composeRule.onAllNodesWithText("80 kg × 8–12").assertCountEquals(3)
         // The exercises' names arrive after their sets.
         waitForText("Bankdrücken (Langhantel)")

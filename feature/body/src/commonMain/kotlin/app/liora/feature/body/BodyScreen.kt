@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -22,9 +21,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -160,12 +161,21 @@ private fun BodyList(
         }
         if (others.isNotEmpty()) {
             item(key = "header") { SectionHeader(stringResource(Res.string.body_measurements)) }
-            items(others, key = { it.type.key }) { summary ->
-                MeasurementRow(
-                    summary = summary,
-                    selected = summary.type == selection.type,
-                    onClick = { navigation.onOpen(summary.type) },
-                )
+            // At most a few dozen, so they share one card.
+            item(key = "measurements") {
+                LioraCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
+                    Column(Modifier.padding(vertical = 6.dp)) {
+                        others.forEach { summary ->
+                            key(summary.type.key) {
+                                MeasurementRow(
+                                    summary = summary,
+                                    selected = summary.type == selection.type,
+                                    onClick = { navigation.onOpen(summary.type) },
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -284,10 +294,9 @@ private fun MeasurementRow(
             modifier
                 .fillMaxWidth()
                 .semantics { if (selected) this.selected = true }
-                .background(
-                    if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface,
-                ).clickable(onClick = onClick)
-                .padding(horizontal = 20.dp, vertical = 10.dp),
+                .background(if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
