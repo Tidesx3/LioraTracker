@@ -72,7 +72,10 @@ internal class OfflineExerciseRepository(
         ) { exercises, names, settings ->
             val namesById = names.groupBy { it.exerciseId }
             val settingsById = settings.associateBy { it.exerciseId }
-            exercises.map { it.toModel(namesById[it.id].orEmpty(), settingsById[it.id], language) }
+            val byId = exercises.associateBy { it.id }
+            exercises.map {
+                it.toModel(namesById[it.id].orEmpty(), settingsById[it.id], language, imagesOf(it, byId))
+            }
         }
 
     override fun observeExercise(
@@ -182,10 +185,27 @@ internal fun ExerciseDraft.toEntity(
     sync = sync,
 )
 
+/**
+ * The exercise's own pictures, or for a variation without any (custom ones have none) its base
+ * exercise's, following variations of variations. Only shown, never stored on the variation.
+ */
+internal fun imagesOf(
+    exercise: ExerciseEntity,
+    byId: Map<String, ExerciseEntity>,
+): List<String> {
+    var current = exercise
+    val seen = mutableSetOf(current.id)
+    while (current.imagePaths.isEmpty()) {
+        current = current.variationOf?.takeIf(seen::add)?.let(byId::get) ?: break
+    }
+    return current.imagePaths
+}
+
 internal fun ExerciseEntity.toModel(
     names: List<ExerciseNameEntity>,
     settings: ExerciseSettingsEntity?,
     language: String,
+    images: List<String> = imagePaths,
 ): Exercise {
     fun primaryName(locale: String) = names.firstOrNull { it.locale == locale && !it.isAlias }?.name
     val displayName =
@@ -203,7 +223,7 @@ internal fun ExerciseEntity.toModel(
         primaryMuscles = primaryMuscles,
         secondaryMuscles = secondaryMuscles,
         instructions = instructions,
-        imageUrls = imagePaths.map(::imageUrl),
+        imageUrls = images.map(::imageUrl),
         isCustom = isCustom,
         variationOf = variationOf,
         notes = notes,

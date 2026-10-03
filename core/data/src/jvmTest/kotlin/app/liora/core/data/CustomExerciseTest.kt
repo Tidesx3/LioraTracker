@@ -8,11 +8,13 @@ import app.liora.core.data.exercise.TrackingTypeLockedException
 import app.liora.core.data.sync.SyncStamper
 import app.liora.core.database.TransactionRunner
 import app.liora.core.database.inMemoryLioraDatabase
+import app.liora.core.database.model.ExerciseEntity
 import app.liora.core.database.model.SyncMetadata
 import app.liora.core.database.model.WorkoutEntity
 import app.liora.core.database.model.WorkoutExerciseEntity
 import app.liora.core.database.model.WorkoutSetEntity
 import app.liora.core.model.Equipment
+import app.liora.core.model.ExerciseCategory
 import app.liora.core.model.ExerciseDraft
 import app.liora.core.model.Muscle
 import app.liora.core.model.SetType
@@ -104,6 +106,63 @@ class CustomExerciseTest {
             repository.setArchived(used, archived = false)
             assertFalse(assertNotNull(repository.observeExercise(used, "de").first()).settings.archived)
         }
+
+    @Test
+    fun aVariationShowsItsBaseExercisesPicturesUntilItHasItsOwn() =
+        runTest {
+            val legPress = "fedb.Leg_Press"
+            database.exerciseDao().upsertExercises(listOf(builtIn(legPress, images = listOf("Leg_Press/0.jpg"))))
+            val variation = repository.createCustom(legPressInternat)
+            // A variation of a variation finds them two steps up.
+            val ofVariation = repository.createCustom(legPressInternat.copy(name = "Unten", variationOf = variation))
+            val unrelated = repository.createCustom(legPressInternat.copy(name = "Eigene", variationOf = null))
+
+            val base = assertNotNull(repository.observeExercise(legPress, "de").first()).imageUrls
+            assertEquals(1, base.size)
+            assertEquals(base, repository.observeExercise(variation, "de").first()?.imageUrls)
+            assertEquals(base, repository.observeExercise(ofVariation, "de").first()?.imageUrls)
+            assertEquals(emptyList(), repository.observeExercise(unrelated, "de").first()?.imageUrls)
+            // Only shown: the variation itself still has none, so a backup or sync doesn't copy them.
+            assertEquals(emptyList(), database.exerciseDao().get(variation)?.imagePaths)
+
+            // A picture of its own wins.
+            val dao = database.exerciseDao()
+            dao.upsertExercises(
+                listOf(assertNotNull(dao.get(variation)).copy(imagePaths = listOf("https://x/own.jpg"))),
+            )
+            assertEquals(listOf("https://x/own.jpg"), repository.observeExercise(variation, "de").first()?.imageUrls)
+        }
+
+    @Test
+    fun variationsThatPointAtEachOtherDontLoop() =
+        runTest {
+            val a = repository.createCustom(legPressInternat.copy(name = "A", variationOf = null))
+            val b = repository.createCustom(legPressInternat.copy(name = "B", variationOf = a))
+            val dao = database.exerciseDao()
+            dao.upsertExercises(listOf(assertNotNull(dao.get(a)).copy(variationOf = b)))
+
+            assertEquals(emptyList(), repository.observeExercise(a, "de").first()?.imageUrls)
+        }
+
+    private fun builtIn(
+        id: String,
+        images: List<String>,
+    ) = ExerciseEntity(
+        id = id,
+        name = "Leg Press",
+        trackingType = TrackingType.WeightReps,
+        equipment = Equipment.Machine,
+        category = ExerciseCategory.Strength,
+        primaryMuscles = setOf(Muscle.Quadriceps),
+        secondaryMuscles = emptySet(),
+        instructions = emptyList(),
+        imagePaths = images,
+        isCustom = false,
+        variationOf = null,
+        notes = null,
+        rank = null,
+        sync = SyncMetadata(createdAt = 1, hlc = "0000000000001:0000:seed", dirty = false),
+    )
 
     private suspend fun logASet(exerciseId: String) {
         val sync = SyncMetadata(createdAt = 1, hlc = "0000000000001:0000:test")
