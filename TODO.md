@@ -51,5 +51,16 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
   - Watch the duration, volume and sets roll in the header, the finish sheet's totals roll in, and the
     rest countdown roll; let a rest run out with the logger open and watch the last five seconds pulse.
   - Turn on "Remove animations" (Settings › Accessibility): everything shows its end state at once.
+- **Motion (Phase 2d): check on the phone.**
+  - Beat last time on a set: the trophy pops and the confetti reads as a celebration, over the rows
+    around it, and is gone before the next tap. Finish: the records card bursts once.
+  - Open a workout from History, a routine from Train and an exercise from the library on the cover
+    screen: each grows from its card or row, and shrinks back on the way back. Nothing flickers at the
+    floating tab bar.
+  - Swipe back slowly from either edge and let go halfway: the screen follows the finger and comes back.
+    Do the same in the logger: it sinks under the finger.
+  - Switch tabs: a quick fade, not a slide. Open the logger from the workout bar: it rises.
+  - Unfold and fold on a detail screen and in the logger: a crossfade, with the place kept. On the inner
+    screen, open a few items from a list: each arrives in the detail pane.
 - **Robolectric: a text field in a dialog never lets Compose go idle.** Find the cause, so the rename
   and save-as-routine dialogs can get UI tests.

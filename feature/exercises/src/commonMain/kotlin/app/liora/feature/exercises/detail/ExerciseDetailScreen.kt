@@ -55,6 +55,8 @@ import app.liora.core.model.Exercise
 import app.liora.core.model.Muscle
 import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
+import app.liora.core.navigation.SharedKeys
+import app.liora.core.navigation.rememberSharedContainer
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.customExerciseBadge
 import app.liora.core.ui.label
@@ -176,7 +178,8 @@ private fun ExerciseDetailContent(
     val exercise = state.exercise
     val navigation = actions.navigation
     Scaffold(
-        modifier = modifier,
+        // The row it was opened from grows into it.
+        modifier = modifier.then(rememberSharedContainer(SharedKeys.exercise(exercise.id))),
         topBar = {
             LioraTopAppBar(
                 title = "",

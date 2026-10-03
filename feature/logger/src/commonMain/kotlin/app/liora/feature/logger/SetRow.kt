@@ -52,6 +52,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import androidx.compose.ui.zIndex
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.designsystem.theme.tabularNumbers
@@ -173,10 +174,13 @@ internal fun SetRow(
     modifier: Modifier = Modifier,
 ) {
     val set = state.set
+    // Records already set when the logger opens just show their trophy; a new one is celebrated.
+    val wasRecord = remember { state.hints.isRecord }
     val dismiss = rememberSwipeToDismissBoxState()
     SwipeToDismissBox(
         state = dismiss,
-        modifier = modifier,
+        // Above the rows around it, so a record's confetti flies over them.
+        modifier = modifier.zIndex(if (state.hints.isRecord) 1f else 0f),
         enableDismissFromStartToEnd = false,
         onDismiss = { actions.onRemove(set.id) },
         backgroundContent = {
@@ -215,14 +219,7 @@ internal fun SetRow(
                 SetTypeMenu(set.type, state.number, onPick = { actions.onTypeChange(set.id, it) })
                 if (state.isCurrent && !set.isCompleted) CurrentMarker(Modifier.align(Alignment.CenterStart))
             }
-            if (state.hints.isRecord) {
-                Icon(
-                    painter = painterResource(LioraIcons.Record),
-                    contentDescription = stringResource(Res.string.cd_personal_record),
-                    tint = LioraTheme.colors.personalRecord,
-                    modifier = Modifier.size(18.dp),
-                )
-            }
+            if (state.hints.isRecord) RecordMark(celebrate = !wasRecord, seed = state.number, Modifier.zIndex(1f))
             Text(
                 text = previousText(state, numbers),
                 style = MaterialTheme.typography.bodyMedium.tabularNumbers(),

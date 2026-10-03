@@ -103,8 +103,19 @@ class HistoryFlowTest {
         composeRule.onAllNodesWithText("3 × $BENCH").assertCountEquals(0)
         composeRule.onRoot().captureRoboImage("src/test/screenshots/history_dark.png")
 
-        // The heavier Push: its records, with a trophy on the sets that set them.
+        // The heavier Push: its card grows into the workout (caught partway, the clock paused)...
+        composeRule.mainClock.autoAdvance = false
         composeRule.onAllNodesWithText("Push").onFirst().performClick()
+        var frames = 0
+        while (!nodeExists(hasText("Repeat workout")) &&
+            frames++ < MAX_FRAMES
+        ) {
+            composeRule.mainClock.advanceTimeByFrame()
+        }
+        composeRule.mainClock.advanceTimeBy(MIDWAY_MS)
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/motion_open_workout_dark.png")
+        composeRule.mainClock.autoAdvance = true
+        // ...with its records, and a trophy on the sets that set them.
         waitForText("Repeat workout")
         waitForText("Tuesday, August 11, 2026 · ")
         waitForText("82.5 kg × 10")
@@ -367,6 +378,8 @@ class HistoryFlowTest {
         const val INNER = "w984dp-h1092dp-night-xhdpi"
         const val ZONE = "Europe/Vienna"
         const val TIMEOUT_MS = 10_000L
+        const val MAX_FRAMES = 200
+        const val MIDWAY_MS = 40L
         val SET_MINUTES = 3.minutes
 
         const val BENCH_ID = "fedb.Barbell_Bench_Press_-_Medium_Grip"

@@ -147,7 +147,16 @@ class LoggerFlowTest {
         listOf("8", "5").forEach { padKey(it).performClick() }
         padButton("Next field").performClick()
         listOf("1", "0").forEach { padKey(it).performClick() }
+        // Frame by frame: the trophy pops in and confetti flies from it.
+        composeRule.mainClock.autoAdvance = false
         padButton("Log set").performClick()
+        var frames = 0
+        while (!nodeExists(hasContentDescription("Personal record")) && frames++ < MAX_FRAMES) {
+            composeRule.mainClock.advanceTimeByFrame()
+        }
+        composeRule.mainClock.advanceTimeBy(BURST_MS)
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/motion_record_dark.png")
+        composeRule.mainClock.autoAdvance = true
         composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasContentDescription("Personal record")) }
         // The second set like last time, the third not at all.
         composeRule.onAllNodesWithContentDescription("Log set").onFirst().performClick()
@@ -480,6 +489,7 @@ class LoggerFlowTest {
         const val EARLY_MS = 80L
         const val LATE_MS = 120L
         const val MAX_FRAMES = 200
+        const val BURST_MS = 220L
 
         const val COVER = "w411dp-h960dp-night-xxhdpi"
         const val INNER = "w984dp-h1092dp-night-xhdpi"

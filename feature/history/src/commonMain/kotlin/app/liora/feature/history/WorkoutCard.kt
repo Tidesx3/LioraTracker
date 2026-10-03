@@ -22,6 +22,8 @@ import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.designsystem.util.workoutDisplayName
+import app.liora.core.navigation.SharedKeys
+import app.liora.core.navigation.rememberSharedContainer
 import app.liora.feature.history.resources.Res
 import app.liora.feature.history.resources.date_time
 import org.jetbrains.compose.resources.pluralStringResource
@@ -38,7 +40,12 @@ internal fun WorkoutCard(
     val dates = rememberDateFormatter()
     LioraCard(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth().semantics { if (selected) this.selected = true },
+        // Grows into the workout as it opens.
+        modifier =
+            modifier
+                .then(rememberSharedContainer(SharedKeys.workout(item.id)))
+                .fillMaxWidth()
+                .semantics { if (selected) this.selected = true },
         containerColor =
             if (selected) {
                 MaterialTheme.colorScheme.secondaryContainer

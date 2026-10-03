@@ -173,6 +173,25 @@ As of 2026-10-03:
       they finish at once; nothing here loops on its own.
     - Tests: `RollingTextTest` (which way a change rolls) and screenshots partway through ticking a set
       with the test clock paused (`motion_tick_early`, `motion_tick_late`).
+  - **2d (done, pending the device check in TODO.md): celebrations and navigation.**
+    - Records: a set that breaks one gets its trophy popping in from nothing with a burst of confetti in
+      gold, violet and pink (`ConfettiBurst` in designsystem, drawn past its bounds, seeded so screenshots
+      hold still); the finish sheet's records card bursts from its trophy as it opens
+      (`RecordsCard(celebrate = true)`). Records already set when the logger opens don't celebrate.
+    - Screens (`ScreenTransitions.kt`): going deeper slides the new screen a tenth of the way in from the
+      end as it fades in, and back reverses it; tabs fade through; a fold or unfold, which changes the
+      layout but not the screen, crossfades. 300 ms, down from the library's 700 ms crossfade. The
+      `Navigator` notes which way it last moved (`lastMove`: forward, back or across tabs).
+    - Predictive back (on by default at target SDK 36+): the screen shrinks and drifts toward the swiped
+      side under the finger, the one beneath coming up behind it, and fades only near the end.
+    - The logger rises from the workout bar and sinks back into it, under the finger with predictive
+      back too (`risingScreen()` entry metadata in `core/navigation`).
+    - List to detail: a history card, a routine card and an exercise row grow into the screen they open
+      and shrink back into it (`rememberSharedContainer` with `SharedKeys`, over a `SharedTransitionLayout`
+      around NavDisplay), on a single pane only. Beside a list, an opened item fades and slides into the
+      detail pane (`ListDetail`'s `Arriving`).
+    - Tests: `lastMove` in `NavigatorTest`, and screenshots partway through a card growing into its
+      workout (`motion_open_workout`) and a record's confetti (`motion_record`).
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a
   milestone go in TODO.md.

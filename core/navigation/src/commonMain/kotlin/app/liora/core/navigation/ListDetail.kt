@@ -1,5 +1,8 @@
 package app.liora.core.navigation
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -8,9 +11,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavMetadataKey
@@ -84,7 +90,7 @@ private class ListDetailScene<T : Any>(
             VerticalDivider()
             Box(Modifier.weight(1f).fillMaxHeight()) {
                 CompositionLocalProvider(LocalPaneRole provides PaneRole.Detail) {
-                    if (detail == null) placeholder() else key(detail.contentKey) { detail.Content() }
+                    if (detail == null) placeholder() else key(detail.contentKey) { Arriving { detail.Content() } }
                 }
             }
         }
@@ -98,6 +104,25 @@ private class ListDetailScene<T : Any>(
 
     override fun hashCode(): Int = (list.hashCode() * 31 + detail.hashCode()) * 31 + previousEntries.hashCode()
 }
+
+/**
+ * Fades in and slides a little way in from the end as it first shows: an item opened beside the list
+ * arrives in the detail pane rather than replacing the last one in a cut. Only drawing moves.
+ */
+@Composable
+private fun Arriving(content: @Composable () -> Unit) {
+    val arrived = remember { Animatable(0f) }
+    LaunchedEffect(Unit) { arrived.animateTo(1f, tween(ARRIVE_MILLIS, easing = LinearOutSlowInEasing)) }
+    Box(
+        Modifier.fillMaxSize().graphicsLayer {
+            alpha = arrived.value
+            translationX = (1 - arrived.value) * ArriveOffset.toPx()
+        },
+    ) { content() }
+}
+
+private const val ARRIVE_MILLIS = 250
+private val ArriveOffset = 24.dp
 
 private class ListPane(
     val placeholder: @Composable () -> Unit,

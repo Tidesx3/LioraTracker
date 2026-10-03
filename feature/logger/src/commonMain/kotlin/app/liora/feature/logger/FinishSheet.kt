@@ -109,7 +109,11 @@ internal fun FinishSheet(
             Totals(summary, startedAt)
             if (summary.records.isNotEmpty()) {
                 val count = summary.records.sumOf { it.records.size }
-                RecordsCard(pluralStringResource(Res.plurals.finish_records, count, count), summary.records)
+                RecordsCard(
+                    title = pluralStringResource(Res.plurals.finish_records, count, count),
+                    entries = summary.records,
+                    celebrate = true,
+                )
             }
             if (summary.openSets > 0) {
                 Text(

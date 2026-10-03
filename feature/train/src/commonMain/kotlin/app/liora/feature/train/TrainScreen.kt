@@ -50,6 +50,8 @@ import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.model.RoutineFolder
 import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
+import app.liora.core.navigation.SharedKeys
+import app.liora.core.navigation.rememberSharedContainer
 import app.liora.core.ui.currentLanguage
 import app.liora.feature.train.resources.Res
 import app.liora.feature.train.resources.cd_more
@@ -335,7 +337,12 @@ private fun RoutineCard(
     val copyName = stringResource(Res.string.routine_copy_name, routine.name)
     LioraCard(
         onClick = { actions.onOpen(routine.id) },
-        modifier = modifier.fillMaxWidth().semantics { if (selected) this.selected = true },
+        // Grows into the routine as it opens.
+        modifier =
+            modifier
+                .then(rememberSharedContainer(SharedKeys.routine(routine.id)))
+                .fillMaxWidth()
+                .semantics { if (selected) this.selected = true },
         containerColor =
             if (selected) {
                 MaterialTheme.colorScheme.secondaryContainer

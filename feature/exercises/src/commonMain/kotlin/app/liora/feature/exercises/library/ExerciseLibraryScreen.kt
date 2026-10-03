@@ -51,6 +51,8 @@ import app.liora.core.model.Exercise
 import app.liora.core.model.Muscle
 import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
+import app.liora.core.navigation.SharedKeys
+import app.liora.core.navigation.rememberSharedContainer
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.label
 import app.liora.feature.exercises.components.ExerciseRow
@@ -304,6 +306,8 @@ private fun ResultList(
                 exercise = exercise,
                 onClick = { onOpenExercise(exercise.id) },
                 selected = exercise.id == selectedId,
+                // Grows into the exercise as it opens.
+                modifier = rememberSharedContainer(SharedKeys.exercise(exercise.id)),
             )
         }
     }

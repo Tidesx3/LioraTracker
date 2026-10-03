@@ -9,13 +9,15 @@ import app.liora.core.navigation.ExercisePickerRoute
 import app.liora.core.navigation.LoggerRoute
 import app.liora.core.navigation.NavigationResultEffect
 import app.liora.core.navigation.Navigator
+import app.liora.core.navigation.risingScreen
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.parameter.parametersOf
 import org.koin.dsl.module
 
 fun EntryProviderScope<NavKey>.loggerEntries(navigator: Navigator) {
-    entry<LoggerRoute> { LoggerEntry(navigator, finishedWorkoutId = null) }
+    // The workout in progress rises from the workout bar, and sinks back into it.
+    entry<LoggerRoute>(metadata = risingScreen()) { LoggerEntry(navigator, finishedWorkoutId = null) }
     // The same logger on a finished workout from history, to correct it.
     entry<EditWorkoutRoute> { route -> LoggerEntry(navigator, finishedWorkoutId = route.workoutId) }
 }

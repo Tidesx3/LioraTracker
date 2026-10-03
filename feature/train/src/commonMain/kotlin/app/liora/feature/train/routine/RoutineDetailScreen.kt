@@ -45,6 +45,8 @@ import app.liora.core.model.RoutineExercise
 import app.liora.core.model.TrackingType
 import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
+import app.liora.core.navigation.SharedKeys
+import app.liora.core.navigation.rememberSharedContainer
 import app.liora.core.ui.ExerciseThumbnail
 import app.liora.core.ui.SetTypeBadge
 import app.liora.core.ui.currentLanguage
@@ -139,7 +141,8 @@ private fun RoutineDetailContent(
 ) {
     val routine = state.routine
     Scaffold(
-        modifier = modifier,
+        // The card it was opened from grows into it.
+        modifier = modifier.then(rememberSharedContainer(SharedKeys.routine(routine.id))),
         topBar = {
             LioraTopAppBar(
                 title = "",

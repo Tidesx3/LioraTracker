@@ -50,6 +50,8 @@ import app.liora.core.model.TrackingType
 import app.liora.core.model.WorkoutExercise
 import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
+import app.liora.core.navigation.SharedKeys
+import app.liora.core.navigation.rememberSharedContainer
 import app.liora.core.ui.ExerciseThumbnail
 import app.liora.core.ui.RecordsCard
 import app.liora.core.ui.SetTypeBadge
@@ -143,7 +145,8 @@ private fun WorkoutDetailContent(
 ) {
     val workout = state.workout
     Scaffold(
-        modifier = modifier,
+        // The card it was opened from grows into it.
+        modifier = modifier.then(rememberSharedContainer(SharedKeys.workout(workout.id))),
         topBar = {
             LioraTopAppBar(
                 title = "",

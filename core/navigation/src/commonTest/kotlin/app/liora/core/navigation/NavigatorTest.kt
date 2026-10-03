@@ -30,6 +30,26 @@ class NavigatorTest {
     }
 
     @Test
+    fun eachChangeSaysWhichWayItWent() {
+        navigator.navigate(BodyRoute)
+        assertEquals(NavigationMove.Forward, navigator.lastMove)
+        navigator.goBack()
+        assertEquals(NavigationMove.Back, navigator.lastMove)
+
+        navigator.selectTopLevel(ExercisesRoute)
+        assertEquals(NavigationMove.Tab, navigator.lastMove)
+        navigator.openFromList(ExercisesRoute, ExerciseDetailRoute("bench"))
+        assertEquals(NavigationMove.Forward, navigator.lastMove)
+        // Re-selecting the tab returns to its root.
+        navigator.selectTopLevel(ExercisesRoute)
+        assertEquals(NavigationMove.Back, navigator.lastMove)
+        // Back from another tab's root crosses to the start tab.
+        navigator.goBack()
+        assertEquals(NavigationMove.Tab, navigator.lastMove)
+        assertEquals(TrainRoute, navigator.currentRoute)
+    }
+
+    @Test
     fun openingFromAListNotOnTheStackJustNavigates() {
         navigator.navigate(LoggerRoute)
         navigator.openFromList(ExercisesRoute, ExerciseDetailRoute("bench"))

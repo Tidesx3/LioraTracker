@@ -29,6 +29,13 @@ class Navigator(
     var topLevelRoute: NavKey by mutableStateOf(startRoute)
         private set
 
+    /**
+     * How the back stack last changed, so the screens can move to match: deeper, back, or across
+     * tabs. Read when a transition starts; it doesn't need to be observed.
+     */
+    var lastMove: NavigationMove = NavigationMove.Forward
+        private set
+
     /** Values screens hand back to the screen that opened them. */
     val results = NavigationResults()
 
@@ -43,6 +50,7 @@ class Navigator(
     /** Switches tabs. Re-selecting the current tab pops it back to its root. */
     fun selectTopLevel(route: NavKey) {
         val stack = stacks[route] ?: error("$route is not a top-level route")
+        lastMove = if (route == topLevelRoute) NavigationMove.Back else NavigationMove.Tab
         if (route == topLevelRoute && stack.size > 1) {
             stack.removeRange(1, stack.size)
         }
@@ -55,6 +63,7 @@ class Navigator(
             selectTopLevel(route)
             return
         }
+        lastMove = NavigationMove.Forward
         stacks.values.forEach { it.remove(route) }
         stacks.getValue(topLevelRoute).add(route)
     }
@@ -90,14 +99,35 @@ class Navigator(
     fun close(route: NavKey) {
         val stack = stacks.getValue(topLevelRoute)
         val index = stack.lastIndexOf(route)
+        lastMove = NavigationMove.Back
         if (index > 0) stack.removeRange(index, stack.size) else goBack()
     }
 
     fun goBack() {
         val stack = stacks.getValue(topLevelRoute)
+        lastMove = NavigationMove.Back
         when {
-            stack.size > 1 -> stack.removeAt(stack.lastIndex)
-            topLevelRoute != startRoute -> topLevelRoute = startRoute
+            stack.size > 1 -> {
+                stack.removeAt(stack.lastIndex)
+            }
+
+            topLevelRoute != startRoute -> {
+                // Back from another tab's root lands on the start tab: across, not back down.
+                lastMove = NavigationMove.Tab
+                topLevelRoute = startRoute
+            }
         }
     }
+}
+
+/** Which way the app last moved. */
+enum class NavigationMove {
+    /** Deeper: a screen opened on top. */
+    Forward,
+
+    /** Back to where the user came from. */
+    Back,
+
+    /** Across to another tab. */
+    Tab,
 }

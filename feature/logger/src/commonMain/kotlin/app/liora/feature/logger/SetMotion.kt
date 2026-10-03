@@ -31,9 +31,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.motion.ConfettiBurst
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.cd_complete_set
+import app.liora.feature.logger.resources.cd_personal_record
 import app.liora.feature.logger.resources.cd_reopen_set
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -119,3 +121,30 @@ private val ColorSpec = tween<Color>(durationMillis = 120)
 
 /** The tint spreads quickly, done well before the next tap. */
 internal val FillSpec = tween<Float>(durationMillis = 320, easing = FastOutSlowInEasing)
+
+/**
+ * The trophy on a set that broke a personal record. With [celebrate], as when the set has just been
+ * logged, it pops in from nothing and a burst of confetti flies from it; [seed] picks the confetti.
+ */
+@Composable
+internal fun RecordMark(
+    celebrate: Boolean,
+    seed: Int,
+    modifier: Modifier = Modifier,
+) {
+    val pop = remember { Animatable(if (celebrate) 0f else 1f) }
+    LaunchedEffect(Unit) { if (celebrate) pop.animateTo(1f, PopSpec) }
+    Box(modifier, contentAlignment = Alignment.Center) {
+        Icon(
+            painter = painterResource(LioraIcons.Record),
+            contentDescription = stringResource(Res.string.cd_personal_record),
+            tint = LioraTheme.colors.personalRecord,
+            modifier =
+                Modifier.size(18.dp).graphicsLayer {
+                    scaleX = pop.value
+                    scaleY = pop.value
+                },
+        )
+        if (celebrate) ConfettiBurst(Modifier.matchParentSize(), seed = seed)
+    }
+}

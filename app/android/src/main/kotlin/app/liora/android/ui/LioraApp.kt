@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -26,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +56,7 @@ import app.liora.core.designsystem.util.workoutDisplayName
 import app.liora.core.model.ActiveWorkout
 import app.liora.core.navigation.EditWorkoutRoute
 import app.liora.core.navigation.ListDetailSceneStrategy
+import app.liora.core.navigation.LocalSharedTransitionScope
 import app.liora.core.navigation.LoggerRoute
 import app.liora.core.navigation.Navigator
 import app.liora.feature.body.bodyEntries
@@ -114,35 +117,45 @@ fun LioraApp(
                 }
             },
         ) { padding ->
-            NavDisplay(
-                backStack = navigator.backStack,
-                onBack = navigator::goBack,
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .consumeWindowInsets(padding)
-                        // The rail already keeps clear of the cutout and system bars on its side.
-                        .consumeWindowInsets(
-                            if (showRail) RailInsets.only(WindowInsetsSides.Start) else WindowInsets(0),
-                        ),
-                entryDecorators =
-                    listOf(
-                        rememberSaveableStateHolderNavEntryDecorator(),
-                        rememberViewModelStoreNavEntryDecorator(),
+            // Lets a list item grow into the screen it opens (rememberSharedContainer).
+            SharedTransitionLayout(
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .consumeWindowInsets(padding)
+                    // The rail already keeps clear of the cutout and system bars on its side.
+                    .consumeWindowInsets(
+                        if (showRail) RailInsets.only(WindowInsetsSides.Start) else WindowInsets(0),
                     ),
-                sceneStrategies = listOf(listDetail),
-                entryProvider =
-                    entryProvider {
-                        trainEntries(navigator)
-                        historyEntries(navigator)
-                        progressEntries(navigator)
-                        exercisesEntries(navigator)
-                        loggerEntries(navigator)
-                        bodyEntries(navigator)
-                        settingsEntries(navigator)
-                    },
-            )
+            ) {
+                CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+                    NavDisplay(
+                        backStack = navigator.backStack,
+                        onBack = navigator::goBack,
+                        modifier = Modifier.fillMaxSize(),
+                        entryDecorators =
+                            listOf(
+                                rememberSaveableStateHolderNavEntryDecorator(),
+                                rememberViewModelStoreNavEntryDecorator(),
+                            ),
+                        sceneStrategies = listOf(listDetail),
+                        sharedTransitionScope = this,
+                        transitionSpec = screenTransition(navigator),
+                        popTransitionSpec = screenTransition(navigator),
+                        predictivePopTransitionSpec = predictiveBack(),
+                        entryProvider =
+                            entryProvider {
+                                trainEntries(navigator)
+                                historyEntries(navigator)
+                                progressEntries(navigator)
+                                exercisesEntries(navigator)
+                                loggerEntries(navigator)
+                                bodyEntries(navigator)
+                                settingsEntries(navigator)
+                            },
+                    )
+                }
+            }
         }
     }
 }
