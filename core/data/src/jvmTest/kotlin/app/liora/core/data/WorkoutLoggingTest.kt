@@ -300,15 +300,22 @@ class WorkoutLoggingTest {
             assertEquals(listOf(bench), dao.exercisesOf(workout.id).map { it.exerciseId })
             assertEquals(listOf(10, 9), dao.setsOf(workout.id).map { it.reps })
             assertNull(restTimer.current())
-            // Next time starts from today: 85 kg, still aiming for 8–12.
+            // Next time starts from today: 85 kg, still aiming for 8–12. What was skipped stays planned.
             val routine = routines.get("push")!!
-            assertEquals(listOf(bench), routine.exercises.map { it.exerciseId })
+            assertEquals(listOf(bench, fly), routine.exercises.map { it.exerciseId })
             assertEquals(
-                List(2) { Mass(85.0) to RepRange(8, 12) },
-                routine.exercises.single().sets.map {
-                    it.weight to
-                        it.reps
-                },
+                listOf(Mass(85.0), Mass(85.0), Mass(80.0)).map { it to RepRange(8, 12) },
+                routine.exercises
+                    .first()
+                    .sets
+                    .map { it.weight to it.reps },
+            )
+            assertEquals(
+                listOf("rf0"),
+                routine.exercises
+                    .last()
+                    .sets
+                    .map { it.id },
             )
         }
 

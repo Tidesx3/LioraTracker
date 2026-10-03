@@ -21,6 +21,7 @@ import app.liora.core.domain.PlateLoad
 import app.liora.core.domain.RecordHighlights
 import app.liora.core.domain.RecordKey
 import app.liora.core.domain.RestDefaults
+import app.liora.core.domain.RoutineChange
 import app.liora.core.domain.RoutineUpdate
 import app.liora.core.domain.SessionRecords
 import app.liora.core.domain.SetField
@@ -148,7 +149,10 @@ sealed interface LoggerUiState {
 
         /** What finishing now would keep, and what it would change. */
         fun finishSummary(): FinishSummary {
-            val updated = routine?.let { RoutineUpdate.fromWorkout(it, workout) { "" } }
+            var next = 0
+            val updated = routine?.let { RoutineUpdate.fromWorkout(it, workout) { "new-${next++}" } }
+            val changes =
+                if (routine != null && updated != null) RoutineUpdate.changeList(routine, updated) else emptyList()
             return FinishSummary(
                 completedSets = completedSets,
                 openSets = openSets,
@@ -162,6 +166,11 @@ sealed interface LoggerUiState {
                             ?.let { RecordsCardEntry(exercises[exercise.exerciseId]?.name.orEmpty(), trackingType, it) }
                     },
                 routineToUpdate = routine?.name?.takeIf { updated != null && RoutineUpdate.changes(routine, updated) },
+                routineChanges = changes,
+                exerciseNames =
+                    changes
+                        .flatMap { it.exerciseIds() }
+                        .associateWith { exercises[it]?.name.orEmpty() },
             )
         }
 
@@ -235,7 +244,20 @@ data class FinishSummary(
     val records: List<RecordsCardEntry>,
     /** The routine's name, when updating it with today's values would change it. */
     val routineToUpdate: String?,
+    /** What updating the routine would change beyond weights and reps; empty when only they change. */
+    val routineChanges: List<RoutineChange> = emptyList(),
+    /** The names of the exercises in [routineChanges], by id. */
+    val exerciseNames: Map<String, String> = emptyMap(),
 )
+
+private fun RoutineChange.exerciseIds(): List<String> =
+    when (this) {
+        is RoutineChange.Replaced -> listOf(from, to)
+        is RoutineChange.Added -> listOf(exerciseId)
+        is RoutineChange.Dropped -> listOf(exerciseId)
+        is RoutineChange.SetCount -> listOf(exerciseId)
+        RoutineChange.Reordered -> emptyList()
+    }
 
 /**
  * Where the logger hears back from the exercise picker. A finished workout open for corrections has

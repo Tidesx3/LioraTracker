@@ -70,6 +70,14 @@
     <item quantity="other">%1$d geplante Sätze wurden nicht geloggt und werden nicht gespeichert.</item>
   </plurals>
   <string name="finish_update_routine">„%1$s“ mit den heutigen Gewichten und Wiederholungen aktualisieren</string>
+  <string name="finish_update_routine_changes">„%1$s“ an das heutige Training anpassen</string>
+  <string name="routine_change_added">Neu dabei: %1$s</string>
+  <string name="routine_change_dropped">Fällt weg: %1$s</string>
+  <plurals name="routine_change_sets">
+    <item quantity="one">%1$s: %2$d Satz statt %3$d</item>
+    <item quantity="other">%1$s: %2$d Sätze statt %3$d</item>
+  </plurals>
+  <string name="routine_change_order">Übungen in der heutigen Reihenfolge</string>
   <string name="cd_personal_record">Persönlicher Rekord</string>
 
   <string name="edit_done">Fertig</string>

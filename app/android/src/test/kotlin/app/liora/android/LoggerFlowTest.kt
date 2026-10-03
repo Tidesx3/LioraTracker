@@ -140,13 +140,49 @@ class LoggerFlowTest {
 
         composeRule.onNode(hasTestTag(LoggerTags.FINISH_CONFIRM)).performClick()
         waitForText("Start empty workout")
+        // The set left open was skipped, not deleted, so the plan keeps it.
         val routine = runBlocking { GlobalContext.get().get<RoutineRepository>().get(PUSH.id)!! }
         assertEquals(
-            listOf(Mass(85.0), Mass(80.0)),
+            listOf(Mass(85.0), Mass(80.0), Mass(80.0)),
             routine.exercises
                 .single()
                 .sets
                 .map { it.weight },
+        )
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun finishingNamesHowTheRoutineWouldChange() {
+        logLastSession()
+        launch()
+        waitForText("Start")
+        composeRule.onNodeWithText("Start").performClick()
+        waitForText("Finish")
+        repeat(3) { done ->
+            composeRule.onAllNodesWithContentDescription("Log set").onFirst().performClick()
+            composeRule.waitUntil(TIMEOUT_MS) { loggedSets() == done + 1 }
+        }
+        // One more than planned.
+        composeRule.onNodeWithText("Add set").performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasContentDescription("Log set")) }
+        composeRule.onAllNodesWithContentDescription("Log set").onFirst().performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { loggedSets() == 4 }
+
+        composeRule.onNodeWithText("Finish").performClick()
+        waitForText("Finish workout?")
+        composeRule.onNodeWithText("Update “Push” to today’s workout").assertIsDisplayed()
+        composeRule.onNodeWithText("Barbell Bench Press: 4 sets, was 3").assertIsDisplayed()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/logger_finish_changes_dark.png")
+
+        composeRule.onNode(hasTestTag(LoggerTags.FINISH_CONFIRM)).performClick()
+        waitForText("Start empty workout")
+        val routine = runBlocking { GlobalContext.get().get<RoutineRepository>().get(PUSH.id)!! }
+        assertEquals(
+            4,
+            routine.exercises
+                .single()
+                .sets.size,
         )
     }
 

@@ -73,6 +73,15 @@
     <item quantity="other">%1$d planned sets weren’t logged and won’t be saved.</item>
   </plurals>
   <string name="finish_update_routine">Update “%1$s” with today’s weights and reps</string>
+  <string name="finish_update_routine_changes">Update “%1$s” to today’s workout</string>
+  <string name="routine_change_replaced" translatable="false">%1$s → %2$s</string>
+  <string name="routine_change_added">Adds %1$s</string>
+  <string name="routine_change_dropped">Drops %1$s</string>
+  <plurals name="routine_change_sets">
+    <item quantity="one">%1$s: %2$d set, was %3$d</item>
+    <item quantity="other">%1$s: %2$d sets, was %3$d</item>
+  </plurals>
+  <string name="routine_change_order">Takes today’s order</string>
   <string name="cd_personal_record">Personal record</string>
 
   <string name="edit_done">Done</string>

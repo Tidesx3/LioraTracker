@@ -119,9 +119,9 @@ class HistoryTest {
         assertEquals(120, routine.exercises.single().restSeconds)
         assertEquals(
             listOf(
-                RoutineSet("id-1", SetType.Warmup, Mass(60.0), RepRange(10)),
+                RoutineSet("id-0", SetType.Warmup, Mass(60.0), RepRange(10)),
                 // A rep range stays the goal.
-                RoutineSet("id-2", SetType.Normal, Mass(80.0), RepRange(8, 12)),
+                RoutineSet("id-1", SetType.Normal, Mass(80.0), RepRange(8, 12)),
             ),
             routine.exercises.single().sets,
         )

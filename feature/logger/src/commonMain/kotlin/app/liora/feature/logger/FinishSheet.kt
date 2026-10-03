@@ -38,6 +38,7 @@ import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.designsystem.util.rememberElapsedTime
 import app.liora.core.designsystem.util.rememberNumberFormatter
+import app.liora.core.domain.RoutineChange
 import app.liora.core.ui.RecordsCard
 import app.liora.core.ui.volumeText
 import app.liora.feature.logger.resources.Res
@@ -47,12 +48,19 @@ import app.liora.feature.logger.resources.finish_open_sets
 import app.liora.feature.logger.resources.finish_records
 import app.liora.feature.logger.resources.finish_title
 import app.liora.feature.logger.resources.finish_update_routine
+import app.liora.feature.logger.resources.finish_update_routine_changes
 import app.liora.feature.logger.resources.logger_discard_cancel
 import app.liora.feature.logger.resources.logger_discard_confirm
 import app.liora.feature.logger.resources.logger_finish
 import app.liora.feature.logger.resources.logger_stat_duration
 import app.liora.feature.logger.resources.logger_stat_sets
 import app.liora.feature.logger.resources.logger_stat_volume
+import app.liora.feature.logger.resources.routine_change_added
+import app.liora.feature.logger.resources.routine_change_dropped
+import app.liora.feature.logger.resources.routine_change_order
+import app.liora.feature.logger.resources.routine_change_replaced
+import app.liora.feature.logger.resources.routine_change_sets
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -110,16 +118,7 @@ internal fun FinishSheet(
                 )
             }
             summary.routineToUpdate?.let { name ->
-                Row(
-                    modifier = Modifier.fillMaxWidth().clickable { updateRoutine = !updateRoutine },
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Checkbox(checked = updateRoutine, onCheckedChange = { updateRoutine = it })
-                    Text(
-                        stringResource(Res.string.finish_update_routine, name),
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                }
+                RoutineUpdateChoice(name, summary, checked = updateRoutine, onCheckedChange = { updateRoutine = it })
             }
             Buttons(
                 confirm = stringResource(Res.string.logger_finish),
@@ -127,6 +126,98 @@ internal fun FinishSheet(
                 onConfirm = { onFinish(summary.routineToUpdate != null && updateRoutine) },
                 onDismiss = onDismiss,
             )
+        }
+    }
+}
+
+/**
+ * The choice to update the routine. When its shape would change (an exercise swapped, added or dropped,
+ * a different number of sets, a new order) each change gets a row, so it's clear what ticking it does.
+ */
+@Composable
+private fun RoutineUpdateChoice(
+    name: String,
+    summary: FinishSummary,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth().clickable { onCheckedChange(!checked) },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(checked = checked, onCheckedChange = onCheckedChange)
+            Text(
+                stringResource(
+                    if (summary.routineChanges.isEmpty()) {
+                        Res.string.finish_update_routine
+                    } else {
+                        Res.string.finish_update_routine_changes
+                    },
+                    name,
+                ),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+        // Lined up under the label, past the checkbox.
+        Column(Modifier.padding(start = 48.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            summary.routineChanges.forEach { change ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painterResource(change.icon()),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Text(
+                        text = change.text(summary.exerciseNames),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun RoutineChange.icon(): DrawableResource =
+    when (this) {
+        is RoutineChange.Replaced -> LioraIcons.Replace
+        is RoutineChange.Added -> LioraIcons.Add
+        is RoutineChange.Dropped -> LioraIcons.Decrease
+        is RoutineChange.SetCount -> LioraIcons.ListView
+        RoutineChange.Reordered -> LioraIcons.Reorder
+    }
+
+@Composable
+private fun RoutineChange.text(names: Map<String, String>): String {
+    fun name(id: String) = names[id].orEmpty()
+    return when (this) {
+        is RoutineChange.Replaced -> {
+            stringResource(Res.string.routine_change_replaced, name(from), name(to))
+        }
+
+        is RoutineChange.Added -> {
+            stringResource(Res.string.routine_change_added, name(exerciseId))
+        }
+
+        is RoutineChange.Dropped -> {
+            stringResource(Res.string.routine_change_dropped, name(exerciseId))
+        }
+
+        is RoutineChange.SetCount -> {
+            pluralStringResource(
+                Res.plurals.routine_change_sets,
+                sets,
+                name(exerciseId),
+                sets,
+                was,
+            )
+        }
+
+        RoutineChange.Reordered -> {
+            stringResource(Res.string.routine_change_order)
         }
     }
 }
