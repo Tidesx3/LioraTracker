@@ -4,9 +4,9 @@ A workout tracker that is fast to log with, owned by its user, and built to grow
 an offline-first Android app now, then sync to your own Google Drive, a self-hosted server with a web
 GUI, and AI features on top.
 
-**Status:** Phase 1, the offline MVP, is done, and Phase 2 (design and motion) is under way: the app has
-its look, a vivid violet with the Sora typeface, floating cards and pills, and small drawn scenes on
-empty screens. Logging moves: a ticked set's check pops and its row fills, the totals and the rest
+**Status:** Phases 1 (the offline MVP) and 2 (design and motion) are done: the app has its look, a vivid
+violet with the Sora typeface, floating cards and pills, small drawn scenes on empty screens, and a
+voice of its own in English and German. Logging moves: a ticked set's check pops and its row fills, the totals and the rest
 countdown roll like an odometer, haptics mark sets and records, and a record bursts into confetti.
 Cards grow into the screens they open, back follows the finger, and the logger rises from the workout
 bar. The database, domain logic, exercise library with
@@ -25,7 +25,7 @@ can load, show the plates per side for a barbell, and add warm-up sets. Everythi
 file (readable JSON plus the photos) that restores on another phone without overwriting newer changes,
 and workouts export as CSV for spreadsheets. Workouts and body measurements import from Hevy and Strong
 exports, with a review of which exercise each name becomes; gym-specific machines become variations of
-their own. Phase 2 finishes with playful copy. Details and progress are in
+their own. Phase 3, Google Drive sync and Health Connect, is next. Details and progress are in
 [docs/PLAN.md](docs/PLAN.md).
 
 ## Principles

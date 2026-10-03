@@ -14,8 +14,8 @@
   <string name="exercises_show_hidden">Show hidden exercises</string>
   <string name="exercises_hide_hidden">Hide hidden exercises</string>
   <string name="exercises_new_custom">Custom exercise</string>
-  <string name="exercises_no_results_title">No exercise found</string>
-  <string name="exercises_no_results_body">Try another name, or create it as your own exercise.</string>
+  <string name="exercises_no_results_title">Never heard of that one</string>
+  <string name="exercises_no_results_body">Try another name, or make it an exercise of your own.</string>
   <string name="exercises_create_named">Create “%1$s”</string>
   <string name="exercises_hidden_badge">Hidden</string>
   <string name="exercises_pick_title">Pick an exercise</string>
@@ -47,7 +47,7 @@
     <item quantity="other">Stalled for %1$d weeks</item>
   </plurals>
   <string name="detail_stalled_body">No new best since %1$s (%2$s).</string>
-  <string name="detail_history_empty">Not trained yet. History, records and charts show up here after your first sets.</string>
+  <string name="detail_history_empty">Fresh territory. Records, charts and history show up here after your first sets.</string>
   <string name="detail_variation_of">Variation of %1$s</string>
   <string name="detail_create_variation">Create variation</string>
   <string name="detail_hide">Hide from library</string>

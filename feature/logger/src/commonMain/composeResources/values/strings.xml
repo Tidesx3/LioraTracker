@@ -4,8 +4,8 @@
   <string name="logger_stat_duration">Duration</string>
   <string name="logger_stat_volume">Volume</string>
   <string name="logger_stat_sets">Sets</string>
-  <string name="logger_empty_title">No exercises yet</string>
-  <string name="logger_empty_body">Add the first exercise and log your sets.</string>
+  <string name="logger_empty_title">The bar is waiting</string>
+  <string name="logger_empty_body">Add your first exercise and get going.</string>
   <string name="logger_no_workout_title">No workout in progress</string>
   <string name="logger_no_workout_body">Start one from the Train tab.</string>
   <string name="logger_discard">Discard workout</string>
@@ -57,16 +57,16 @@
   <string name="focus_set">Set %1$d of %2$d</string>
   <string name="focus_previous">Last time: %1$s</string>
   <string name="focus_log">Log set</string>
-  <string name="focus_all_done">All sets done</string>
-  <string name="focus_all_done_body">Add an exercise or a set, or finish the workout.</string>
+  <string name="focus_all_done">Every set done</string>
+  <string name="focus_all_done_body">Got one more in you? Add a set or an exercise, or finish the workout.</string>
   <string name="focus_all_done_finished_body">Add an exercise or a set, or tap Done.</string>
 
-  <string name="finish_title">Finish workout?</string>
-  <string name="finish_empty_title">Nothing logged yet</string>
-  <string name="finish_empty_body">Log a set first, or discard this workout.</string>
+  <string name="finish_title">Call it a day?</string>
+  <string name="finish_empty_title">Not a single set yet</string>
+  <string name="finish_empty_body">Log one first, or discard this workout. No hard feelings.</string>
   <plurals name="finish_records">
-    <item quantity="one">%1$d personal record</item>
-    <item quantity="other">%1$d personal records</item>
+    <item quantity="one">A new personal record!</item>
+    <item quantity="other">%1$d new personal records!</item>
   </plurals>
   <plurals name="finish_open_sets">
     <item quantity="one">%1$d planned set wasn’t logged and won’t be saved.</item>

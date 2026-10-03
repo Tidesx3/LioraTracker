@@ -163,8 +163,8 @@ class LoggerFlowTest {
         composeRule.waitUntil(TIMEOUT_MS) { loggedSets() == 2 }
 
         composeRule.onNodeWithText("Finish").performClick()
-        waitForText("Finish workout?")
-        composeRule.onNodeWithText("3 personal records").assertIsDisplayed()
+        waitForText("Call it a day?")
+        composeRule.onNodeWithText("3 new personal records!").assertIsDisplayed()
         // Each record on a row of its own, with the value it was set at.
         composeRule.onNodeWithText("Heaviest weight").assertIsDisplayed()
         composeRule.onNodeWithText("85 kg").assertIsDisplayed()
@@ -204,7 +204,7 @@ class LoggerFlowTest {
         composeRule.waitUntil(TIMEOUT_MS) { loggedSets() == 4 }
 
         composeRule.onNodeWithText("Finish").performClick()
-        waitForText("Finish workout?")
+        waitForText("Call it a day?")
         composeRule.onNodeWithText("Update “Push” to today’s workout").assertIsDisplayed()
         composeRule.onNodeWithText("Barbell Bench Press: 4 sets, was 3").assertIsDisplayed()
         composeRule.onRoot().captureRoboImage("src/test/screenshots/logger_finish_changes_dark.png")

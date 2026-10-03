@@ -77,6 +77,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - Use plurals for counts.
   - Format numbers and dates through the locale-aware helpers, never string templates, so German shows "82,5 kg".
   - Exercise names are localized through `ExerciseName` rows, not string resources.
+- **Voice:** empty states, the end of a workout, records and notifications are light and warm, with a wink, and still say what to do ("Nothing on the menu yet", "Call it a day?"). No emoji, and exclamation marks only for records. Write the German on its own, with its own idioms ("Der erste Satz fehlt noch"), not word for word. Anything that deletes, restores or explains stays plain.
 - **Icons:** Material Symbols Rounded from google/material-design-icons (`symbols/android/<name>/materialsymbolsrounded/<name>_24px.xml`).
   - When adding one, delete the `android:tint` attribute but keep the `>` that closes the tag.
   - Replace `@android:color/white` with `#FFFFFFFF`.

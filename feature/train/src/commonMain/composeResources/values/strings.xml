@@ -6,14 +6,14 @@
   <string name="train_start_empty">Start empty workout</string>
   <string name="train_resume">Resume workout</string>
   <string name="train_routines">Routines</string>
-  <string name="train_routines_empty_title">No routines yet</string>
-  <string name="train_routines_empty_body">Save your splits as routines and start them with one tap.</string>
+  <string name="train_routines_empty_title">Nothing on the menu yet</string>
+  <string name="train_routines_empty_body">Save your splits once and start them with one tap. Push, pull, legs, repeat.</string>
   <string name="train_my_routines">My routines</string>
   <string name="train_new_routine">New routine</string>
   <string name="train_new_folder">New folder</string>
   <string name="train_start">Start</string>
   <string name="train_routine_no_exercises">No exercises yet</string>
-  <string name="train_folder_empty">Nothing in this folder yet.</string>
+  <string name="train_folder_empty">This folder is waiting for its first routine.</string>
   <string name="train_pick_title">Pick a routine</string>
   <string name="train_pick_body">Its exercises and sets show up here.</string>
   <string name="cd_settings">Settings</string>

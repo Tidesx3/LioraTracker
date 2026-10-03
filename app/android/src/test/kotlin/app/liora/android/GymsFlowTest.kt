@@ -57,7 +57,7 @@ class GymsFlowTest {
     fun setUpAGymAndUseIt() {
         openGyms()
         // No gym yet: weights round to standard equipment.
-        waitForText("No gyms yet")
+        waitForText("Where do you lift?")
         composeRule.onNodeWithContentDescription("Add gym").performClick()
         waitForText("New gym")
         field("Name").performTextReplacement("Studio Nord")

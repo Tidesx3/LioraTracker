@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="body_title">Body</string>
-  <string name="body_empty_title">Track your body</string>
-  <string name="body_empty_body">Log bodyweight, measurements and progress photos. No limits, no paywall.</string>
+  <string name="body_empty_title">More than a number</string>
+  <string name="body_empty_body">Bodyweight, measurements, progress photos: log what helps you and skip the rest. No limits, no paywall.</string>
   <string name="body_log">Log measurements</string>
   <string name="body_measurements">Measurements</string>
   <string name="body_change_since">%1$s since %2$s</string>
@@ -31,8 +31,8 @@
     <item quantity="one">%1$d photo</item>
     <item quantity="other">%1$d photos</item>
   </plurals>
-  <string name="photos_empty_title">No photos yet</string>
-  <string name="photos_empty_body">Photos stay on this phone, inside Liora. Same spot, same light and the same poses make them easy to compare.</string>
+  <string name="photos_empty_title">Strike a pose</string>
+  <string name="photos_empty_body">Same spot, same light, same poses, and the change shows. Your photos stay on this phone, inside Liora.</string>
   <string name="photos_add">Add photo</string>
   <string name="photos_add_title">Add progress photos</string>
   <string name="photos_take">Take photo</string>

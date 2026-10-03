@@ -76,7 +76,7 @@ class BodyFlowTest {
     @Config(qualifiers = COVER)
     fun firstWeighIn() {
         openBody()
-        waitForText("Track your body")
+        waitForText("More than a number")
         composeRule.onNodeWithContentDescription("Log measurements").performClick()
 
         field(MeasurementType.Bodyweight).performTextInput("82.5")

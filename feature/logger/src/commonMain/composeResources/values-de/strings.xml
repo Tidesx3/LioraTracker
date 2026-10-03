@@ -4,8 +4,8 @@
   <string name="logger_stat_duration">Dauer</string>
   <string name="logger_stat_volume">Volumen</string>
   <string name="logger_stat_sets">Sätze</string>
-  <string name="logger_empty_title">Noch keine Übungen</string>
-  <string name="logger_empty_body">Füge die erste Übung hinzu und logge deine Sätze.</string>
+  <string name="logger_empty_title">Die Hantel wartet schon</string>
+  <string name="logger_empty_body">Füg die erste Übung hinzu, und los geht’s.</string>
   <string name="logger_no_workout_title">Kein laufendes Training</string>
   <string name="logger_no_workout_body">Starte eines im Tab Training.</string>
   <string name="logger_discard">Training verwerfen</string>
@@ -54,16 +54,16 @@
   <string name="focus_set">Satz %1$d von %2$d</string>
   <string name="focus_previous">Letztes Mal: %1$s</string>
   <string name="focus_log">Satz abhaken</string>
-  <string name="focus_all_done">Alle Sätze erledigt</string>
-  <string name="focus_all_done_body">Füge eine Übung oder einen Satz hinzu, oder beende das Training.</string>
+  <string name="focus_all_done">Alle Sätze geschafft</string>
+  <string name="focus_all_done_body">Zugabe gefällig? Füg einen Satz oder eine Übung hinzu, oder beende das Training.</string>
   <string name="focus_all_done_finished_body">Füge eine Übung oder einen Satz hinzu, oder tippe auf Fertig.</string>
 
-  <string name="finish_title">Training beenden?</string>
-  <string name="finish_empty_title">Noch nichts geloggt</string>
-  <string name="finish_empty_body">Logge zuerst einen Satz oder verwirf dieses Training.</string>
+  <string name="finish_title">Schluss für heute?</string>
+  <string name="finish_empty_title">Noch kein einziger Satz</string>
+  <string name="finish_empty_body">Logge erst einen, oder verwirf das Training. Kein Drama.</string>
   <plurals name="finish_records">
-    <item quantity="one">%1$d persönlicher Rekord</item>
-    <item quantity="other">%1$d persönliche Rekorde</item>
+    <item quantity="one">Ein neuer persönlicher Rekord!</item>
+    <item quantity="other">%1$d neue persönliche Rekorde!</item>
   </plurals>
   <plurals name="finish_open_sets">
     <item quantity="one">%1$d geplanter Satz wurde nicht geloggt und wird nicht gespeichert.</item>

@@ -95,8 +95,8 @@
   <string name="gym">Gym</string>
   <string name="gym_standard">Standard equipment</string>
   <string name="gyms_title">Gyms</string>
-  <string name="gyms_empty_title">No gyms yet</string>
-  <string name="gyms_empty_body">Until you add one, weights round to standard plates, dumbbells and machine stacks. Add your gym so they match what it has.</string>
+  <string name="gyms_empty_title">Where do you lift?</string>
+  <string name="gyms_empty_body">Until you add a gym, weights round to standard plates, dumbbells and machine stacks. Add yours, and they match what’s on its racks.</string>
   <string name="gyms_add">Add gym</string>
   <string name="cd_use_gym">Use %1$s</string>
   <string name="gym_bar_summary">%1$s bar</string>

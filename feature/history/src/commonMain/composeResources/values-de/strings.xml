@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="history_title">Verlauf</string>
-  <string name="history_empty_title">Noch keine Trainings</string>
-  <string name="history_empty_body">Abgeschlossene Trainings landen hier, zusammen mit einem Kalender deiner Trainingstage.</string>
+  <string name="history_empty_title">Der erste Satz fehlt noch</string>
+  <string name="history_empty_body">Jede Geschichte fängt mit einem an. Abgeschlossene Trainings landen hier, mit einem Kalender aller Tage, an denen du da warst.</string>
   <string name="history_pick_title">Training auswählen</string>
   <string name="history_pick_body">Hier erscheinen seine Übungen, Sätze und Rekorde.</string>
 
@@ -18,7 +18,7 @@
     <item quantity="one">%1$d Training</item>
     <item quantity="other">%1$d Trainings</item>
   </plurals>
-  <string name="history_month_none">Keine Trainings in diesem Monat.</string>
+  <string name="history_month_none">Ein ruhiger Monat.</string>
   <string name="history_whole_month">Ganzer Monat</string>
 
   <string name="stat_duration">Dauer</string>

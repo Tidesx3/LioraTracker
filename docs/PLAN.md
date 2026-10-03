@@ -192,6 +192,14 @@ As of 2026-10-03:
       detail pane (`ListDetail`'s `Arriving`).
     - Tests: `lastMove` in `NavigatorTest`, and screenshots partway through a card growing into its
       workout (`motion_open_workout`) and a record's confetti (`motion_record`).
+  - **2e (done): voice.** Empty states, the end of a workout, records and the workout notification speak
+    with a light, warm voice that still says what to do: "Nothing on the menu yet", "The bar is waiting",
+    "Call it a day?", "3 new personal records!", "Break’s over". German is written on its own rather than
+    translated: "Der erste Satz fehlt noch" (Satz as set and sentence), "Bitte recht freundlich" for
+    photos, "Zugabe gefällig?" when every set is done, "Kein Drama" for an empty workout. Messages that
+    delete, restore or explain stay plain.
+- **Phase 2 is done**, pending the device checks for motion in TODO.md. Phase 3 (Google Drive sync and
+  Health Connect) is next.
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a
   milestone go in TODO.md.

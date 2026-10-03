@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="body_title">Körper</string>
-  <string name="body_empty_title">Behalte deinen Körper im Blick</string>
-  <string name="body_empty_body">Körpergewicht, Maße und Fortschrittsfotos loggen. Ohne Limits, ohne Paywall.</string>
+  <string name="body_empty_title">Mehr als eine Zahl</string>
+  <string name="body_empty_body">Körpergewicht, Maße, Fortschrittsfotos: Logge, was dir hilft, und lass den Rest weg. Ohne Limits, ohne Paywall.</string>
   <string name="body_log">Maße eintragen</string>
   <string name="body_measurements">Maße</string>
   <string name="body_change_since">%1$s seit %2$s</string>
@@ -31,8 +31,8 @@
     <item quantity="one">%1$d Foto</item>
     <item quantity="other">%1$d Fotos</item>
   </plurals>
-  <string name="photos_empty_title">Noch keine Fotos</string>
-  <string name="photos_empty_body">Die Fotos bleiben auf diesem Handy, nur in Liora. Gleicher Ort, gleiches Licht und gleiche Posen machen sie gut vergleichbar.</string>
+  <string name="photos_empty_title">Bitte recht freundlich</string>
+  <string name="photos_empty_body">Gleicher Ort, gleiches Licht, gleiche Posen – so sieht man, was sich tut. Deine Fotos bleiben auf diesem Handy, nur in Liora.</string>
   <string name="photos_add">Foto hinzufügen</string>
   <string name="photos_add_title">Fortschrittsfotos hinzufügen</string>
   <string name="photos_take">Foto aufnehmen</string>

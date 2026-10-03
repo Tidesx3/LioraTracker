@@ -118,7 +118,7 @@ class WorkoutNotificationTest {
         )
         shadowOf(Looper.getMainLooper()).idle()
         awaitTimer { it == null }
-        val alert = awaitNotification(WorkoutNotifications.ID_REST_OVER) { it.title == "Rest over" }
+        val alert = awaitNotification(WorkoutNotifications.ID_REST_OVER) { it.title == "Break’s over" }
         assertEquals(WorkoutNotifications.CHANNEL_REST_OVER, alert.channelId)
         awaitNotification { it.title == "Push" && it.text.startsWith("Barbell Bench Press · Set 2 of 3") }
     }

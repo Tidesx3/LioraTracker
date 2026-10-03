@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="history_title">History</string>
-  <string name="history_empty_title">No workouts yet</string>
-  <string name="history_empty_body">Finished workouts land here, along with a calendar of your training days.</string>
+  <string name="history_empty_title">A blank page, for now</string>
+  <string name="history_empty_body">Finished workouts land here, with a calendar of every day you showed up.</string>
   <string name="history_pick_title">Pick a workout</string>
   <string name="history_pick_body">Its exercises, sets and records show up here.</string>
 
@@ -18,7 +18,7 @@
     <item quantity="one">%1$d workout</item>
     <item quantity="other">%1$d workouts</item>
   </plurals>
-  <string name="history_month_none">No workouts this month.</string>
+  <string name="history_month_none">A quiet month.</string>
   <string name="history_whole_month">Whole month</string>
 
   <string name="stat_duration">Duration</string>

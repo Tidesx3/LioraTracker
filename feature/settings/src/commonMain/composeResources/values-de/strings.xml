@@ -93,8 +93,8 @@
   <string name="gym">Studio</string>
   <string name="gym_standard">Standardausstattung</string>
   <string name="gyms_title">Studios</string>
-  <string name="gyms_empty_title">Noch keine Studios</string>
-  <string name="gyms_empty_body">Bis du eins anlegst, runden Gewichte auf übliche Scheiben, Kurzhanteln und Steckgewichte. Lege dein Studio an, damit sie zu seiner Ausstattung passen.</string>
+  <string name="gyms_empty_title">Wo trainierst du?</string>
+  <string name="gyms_empty_body">Bis du ein Studio anlegst, runden Gewichte auf übliche Scheiben, Kurzhanteln und Steckgewichte. Leg deins an, dann passen sie zu dem, was dort im Regal liegt.</string>
   <string name="gyms_add">Studio hinzufügen</string>
   <string name="cd_use_gym">%1$s verwenden</string>
   <string name="gym_bar_summary">Stange %1$s</string>

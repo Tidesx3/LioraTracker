@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="progress_title">Fortschritt</string>
-  <string name="progress_empty_title">Noch nichts auszuwerten</string>
-  <string name="progress_empty_body">Logge ein paar Trainings, um Kraftverläufe, persönliche Rekorde und wöchentliche Sätze pro Muskel zu sehen.</string>
+  <string name="progress_empty_title">Für eine Kurve braucht es Punkte</string>
+  <string name="progress_empty_body">Ein paar Trainings, und schon nehmen Kraftverläufe, persönliche Rekorde und Sätze pro Muskel Form an.</string>
   <string name="progress_body_title">Körper</string>
   <string name="progress_body_subtitle">Körpergewicht, Maße und Fortschrittsfotos</string>
 
@@ -24,7 +24,7 @@
   <string name="progress_last_week">Letzte Woche</string>
   <string name="cd_previous_week">Vorige Woche</string>
   <string name="cd_next_week">Nächste Woche</string>
-  <string name="progress_no_sets">In dieser Woche keine Sätze.</string>
+  <string name="progress_no_sets">Eine Ruhewoche.</string>
   <string name="progress_legend">Sätze pro Woche</string>
   <plurals name="progress_sets_count">
     <item quantity="one">%1$s Satz</item>
@@ -47,7 +47,7 @@
   <string name="report_title">Monatsbericht</string>
   <string name="cd_previous_month">Voriger Monat</string>
   <string name="cd_next_month">Nächster Monat</string>
-  <string name="report_none">Keine Trainings in diesem Monat.</string>
+  <string name="report_none">Ein ruhiger Monat.</string>
   <string name="report_workouts">Trainings</string>
   <string name="report_days">Trainingstage</string>
   <string name="report_time">Zeit</string>

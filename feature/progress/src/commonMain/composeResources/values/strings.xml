@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="progress_title">Progress</string>
-  <string name="progress_empty_title">Nothing to chart yet</string>
-  <string name="progress_empty_body">Log a few workouts to see strength trends, personal records and weekly sets per muscle.</string>
+  <string name="progress_empty_title">A chart needs a few dots</string>
+  <string name="progress_empty_body">Log a few workouts, and strength trends, personal records and weekly sets per muscle start to take shape.</string>
   <string name="progress_body_title">Body</string>
   <string name="progress_body_subtitle">Bodyweight, measurements and progress photos</string>
 
@@ -25,7 +25,7 @@
   <string name="progress_last_week">Last week</string>
   <string name="cd_previous_week">Previous week</string>
   <string name="cd_next_week">Next week</string>
-  <string name="progress_no_sets">No sets this week.</string>
+  <string name="progress_no_sets">A rest week.</string>
   <string name="progress_legend">Sets a week</string>
   <string name="progress_legend_none" translatable="false">0</string>
   <string name="progress_legend_light" translatable="false">1–4</string>
@@ -53,7 +53,7 @@
   <string name="report_title">Monthly report</string>
   <string name="cd_previous_month">Previous month</string>
   <string name="cd_next_month">Next month</string>
-  <string name="report_none">No workouts this month.</string>
+  <string name="report_none">A quiet month.</string>
   <string name="report_workouts">Workouts</string>
   <string name="report_days">Training days</string>
   <string name="report_time">Time</string>

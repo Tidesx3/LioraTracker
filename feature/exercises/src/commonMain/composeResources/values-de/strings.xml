@@ -14,8 +14,8 @@
   <string name="exercises_show_hidden">Ausgeblendete anzeigen</string>
   <string name="exercises_hide_hidden">Ausgeblendete verbergen</string>
   <string name="exercises_new_custom">Eigene Übung</string>
-  <string name="exercises_no_results_title">Keine Übung gefunden</string>
-  <string name="exercises_no_results_body">Versuch einen anderen Namen oder leg sie als eigene Übung an.</string>
+  <string name="exercises_no_results_title">Die kennen wir noch nicht</string>
+  <string name="exercises_no_results_body">Versuch einen anderen Namen, oder leg sie als eigene Übung an.</string>
   <string name="exercises_create_named">„%1$s“ anlegen</string>
   <string name="exercises_hidden_badge">Ausgeblendet</string>
   <string name="exercises_pick_title">Übung auswählen</string>
@@ -47,7 +47,7 @@
     <item quantity="other">Stagniert seit %1$d Wochen</item>
   </plurals>
   <string name="detail_stalled_body">Keine neue Bestleistung seit %1$s (%2$s).</string>
-  <string name="detail_history_empty">Noch nicht trainiert. Verlauf, Rekorde und Diagramme erscheinen hier nach deinen ersten Sätzen.</string>
+  <string name="detail_history_empty">Noch Neuland. Rekorde, Diagramme und Verlauf erscheinen hier nach deinen ersten Sätzen.</string>
   <string name="detail_variation_of">Variante von %1$s</string>
   <string name="detail_create_variation">Variante erstellen</string>
   <string name="detail_hide">In der Bibliothek ausblenden</string>

@@ -51,14 +51,14 @@ class LioraAppTest {
         setApp(darkTheme = false)
         composeRule.onNodeWithText("Start empty workout").assertIsDisplayed()
         // The routines arrive from Room a moment later; capture once they have.
-        waitForText("No routines yet")
+        waitForText("Nothing on the menu yet")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/train_light.png")
     }
 
     @Test
     fun trainTab_dark() {
         setApp(darkTheme = true)
-        waitForText("No routines yet")
+        waitForText("Nothing on the menu yet")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/train_dark.png")
     }
 
@@ -79,7 +79,7 @@ class LioraAppTest {
         waitForText("Finish")
         composeRule.onNodeWithText("Finish").performClick()
         // Nothing was logged, so finishing offers to discard instead.
-        waitForText("Nothing logged yet")
+        waitForText("Not a single set yet")
         composeRule.onNodeWithText("Discard").performClick()
         waitForText("Start empty workout")
     }
@@ -89,15 +89,15 @@ class LioraAppTest {
         setApp(darkTheme = true)
 
         composeRule.onNodeWithText("Progress").performClick()
-        waitUntilDisplayed("Nothing to chart yet")
+        waitUntilDisplayed("A chart needs a few dots")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/progress_dark.png")
 
         composeRule.onNodeWithText("Body").performClick()
-        waitUntilDisplayed("Track your body")
+        waitUntilDisplayed("More than a number")
         composeRule.onNodeWithContentDescription("Back").performClick()
 
         composeRule.onNodeWithText("History").performClick()
-        waitUntilDisplayed("No workouts yet")
+        waitUntilDisplayed("A blank page, for now")
     }
 
     @Test
@@ -106,7 +106,7 @@ class LioraAppTest {
         setApp(darkTheme = true)
         composeRule.onNodeWithText("Leeres Training starten").assertIsDisplayed()
         composeRule.onNodeWithText("Fortschritt").assertIsDisplayed()
-        waitForText("Noch keine Routinen")
+        waitForText("Noch nichts auf dem Plan")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/de_train_dark.png")
 
         composeRule.onNodeWithText("Leeres Training starten").performClick()

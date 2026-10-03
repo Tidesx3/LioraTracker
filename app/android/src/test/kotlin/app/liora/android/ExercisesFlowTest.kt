@@ -65,7 +65,7 @@ class ExercisesFlowTest {
     fun createAGymSpecificExerciseFromSearchThenDeleteIt() {
         openLibrary()
         composeRule.onNode(hasSetTextAction()).performTextInput("Beinpresse Internat")
-        waitForText("Keine Übung gefunden")
+        waitForText("Die kennen wir noch nicht")
         composeRule.onNodeWithText("„Beinpresse Internat“ anlegen").performClick()
 
         waitForText("Neue Übung")
@@ -86,7 +86,7 @@ class ExercisesFlowTest {
         composeRule.onNodeWithText("Löschen").performClick()
         waitForText("Übung löschen?")
         composeRule.onAllNodesWithText("Löschen").onFirst().performClick()
-        waitForText("Keine Übung gefunden")
+        waitForText("Die kennen wir noch nicht")
     }
 
     private fun openLibrary() {

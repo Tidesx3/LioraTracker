@@ -12,11 +12,11 @@
   <string name="notif_channel_rest_desc">Lets you know when your rest is up.</string>
   <string name="notif_workout_default_title">Workout</string>
   <string name="notif_rest_remaining">Rest %1$s</string>
-  <string name="notif_rest_over_title">Rest over</string>
+  <string name="notif_rest_over_title">Break’s over</string>
   <string name="notif_next">Next: %1$s</string>
   <string name="notif_set_of">Set %1$d of %2$d</string>
   <string name="notif_set_short" translatable="false">%1$d/%2$d</string>
-  <string name="notif_all_done">All sets done</string>
+  <string name="notif_all_done">Every set done</string>
   <string name="notif_action_log_set">Log set</string>
   <string name="notif_action_add_rest" translatable="false">+15 s</string>
   <string name="notif_action_remove_rest" translatable="false">−15 s</string>
