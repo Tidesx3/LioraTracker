@@ -1,5 +1,12 @@
 package app.liora.feature.logger
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,10 +31,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
@@ -36,6 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.designsystem.theme.tabularNumbers
@@ -64,6 +80,7 @@ import app.liora.feature.logger.resources.col_set
 import app.liora.feature.logger.resources.col_time
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.hypot
 
 /** Everything a set row needs to draw itself. */
 internal class SetRowState(
@@ -181,15 +198,16 @@ internal fun SetRow(
         },
     ) {
         // Opaque first: the swipe's red delete background sits right behind the row.
-        val tint = if (set.isCompleted) LioraTheme.colors.completed.copy(alpha = COMPLETED_ALPHA) else Color.Transparent
+        val tint = LioraTheme.colors.completed.copy(alpha = COMPLETED_ALPHA)
+        val filled = animateFloatAsState(if (set.isCompleted) 1f else 0f, FillSpec)
         Row(
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .height(RowHeight)
                     .background(MaterialTheme.colorScheme.surfaceContainer)
-                    .background(tint)
-                    .padding(horizontal = 12.dp),
+                    .drawBehind { drawFill(filled.value, tint) }
+                    .padding(horizontal = RowPadding),
             horizontalArrangement = Arrangement.spacedBy(CellGap),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -298,27 +316,6 @@ private fun ValueCell(
     }
 }
 
-@Composable
-private fun CheckButton(
-    completed: Boolean,
-    onClick: () -> Unit,
-) {
-    val description = stringResource(if (completed) Res.string.cd_reopen_set else Res.string.cd_complete_set)
-    // A ring until the set is done, then it fills in.
-    Surface(
-        onClick = onClick,
-        modifier = Modifier.size(CheckSize).semantics { contentDescription = description },
-        shape = CircleShape,
-        color = if (completed) LioraTheme.colors.completed else Color.Transparent,
-        contentColor = if (completed) LioraTheme.colors.onCompleted else MaterialTheme.colorScheme.outline,
-        border = if (completed) null else BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant),
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(painterResource(LioraIcons.Check), contentDescription = null)
-        }
-    }
-}
-
 /** Last session's values, or the routine's rep target when there is no last session. */
 @Composable
 private fun previousText(
@@ -386,9 +383,10 @@ internal val SetField.cellWidth: Dp
         }
 
 internal val RowHeight = 52.dp
+internal val RowPadding = 12.dp
 private val CellHeight = 40.dp
 private val CellGap = 6.dp
 private val BadgeWidth = 32.dp
-private val CheckSize = 40.dp
+internal val CheckSize = 40.dp
 private const val COMPLETED_ALPHA = 0.14f
 private const val PLACEHOLDER_ALPHA = 0.6f

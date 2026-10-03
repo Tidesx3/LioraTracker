@@ -1,11 +1,11 @@
 package app.liora.android
 
-import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
@@ -22,9 +22,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.text.TextLayoutResult
 import androidx.window.testing.layout.FoldingFeature
 import androidx.window.testing.layout.TestWindowLayoutInfo
 import androidx.window.testing.layout.WindowLayoutInfoPublisherRule
@@ -105,6 +103,33 @@ class LoggerFlowTest {
 
         composeRule.onNodeWithText("Skip").performClick()
         composeRule.waitUntil(TIMEOUT_MS) { !nodeExists(hasText("Skip")) }
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun tickingASetPopsTheCheckFillsTheRowAndRollsTheTotals() {
+        logLastSession()
+        launch()
+        waitForText("Start")
+        composeRule.onNodeWithText("Start").performClick()
+        waitForText("Finish")
+
+        // Frame by frame from here: the clock moves only when the test moves it.
+        composeRule.mainClock.autoAdvance = false
+        composeRule.onAllNodesWithContentDescription("Log set").onFirst().performClick()
+        // The set is written off the main thread; the frame that shows it starts the motion.
+        var frames = 0
+        while (loggedSets() == 0 && frames++ < MAX_FRAMES) composeRule.mainClock.advanceTimeByFrame()
+        assertEquals(1, loggedSets())
+        // Early on: the check overshoots, the tint spreads from it, the volume's digits are mid-roll.
+        composeRule.mainClock.advanceTimeBy(EARLY_MS)
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/motion_tick_early_dark.png")
+        composeRule.mainClock.advanceTimeBy(LATE_MS)
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/motion_tick_late_dark.png")
+
+        composeRule.mainClock.autoAdvance = true
+        waitForText("Skip")
+        composeRule.onNodeWithText("800 kg").assertIsDisplayed()
     }
 
     @Test
@@ -387,12 +412,15 @@ class LoggerFlowTest {
         waitForText("Beenden")
         composeRule.onAllNodesWithContentDescription("Satz abhaken").onFirst().performClick()
         waitForText("Überspringen")
-        // German's longer buttons leave no room for "Pause" on the cover screen, so the time takes it.
-        val layouts = mutableListOf<TextLayoutResult>()
-        composeRule.onNodeWithTag(LoggerTags.REST_TIME).performSemanticsAction(SemanticsActions.GetTextLayoutResult) {
-            it(layouts)
-        }
-        assertEquals(1, layouts.single().lineCount)
+        // German's longer buttons leave no room for "Pause" on the cover screen, so the time takes it,
+        // on one line: wider than it's tall.
+        val time =
+            composeRule
+                .onNodeWithTag(LoggerTags.REST_TIME)
+                .assertTextEquals("1:30")
+                .fetchSemanticsNode()
+                .size
+        assertTrue("the time wraps: $time", time.width > time.height)
         composeRule.onRoot().captureRoboImage("src/test/screenshots/de_logger_resting_dark.png")
     }
 
@@ -448,6 +476,11 @@ class LoggerFlowTest {
         composeRule.waitUntil(TIMEOUT_MS) { composeRule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty() }
 
     private companion object {
+        /** Points into the motion of ticking a set off, for screenshots, and how long to wait for it to start. */
+        const val EARLY_MS = 80L
+        const val LATE_MS = 120L
+        const val MAX_FRAMES = 200
+
         const val COVER = "w411dp-h960dp-night-xxhdpi"
         const val INNER = "w984dp-h1092dp-night-xhdpi"
 

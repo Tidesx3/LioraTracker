@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import app.liora.core.designsystem.component.Stat
+import app.liora.core.designsystem.component.StatMotion
 import app.liora.core.designsystem.component.StatRow
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.theme.LioraTheme
@@ -229,10 +230,26 @@ private fun Totals(
 ) {
     val numbers = rememberNumberFormatter()
     val elapsed = rememberElapsedTime(startedAt)
+    // The totals roll in as the sheet comes up, the end of the workout counted out.
     StatRow {
-        Stat(elapsed.formatAsClock(), stringResource(Res.string.logger_stat_duration), Modifier.weight(1f))
-        Stat(volumeText(summary.volumeKg), stringResource(Res.string.logger_stat_volume), Modifier.weight(1f))
-        Stat(numbers.format(summary.completedSets), stringResource(Res.string.logger_stat_sets), Modifier.weight(1f))
+        Stat(
+            value = elapsed.formatAsClock(),
+            label = stringResource(Res.string.logger_stat_duration),
+            modifier = Modifier.weight(1f),
+            motion = StatMotion.RollIn,
+        )
+        Stat(
+            value = volumeText(summary.volumeKg),
+            label = stringResource(Res.string.logger_stat_volume),
+            modifier = Modifier.weight(1f),
+            motion = StatMotion.RollIn,
+        )
+        Stat(
+            value = numbers.format(summary.completedSets),
+            label = stringResource(Res.string.logger_stat_sets),
+            modifier = Modifier.weight(1f),
+            motion = StatMotion.RollIn,
+        )
     }
 }
 

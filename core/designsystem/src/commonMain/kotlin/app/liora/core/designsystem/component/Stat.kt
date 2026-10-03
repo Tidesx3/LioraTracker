@@ -43,7 +43,7 @@ fun StatRow(
  * One figure: the number big and its unit smaller ("82.5 kg"), what it counts underneath, and an
  * optional [detail] below that, such as a date or last month's figure. The value stays on one line,
  * shrinking a little in a narrow column rather than wrapping. [highlight] gives it the accent, e.g.
- * for a clock that's running.
+ * for a clock that's running. [motion] rolls a figure that changes live, like an odometer.
  */
 @Composable
 fun Stat(
@@ -53,15 +53,21 @@ fun Stat(
     detail: String? = null,
     highlight: Boolean = false,
     valueStyle: TextStyle = MaterialTheme.typography.titleLarge,
+    motion: StatMotion = StatMotion.None,
 ) {
     Column(modifier) {
         val color = if (highlight) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-        BasicText(
-            text = figure(value),
-            style = valueStyle.tabularNumbers().copy(color = color),
-            maxLines = 1,
-            autoSize = TextAutoSize.StepBased(minFontSize = MIN_VALUE_SIZE, maxFontSize = valueStyle.fontSize),
-        )
+        val style = valueStyle.tabularNumbers().copy(color = color)
+        if (motion == StatMotion.None) {
+            BasicText(
+                text = figure(value),
+                style = style,
+                maxLines = 1,
+                autoSize = TextAutoSize.StepBased(minFontSize = MIN_VALUE_SIZE, maxFontSize = valueStyle.fontSize),
+            )
+        } else {
+            RollingText(figure(value), style, rollIn = motion == StatMotion.RollIn)
+        }
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
@@ -75,6 +81,18 @@ fun Stat(
             )
         }
     }
+}
+
+/** How a [Stat]'s figure moves. */
+enum class StatMotion {
+    /** Not at all: for figures that stay as they are while shown. */
+    None,
+
+    /** Rolls when it changes, e.g. a workout's volume as sets are logged. */
+    Roll,
+
+    /** Rolls in from blank when it first shows, then like [Roll]: totals revealed at the end. */
+    RollIn,
 }
 
 /** [text] with its words smaller than its numbers: "1 h 5 min", "82.5 kg", "6 weeks", "2 Trainings". */

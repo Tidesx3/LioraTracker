@@ -50,6 +50,7 @@ import app.liora.core.model.WeightUnit
 import app.liora.core.ui.RecordsCardEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -63,6 +64,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -250,6 +252,14 @@ data class FinishSummary(
     val exerciseNames: Map<String, String> = emptyMap(),
 )
 
+/** How a tap to tick a set off turned out. */
+enum class TickOutcome {
+    Logged,
+
+    /** Not logged: a value is missing, and its cell is now open to type it. */
+    Missing,
+}
+
 private fun RoutineChange.exerciseIds(): List<String> =
     when (this) {
         is RoutineChange.Replaced -> listOf(from, to)
@@ -304,6 +314,11 @@ class LoggerViewModel(
 
     /** True once corrections are tidied up and saved; the screen then closes. */
     val corrected: StateFlow<Boolean> = doneCorrecting.asStateFlow()
+
+    private val outcomes = Channel<TickOutcome>(Channel.BUFFERED)
+
+    /** How each tap to tick a set off turned out, as soon as it's known, for the screen to answer with a haptic. */
+    val tickOutcomes: Flow<TickOutcome> = outcomes.receiveAsFlow()
 
     /** The exercise being replaced while the picker is open. */
     private var replacing: String? = null
@@ -662,6 +677,7 @@ class LoggerViewModel(
         viewModelScope.launch {
             when (val result = writes.withLock { sets.completeSet(setId) }) {
                 is SetCompletion.Logged -> {
+                    outcomes.trySend(TickOutcome.Logged)
                     invalid.value = null
                     // Typing carries on with the next set, so a whole workout can be logged on the pad.
                     if (edit.value != null) {
@@ -671,6 +687,7 @@ class LoggerViewModel(
                 }
 
                 is SetCompletion.Missing -> {
+                    outcomes.trySend(TickOutcome.Missing)
                     val field = SetField.entries.firstOrNull { it in result.fields } ?: return@launch
                     val cell = CellRef(setId, field)
                     invalid.value = cell

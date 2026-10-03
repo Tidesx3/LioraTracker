@@ -43,5 +43,13 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
   outline counting down, the floating tabs over long lists, and Sora's numbers on the cover screen.
 - **Logger in pounds: the "Previous" column cuts off** converted weights such as "176.37 lb × 10". Round
   converted values for display, or give the column more room.
+- **Motion (Phase 2c): check on the phone.** Only the device tells whether it feels good:
+  - Tick a few sets quickly on the cover screen: the check's pop and the row's fill never hold up the
+    next tap, and the haptic tick lands with the tap rather than after it.
+  - Log a set that beats last time: the double beat reads as a record, not as a stutter.
+  - Tap the tick on a set with an empty field and no placeholder: a buzz, and the cell opens.
+  - Watch the duration, volume and sets roll in the header, the finish sheet's totals roll in, and the
+    rest countdown roll; let a rest run out with the logger open and watch the last five seconds pulse.
+  - Turn on "Remove animations" (Settings › Accessibility): everything shows its end state at once.
 - **Robolectric: a text field in a dialog never lets Compose go idle.** Find the cause, so the rename
   and save-as-routine dialogs can get UI tests.

@@ -155,6 +155,24 @@ As of 2026-10-03:
     through (`LioraCardDefaults.listItemColors`). Workout detail and routine detail give each exercise a
     card with its picture, a superset's cards sharing the accent outline as in the logger. The exercise
     thumbnail's tile is a tint of the accent, so it shows on cards.
+  - **2c (done, pending the device check in TODO.md): motion in the logging loop.** Only drawing moves, so
+    no tap waits for an animation.
+    - Ticking a set: the check fills and pops (it swells past its size and settles, the tick springing up
+      inside), and the done tint spreads across the row from the check (`SetMotion.kt`). Reopening draws
+      it back. Sets already done when the logger opens don't move.
+    - Odometer numbers: `RollingText` (designsystem) rolls each changed character, up as the number grows
+      and down as it shrinks, lined up from the right; screen readers get it as one text. `Stat` takes
+      a `StatMotion`: the logger's duration, volume and sets roll as they change, the finish sheet's
+      totals roll in from blank as it opens, and the rest pill and ring roll their countdown.
+    - The rest pill's outline and the ring swell and fade on each of the last five seconds.
+    - Haptics (`LioraHaptics`, named by what happened): a tick when a set is logged, a buzz when a value
+      is missing, and a heavier double beat a moment later when the set is a personal record. The
+      ViewModel reports how each tick turned out (`tickOutcomes`), so the haptic follows the real
+      result. Rest over already vibrates through its alert, in the app too, so it gets no second buzz.
+    - "Remove animations": Compose plays every animation at the system's animator scale, so with it off
+      they finish at once; nothing here loops on its own.
+    - Tests: `RollingTextTest` (which way a change rolls) and screenshots partway through ticking a set
+      with the test clock paused (`motion_tick_early`, `motion_tick_late`).
 - **Working style:** one milestone at a time, built, tested (`./gradlew check`) and committed before the next.
   Big milestones split into parts, committed as e.g. "Phase 1 M6a: …". Bugs and polish that don't belong to a
   milestone go in TODO.md.

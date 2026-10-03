@@ -1,5 +1,8 @@
 package app.liora.feature.logger
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.withInfiniteAnimationFrameMillis
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +27,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.FloatState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.produceState
@@ -39,12 +43,15 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.RollingText
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.designsystem.theme.tabularNumbers
@@ -142,8 +149,17 @@ internal fun RestTimerBar(
         } else {
             lerp(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimaryContainer, LINE_LIGHTER)
         }
+    val pulse = rememberEndingPulse(progress.remaining)
     Surface(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .graphicsLayer {
+                    val swell = 1f + PILL_SWELL * pulse.value
+                    scaleX = swell
+                    scaleY = swell
+                },
         shape = CircleShape,
         color = container,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -154,7 +170,7 @@ internal fun RestTimerBar(
                 Modifier
                     .drawWithContent {
                         drawContent()
-                        drawPillProgress(progress.fraction, line, OUTLINE_WIDTH.dp.toPx())
+                        drawPillProgress(progress.fraction, line, OUTLINE_WIDTH.dp.toPx() * (1f + pulse.value))
                     }.padding(start = 20.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -169,11 +185,13 @@ internal fun RestTimerBar(
                         modifier = Modifier.padding(start = 8.dp),
                     )
                 }
-                Text(
-                    text = progress.remaining.formatAsClock(),
-                    style = MaterialTheme.typography.titleLarge.tabularNumbers(),
-                    maxLines = 1,
-                    softWrap = false,
+                // Counting down, each second rolls away.
+                RollingText(
+                    text = AnnotatedString(progress.remaining.formatAsClock()),
+                    style =
+                        MaterialTheme.typography.titleLarge.tabularNumbers().copy(
+                            color = LocalContentColor.current,
+                        ),
                     modifier = Modifier.padding(start = 8.dp).testTag(LoggerTags.REST_TIME),
                 )
             }
@@ -249,7 +267,15 @@ internal fun RestTimerRing(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box(Modifier.size(RING_SIZE), contentAlignment = Alignment.Center) {
+        val pulse = rememberEndingPulse(progress.remaining)
+        Box(
+            Modifier.size(RING_SIZE).graphicsLayer {
+                val swell = 1f + RING_SWELL * pulse.value
+                scaleX = swell
+                scaleY = swell
+            },
+            contentAlignment = Alignment.Center,
+        ) {
             CircularProgressIndicator(
                 progress = { progress.fraction },
                 modifier = Modifier.fillMaxSize(),
@@ -264,9 +290,12 @@ internal fun RestTimerRing(
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Text(
-                    text = progress.remaining.formatAsClock(),
-                    style = MaterialTheme.typography.displayMedium.tabularNumbers(),
+                RollingText(
+                    text = AnnotatedString(progress.remaining.formatAsClock()),
+                    style =
+                        MaterialTheme.typography.displayMedium
+                            .tabularNumbers()
+                            .copy(color = MaterialTheme.colorScheme.onSurface),
                 )
             }
         }
@@ -281,9 +310,30 @@ internal fun RestTimerRing(
     }
 }
 
+/**
+ * A beat on each of the last seconds of rest: 1 as the second turns, easing back to 0 before the next,
+ * so the timer pulses as it runs out. Drawing reads it, so a beat redraws without recomposing.
+ */
+@Composable
+private fun rememberEndingPulse(remaining: Duration): State<Float> {
+    val pulse = remember { Animatable(0f) }
+    LaunchedEffect(remaining) {
+        if (remaining > PULSE_FROM) return@LaunchedEffect
+        pulse.snapTo(1f)
+        pulse.animateTo(0f, PulseSpec)
+    }
+    return pulse.asState()
+}
+
 private val TICK = 200.milliseconds
 private val RING_SIZE = 200.dp
 private const val ADJUST_SECONDS = 15
+
+/** The last seconds pulse; earlier ones just count down. */
+private val PULSE_FROM = 5.seconds
+private val PulseSpec = tween<Float>(durationMillis = 700, easing = FastOutSlowInEasing)
+private const val PILL_SWELL = 0.03f
+private const val RING_SWELL = 0.05f
 
 private const val FLOATING_ELEVATION = 6
 private const val OUTLINE_WIDTH = 3

@@ -46,11 +46,13 @@ import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.Stat
+import app.liora.core.designsystem.component.StatMotion
 import app.liora.core.designsystem.component.StatRow
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.layout.currentWindowLayout
 import app.liora.core.designsystem.layout.readableWidth
+import app.liora.core.designsystem.motion.rememberLioraHaptics
 import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.designsystem.util.rememberElapsedTime
@@ -73,6 +75,7 @@ import app.liora.feature.logger.resources.logger_no_workout_title
 import app.liora.feature.logger.resources.logger_stat_duration
 import app.liora.feature.logger.resources.logger_stat_sets
 import app.liora.feature.logger.resources.logger_stat_volume
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -95,6 +98,7 @@ internal fun LoggerScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val corrected by viewModel.corrected.collectAsStateWithLifecycle()
     CloseWhenDone(uiState, corrected, viewModel.correctsHistory, navigation.onClose)
+    LoggerHaptics(viewModel.tickOutcomes, uiState)
 
     var dialog by rememberSaveable { mutableStateOf<LoggerDialog?>(null) }
     val showDialog = { value: LoggerDialog ->
@@ -464,15 +468,57 @@ private fun WorkoutStats(
     // A finished workout's clock has stopped.
     val duration = state.endedAt?.let { it - state.workout.startedAt } ?: rememberElapsedTime(state.workout.startedAt)
     val numbers = rememberNumberFormatter()
+    // Each figure rolls as it changes: the clock every second, volume and sets with each set logged.
     StatRow(modifier) {
         Stat(
             value = duration.formatAsClock(),
             label = stringResource(Res.string.logger_stat_duration),
             modifier = Modifier.weight(1f),
             highlight = !state.isFinished,
+            motion = StatMotion.Roll,
         )
-        Stat(volumeText(state.volumeKg), stringResource(Res.string.logger_stat_volume), Modifier.weight(1f))
-        Stat(numbers.format(state.completedSets), stringResource(Res.string.logger_stat_sets), Modifier.weight(1f))
+        Stat(
+            value = volumeText(state.volumeKg),
+            label = stringResource(Res.string.logger_stat_volume),
+            modifier = Modifier.weight(1f),
+            motion = StatMotion.Roll,
+        )
+        Stat(
+            value = numbers.format(state.completedSets),
+            label = stringResource(Res.string.logger_stat_sets),
+            modifier = Modifier.weight(1f),
+            motion = StatMotion.Roll,
+        )
+    }
+}
+
+/**
+ * Answers ticking a set off with a haptic once it's known how it went: a tick when it's logged, a
+ * buzz when a value is missing, and a double beat when it sets a personal record.
+ */
+@Composable
+private fun LoggerHaptics(
+    outcomes: Flow<TickOutcome>,
+    state: LoggerUiState,
+) {
+    val haptics = rememberLioraHaptics()
+    LaunchedEffect(outcomes, haptics) {
+        outcomes.collect { outcome ->
+            when (outcome) {
+                TickOutcome.Logged -> haptics.setLogged()
+                TickOutcome.Missing -> haptics.rejected()
+            }
+        }
+    }
+    // Records show in the state a moment after their set is logged; those already there when the
+    // logger opens don't count.
+    val records = (state as? LoggerUiState.Active)?.newRecords?.keys
+    var known by remember { mutableStateOf<Set<String>?>(null) }
+    LaunchedEffect(records) {
+        if (records == null) return@LaunchedEffect
+        val before = known
+        known = records
+        if (before != null && !before.containsAll(records)) haptics.record()
     }
 }
 
