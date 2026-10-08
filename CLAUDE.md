@@ -47,7 +47,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - Every write goes through `SyncStamper` (`newRow`, `touch`, `tombstone`).
   - Never hard-delete synced rows.
   - Synced tables have no foreign-key constraints. Repositories keep references consistent and cascade tombstones.
-  - `ownerId` is a server-side concept, added in Phase 4. The local DB belongs to one user.
+  - `ownerId` is a server-side concept, added with the server (Phase 5). The local DB belongs to one user.
 - **Local-only tables:** `local_meta` (device id, seed version, the running rest timer, the gym in use) and `exercise_name` (search index, rebuilt from the seed).
 - **Photos:** progress photos are files in app-private `files/photos` (never the shared gallery), written only through `PhotoStorage`. Their rows sync; the images will sync as blobs (Phase 3).
 - **Notes:** an exercise has its own note (`exercise_settings.sticky_note`, written through `ExerciseRepository.setNote`), shown wherever it appears; each workout has its own per exercise (`workout_exercise.notes`). Never copy one into the other. Routine exercise notes and custom exercise `notes` are legacy: `LegacyNotes` moves them onto the exercise's note at startup.

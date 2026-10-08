@@ -254,6 +254,9 @@ As of 2026-10-03:
       off, after asking. Tests use `TestHealthStore`.
     - Progress: the Body card moved up, under the monthly report (on request).
   - **3d, first launch,** is next.
+- **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
+  Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
+  stays Phase 6, since it runs on the server.
 - **Release builds** (2026-10-08, `05d7ba2`): signed with a local key named in the gitignored
   `keystore.properties` (README › Release builds), smoke-tested with R8. Judge speed on them, not on debug.
 - **After the first real workout (2026-10-03):** fixes from logging one on the phone. No schema change.
@@ -441,7 +444,7 @@ Every syncable row carries `id` (UUIDv7, created on the client), `ownerId`, `cre
     - Auth runs through Credential Manager and `AuthorizationClient`. The legacy GoogleSignIn API was removed in play-services-auth 22.
     - Calls the REST v3 API through the Ktor client.
     - Layout: each device only appends its own `changes/<deviceId>/<seq>.json.gz` batches, so there is no write contention. Any device can occasionally compact everything into `snapshot-<hlc>.json.gz`. Photos are stored under `blobs/`.
-  - **Server backend (Phase 4):** `GET /sync/pull?cursor=` and `POST /sync/push` using the same ChangeSet DTOs. The server assigns a monotonic `serverSeq` that clients use as their cursor.
+  - **Server backend (Phase 5):** `GET /sync/pull?cursor=` and `POST /sync/push` using the same ChangeSet DTOs. The server assigns a monotonic `serverSeq` that clients use as their cursor.
 - Sync is triggered by WorkManager: when a workout finishes, periodically, and manually. It requires network.
 - Switching backends means a full push of the local DB.
 - **Manual backup** (JSON export and import via SAF) always works, independent of sync.
@@ -608,7 +611,7 @@ the app gets its character before sync, the server and the web GUI build on it.
   clock starts past it, so an edit made after a restart beats the version it replaces even when this
   phone's clock is behind.
 - **`SyncBackend`** (`core/data/sync`): push a batch, pull batches since a cursor, put and get blobs. The
-  cursor belongs to the backend (Drive's per-device sequence numbers; the server's sequence in Phase 4).
+  cursor belongs to the backend (Drive's per-device sequence numbers; the server's sequence in Phase 5).
 - **Google Drive** (`sync/gdrive`, Android):
   - The app data folder: hidden from the user's Drive, counted against their quota.
   - `AuthorizationClient` for the `drive.appdata` scope, and REST v3 through the Ktor client.
@@ -636,15 +639,7 @@ the app gets its character before sync, the server and the web GUI build on it.
   - **3d, first launch** (added 2026-10-08 on request): a short walkthrough on the first start, showing how
     Liora works (routines, the logger, progress) and ending with an offer to set up Google Drive sync.
 
-### Phase 4: Self-hosted server
-- `server/`: Ktor, PostgreSQL, Exposed, Flyway, Argon2 passwords, JWT access tokens plus refresh tokens per device.
-- `core/api-contract` DTOs, the `/sync` endpoints, a blob store on a filesystem volume, and a read-only `/api/v1` REST API with OpenAPI docs.
-- `docker-compose.yml` with the server and Postgres.
-- `sync/server` client backend, and moving from Drive to the server from the app.
-
-### Phase 5: Web GUI, programs, extras
-- `app/web`: Compose Multiplatform (wasmJs) reusing `designsystem`, with desktop layouts. It is served by the Ktor server and offers a history browser, dashboards, a routine editor, and import/export.
-  - Re-check Compose Web maturity before starting: it is Beta as of Compose Multiplatform 1.12.
+### Phase 4: Programs, progression, and extras (moved up 2026-10-09 on request)
 - Programs and progression engine: multi-week blocks, and rules like double progression or linear progression with deload (5/3/1, GZCLP).
   - **Progression rules** (added 2026-09-30 on request): a pure `core/domain` function takes a rule and the recent
     history and returns the next session's targets (weight and reps per set) plus the reason, e.g. "8 reps on
@@ -655,7 +650,15 @@ the app gets its character before sync, the server and the web GUI build on it.
     weeks) is flagged before it is shown. The same check guards AI suggestions in Phase 6.
 - Wear OS companion, home-screen widget.
 
-### Phase 6: AI (opt-in; runs server-side, so API keys never sit on the phone)
+### Phase 5: Self-hosted server and web GUI (moved back 2026-10-09 on request: not a priority now)
+- `server/`: Ktor, PostgreSQL, Exposed, Flyway, Argon2 passwords, JWT access tokens plus refresh tokens per device.
+- `core/api-contract` DTOs, the `/sync` endpoints, a blob store on a filesystem volume, and a read-only `/api/v1` REST API with OpenAPI docs.
+- `docker-compose.yml` with the server and Postgres.
+- `sync/server` client backend, and moving from Drive to the server from the app.
+- `app/web`: Compose Multiplatform (wasmJs) reusing `designsystem`, with desktop layouts. It is served by the Ktor server and offers a history browser, dashboards, a routine editor, and import/export.
+  - Re-check Compose Web maturity before starting: it is Beta as of Compose Multiplatform 1.12.
+
+### Phase 6: AI (opt-in; runs on the Phase 5 server, so API keys never sit on the phone)
 - Claude API with tool use over read-only domain queries (`get_workouts`, `get_exercise_history`, `get_prs`, `propose_routine`). Features:
   - "Ask your log" (e.g. "how has my bench moved since March?").
   - Post-workout and weekly insights.

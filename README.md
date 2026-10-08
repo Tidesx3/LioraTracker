@@ -106,6 +106,6 @@ build-logic        Gradle convention plugins (liora.kmp.library, liora.cmp.featu
 2. Design and motion polish: more character, a bit quirky and playful, with animations that make
    logging feel good
 3. Google Drive (appDataFolder) sync and Health Connect
-4. Self-hosted Ktor + PostgreSQL server (Docker)
-5. Web GUI, programs with auto-progression, Wear OS
-6. Opt-in AI: ask your log, insights, natural-language logging, program generation
+4. Programs with auto-progression, home-screen widget, Wear OS
+5. Self-hosted Ktor + PostgreSQL server (Docker) and web GUI
+6. Opt-in AI on that server: ask your log, insights, natural-language logging, program generation
