@@ -4,14 +4,12 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
-- **Google Drive sync: check on the phone** (added 2026-10-08). Tests cover the engine, the Drive layout and
-  the REST calls against a fake Drive; Google's sign-in and the real Drive are only seen on a device.
-  - Settings › Your data › Sync with Google Drive › Connect: Google's consent screen shows, and after it
-    the account's email. "Not synced yet" turns into "Synced today at …" within a minute or so.
-  - In Drive on the web, Settings › Manage apps › Liora shows some hidden app data.
-  - Log a workout, leave the app: it syncs again (the time updates).
-  - On a second install (the debug app is one), connect the same account: everything arrives, photos too.
+- **Google Drive sync: the rest of the device check** (added 2026-10-08). Connecting and syncing between
+  the debug and release apps on the Fold worked on 2026-10-08. Still to see:
+  - Log a workout, leave the app: it syncs again (the time updates), and the other app gets it.
+  - Photos arrive in the other app, and a photo deleted in one disappears from the other.
   - Disconnect, then connect again; turn the network off and on (a quiet "couldn't be reached" while off).
+  - After a week or two of use: the twice-daily sync keeps going without opening the app.
 
 - **Rest sound: check on the phone** (added 2026-10-03). The sounds were made without listening to
   them, so pick one in Settings › Workout and say if it needs to change (`tools/sound/MakeSounds.java`).
