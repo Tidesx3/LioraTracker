@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.exercise.ExerciseRepository
 import app.liora.core.data.routine.RoutineRepository
+import app.liora.core.data.sync.SyncRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineFolder
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
@@ -41,6 +43,8 @@ data class TrainUiState(
     val folders: List<RoutineFolder> = emptyList(),
     val loading: Boolean = true,
     val dialog: RoutineDialog? = null,
+    /** Sync has stopped until the user does something in Settings. */
+    val settingsNeedYou: Boolean = false,
 ) {
     val isEmpty: Boolean get() = folders.isEmpty() && sections.all { it.routines.isEmpty() }
 }
@@ -50,6 +54,7 @@ class TrainViewModel(
     private val activeWorkouts: ActiveWorkoutRepository,
     private val routines: RoutineRepository,
     exercises: ExerciseRepository,
+    sync: SyncRepository,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
     private val dialog = MutableStateFlow<RoutineDialog?>(null)
@@ -78,6 +83,8 @@ class TrainViewModel(
                 loading = false,
                 dialog = openDialog,
             )
+        }.combine(sync.state.map { it.needsYou }.distinctUntilChanged()) { state, needsYou ->
+            state.copy(settingsNeedYou = needsYou)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TrainUiState())
 
     fun setLanguage(value: String) {

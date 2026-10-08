@@ -237,6 +237,10 @@ As of 2026-10-03:
       in when that's what it takes), Sync now and Disconnect, after asking.
     - Since 2026-10-09 (on request) it also shows the space Liora takes in the Drive: after each sync the
       backend adds up its files (`SyncBackend.usedBytes`), shown like Drive does ("2.4 MB").
+    - Also since 2026-10-09: how many changes haven't gone up yet ("3 changes waiting", or "Everything is in
+      Drive"), counted live by `SyncDao.observePending` like a push would take them; and when sync needs the
+      user (sign in again, Drive full, a newer Liora elsewhere: `SyncState.needsYou`), a dot on the Train tab's
+      Settings gear and the problem in red on Settings' Sync row. A Drive that's only unreachable gets neither.
   - **3c (done, pending the device check in TODO.md): Health Connect.** No schema change.
     - `HealthRepository` (`core/data/health`) trades with a `HealthStore`: finished workouts go out as exercise
       sessions keyed by the workout's id, with the HLC as their version, so an edit replaces one and a

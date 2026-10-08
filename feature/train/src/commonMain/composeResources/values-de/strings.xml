@@ -17,6 +17,7 @@
   <string name="train_pick_title">Routine auswählen</string>
   <string name="train_pick_body">Hier erscheinen ihre Übungen und Sätze.</string>
   <string name="cd_settings">Einstellungen</string>
+  <string name="cd_settings_attention">Die Synchronisierung braucht dich</string>
   <string name="cd_more">Weitere Optionen</string>
   <string name="cd_edit">Bearbeiten</string>
   <string name="cd_close">Schließen</string>

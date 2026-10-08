@@ -1,7 +1,10 @@
 package app.liora.android
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToKeyAction
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -11,12 +14,18 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
 import app.liora.core.data.AppStartup
+import app.liora.core.data.body.BodyRepository
 import app.liora.core.data.sync.SyncRepository
 import app.liora.core.data.sync.SyncSignInNeededException
+import app.liora.core.data.sync.SyncStoreFullException
 import app.liora.core.data.sync.SyncStores
+import app.liora.core.data.sync.SyncUnreachableException
+import app.liora.core.model.MeasurementType
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
 import org.junit.After
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -51,6 +60,13 @@ class SyncFlowTest {
     @Test
     @Config(qualifiers = COVER)
     fun connectSyncAndDisconnect() {
+        runBlocking {
+            koin.get<BodyRepository>().saveDay(
+                LocalDate(2026, 10, 1),
+                mapOf(MeasurementType.Bodyweight to 82.5),
+                TimeZone.currentSystemDefault(),
+            )
+        }
         openSync()
         waitForText("Two copies beat one")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/sync_off_dark.png")
@@ -59,11 +75,14 @@ class SyncFlowTest {
         composeRule.onNodeWithText("Connect Google Drive").performClick()
         waitForText(TEST_ACCOUNT)
         composeRule.onNodeWithText("Not synced yet").assertIsDisplayed()
+        // The weigh-in hasn't gone up yet.
+        waitForText("1 change waiting")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/sync_on_dark.png")
 
         // A sync as the background work runs it.
         runBlocking { sync.sync() }
         waitForText("Synced today at", substring = true)
+        waitForText("Everything is in Drive")
         // And how much of the Drive it takes.
         composeRule.onNodeWithText("Space in your Drive").assertExists()
         waitForText("2.4 MB")
@@ -93,6 +112,28 @@ class SyncFlowTest {
         composeRule.onNodeWithText("Sign in").performClick()
         composeRule.waitUntil(TIMEOUT_MS) {
             composeRule.onAllNodesWithText("Google Drive needs you to sign in again.").fetchSemanticsNodes().isEmpty()
+        }
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun theSettingsGearSaysWhenSyncNeedsYou() {
+        runBlocking { sync.connect(TEST_ACCOUNT) }
+        stores.failure = SyncStoreFullException()
+        runBlocking { sync.sync() }
+
+        Robolectric.buildActivity(MainActivity::class.java).setup()
+        val needsYou = SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Sync needs you")
+        composeRule.waitUntil(TIMEOUT_MS) {
+            composeRule.onAllNodes(hasContentDescription("Settings") and needsYou).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/train_sync_needs_you_dark.png")
+
+        // A Drive that's only busy for a moment doesn't need anyone.
+        stores.failure = SyncUnreachableException("offline")
+        runBlocking { sync.sync() }
+        composeRule.waitUntil(TIMEOUT_MS) {
+            composeRule.onAllNodes(hasContentDescription("Settings") and needsYou).fetchSemanticsNodes().isEmpty()
         }
     }
 

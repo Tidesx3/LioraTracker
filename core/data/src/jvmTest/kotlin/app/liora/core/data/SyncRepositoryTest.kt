@@ -25,7 +25,8 @@ class SyncRepositoryTest {
     private val drive = InMemoryStore()
     private val stores = FakeStores()
     private val scheduler = FakeScheduler()
-    private val repository = OfflineSyncRepository(phone.sync, stores, scheduler, phone.database.localMetaDao())
+    private val repository =
+        OfflineSyncRepository(phone.sync, stores, scheduler, phone.database.localMetaDao(), phone.database.syncDao())
 
     @AfterTest
     fun tearDown() = phone.database.close()
@@ -68,6 +69,34 @@ class SyncRepositoryTest {
             repository.sync()
             // Nothing changed since the first sync, so there's nothing to send again.
             assertEquals(1, drive.batches.size)
+        }
+
+    @Test
+    fun whatHasntGoneUpYetIsCounted() =
+        runTest {
+            repository.connect(ACCOUNT)
+            phone.trainForAWhile()
+            val waiting = repository.state.first().pending
+            assertTrue(waiting > 0)
+
+            repository.sync()
+            // Everything went, but the workout still going: it waits to be finished.
+            assertEquals(0, repository.state.first().pending)
+            phone.workouts.finish()
+            assertTrue(repository.state.first().pending > 0)
+        }
+
+    @Test
+    fun onlyAProblemTheUserCanSolveNeedsThem() =
+        runTest {
+            repository.connect(ACCOUNT)
+            stores.failure = SyncUnreachableException("offline")
+            repository.sync()
+            assertFalse(repository.state.first().needsYou)
+
+            stores.failure = SyncSignInNeededException()
+            repository.sync()
+            assertTrue(repository.state.first().needsYou)
         }
 
     @Test

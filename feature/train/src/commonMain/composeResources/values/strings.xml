@@ -17,6 +17,7 @@
   <string name="train_pick_title">Pick a routine</string>
   <string name="train_pick_body">Its exercises and sets show up here.</string>
   <string name="cd_settings">Settings</string>
+  <string name="cd_settings_attention">Sync needs you</string>
   <string name="cd_more">More options</string>
   <string name="cd_edit">Edit</string>
   <string name="cd_close">Close</string>

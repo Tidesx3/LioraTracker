@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -21,6 +23,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -35,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -56,6 +60,7 @@ import app.liora.core.ui.currentLanguage
 import app.liora.feature.train.resources.Res
 import app.liora.feature.train.resources.cd_more
 import app.liora.feature.train.resources.cd_settings
+import app.liora.feature.train.resources.cd_settings_attention
 import app.liora.feature.train.resources.folder_delete
 import app.liora.feature.train.resources.folder_new_routine
 import app.liora.feature.train.resources.folder_rename
@@ -179,13 +184,7 @@ private fun TrainContent(
         topBar = {
             LioraTopAppBar(
                 title = stringResource(Res.string.train_title),
-                actions = {
-                    LioraIconButton(
-                        icon = LioraIcons.Settings,
-                        contentDescription = stringResource(Res.string.cd_settings),
-                        onClick = actions.onOpenSettings,
-                    )
-                },
+                actions = { SettingsButton(needsYou = uiState.settingsNeedYou, onClick = actions.onOpenSettings) },
             )
         },
     ) { padding ->
@@ -464,6 +463,24 @@ private fun QuickStartCard(
                         ),
                 )
             }
+        }
+    }
+}
+
+/** The way to Settings, with a dot when sync has stopped until the user does something there. */
+@Composable
+private fun SettingsButton(
+    needsYou: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val attention = stringResource(Res.string.cd_settings_attention)
+    IconButton(
+        onClick = onClick,
+        modifier = if (needsYou) modifier.semantics { stateDescription = attention } else modifier,
+    ) {
+        BadgedBox(badge = { if (needsYou) Badge() }) {
+            Icon(painterResource(LioraIcons.Settings), contentDescription = stringResource(Res.string.cd_settings))
         }
     }
 }

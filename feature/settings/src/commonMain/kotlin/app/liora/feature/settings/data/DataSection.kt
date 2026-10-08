@@ -92,7 +92,17 @@ internal fun DataSection(
     SettingsGroup(stringResource(Res.string.section_data), modifier) {
         ListItem(
             headlineContent = { Text(stringResource(Res.string.sync_row_title)) },
-            supportingContent = { Text(sync?.let { syncStatusText(it, today) }.orEmpty()) },
+            supportingContent = {
+                Text(
+                    text = sync?.let { syncStatusText(it, today) }.orEmpty(),
+                    color =
+                        if (sync?.needsYou == true) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                )
+            },
             colors = LioraCardDefaults.listItemColors(),
             modifier = Modifier.clickable(onClick = onOpenSync),
         )

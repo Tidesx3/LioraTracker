@@ -203,6 +203,15 @@
   <string name="sync_off_body">Liora legt alles in einem versteckten Ordner in deinem Google Drive ab und hält deine Geräte auf demselben Stand. Nur Liora sieht diesen Ordner, und nichts landet woanders.</string>
   <string name="sync_connect">Google Drive verbinden</string>
   <string name="sync_account">Google Drive</string>
+  <string name="sync_all_in">Alles ist in deinem Drive</string>
+  <plurals name="sync_waiting">
+    <item quantity="one">%1$d Änderung wartet</item>
+    <item quantity="other">%1$d Änderungen warten</item>
+  </plurals>
+  <plurals name="sync_waiting_body">
+    <item quantity="one">Sie landet mit der nächsten Synchronisierung in deinem Drive.</item>
+    <item quantity="other">Sie landen mit der nächsten Synchronisierung in deinem Drive.</item>
+  </plurals>
   <string name="sync_space">Platz in deinem Drive</string>
   <string name="sync_space_kb">%1$s KB</string>
   <string name="sync_space_mb">%1$s MB</string>

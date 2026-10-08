@@ -42,6 +42,7 @@ import app.liora.core.ui.LocalCloudConsent
 import app.liora.feature.settings.resources.Res
 import app.liora.feature.settings.resources.dialog_cancel
 import app.liora.feature.settings.resources.sync_account
+import app.liora.feature.settings.resources.sync_all_in
 import app.liora.feature.settings.resources.sync_connect
 import app.liora.feature.settings.resources.sync_connect_failed
 import app.liora.feature.settings.resources.sync_disconnect
@@ -56,10 +57,13 @@ import app.liora.feature.settings.resources.sync_row_running
 import app.liora.feature.settings.resources.sync_sign_in
 import app.liora.feature.settings.resources.sync_space
 import app.liora.feature.settings.resources.sync_title
+import app.liora.feature.settings.resources.sync_waiting
+import app.liora.feature.settings.resources.sync_waiting_body
 import app.liora.feature.settings.resources.sync_when
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -214,6 +218,7 @@ private fun Connected(
                         },
                     colors = LioraCardDefaults.listItemColors(),
                 )
+                Pending(sync.pending)
                 sync.usedBytes?.let { bytes ->
                     ListItem(
                         headlineContent = { Text(stringResource(Res.string.sync_space)) },
@@ -237,6 +242,29 @@ private fun Connected(
             TextButton(onClick = onDisconnect) { Text(stringResource(Res.string.sync_disconnect)) }
         }
     }
+}
+
+/** How many changes here haven't gone up yet, or that everything has. */
+@Composable
+private fun Pending(
+    pending: Int,
+    modifier: Modifier = Modifier,
+) {
+    ListItem(
+        headlineContent = {
+            Text(
+                if (pending == 0) {
+                    stringResource(Res.string.sync_all_in)
+                } else {
+                    pluralStringResource(Res.plurals.sync_waiting, pending, pending)
+                },
+            )
+        },
+        supportingContent =
+            if (pending == 0) null else ({ Text(pluralStringResource(Res.plurals.sync_waiting_body, pending)) }),
+        colors = LioraCardDefaults.listItemColors(),
+        modifier = modifier,
+    )
 }
 
 /** What went wrong, and for signing in again the button that does it. A busy Drive passes on its own. */

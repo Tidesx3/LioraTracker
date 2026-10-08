@@ -2,6 +2,7 @@ package app.liora.core.data.sync
 
 import app.liora.core.data.backup.NewerBackupException
 import app.liora.core.database.dao.LocalMetaDao
+import app.liora.core.database.dao.SyncDao
 import app.liora.core.database.model.LocalMetaEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -32,7 +33,12 @@ data class SyncState(
     val running: Boolean = false,
     /** How much of the user's space the store took after the last sync, in bytes, when it said. */
     val usedBytes: Long? = null,
-)
+    /** How many changes here haven't gone to the store yet. */
+    val pending: Int = 0,
+) {
+    /** Syncing has stopped until the user does something: sign in again, make room, update Liora. */
+    val needsYou: Boolean get() = account != null && problem != null && problem != SyncProblem.Unreachable
+}
 
 /** How one sync ended, for the background work that ran it. */
 enum class SyncOutcome {
@@ -92,6 +98,7 @@ internal class OfflineSyncRepository(
     private val stores: SyncStores,
     private val scheduler: SyncScheduler,
     private val meta: LocalMetaDao,
+    private val syncDao: SyncDao,
 ) : SyncRepository {
     override val state: Flow<SyncState> =
         combine(
@@ -108,7 +115,7 @@ internal class OfflineSyncRepository(
                 running = running,
                 usedBytes = usedBytes?.toLongOrNull(),
             )
-        }
+        }.combine(syncDao.observePending()) { state, pending -> state.copy(pending = pending) }
 
     override suspend fun connect(account: String) {
         if (meta.get(ACCOUNT) != account) engine.startOver()
