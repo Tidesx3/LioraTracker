@@ -51,3 +51,4 @@ include(":feature:body")
 include(":feature:settings")
 
 include(":sync:gdrive")
+include(":integration:healthconnect")

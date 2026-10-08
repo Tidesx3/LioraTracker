@@ -235,7 +235,25 @@ As of 2026-10-03:
     - Settings › Your data › Sync with Google Drive (`SyncRoute`): off, an illustrated invitation
       (`Illustration.Sync`) with Connect; on, the account, when it last synced, the problem if any (with Sign
       in when that's what it takes), Sync now and Disconnect, after asking.
-  - **3c, Health Connect,** is next.
+  - **3c (done, pending the device check in TODO.md): Health Connect.** No schema change.
+    - `HealthRepository` (`core/data/health`) trades with a `HealthStore`: finished workouts go out as exercise
+      sessions keyed by the workout's id, with the HLC as their version, so an edit replaces one and a
+      deletion removes it; which version Health Connect has is kept per workout in `local_meta`, since a
+      workout synced from another phone can carry an older stamp. Weight and body fat come in through
+      `BodyRepository.addMissing`, only for days without a value of their type, the day's last reading
+      counting. Each part only runs while Health Connect allows it.
+    - `integration/healthconnect` (Android): `HealthConnectStore` on the Jetpack client, reading through
+      the changes API (a token per set of allowed types; a full read when it runs out or the set changes),
+      skipping Liora's own records, sessions of at least a second. The manifest declares the three
+      permissions and a `PrivacyPolicyActivity` for Health Connect's rationale links.
+    - App: `HealthTriggers` trades when Liora comes to the front and when a workout ends (reading needs
+      Liora on screen). `LocalHealthConnectScreens` (`core:ui`) opens the permission screen, Health Connect's
+      settings and its store page.
+    - Settings › Your data › Health Connect (`HealthConnectRoute`): not installed or out of date (with the
+      store page), an invitation to set it up, or what goes out and comes in, with its settings and Turn
+      off, after asking. Tests use `TestHealthStore`.
+    - Progress: the Body card moved up, under the monthly report (on request).
+  - **3d, first launch,** is next.
 - **Release builds** (2026-10-08, `05d7ba2`): signed with a local key named in the gitignored
   `keystore.properties` (README › Release builds), smoke-tested with R8. Judge speed on them, not on debug.
 - **After the first real workout (2026-10-03):** fixes from logging one on the phone. No schema change.

@@ -15,6 +15,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -33,7 +34,24 @@ interface BodyRepository {
         values: Map<MeasurementType, Double?>,
         zone: TimeZone,
     )
+
+    /**
+     * Adds readings from elsewhere (Health Connect) for the days in [zone]'s calendar that have no value of
+     * their type yet: what was logged here stays. Of several readings on a day, the last one counts.
+     * Returns how many were added.
+     */
+    suspend fun addMissing(
+        readings: List<BodyReading>,
+        zone: TimeZone,
+    ): Int
 }
+
+/** A measurement taken elsewhere, in its type's canonical unit (see [Measurement.value]). */
+data class BodyReading(
+    val type: MeasurementType,
+    val takenAt: Instant,
+    val value: Double,
+)
 
 internal class OfflineBodyRepository(
     private val dao: MeasurementDao,
@@ -75,6 +93,35 @@ internal class OfflineBodyRepository(
             }
         dao.upsertAll(changed)
     }
+
+    override suspend fun addMissing(
+        readings: List<BodyReading>,
+        zone: TimeZone,
+    ): Int =
+        transactions.inTransaction {
+            val added =
+                readings
+                    .groupBy { it.type to it.takenAt.toLocalDateTime(zone).date }
+                    .mapNotNull { (key, onDay) ->
+                        val (type, day) = key
+                        val from = day.atStartOfDayIn(zone).toEpochMilliseconds()
+                        val until = day.plus(1, DateTimeUnit.DAY).atStartOfDayIn(zone).toEpochMilliseconds()
+                        val last = onDay.maxBy { it.takenAt }
+                        if (dao.between(type.key, from, until).isNotEmpty()) {
+                            null
+                        } else {
+                            MeasurementEntity(
+                                ids.newId(),
+                                last.takenAt.toEpochMilliseconds(),
+                                type.key,
+                                last.value,
+                                stamper.newRow(),
+                            )
+                        }
+                    }
+            dao.upsertAll(added)
+            added.size
+        }
 }
 
 /** Null for a type this app version doesn't know, e.g. one synced from a newer version. */

@@ -26,7 +26,8 @@ file (readable JSON plus the photos) that restores on another phone without over
 and workouts export as CSV for spreadsheets. Workouts and body measurements import from Hevy and Strong
 exports, with a review of which exercise each name becomes; gym-specific machines become variations of
 their own. Phase 3 is under way: everything syncs through a hidden folder in your own Google Drive (Settings
-› Your data), in the background, deletions and photos included; Health Connect comes next. Details and progress are in
+› Your data), in the background, deletions and photos included. Health Connect gets every finished workout
+and brings in weight and body fat from apps like Samsung Health. Details and progress are in
 [docs/PLAN.md](docs/PLAN.md).
 
 ## Principles

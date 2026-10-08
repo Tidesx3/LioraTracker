@@ -78,6 +78,7 @@ dependencies {
     implementation(projects.feature.settings)
 
     implementation(projects.sync.gdrive)
+    implementation(projects.integration.healthconnect)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)

@@ -65,6 +65,9 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - Google Drive is `sync/gdrive`: REST in `commonMain` (Ktor, tested on the JVM with `MockEngine`), sign-in in
     `androidMain` (`GoogleDriveAccess`). The app runs syncs with WorkManager (`app/.../sync/`); UI tests get
     fakes from `TestLioraApplication.syncModules()` and never reach Google.
+- **Health Connect:** `HealthRepository` (`core/data/health`) decides what goes out and comes in;
+  `integration/healthconnect` is only the platform side. Readings never overwrite a day that has a value of its
+  own. UI tests use `TestLioraApplication.healthModules()`.
 - **Imports:** `core/domain/importing` reads Hevy and Strong CSVs and matches their exercise names
   (`ExerciseMatcher`); `ImportRepository` writes them. A name is never merged into a different exercise
   silently: anything not the same words becomes a custom variation. Tests use synthetic files in the real layouts.

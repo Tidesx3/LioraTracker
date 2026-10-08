@@ -3,6 +3,9 @@ package app.liora.android
 import android.app.Application
 import app.liora.android.di.ProcessScope
 import app.liora.android.di.appModule
+import app.liora.android.health.HealthConnectActivityScreens
+import app.liora.android.health.HealthConnectScreensFactory
+import app.liora.android.health.HealthTriggers
 import app.liora.android.sync.CloudConsentFactory
 import app.liora.android.sync.DriveConsent
 import app.liora.android.sync.SyncTriggers
@@ -12,6 +15,7 @@ import app.liora.android.workout.WorkoutNotifications
 import app.liora.android.workout.WorkoutNotifier
 import app.liora.core.data.AppStartup
 import app.liora.core.data.dataModule
+import app.liora.core.data.health.HealthStore
 import app.liora.core.data.sync.SyncScheduler
 import app.liora.core.data.sync.SyncStores
 import app.liora.core.database.androidDatabaseModule
@@ -22,6 +26,7 @@ import app.liora.feature.logger.loggerModule
 import app.liora.feature.progress.progressModule
 import app.liora.feature.settings.settingsModule
 import app.liora.feature.train.trainModule
+import app.liora.integration.healthconnect.HealthConnectStore
 import app.liora.sync.gdrive.GoogleDriveAccess
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
@@ -37,7 +42,7 @@ open class LioraApplication : Application() {
         startKoin {
             androidContext(this@LioraApplication)
             modules(
-                databaseModules() + syncModules() +
+                databaseModules() + syncModules() + healthModules() +
                     listOf(
                         appModule,
                         dataModule,
@@ -59,6 +64,7 @@ open class LioraApplication : Application() {
         get<WorkoutNotifier>().start(processScope)
         get<RestAlarmScheduler>().start(processScope)
         get<SyncTriggers>().start(processScope)
+        get<HealthTriggers>().start(processScope)
     }
 
     /** Where the database lives. Tests swap in an in-memory database. */
@@ -71,6 +77,15 @@ open class LioraApplication : Application() {
                 single<SyncScheduler> { WorkSyncScheduler(androidContext()) }
                 single { GoogleDriveAccess(androidContext()) } bind SyncStores::class
                 single { CloudConsentFactory { activity -> DriveConsent(activity, get()) } }
+            },
+        )
+
+    /** Health Connect on this phone. Tests swap in one in memory. */
+    protected open fun healthModules(): List<Module> =
+        listOf(
+            module {
+                single<HealthStore> { HealthConnectStore(androidContext()) }
+                single { HealthConnectScreensFactory { activity -> HealthConnectActivityScreens(activity) } }
             },
         )
 }

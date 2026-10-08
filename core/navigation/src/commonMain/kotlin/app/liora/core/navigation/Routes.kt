@@ -67,6 +67,10 @@ data object SettingsRoute : NavKey
 @Serializable
 data object SyncRoute : NavKey
 
+/** Health Connect: what Liora shares with it and takes from it, and the way to its permissions. */
+@Serializable
+data object HealthConnectRoute : NavKey
+
 /**
  * A file exported from Hevy or Strong, shown before it's imported: what it holds and which exercise each
  * name becomes. [source] is where the system's file picker found it.

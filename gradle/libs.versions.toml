@@ -42,6 +42,8 @@ ktor = "3.6.0"
 playServicesAuth = "22.0.0"
 work = "2.12.0"
 androidxLifecycle = "2.11.0"
+# Health Connect: workouts out, weight and body fat in.
+healthConnect = "1.1.0"
 
 # Testing
 junit4 = "4.13.2"
@@ -115,6 +117,7 @@ kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-cor
 androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "work" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "androidxLifecycle" }
+androidx-health-connect = { module = "androidx.health.connect:connect-client", version.ref = "healthConnect" }
 
 junit4 = { module = "junit:junit", version.ref = "junit4" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }

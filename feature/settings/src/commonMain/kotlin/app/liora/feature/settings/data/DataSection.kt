@@ -13,10 +13,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import app.liora.core.data.health.HealthAccess
 import app.liora.core.data.sync.SyncState
 import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.feature.settings.SettingsGroup
+import app.liora.feature.settings.health.healthStatusText
 import app.liora.feature.settings.resources.Res
 import app.liora.feature.settings.resources.backup_body
 import app.liora.feature.settings.resources.backup_exercises
@@ -28,6 +30,7 @@ import app.liora.feature.settings.resources.backup_workouts
 import app.liora.feature.settings.resources.csv_body
 import app.liora.feature.settings.resources.csv_title
 import app.liora.feature.settings.resources.dialog_cancel
+import app.liora.feature.settings.resources.health_title
 import app.liora.feature.settings.resources.import_row_body
 import app.liora.feature.settings.resources.import_row_title
 import app.liora.feature.settings.resources.message_backup_saved
@@ -79,8 +82,10 @@ internal class DataActions(
 internal fun DataSection(
     working: DataWork?,
     sync: SyncState?,
+    health: HealthAccess?,
     today: LocalDate,
     onOpenSync: () -> Unit,
+    onOpenHealth: () -> Unit,
     actions: DataActions,
     modifier: Modifier = Modifier,
 ) {
@@ -90,6 +95,12 @@ internal fun DataSection(
             supportingContent = { Text(sync?.let { syncStatusText(it, today) }.orEmpty()) },
             colors = LioraCardDefaults.listItemColors(),
             modifier = Modifier.clickable(onClick = onOpenSync),
+        )
+        ListItem(
+            headlineContent = { Text(stringResource(Res.string.health_title)) },
+            supportingContent = { Text(health?.let { healthStatusText(it) }.orEmpty()) },
+            colors = LioraCardDefaults.listItemColors(),
+            modifier = Modifier.clickable(onClick = onOpenHealth),
         )
         DataRow(
             title = stringResource(Res.string.backup_title),

@@ -8,6 +8,8 @@ import app.liora.core.data.backup.ExportFileException
 import app.liora.core.data.backup.InvalidBackupException
 import app.liora.core.data.backup.NewerBackupException
 import app.liora.core.data.backup.WorkoutCsvExport
+import app.liora.core.data.health.HealthAccess
+import app.liora.core.data.health.HealthRepository
 import app.liora.core.data.sync.SyncRepository
 import app.liora.core.data.sync.SyncState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,6 +56,7 @@ class DataViewModel(
     private val backups: BackupRepository,
     private val csv: WorkoutCsvExport,
     sync: SyncRepository,
+    private val health: HealthRepository,
     private val clock: Clock,
 ) : ViewModel() {
     private val state = MutableStateFlow(DataUiState())
@@ -62,6 +65,14 @@ class DataViewModel(
     /** Whether sync is on and how it's going, for its row; null until it's known. */
     val sync: StateFlow<SyncState?> =
         sync.state.stateIn(viewModelScope, SharingStarted.WhileSubscribed(SYNC_STOP_TIMEOUT_MS), null)
+
+    /** What Health Connect lets Liora do, for its row; null until it's been asked. */
+    val healthAccess: StateFlow<HealthAccess?> = health.access
+
+    /** Asks Health Connect again, e.g. when Settings comes back into view. */
+    fun refreshHealth() {
+        viewModelScope.launch { health.refresh() }
+    }
 
     private var pending: BackupContents? = null
 

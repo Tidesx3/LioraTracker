@@ -15,6 +15,17 @@
   <!-- Brings a workout's notification and rest alarm back after a reboot. -->
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+  <!-- Health Connect, only once the user allows it there: finished workouts out, weight and body fat in.
+       The same set as HealthConnectStore.permissions. -->
+  <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
+  <uses-permission android:name="android.permission.health.READ_WEIGHT" />
+  <uses-permission android:name="android.permission.health.READ_BODY_FAT" />
+
+  <!-- Health Connect is an app of its own up to Android 13. -->
+  <queries>
+    <package android:name="com.google.android.apps.healthdata" />
+  </queries>
+
   <!-- System backup is off: backups go through Liora's own export and sync, which know how to merge. -->
   <application
     android:name=".LioraApplication"
@@ -40,6 +51,27 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+
+    <!-- Health Connect shows Liora's privacy policy from its permission screens: up to Android 13
+         through the rationale action, from Android 14 through the permission usage alias. -->
+    <activity
+      android:name=".health.PrivacyPolicyActivity"
+      android:exported="true"
+      android:theme="@android:style/Theme.Translucent.NoTitleBar">
+      <intent-filter>
+        <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+      </intent-filter>
+    </activity>
+    <activity-alias
+      android:name="ViewPermissionUsageActivity"
+      android:exported="true"
+      android:permission="android.permission.START_VIEW_PERMISSION_USAGE"
+      android:targetActivity=".health.PrivacyPolicyActivity">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+        <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+      </intent-filter>
+    </activity-alias>
 
     <!-- Hands the camera app a file to write a progress photo into (core:ui PhotoSource); the
          authority must stay "<application id>.photos". No camera permission: the camera app takes it. -->

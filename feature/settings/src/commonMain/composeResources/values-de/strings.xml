@@ -216,4 +216,28 @@
   <string name="sync_problem_full">Dein Google Drive ist voll. Schaff etwas Platz, dann macht Liora weiter.</string>
   <string name="sync_problem_newer_app">Ein anderes Gerät nutzt eine neuere Liora-Version. Aktualisiere Liora hier, um weiter zu synchronisieren.</string>
   <string name="sync_connect_failed">Google war nicht erreichbar. Prüf die Verbindung und versuch es noch einmal.</string>
+  <!-- Health Connect -->
+  <string name="health_title">Health Connect</string>
+  <string name="health_row_off">Aus</string>
+  <string name="health_row_on">Speichert Trainings, übernimmt Gewicht</string>
+  <string name="health_row_missing">Nicht auf diesem Gerät</string>
+  <string name="health_off_title">Deine Apps, per Du</string>
+  <string name="health_off_body">Liora trägt jedes beendete Training in Health Connect ein, auch die bisherigen, und holt dein Gewicht und deinen Körperfettanteil aus Apps wie Samsung Health oder von einer smarten Waage. Was du in Liora eingetragen hast, bleibt, wie es ist.</string>
+  <string name="health_set_up">Health Connect einrichten</string>
+  <string name="health_missing_title">Health Connect fehlt noch</string>
+  <string name="health_missing_body">Mit Health Connect teilt Liora deine Trainings mit deinen anderen Gesundheits-Apps und übernimmt dein Gewicht. Hol es dir im Play Store und komm dann zurück.</string>
+  <string name="health_get">Health Connect holen</string>
+  <string name="health_update_title">Health Connect braucht ein Update</string>
+  <string name="health_update_body">Aktualisiere es im Play Store und komm dann zurück.</string>
+  <string name="health_update">Health Connect aktualisieren</string>
+  <string name="health_workouts">Trainings</string>
+  <string name="health_workouts_on">Werden in Health Connect gespeichert</string>
+  <string name="health_body">Gewicht und Körperfett</string>
+  <string name="health_body_on">Werden aus Health Connect übernommen</string>
+  <string name="health_not_allowed">Nicht erlaubt</string>
+  <string name="health_allow_rest">Den Rest erlaubst du in den Einstellungen von Health Connect.</string>
+  <string name="health_settings">Health-Connect-Einstellungen</string>
+  <string name="health_turn_off">Ausschalten</string>
+  <string name="health_turn_off_question">Health Connect ausschalten?</string>
+  <string name="health_turn_off_body">Liora trägt dann keine Trainings mehr dort ein und übernimmt keine Werte mehr. Was schon in Health Connect und in Liora ist, bleibt.</string>
 </resources>

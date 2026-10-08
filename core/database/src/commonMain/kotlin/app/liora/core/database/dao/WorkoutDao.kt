@@ -160,6 +160,10 @@ interface WorkoutDao {
     @Query("SELECT started_at FROM workout WHERE ended_at IS NOT NULL AND deleted_at IS NULL")
     suspend fun finishedStarts(): List<Long>
 
+    /** Every finished workout, deleted ones too. */
+    @Query("SELECT * FROM workout WHERE ended_at IS NOT NULL")
+    suspend fun finishedWithDeleted(): List<WorkoutEntity>
+
     @Query(EXERCISES_OF_FINISHED)
     fun observeFinishedExercises(): Flow<List<WorkoutExerciseEntity>>
 

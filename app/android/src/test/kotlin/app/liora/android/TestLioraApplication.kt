@@ -4,7 +4,14 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.driver.AndroidSQLiteDriver
+import app.liora.android.health.HealthConnectScreensFactory
 import app.liora.android.sync.CloudConsentFactory
+import app.liora.core.data.body.BodyReading
+import app.liora.core.data.health.HealthAccess
+import app.liora.core.data.health.HealthAvailability
+import app.liora.core.data.health.HealthReadings
+import app.liora.core.data.health.HealthSession
+import app.liora.core.data.health.HealthStore
 import app.liora.core.data.sync.PulledBatches
 import app.liora.core.data.sync.SyncBackend
 import app.liora.core.data.sync.SyncScheduler
@@ -14,6 +21,7 @@ import app.liora.core.database.LioraDatabase
 import app.liora.core.domain.RestSound
 import app.liora.core.ui.CloudConnection
 import app.liora.core.ui.CloudConsent
+import app.liora.core.ui.HealthConnectScreens
 import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.imageDecoderEnabled
@@ -24,6 +32,7 @@ import org.koin.core.context.loadKoinModules
 import org.koin.core.module.Module
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -56,6 +65,29 @@ class TestLioraApplication : LioraApplication() {
                 single { TestSyncStores() } bind SyncStores::class
                 // Google's consent screen can't run here: access is granted at once.
                 single { CloudConsentFactory { CloudConsent { CloudConnection.Connected(TEST_ACCOUNT) } } }
+            },
+        )
+
+    override fun healthModules(): List<Module> =
+        listOf(
+            module {
+                single { TestHealthStore() } bind HealthStore::class
+                // Health Connect's permission screen can't run here: everything is allowed at once.
+                single {
+                    HealthConnectScreensFactory {
+                        val store = get<TestHealthStore>()
+                        object : HealthConnectScreens {
+                            override suspend fun requestPermissions(): Boolean {
+                                store.access = TestHealthStore.ALLOWED
+                                return true
+                            }
+
+                            override fun openSettings() = Unit
+
+                            override fun install() = Unit
+                        }
+                    }
+                }
             },
         )
 
@@ -136,5 +168,36 @@ class TestSyncStores : SyncStores {
 
     override suspend fun forget(account: String) {
         forgotten += account
+    }
+}
+
+/** Health Connect in memory: there but not allowed until its permission screen is "shown". */
+class TestHealthStore : HealthStore {
+    @Volatile
+    var access = HealthAccess(HealthAvailability.Available)
+    val sessions: MutableMap<String, HealthSession> = ConcurrentHashMap()
+
+    @Volatile
+    var readings: List<BodyReading> = emptyList()
+
+    override suspend fun access() = access
+
+    override suspend fun writeSessions(sessions: List<HealthSession>) {
+        sessions.forEach { this.sessions[it.id] = it }
+    }
+
+    override suspend fun deleteSessions(ids: List<String>) {
+        ids.forEach { sessions.remove(it) }
+    }
+
+    override suspend fun readings(cursor: String?): HealthReadings =
+        HealthReadings(readings.also { readings = emptyList() }, "read")
+
+    override suspend fun revoke() {
+        access = HealthAccess(HealthAvailability.Available)
+    }
+
+    companion object {
+        val ALLOWED = HealthAccess(HealthAvailability.Available, writeWorkouts = true, readBody = true)
     }
 }

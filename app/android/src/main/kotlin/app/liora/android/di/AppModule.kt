@@ -2,6 +2,7 @@ package app.liora.android.di
 
 import android.content.Context
 import app.liora.android.backup.AndroidExportFiles
+import app.liora.android.health.HealthTriggers
 import app.liora.android.photos.AndroidPhotoStorage
 import app.liora.android.sync.SyncTriggers
 import app.liora.android.ui.LioraAppViewModel
@@ -34,6 +35,7 @@ val appModule =
         single { RestAlarmScheduler(androidContext(), get(), get()) }
         single<RestSoundPlayer> { AndroidRestSoundPlayer(androidContext()) }
         single { SyncTriggers(get(), get()) }
+        single { HealthTriggers(get(), get()) }
     }
 
 /** The catalog built by `tools/seed/build-seed.mjs`, shipped in `assets/seed/`. */

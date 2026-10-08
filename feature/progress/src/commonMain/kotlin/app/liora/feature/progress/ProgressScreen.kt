@@ -113,6 +113,8 @@ private fun ProgressContent(
                             body = stringResource(Res.string.progress_empty_body),
                         )
                     }
+                    // Bodyweight can be logged before any workout.
+                    item(key = "body") { BodyLink(navigation.onOpenBody, Modifier.padding(16.dp)) }
                 }
 
                 is ProgressUiState.Loaded -> {
@@ -126,6 +128,10 @@ private fun ProgressContent(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         )
                     }
+                    // Near the top: bodyweight is logged far more often than the rest is read.
+                    item(
+                        key = "body",
+                    ) { BodyLink(navigation.onOpenBody, Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) }
                     item(key = "consistency") {
                         SectionHeader(stringResource(Res.string.progress_consistency))
                         ConsistencyGrid(state.trainingDays, state.today, Modifier.padding(horizontal = 20.dp))
@@ -142,21 +148,23 @@ private fun ProgressContent(
                     }
                 }
             }
-            // Not while loading: the list would hold on to the card as the sections arrive above it and
-            // open scrolled to the bottom.
-            if (state != ProgressUiState.Loading) {
-                item(key = "body") {
-                    LinkCard(
-                        icon = LioraIcons.Body,
-                        title = stringResource(Res.string.progress_body_title),
-                        subtitle = stringResource(Res.string.progress_body_subtitle),
-                        onClick = navigation.onOpenBody,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
-                    )
-                }
-            }
         }
     }
+}
+
+/** The way to bodyweight, body fat, measurements and photos. */
+@Composable
+private fun BodyLink(
+    onOpenBody: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LinkCard(
+        icon = LioraIcons.Body,
+        title = stringResource(Res.string.progress_body_title),
+        subtitle = stringResource(Res.string.progress_body_subtitle),
+        onClick = onOpenBody,
+        modifier = modifier,
+    )
 }
 
 /** The streak, and this week so far. */

@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.liora.android.health.HealthConnectScreensFactory
 import app.liora.android.sync.CloudConsentFactory
 import app.liora.android.ui.LioraApp
 import app.liora.android.workout.WorkoutNotifications
@@ -21,7 +22,9 @@ import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.domain.ThemeMode
 import app.liora.core.ui.CloudConsent
+import app.liora.core.ui.HealthConnectScreens
 import app.liora.core.ui.LocalCloudConsent
+import app.liora.core.ui.LocalHealthConnectScreens
 import app.liora.core.ui.LocalUnits
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.get
@@ -36,10 +39,14 @@ class MainActivity : ComponentActivity() {
     /** Google's consent screen for sync; it registers for its result, so it's made before the activity starts. */
     private lateinit var cloudConsent: CloudConsent
 
+    /** Health Connect's permission screen and settings; made before the activity starts, like [cloudConsent]. */
+    private lateinit var healthConnectScreens: HealthConnectScreens
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         cloudConsent = get<CloudConsentFactory>().create(this)
+        healthConnectScreens = get<HealthConnectScreensFactory>().create(this)
         // After a recreation the intent was already handled.
         if (savedInstanceState == null) openLogger = intent.opensLogger()
         // Read once up front, so a chosen theme and units show from the first frame.
@@ -64,7 +71,11 @@ class MainActivity : ComponentActivity() {
                 darkTheme = dark,
                 dynamicColor = settings.dynamicColor,
             ) {
-                CompositionLocalProvider(LocalUnits provides settings.units, LocalCloudConsent provides cloudConsent) {
+                CompositionLocalProvider(
+                    LocalUnits provides settings.units,
+                    LocalCloudConsent provides cloudConsent,
+                    LocalHealthConnectScreens provides healthConnectScreens,
+                ) {
                     LioraApp(openLogger = openLogger, onOpenLoggerHandle = { openLogger = false })
                 }
             }

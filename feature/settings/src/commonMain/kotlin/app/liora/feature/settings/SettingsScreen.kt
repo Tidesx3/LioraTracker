@@ -29,7 +29,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.liora.core.data.health.HealthAccess
 import app.liora.core.data.sync.SyncState
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.LioraCard
@@ -101,11 +103,17 @@ internal fun SettingsScreen(
     onBack: () -> Unit,
     onOpenGyms: () -> Unit,
     onOpenSync: () -> Unit,
+    onOpenHealth: () -> Unit,
     onImport: (source: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val sync by dataViewModel.sync.collectAsStateWithLifecycle()
+    val health by dataViewModel.healthAccess.collectAsStateWithLifecycle()
+    LifecycleResumeEffect(Unit) {
+        dataViewModel.refreshHealth()
+        onPauseOrDispose {}
+    }
     val gym by viewModel.gym.collectAsStateWithLifecycle()
     val data by dataViewModel.uiState.collectAsStateWithLifecycle()
     val exerciseLanguage = currentLanguage()
@@ -122,9 +130,11 @@ internal fun SettingsScreen(
         gym = gym,
         data = data,
         sync = sync,
+        health = health,
         today = dataViewModel.today(),
         onBack = onBack,
         onOpenSync = onOpenSync,
+        onOpenHealth = onOpenHealth,
         onOpenGyms = onOpenGyms,
         onChange = viewModel::update,
         onPreviewSound = viewModel::preview,
@@ -173,9 +183,11 @@ private fun SettingsContent(
     gym: GymProfile?,
     data: DataUiState,
     sync: SyncState?,
+    health: HealthAccess?,
     today: LocalDate,
     onBack: () -> Unit,
     onOpenSync: () -> Unit,
+    onOpenHealth: () -> Unit,
     onOpenGyms: () -> Unit,
     onChange: (SettingsChange) -> Unit,
     onPreviewSound: (RestSound) -> Unit,
@@ -301,8 +313,10 @@ private fun SettingsContent(
                 DataSection(
                     working = data.working,
                     sync = sync,
+                    health = health,
                     today = today,
                     onOpenSync = onOpenSync,
+                    onOpenHealth = onOpenHealth,
                     actions = dataActions,
                 )
             }

@@ -5,6 +5,7 @@ import androidx.navigation3.runtime.NavKey
 import app.liora.core.navigation.ExercisePickerRoute
 import app.liora.core.navigation.GymEditorRoute
 import app.liora.core.navigation.GymsRoute
+import app.liora.core.navigation.HealthConnectRoute
 import app.liora.core.navigation.ImportRoute
 import app.liora.core.navigation.NavigationResultEffect
 import app.liora.core.navigation.Navigator
@@ -16,6 +17,8 @@ import app.liora.feature.settings.gym.GymEditorScreen
 import app.liora.feature.settings.gym.GymEditorViewModel
 import app.liora.feature.settings.gym.GymsScreen
 import app.liora.feature.settings.gym.GymsViewModel
+import app.liora.feature.settings.health.HealthScreen
+import app.liora.feature.settings.health.HealthViewModel
 import app.liora.feature.settings.importing.ImportScreen
 import app.liora.feature.settings.importing.ImportViewModel
 import app.liora.feature.settings.sync.SyncScreen
@@ -34,8 +37,12 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: Navigator) {
             onBack = navigator::goBack,
             onOpenGyms = { navigator.navigate(GymsRoute) },
             onOpenSync = { navigator.navigate(SyncRoute) },
+            onOpenHealth = { navigator.navigate(HealthConnectRoute) },
             onImport = { source -> navigator.navigate(ImportRoute(source)) },
         )
+    }
+    entry<HealthConnectRoute> {
+        HealthScreen(viewModel = koinViewModel(), onBack = navigator::goBack)
     }
     entry<SyncRoute> {
         SyncScreen(viewModel = koinViewModel(), onBack = navigator::goBack)
@@ -76,6 +83,7 @@ val settingsModule =
         viewModelOf(::DataViewModel)
         viewModelOf(::GymsViewModel)
         viewModelOf(::SyncViewModel)
+        viewModelOf(::HealthViewModel)
         viewModelOf(::GymEditorViewModel)
         viewModel { (route: ImportRoute, language: String) -> ImportViewModel(route, language, get(), get()) }
     }

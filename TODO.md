@@ -4,6 +4,12 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
+- **Health Connect: check on the phone** (added 2026-10-08). Settings › Your data › Health Connect › Set up:
+  Health Connect's own permission screen shows Liora's three permissions, and its privacy policy link opens
+  PRIVACY.md. Afterwards past workouts appear in Health Connect (and Samsung Health) as strength training,
+  and a weigh-in from Samsung Health or a scale shows in Body (on a day without one of its own). Rename and
+  delete a past workout: Health Connect follows when Liora next comes to the front.
+
 - **Google Drive sync: the rest of the device check** (added 2026-10-08). Connecting and syncing between
   the debug and release apps on the Fold worked on 2026-10-08. Still to see:
   - Log a workout, leave the app: it syncs again (the time updates), and the other app gets it.

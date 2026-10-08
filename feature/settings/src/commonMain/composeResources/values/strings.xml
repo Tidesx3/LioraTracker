@@ -218,4 +218,28 @@
   <string name="sync_problem_full">Your Google Drive is full. Free up some space and Liora carries on.</string>
   <string name="sync_problem_newer_app">Another device runs a newer Liora. Update this one to keep syncing.</string>
   <string name="sync_connect_failed">Google couldn’t be reached. Check the connection and try again.</string>
+  <!-- Health Connect -->
+  <string name="health_title">Health Connect</string>
+  <string name="health_row_off">Off</string>
+  <string name="health_row_on">Saves workouts, brings in weight</string>
+  <string name="health_row_missing">Not on this phone</string>
+  <string name="health_off_title">Get your apps talking</string>
+  <string name="health_off_body">Liora saves each finished workout to Health Connect, past ones too, and brings in your weight and body fat from apps like Samsung Health or a smart scale. What you logged in Liora stays as you logged it.</string>
+  <string name="health_set_up">Set up Health Connect</string>
+  <string name="health_missing_title">Health Connect isn’t here yet</string>
+  <string name="health_missing_body">Health Connect lets Liora share your workouts with your other health apps and bring in your weight. Get it from the Play Store, then come back.</string>
+  <string name="health_get">Get Health Connect</string>
+  <string name="health_update_title">Health Connect needs an update</string>
+  <string name="health_update_body">Update it in the Play Store, then come back.</string>
+  <string name="health_update">Update Health Connect</string>
+  <string name="health_workouts">Workouts</string>
+  <string name="health_workouts_on">Saved to Health Connect</string>
+  <string name="health_body">Weight and body fat</string>
+  <string name="health_body_on">Brought in from Health Connect</string>
+  <string name="health_not_allowed">Not allowed</string>
+  <string name="health_allow_rest">Allow the rest in Health Connect’s settings.</string>
+  <string name="health_settings">Health Connect settings</string>
+  <string name="health_turn_off">Turn off</string>
+  <string name="health_turn_off_question">Turn off Health Connect?</string>
+  <string name="health_turn_off_body">Liora stops saving workouts there and bringing in readings. What’s already in Health Connect and in Liora stays.</string>
 </resources>
