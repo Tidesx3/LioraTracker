@@ -205,6 +205,10 @@
   <string name="sync_off_body">Liora keeps everything in a hidden folder in your Google Drive and keeps your devices in step. Only Liora can see that folder, and nothing goes anywhere else.</string>
   <string name="sync_connect">Connect Google Drive</string>
   <string name="sync_account">Google Drive</string>
+  <string name="sync_space">Space in your Drive</string>
+  <string name="sync_space_kb">%1$s KB</string>
+  <string name="sync_space_mb">%1$s MB</string>
+  <string name="sync_space_gb">%1$s GB</string>
   <string name="sync_last">Last synced</string>
   <string name="sync_when">Syncs after each workout, when you leave Liora, and twice a day.</string>
   <string name="sync_now">Sync now</string>

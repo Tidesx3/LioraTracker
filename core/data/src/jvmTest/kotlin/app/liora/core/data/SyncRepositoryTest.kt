@@ -47,6 +47,8 @@ class SyncRepositoryTest {
             tablet.sync.sync(drive)
             assertEquals(phone.history.workouts.first(), tablet.history.workouts.first())
             assertTrue(repository.state.first().lastSynced != null)
+            // How much of the Drive it takes, as the store says after the sync.
+            assertEquals(drive.usedBytes(), repository.state.first().usedBytes)
             tablet.database.close()
         }
 
@@ -90,6 +92,7 @@ class SyncRepositoryTest {
             assertFalse(scheduler.started)
             assertEquals(listOf(ACCOUNT), stores.forgotten)
             assertNull(repository.state.first().account)
+            assertNull(repository.state.first().usedBytes)
             stores.failure = SyncUnreachableException("not used")
             assertEquals(SyncOutcome.Done, repository.sync())
             repository.syncNow()

@@ -91,6 +91,17 @@ class DriveSyncBackendTest {
             assertEquals(emptyList(), drive.pull(TABLET, null).texts())
         }
 
+    @Test
+    fun theSpaceTakenIsEveryFileTogether() =
+        runTest {
+            drive.push(PHONE, "batch".encodeToByteArray())
+            drive.putBlob("photo-1", ByteArray(1_000))
+            drive.putBlob("photo-1", ByteArray(2_500))
+
+            assertEquals(folder.contents.values.sumOf { it.size.toLong() }, drive.usedBytes())
+            assertTrue(drive.usedBytes() > 2_500)
+        }
+
     private fun app.liora.core.data.sync.PulledBatches.texts() = batches.map { gunzipped(it) }
 
     /** Pulled batches are unzipped already. */
@@ -111,7 +122,7 @@ class DriveSyncBackendTest {
             properties: Map<String, String>,
             content: ByteArray,
         ): DriveFile {
-            val file = DriveFile("file-${next++}", name, properties)
+            val file = DriveFile("file-${next++}", name, properties, size = content.size.toString())
             files[file.id] = file
             contents[file.id] = content
             return file
@@ -122,6 +133,7 @@ class DriveSyncBackendTest {
             content: ByteArray,
         ) {
             contents[id] = content
+            files[id] = files.getValue(id).copy(size = content.size.toString())
         }
 
         override suspend fun delete(id: String) {

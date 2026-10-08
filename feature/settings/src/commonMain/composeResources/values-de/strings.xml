@@ -203,6 +203,10 @@
   <string name="sync_off_body">Liora legt alles in einem versteckten Ordner in deinem Google Drive ab und hält deine Geräte auf demselben Stand. Nur Liora sieht diesen Ordner, und nichts landet woanders.</string>
   <string name="sync_connect">Google Drive verbinden</string>
   <string name="sync_account">Google Drive</string>
+  <string name="sync_space">Platz in deinem Drive</string>
+  <string name="sync_space_kb">%1$s KB</string>
+  <string name="sync_space_mb">%1$s MB</string>
+  <string name="sync_space_gb">%1$s GB</string>
   <string name="sync_last">Zuletzt synchronisiert</string>
   <string name="sync_when">Synchronisiert nach jedem Training, wenn du Liora verlässt, und zweimal am Tag.</string>
   <string name="sync_now">Jetzt synchronisieren</string>

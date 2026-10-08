@@ -3,12 +3,16 @@ package app.liora.sync.gdrive
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/** A file in Liora's app data folder. [properties] (Drive's `appProperties`) say what it holds. */
+/**
+ * A file in Liora's app data folder. [properties] (Drive's `appProperties`) say what it holds; [size] is in
+ * bytes, as Drive writes it (a 64-bit number in a string).
+ */
 @Serializable
 internal data class DriveFile(
     val id: String,
     val name: String,
     @SerialName("appProperties") val properties: Map<String, String> = emptyMap(),
+    val size: String? = null,
 )
 
 /** Liora's own hidden folder in the user's Drive: the only part of it Liora can see. */

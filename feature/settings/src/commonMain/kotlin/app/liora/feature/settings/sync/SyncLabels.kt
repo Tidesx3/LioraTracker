@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import app.liora.core.data.sync.SyncProblem
 import app.liora.core.data.sync.SyncState
 import app.liora.core.designsystem.util.rememberDateFormatter
+import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.feature.settings.resources.Res
 import app.liora.feature.settings.resources.sync_problem_full
 import app.liora.feature.settings.resources.sync_problem_newer_app
@@ -14,6 +15,9 @@ import app.liora.feature.settings.resources.sync_row_off
 import app.liora.feature.settings.resources.sync_row_on
 import app.liora.feature.settings.resources.sync_row_running
 import app.liora.feature.settings.resources.sync_row_today
+import app.liora.feature.settings.resources.sync_space_gb
+import app.liora.feature.settings.resources.sync_space_kb
+import app.liora.feature.settings.resources.sync_space_mb
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -49,6 +53,32 @@ internal fun lastSyncedText(
         else -> stringResource(Res.string.sync_row_on, dates.longDate(last.date), dates.time(last.time))
     }
 }
+
+/** A size the way Drive shows one, in the locale's numbers: "640 KB", "2.4 MB", "1.2 GB". */
+@Composable
+internal fun storageText(bytes: Long): String {
+    val numbers = rememberNumberFormatter()
+    return when {
+        bytes < MEGABYTE -> {
+            // A few bytes still count as one kilobyte, so it never reads as nothing at all.
+            val kilobytes = if (bytes == 0L) 0L else maxOf(1L, (bytes + KILOBYTE / 2) / KILOBYTE)
+            stringResource(Res.string.sync_space_kb, numbers.format(kilobytes.toInt()))
+        }
+
+        bytes < GIGABYTE -> {
+            stringResource(Res.string.sync_space_mb, numbers.format(bytes.toDouble() / MEGABYTE, maxFractionDigits = 1))
+        }
+
+        else -> {
+            stringResource(Res.string.sync_space_gb, numbers.format(bytes.toDouble() / GIGABYTE, maxFractionDigits = 1))
+        }
+    }
+}
+
+// Decimal units, as Drive and Android's file sizes count.
+private const val KILOBYTE = 1_000L
+private const val MEGABYTE = 1_000_000L
+private const val GIGABYTE = 1_000_000_000L
 
 internal fun SyncProblem.text(): StringResource =
     when (this) {

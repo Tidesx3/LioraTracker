@@ -64,6 +64,9 @@ class SyncFlowTest {
         // A sync as the background work runs it.
         runBlocking { sync.sync() }
         waitForText("Synced today at", substring = true)
+        // And how much of the Drive it takes.
+        composeRule.onNodeWithText("Space in your Drive").assertExists()
+        waitForText("2.4 MB")
         // What it and connecting ask the scheduler for is in SyncRepositoryTest: those calls land after
         // the screen changes, where a UI test can't wait for them.
         composeRule.onNodeWithText("Sync now").assertIsEnabled()

@@ -347,6 +347,9 @@ internal class InMemoryStore : SyncBackend {
 
     override suspend fun getBlob(name: String): ByteArray? = blobs[name]
 
+    override suspend fun usedBytes(): Long =
+        batches.sumOf { it.second.size.toLong() } + blobs.values.sumOf { it.size.toLong() }
+
     override suspend fun wantsSnapshot(deviceId: String) = wantsSnapshots
 
     override suspend fun putSnapshot(

@@ -30,6 +30,8 @@ data class SyncState(
     val problem: SyncProblem? = null,
     /** A sync is running right now. */
     val running: Boolean = false,
+    /** How much of the user's space the store took after the last sync, in bytes, when it said. */
+    val usedBytes: Long? = null,
 )
 
 /** How one sync ended, for the background work that ran it. */
@@ -92,17 +94,19 @@ internal class OfflineSyncRepository(
     private val meta: LocalMetaDao,
 ) : SyncRepository {
     override val state: Flow<SyncState> =
-        combine(meta.observe(ACCOUNT), engine.lastSynced, meta.observe(PROBLEM), scheduler.running) {
-            account,
-            lastSynced,
-            problem,
-            running,
-            ->
+        combine(
+            meta.observe(ACCOUNT),
+            engine.lastSynced,
+            meta.observe(PROBLEM),
+            scheduler.running,
+            meta.observe(USED_BYTES),
+        ) { account, lastSynced, problem, running, usedBytes ->
             SyncState(
                 account = account,
                 lastSynced = lastSynced,
                 problem = SyncProblem.entries.firstOrNull { it.name == problem },
                 running = running,
+                usedBytes = usedBytes?.toLongOrNull(),
             )
         }
 
@@ -119,6 +123,7 @@ internal class OfflineSyncRepository(
         scheduler.stop()
         meta.delete(ACCOUNT)
         meta.delete(PROBLEM)
+        meta.delete(USED_BYTES)
         try {
             stores.forget(account)
         } catch (_: SyncUnreachableException) {
@@ -132,9 +137,10 @@ internal class OfflineSyncRepository(
 
     override suspend fun sync(): SyncOutcome {
         val account = meta.get(ACCOUNT) ?: return SyncOutcome.Done
+        val backend = stores.open(account)
         val problem =
             try {
-                engine.sync(stores.open(account))
+                engine.sync(backend)
                 null
             } catch (_: SyncUnreachableException) {
                 SyncProblem.Unreachable
@@ -147,7 +153,12 @@ internal class OfflineSyncRepository(
             }
         // Disconnected while it ran: there's nothing to report to.
         if (meta.get(ACCOUNT) != account) return SyncOutcome.Done
-        if (problem == null) meta.delete(PROBLEM) else meta.put(LocalMetaEntity(PROBLEM, problem.name))
+        if (problem == null) {
+            meta.delete(PROBLEM)
+            rememberUsedBytes(backend)
+        } else {
+            meta.put(LocalMetaEntity(PROBLEM, problem.name))
+        }
         return when (problem) {
             null -> SyncOutcome.Done
             SyncProblem.Unreachable -> SyncOutcome.TryLater
@@ -155,9 +166,21 @@ internal class OfflineSyncRepository(
         }
     }
 
+    /** Asks the store how much space it takes now; a store that can't say right now keeps the last answer. */
+    private suspend fun rememberUsedBytes(backend: SyncBackend) {
+        val used =
+            try {
+                backend.usedBytes()
+            } catch (_: SyncUnreachableException) {
+                null
+            } ?: return
+        meta.put(LocalMetaEntity(USED_BYTES, used.toString()))
+    }
+
     private companion object {
         // Kept in local_meta: each device chooses for itself whether and where it syncs.
         const val ACCOUNT = "sync_account"
         const val PROBLEM = "sync_problem"
+        const val USED_BYTES = "sync_used_bytes"
     }
 }

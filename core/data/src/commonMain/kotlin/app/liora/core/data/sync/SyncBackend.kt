@@ -29,6 +29,9 @@ interface SyncBackend {
     /** The image stored under [name], or null when there's none. */
     suspend fun getBlob(name: String): ByteArray?
 
+    /** How much of the user's space the store takes, in bytes; null when it can't say. */
+    suspend fun usedBytes(): Long? = null
+
     /** Whether [deviceId]'s batches have piled up, so it should hand over everything it has in one. */
     suspend fun wantsSnapshot(deviceId: String): Boolean = false
 

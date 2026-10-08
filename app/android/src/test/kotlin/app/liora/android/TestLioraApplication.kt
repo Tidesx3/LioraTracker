@@ -133,6 +133,9 @@ class TestSyncScheduler : SyncScheduler {
 /** The Google account tests connect sync to. */
 const val TEST_ACCOUNT = "lifter@example.com"
 
+/** What the store in memory says it takes of the Drive: 2.4 MB. */
+const val USED_BYTES = 2_400_000L
+
 /** A store in memory in place of Google Drive; [failure] is thrown by the next syncs while it's set. */
 class TestSyncStores : SyncStores {
     val batches: MutableList<ByteArray> = CopyOnWriteArrayList()
@@ -164,6 +167,8 @@ class TestSyncStores : SyncStores {
             ) = Unit
 
             override suspend fun getBlob(name: String): ByteArray? = null
+
+            override suspend fun usedBytes(): Long = USED_BYTES
         }
 
     override suspend fun forget(account: String) {

@@ -54,6 +54,7 @@ import app.liora.feature.settings.resources.sync_off_body
 import app.liora.feature.settings.resources.sync_off_title
 import app.liora.feature.settings.resources.sync_row_running
 import app.liora.feature.settings.resources.sync_sign_in
+import app.liora.feature.settings.resources.sync_space
 import app.liora.feature.settings.resources.sync_title
 import app.liora.feature.settings.resources.sync_when
 import kotlinx.coroutines.launch
@@ -213,6 +214,13 @@ private fun Connected(
                         },
                     colors = LioraCardDefaults.listItemColors(),
                 )
+                sync.usedBytes?.let { bytes ->
+                    ListItem(
+                        headlineContent = { Text(stringResource(Res.string.sync_space)) },
+                        supportingContent = { Text(storageText(bytes)) },
+                        colors = LioraCardDefaults.listItemColors(),
+                    )
+                }
             }
         }
         sync.problem?.let { problem ->

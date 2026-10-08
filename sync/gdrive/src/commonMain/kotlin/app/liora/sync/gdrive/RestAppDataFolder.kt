@@ -41,7 +41,7 @@ internal class RestAppDataFolder(
                     url(FILES)
                     parameter("spaces", APP_DATA)
                     parameter("q", query)
-                    parameter("fields", "nextPageToken,files(id,name,appProperties)")
+                    parameter("fields", "nextPageToken,files(id,name,appProperties,size)")
                     parameter("pageSize", PAGE_SIZE)
                     page?.let { parameter("pageToken", it) }
                 }

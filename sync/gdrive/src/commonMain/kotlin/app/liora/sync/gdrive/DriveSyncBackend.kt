@@ -70,6 +70,8 @@ internal class DriveSyncBackend(
 
     override suspend fun getBlob(name: String): ByteArray? = blob(name)?.let { folder.download(it.id) }
 
+    override suspend fun usedBytes(): Long = folder.list("trashed = false").sumOf { it.size?.toLongOrNull() ?: 0L }
+
     override suspend fun wantsSnapshot(deviceId: String): Boolean =
         ownFiles(deviceId).count { it.kind == CHANGES } > snapshotAfter
 

@@ -35,7 +35,11 @@ class RestAppDataFolderTest {
                     if (request.url.parameters["pageToken"] == null) {
                         json("""{"files": [{"id": "a", "name": "one"}], "nextPageToken": "p2"}""")
                     } else {
-                        json("""{"files": [{"id": "b", "name": "two", "appProperties": {"kind": "blob"}}]}""")
+                        json(
+                            """
+                            {"files": [{"id": "b", "name": "two", "appProperties": {"kind": "blob"}, "size": "2048"}]}
+                            """.trimIndent(),
+                        )
                     }
                 }
 
@@ -43,6 +47,8 @@ class RestAppDataFolderTest {
 
             assertEquals(listOf("a", "b"), files.map { it.id })
             assertEquals(mapOf("kind" to "blob"), files[1].properties)
+            assertEquals("2048", files[1].size)
+            assertEquals("nextPageToken,files(id,name,appProperties,size)", requests.first().url.parameters["fields"])
             val first = requests.first()
             assertEquals("appDataFolder", first.url.parameters["spaces"])
             assertEquals("trashed = false", first.url.parameters["q"])

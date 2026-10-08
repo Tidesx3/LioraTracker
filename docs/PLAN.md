@@ -235,6 +235,8 @@ As of 2026-10-03:
     - Settings › Your data › Sync with Google Drive (`SyncRoute`): off, an illustrated invitation
       (`Illustration.Sync`) with Connect; on, the account, when it last synced, the problem if any (with Sign
       in when that's what it takes), Sync now and Disconnect, after asking.
+    - Since 2026-10-09 (on request) it also shows the space Liora takes in the Drive: after each sync the
+      backend adds up its files (`SyncBackend.usedBytes`), shown like Drive does ("2.4 MB").
   - **3c (done, pending the device check in TODO.md): Health Connect.** No schema change.
     - `HealthRepository` (`core/data/health`) trades with a `HealthStore`: finished workouts go out as exercise
       sessions keyed by the workout's id, with the HLC as their version, so an edit replaces one and a
