@@ -212,6 +212,30 @@ As of 2026-10-03:
     loses its image here. The clock starts past `NEWEST_MERGED_HLC` after a restart, and `receive` no
     longer lets the counter overflow its four digits. `SyncEngineTest` runs two phones against an
     in-memory store; the phone helpers moved to `TestPhone.kt`.
+  - **3b (done, pending the device check in TODO.md): Google Drive.** No schema change.
+    - `SyncRepository` (`core/data/sync`): connect an account (a new one starts over; the same one again,
+      after signing in again, carries on), disconnect (stops and gives back access; nothing is deleted),
+      sync now, and one sync as the background work runs it, keeping what went wrong (`SyncProblem`:
+      unreachable, sign in again, Drive full, a newer Liora elsewhere). Account and problem are device
+      state in `local_meta`. Backends report failures as `SyncUnreachableException`,
+      `SyncSignInNeededException` and `SyncStoreFullException`.
+    - `sync/gdrive` (KMP, tested on the JVM): `RestAppDataFolder` calls Drive's REST API through Ktor (list
+      page by page, multipart upload into the app data folder, a fresh token once on 401, failures mapped
+      to the exceptions above); `DriveSyncBackend` lays out `changes-<device>-<seq>.json.gz` (gzipped),
+      `snapshot-<device>-<seq>.json.gz` and `blob-<photoId>`, reads each other device's batches in order
+      without skipping a gap, and compacts: past 100 batches the engine hands over everything
+      (`wantsSnapshot`/`putSnapshot`), and the device deletes its files up to there. `GoogleDriveAccess`
+      (Android) signs in through `AuthorizationClient`, looks up the account's email through Drive, gets
+      tokens for background syncs (or says to sign in again), and revokes access.
+    - App: `WorkSyncScheduler` (WorkManager, with network: a one-off sync and one every 12 hours) runs
+      `SyncWorker`; `SyncTriggers` asks for a sync when a workout ends and when Liora leaves the screen.
+      Google's consent screen comes through `LocalCloudConsent` (`core:ui`), which `MainActivity` provides
+      from a `CloudConsentFactory`; tests swap in one that grants access at once, a fake scheduler and an
+      in-memory store (`TestLioraApplication`).
+    - Settings › Your data › Sync with Google Drive (`SyncRoute`): off, an illustrated invitation
+      (`Illustration.Sync`) with Connect; on, the account, when it last synced, the problem if any (with Sign
+      in when that's what it takes), Sync now and Disconnect, after asking.
+  - **3c, Health Connect,** is next.
 - **Release builds** (2026-10-08, `05d7ba2`): signed with a local key named in the gitignored
   `keystore.properties` (README › Release builds), smoke-tested with R8. Judge speed on them, not on debug.
 - **After the first real workout (2026-10-03):** fixes from logging one on the phone. No schema change.
@@ -591,6 +615,8 @@ the app gets its character before sync, the server and the web GUI build on it.
     in-memory backend. Needs no Google setup.
   - **3b, Google Drive:** sign-in, the Drive backend with compaction, WorkManager, Settings › Sync.
   - **3c, Health Connect.**
+  - **3d, first launch** (added 2026-10-08 on request): a short walkthrough on the first start, showing how
+    Liora works (routines, the logger, progress) and ending with an offer to set up Google Drive sync.
 
 ### Phase 4: Self-hosted server
 - `server/`: Ktor, PostgreSQL, Exposed, Flyway, Argon2 passwords, JWT access tokens plus refresh tokens per device.

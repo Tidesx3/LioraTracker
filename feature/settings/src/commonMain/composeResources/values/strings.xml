@@ -193,4 +193,29 @@
     <item quantity="other">%1$d new exercises</item>
   </plurals>
   <string name="import_done">Done</string>
+  <!-- Sync -->
+  <string name="sync_row_title">Sync with Google Drive</string>
+  <string name="sync_row_off">Off</string>
+  <string name="sync_row_never">Not synced yet</string>
+  <string name="sync_row_running">Syncing…</string>
+  <string name="sync_row_today">Synced today at %1$s</string>
+  <string name="sync_row_on">Synced %1$s at %2$s</string>
+  <string name="sync_title">Sync</string>
+  <string name="sync_off_title">Two copies beat one</string>
+  <string name="sync_off_body">Liora keeps everything in a hidden folder in your Google Drive and keeps your devices in step. Only Liora can see that folder, and nothing goes anywhere else.</string>
+  <string name="sync_connect">Connect Google Drive</string>
+  <string name="sync_account">Google Drive</string>
+  <string name="sync_last">Last synced</string>
+  <string name="sync_when">Syncs after each workout, when you leave Liora, and twice a day.</string>
+  <string name="sync_now">Sync now</string>
+  <string name="sync_disconnect">Disconnect</string>
+  <string name="sync_disconnect_question">Stop syncing?</string>
+  <string name="sync_disconnect_body">Your data stays on this phone and in your Google Drive. You can connect again any time.</string>
+  <string name="sync_disconnect_confirm">Stop syncing</string>
+  <string name="sync_sign_in">Sign in</string>
+  <string name="sync_problem_unreachable">Google Drive couldn’t be reached. Liora tries again by itself.</string>
+  <string name="sync_problem_sign_in">Google Drive needs you to sign in again.</string>
+  <string name="sync_problem_full">Your Google Drive is full. Free up some space and Liora carries on.</string>
+  <string name="sync_problem_newer_app">Another device runs a newer Liora. Update this one to keep syncing.</string>
+  <string name="sync_connect_failed">Google couldn’t be reached. Check the connection and try again.</string>
 </resources>

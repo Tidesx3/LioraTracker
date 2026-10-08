@@ -49,3 +49,5 @@ include(":feature:exercises")
 include(":feature:progress")
 include(":feature:body")
 include(":feature:settings")
+
+include(":sync:gdrive")

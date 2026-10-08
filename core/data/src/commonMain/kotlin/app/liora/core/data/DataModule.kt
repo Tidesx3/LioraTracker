@@ -26,7 +26,9 @@ import app.liora.core.data.settings.OfflineSettingsRepository
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.sync.DeviceIdentity
 import app.liora.core.data.sync.NEWEST_MERGED_HLC
+import app.liora.core.data.sync.OfflineSyncRepository
 import app.liora.core.data.sync.SyncEngine
+import app.liora.core.data.sync.SyncRepository
 import app.liora.core.data.sync.SyncStamper
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.LocalRestTimerRepository
@@ -44,7 +46,7 @@ import kotlin.time.Clock
 
 /**
  * Repositories and their plumbing. The app also has to provide the platform database module, an
- * `ExerciseSeedSource`, a `PhotoStorage` and `ExportFiles`.
+ * `ExerciseSeedSource`, a `PhotoStorage`, `ExportFiles`, and for sync a `SyncScheduler` and `SyncStores`.
  */
 val dataModule =
     module {
@@ -78,6 +80,7 @@ val dataModule =
         singleOf(::SyncedTables)
         singleOf(::OfflineBackupRepository) bind BackupRepository::class
         singleOf(::SyncEngine)
+        singleOf(::OfflineSyncRepository) bind SyncRepository::class
         singleOf(::OfflineWorkoutCsvExport) bind WorkoutCsvExport::class
         singleOf(::OfflineImportRepository) bind ImportRepository::class
         // The workout in progress has one set logger, shared by the logger and the notification.

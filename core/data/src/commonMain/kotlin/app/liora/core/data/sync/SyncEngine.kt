@@ -109,15 +109,25 @@ class SyncEngine internal constructor(
         if (rows > 0) {
             // Images first, so whoever pulls a photo finds its image.
             for ((name, path) in snapshot.images) photoStorage.read(path)?.let { backend.putBlob(name, it) }
-            val bytes = withContext(Dispatchers.Default) { BackupJson.encodeCompact(batch).encodeToByteArray() }
-            backend.push(deviceId, bytes)
+            backend.push(deviceId, encode(batch))
         }
         transactions.inTransaction {
             markPushed(batch)
             meta.delete(PUSH_EVERYTHING)
         }
+        if (backend.wantsSnapshot(deviceId)) {
+            // Every image is in the store already: each went with the batch that first held its photo.
+            val everything =
+                transactions.inTransaction {
+                    tables.snapshot(RowSelection.All, clock.now().toEpochMilliseconds(), imageName = { it })
+                }
+            backend.putSnapshot(deviceId, encode(everything.backup))
+        }
         return rows
     }
+
+    private suspend fun encode(batch: Backup): ByteArray =
+        withContext(Dispatchers.Default) { BackupJson.encodeCompact(batch).encodeToByteArray() }
 
     /** Clears `dirty` on the rows in [batch], unless they changed while it was pushed. */
     private suspend fun markPushed(batch: Backup) {

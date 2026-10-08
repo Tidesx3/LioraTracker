@@ -8,9 +8,13 @@ import app.liora.core.data.backup.ExportFileException
 import app.liora.core.data.backup.InvalidBackupException
 import app.liora.core.data.backup.NewerBackupException
 import app.liora.core.data.backup.WorkoutCsvExport
+import app.liora.core.data.sync.SyncRepository
+import app.liora.core.data.sync.SyncState
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
@@ -49,10 +53,15 @@ data class DataUiState(
 class DataViewModel(
     private val backups: BackupRepository,
     private val csv: WorkoutCsvExport,
+    sync: SyncRepository,
     private val clock: Clock,
 ) : ViewModel() {
     private val state = MutableStateFlow(DataUiState())
     val uiState: StateFlow<DataUiState> = state.asStateFlow()
+
+    /** Whether sync is on and how it's going, for its row; null until it's known. */
+    val sync: StateFlow<SyncState?> =
+        sync.state.stateIn(viewModelScope, SharingStarted.WhileSubscribed(SYNC_STOP_TIMEOUT_MS), null)
 
     private var pending: BackupContents? = null
 
@@ -140,3 +149,5 @@ private fun BackupContents.summary() =
         measurements = measurements,
         photos = photos,
     )
+
+private const val SYNC_STOP_TIMEOUT_MS = 5_000L

@@ -16,6 +16,7 @@ internal val Illustration.layers: List<Layer>
             Illustration.Gym -> GymScene
             Illustration.UnknownFile -> UnknownFileScene
             Illustration.Done -> DoneScene
+            Illustration.Sync -> SyncScene
         }
 
 /** A strip of confetti at ([x], [y]), turned by [degrees]. */
@@ -323,4 +324,21 @@ private val DoneScene =
         fill(Tone.Soft, circle(208f, 46f, 3f))
         fill(Tone.Accent, circle(40f, 98f, 3f))
         fill(Tone.Soft, circle(156f, 138f, 3f))
+    }
+
+private val SyncScene =
+    scene {
+        // A cloud of overlapping rounds on a flat base.
+        fill(Tone.Paper, rect(76f, 90f, 168f, 114f, 12f))
+        fill(Tone.Paper, circle(98f, 92f, 21f))
+        fill(Tone.Paper, circle(126f, 78f, 28f))
+        fill(Tone.Paper, circle(151f, 94f, 18f))
+        fill(Tone.Line, rect(98f, 99f, 140f, 105f, 3f))
+        // Kept safe.
+        fill(Tone.Accent, circle(164f, 110f, 15f))
+        stroke(Tone.OnAccent, 3.2f, svg("M 157 110.5 L 161.8 115 L 170.5 105.5"))
+        fill(Tone.Accent, sparkle(58f, 54f, 7f))
+        fill(Tone.Soft, sparkle(192f, 50f, 6f))
+        fill(Tone.Soft, circle(200f, 84f, 3f))
+        stroke(Tone.Soft, 2f, circle(56f, 114f, 4.5f))
     }

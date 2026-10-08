@@ -16,6 +16,8 @@ import app.liora.core.data.routine.OfflineRoutineRepository
 import app.liora.core.data.settings.OfflineSettingsRepository
 import app.liora.core.data.sync.DeviceIdentity
 import app.liora.core.data.sync.NEWEST_MERGED_HLC
+import app.liora.core.data.sync.PulledBatches
+import app.liora.core.data.sync.SyncBackend
 import app.liora.core.data.sync.SyncEngine
 import app.liora.core.data.sync.SyncStamper
 import app.liora.core.data.workout.LocalRestTimerRepository
@@ -307,4 +309,50 @@ private object NoFiles : ExportFiles {
         names: Set<String>,
         onEntry: suspend (name: String, bytes: ByteArray) -> Unit,
     ) = error("No files here")
+}
+
+/** A store in memory: batches in the order they came, the cursor counting them. */
+internal class InMemoryStore : SyncBackend {
+    val batches = mutableListOf<Pair<String, ByteArray>>()
+    val blobs = mutableMapOf<String, ByteArray>()
+    var beforePush: suspend () -> Unit = {}
+
+    /** Snapshots handed over, when [wantsSnapshots] asks for them. */
+    val snapshots = mutableListOf<Pair<String, ByteArray>>()
+    var wantsSnapshots = false
+
+    override suspend fun push(
+        deviceId: String,
+        batch: ByteArray,
+    ) {
+        beforePush()
+        batches += deviceId to batch
+    }
+
+    override suspend fun pull(
+        deviceId: String,
+        cursor: String?,
+    ): PulledBatches {
+        val from = cursor?.toInt() ?: 0
+        val theirs = batches.drop(from).filter { it.first != deviceId }.map { it.second }
+        return PulledBatches(theirs, batches.size.toString())
+    }
+
+    override suspend fun putBlob(
+        name: String,
+        bytes: ByteArray,
+    ) {
+        blobs[name] = bytes
+    }
+
+    override suspend fun getBlob(name: String): ByteArray? = blobs[name]
+
+    override suspend fun wantsSnapshot(deviceId: String) = wantsSnapshots
+
+    override suspend fun putSnapshot(
+        deviceId: String,
+        snapshot: ByteArray,
+    ) {
+        snapshots += deviceId to snapshot
+    }
 }

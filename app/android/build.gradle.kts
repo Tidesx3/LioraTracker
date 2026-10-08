@@ -77,9 +77,13 @@ dependencies {
     implementation(projects.feature.body)
     implementation(projects.feature.settings)
 
+    implementation(projects.sync.gdrive)
+
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.exifinterface)
+    implementation(libs.androidx.lifecycle.process)
+    implementation(libs.androidx.work.runtime)
     implementation(libs.coil.network.okhttp)
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)

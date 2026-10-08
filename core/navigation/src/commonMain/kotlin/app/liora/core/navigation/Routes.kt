@@ -63,6 +63,10 @@ data object MonthlyReportRoute : NavKey
 @Serializable
 data object SettingsRoute : NavKey
 
+/** Syncing with the user's Google Drive: connect, see how it's going, sync now, disconnect. */
+@Serializable
+data object SyncRoute : NavKey
+
 /**
  * A file exported from Hevy or Strong, shown before it's imported: what it holds and which exercise each
  * name becomes. [source] is where the system's file picker found it.

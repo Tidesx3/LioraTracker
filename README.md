@@ -25,7 +25,8 @@ can load, show the plates per side for a barbell, and add warm-up sets. Everythi
 file (readable JSON plus the photos) that restores on another phone without overwriting newer changes,
 and workouts export as CSV for spreadsheets. Workouts and body measurements import from Hevy and Strong
 exports, with a review of which exercise each name becomes; gym-specific machines become variations of
-their own. Phase 3, Google Drive sync and Health Connect, is next. Details and progress are in
+their own. Phase 3 is under way: everything syncs through a hidden folder in your own Google Drive (Settings
+› Your data), in the background, deletions and photos included; Health Connect comes next. Details and progress are in
 [docs/PLAN.md](docs/PLAN.md).
 
 ## Principles

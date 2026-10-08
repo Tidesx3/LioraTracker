@@ -62,6 +62,9 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   this device's. A batch is a backup of the rows changed since the last push (`RowSelection.Changed`), deletions
   included, and merging one is restoring it, except that pulled rows aren't dirty. The workout in progress
   never syncs. The clock starts past the newest HLC merged (`NEWEST_MERGED_HLC`), so edits after a restart win.
+  - Google Drive is `sync/gdrive`: REST in `commonMain` (Ktor, tested on the JVM with `MockEngine`), sign-in in
+    `androidMain` (`GoogleDriveAccess`). The app runs syncs with WorkManager (`app/.../sync/`); UI tests get
+    fakes from `TestLioraApplication.syncModules()` and never reach Google.
 - **Imports:** `core/domain/importing` reads Hevy and Strong CSVs and matches their exercise names
   (`ExerciseMatcher`); `ImportRepository` writes them. A name is never merged into a different exercise
   silently: anything not the same words becomes a custom variation. Tests use synthetic files in the real layouts.
@@ -128,5 +131,9 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - **Compose string resources** (`composeResources/**/strings.xml`) do not unescape `\'` the way Android `res/` does; the backslash shows up in the UI. Write a typographic apostrophe (`’`) instead.
 - **Escaping in shell edits:** shell heredocs and sed here mangle backslashes and quotes. Make escaping-sensitive edits with the file edit tools, or with a script file, not inline shell text.
 - **Invisible characters:** write them as `Char(0xFEFF)`, not `'﻿'`. The edit tools can turn the escape into the raw character, which Spotless then strips without a word.
+- **Ktor requests:** inside `http.request { }`, a lambda parameter called `build` loses to the builder's own
+  `build()`, and the request goes out unset. Name it something else and call it as `configure(this)`.
+- **Spotless after editing `.editorconfig`** (e.g. the compose-rules allowlists): a lint result can come back
+  from the build cache. Rerun the module's `spotlessKotlin --rerun --no-build-cache` once.
 - **Navigation 3 metadata** is stored under each `NavMetadataKey`'s `toString()`, so keys override it with a namespaced name (see `ListDetail.kt`).
 - **Pinned versions:** `androidx.navigation3:navigation3-runtime` stays at 1.1.7 to match JB `navigation3-ui` 1.1.2, and `sqlite-bundled` stays at 2.6.2 to match Room 2.8.5. Lint's "newer version available" warnings on these two are expected.

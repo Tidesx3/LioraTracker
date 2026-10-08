@@ -13,6 +13,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import app.liora.core.data.sync.SyncState
 import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.feature.settings.SettingsGroup
@@ -45,10 +46,13 @@ import app.liora.feature.settings.resources.restore_made
 import app.liora.feature.settings.resources.restore_question
 import app.liora.feature.settings.resources.restore_title
 import app.liora.feature.settings.resources.section_data
+import app.liora.feature.settings.resources.sync_row_title
 import app.liora.feature.settings.resources.working_backup
 import app.liora.feature.settings.resources.working_csv
 import app.liora.feature.settings.resources.working_read
 import app.liora.feature.settings.resources.working_restore
+import app.liora.feature.settings.sync.syncStatusText
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.PluralStringResource
@@ -67,14 +71,26 @@ internal class DataActions(
     val onMessageShown: () -> Unit,
 )
 
-/** Backing up, restoring and exporting; the row at work shows it, and the others wait. */
+/**
+ * Sync, then backing up, restoring and exporting; the row at work shows it, and the others wait. [sync] is
+ * null until it's known.
+ */
 @Composable
 internal fun DataSection(
     working: DataWork?,
+    sync: SyncState?,
+    today: LocalDate,
+    onOpenSync: () -> Unit,
     actions: DataActions,
     modifier: Modifier = Modifier,
 ) {
     SettingsGroup(stringResource(Res.string.section_data), modifier) {
+        ListItem(
+            headlineContent = { Text(stringResource(Res.string.sync_row_title)) },
+            supportingContent = { Text(sync?.let { syncStatusText(it, today) }.orEmpty()) },
+            colors = LioraCardDefaults.listItemColors(),
+            modifier = Modifier.clickable(onClick = onOpenSync),
+        )
         DataRow(
             title = stringResource(Res.string.backup_title),
             body = stringResource(Res.string.backup_body),

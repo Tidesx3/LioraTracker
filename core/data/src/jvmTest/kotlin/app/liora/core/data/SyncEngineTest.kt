@@ -1,8 +1,6 @@
 package app.liora.core.data
 
 import app.liora.core.data.backup.NewerBackupException
-import app.liora.core.data.sync.PulledBatches
-import app.liora.core.data.sync.SyncBackend
 import app.liora.core.model.MeasurementType
 import app.liora.core.model.PhotoPose
 import kotlinx.coroutines.flow.first
@@ -253,6 +251,21 @@ class SyncEngineTest {
     private suspend fun TestPhone.renamePush(name: String) =
         routines.save(checkNotNull(routines.get("push")).copy(name = name))
 
+    @Test
+    fun aStoreThatAsksForASnapshotGetsEverything() =
+        runTest {
+            phone.trainForAWhile()
+            store.wantsSnapshots = true
+            phone.sync.sync(store)
+
+            // A store holding only the snapshot gives a new phone all of it.
+            val (device, snapshot) = store.snapshots.single()
+            val compacted = InMemoryStore().apply { batches += device to snapshot }
+            compacted.blobs += store.blobs
+            tablet.sync.sync(compacted)
+            phone.assertSameAs(tablet)
+        }
+
     /** What both phones show is the same. */
     private suspend fun TestPhone.assertSameAs(other: TestPhone) {
         assertEquals(history.workouts.first(), other.history.workouts.first())
@@ -268,38 +281,5 @@ class SyncEngineTest {
                 .first()
                 .map { it.copy(path = "") },
         )
-    }
-
-    /** A store in memory: batches in the order they came, the cursor counting them. */
-    private class InMemoryStore : SyncBackend {
-        val batches = mutableListOf<Pair<String, ByteArray>>()
-        val blobs = mutableMapOf<String, ByteArray>()
-        var beforePush: suspend () -> Unit = {}
-
-        override suspend fun push(
-            deviceId: String,
-            batch: ByteArray,
-        ) {
-            beforePush()
-            batches += deviceId to batch
-        }
-
-        override suspend fun pull(
-            deviceId: String,
-            cursor: String?,
-        ): PulledBatches {
-            val from = cursor?.toInt() ?: 0
-            val theirs = batches.drop(from).filter { it.first != deviceId }.map { it.second }
-            return PulledBatches(theirs, batches.size.toString())
-        }
-
-        override suspend fun putBlob(
-            name: String,
-            bytes: ByteArray,
-        ) {
-            blobs[name] = bytes
-        }
-
-        override suspend fun getBlob(name: String): ByteArray? = blobs[name]
     }
 }

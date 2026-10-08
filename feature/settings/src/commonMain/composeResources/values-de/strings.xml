@@ -191,4 +191,29 @@
     <item quantity="other">%1$d neue Übungen</item>
   </plurals>
   <string name="import_done">Fertig</string>
+  <!-- Sync -->
+  <string name="sync_row_title">Mit Google Drive synchronisieren</string>
+  <string name="sync_row_off">Aus</string>
+  <string name="sync_row_never">Noch nicht synchronisiert</string>
+  <string name="sync_row_running">Wird synchronisiert …</string>
+  <string name="sync_row_today">Heute um %1$s synchronisiert</string>
+  <string name="sync_row_on">Am %1$s um %2$s synchronisiert</string>
+  <string name="sync_title">Synchronisierung</string>
+  <string name="sync_off_title">Doppelt hält besser</string>
+  <string name="sync_off_body">Liora legt alles in einem versteckten Ordner in deinem Google Drive ab und hält deine Geräte auf demselben Stand. Nur Liora sieht diesen Ordner, und nichts landet woanders.</string>
+  <string name="sync_connect">Google Drive verbinden</string>
+  <string name="sync_account">Google Drive</string>
+  <string name="sync_last">Zuletzt synchronisiert</string>
+  <string name="sync_when">Synchronisiert nach jedem Training, wenn du Liora verlässt, und zweimal am Tag.</string>
+  <string name="sync_now">Jetzt synchronisieren</string>
+  <string name="sync_disconnect">Trennen</string>
+  <string name="sync_disconnect_question">Synchronisierung beenden?</string>
+  <string name="sync_disconnect_body">Deine Daten bleiben auf diesem Gerät und in deinem Google Drive. Du kannst jederzeit wieder verbinden.</string>
+  <string name="sync_disconnect_confirm">Beenden</string>
+  <string name="sync_sign_in">Anmelden</string>
+  <string name="sync_problem_unreachable">Google Drive war nicht erreichbar. Liora versucht es von selbst noch einmal.</string>
+  <string name="sync_problem_sign_in">Google Drive möchte, dass du dich noch einmal anmeldest.</string>
+  <string name="sync_problem_full">Dein Google Drive ist voll. Schaff etwas Platz, dann macht Liora weiter.</string>
+  <string name="sync_problem_newer_app">Ein anderes Gerät nutzt eine neuere Liora-Version. Aktualisiere Liora hier, um weiter zu synchronisieren.</string>
+  <string name="sync_connect_failed">Google war nicht erreichbar. Prüf die Verbindung und versuch es noch einmal.</string>
 </resources>

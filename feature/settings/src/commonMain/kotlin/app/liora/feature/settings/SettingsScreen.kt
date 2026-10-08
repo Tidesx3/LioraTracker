@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.liora.core.data.sync.SyncState
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
@@ -87,6 +88,7 @@ import app.liora.feature.settings.resources.theme
 import app.liora.feature.settings.resources.unit_body_length
 import app.liora.feature.settings.resources.unit_distance
 import app.liora.feature.settings.resources.unit_weight
+import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -98,10 +100,12 @@ internal fun SettingsScreen(
     dataViewModel: DataViewModel,
     onBack: () -> Unit,
     onOpenGyms: () -> Unit,
+    onOpenSync: () -> Unit,
     onImport: (source: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val sync by dataViewModel.sync.collectAsStateWithLifecycle()
     val gym by viewModel.gym.collectAsStateWithLifecycle()
     val data by dataViewModel.uiState.collectAsStateWithLifecycle()
     val exerciseLanguage = currentLanguage()
@@ -117,7 +121,10 @@ internal fun SettingsScreen(
         settings = settings,
         gym = gym,
         data = data,
+        sync = sync,
+        today = dataViewModel.today(),
         onBack = onBack,
+        onOpenSync = onOpenSync,
         onOpenGyms = onOpenGyms,
         onChange = viewModel::update,
         onPreviewSound = viewModel::preview,
@@ -165,7 +172,10 @@ private fun SettingsContent(
     settings: Settings?,
     gym: GymProfile?,
     data: DataUiState,
+    sync: SyncState?,
+    today: LocalDate,
     onBack: () -> Unit,
+    onOpenSync: () -> Unit,
     onOpenGyms: () -> Unit,
     onChange: (SettingsChange) -> Unit,
     onPreviewSound: (RestSound) -> Unit,
@@ -288,7 +298,13 @@ private fun SettingsContent(
                 }
             }
             item(key = "data") {
-                DataSection(working = data.working, actions = dataActions)
+                DataSection(
+                    working = data.working,
+                    sync = sync,
+                    today = today,
+                    onOpenSync = onOpenSync,
+                    actions = dataActions,
+                )
             }
         }
     }

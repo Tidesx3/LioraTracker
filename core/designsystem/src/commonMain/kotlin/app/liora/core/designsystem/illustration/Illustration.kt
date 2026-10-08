@@ -45,6 +45,9 @@ enum class Illustration {
 
     /** A tick in confetti. */
     Done,
+
+    /** A cloud with a tick on it: a copy kept safe elsewhere. */
+    Sync,
 }
 
 /**

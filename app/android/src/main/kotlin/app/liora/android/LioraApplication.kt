@@ -3,11 +3,17 @@ package app.liora.android
 import android.app.Application
 import app.liora.android.di.ProcessScope
 import app.liora.android.di.appModule
+import app.liora.android.sync.CloudConsentFactory
+import app.liora.android.sync.DriveConsent
+import app.liora.android.sync.SyncTriggers
+import app.liora.android.sync.WorkSyncScheduler
 import app.liora.android.workout.RestAlarmScheduler
 import app.liora.android.workout.WorkoutNotifications
 import app.liora.android.workout.WorkoutNotifier
 import app.liora.core.data.AppStartup
 import app.liora.core.data.dataModule
+import app.liora.core.data.sync.SyncScheduler
+import app.liora.core.data.sync.SyncStores
 import app.liora.core.database.androidDatabaseModule
 import app.liora.feature.body.bodyModule
 import app.liora.feature.exercises.exercisesModule
@@ -16,11 +22,14 @@ import app.liora.feature.logger.loggerModule
 import app.liora.feature.progress.progressModule
 import app.liora.feature.settings.settingsModule
 import app.liora.feature.train.trainModule
+import app.liora.sync.gdrive.GoogleDriveAccess
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
+import org.koin.dsl.bind
+import org.koin.dsl.module
 
 open class LioraApplication : Application() {
     override fun onCreate() {
@@ -28,7 +37,7 @@ open class LioraApplication : Application() {
         startKoin {
             androidContext(this@LioraApplication)
             modules(
-                databaseModules() +
+                databaseModules() + syncModules() +
                     listOf(
                         appModule,
                         dataModule,
@@ -49,8 +58,19 @@ open class LioraApplication : Application() {
         WorkoutNotifications.createChannels(this)
         get<WorkoutNotifier>().start(processScope)
         get<RestAlarmScheduler>().start(processScope)
+        get<SyncTriggers>().start(processScope)
     }
 
     /** Where the database lives. Tests swap in an in-memory database. */
     protected open fun databaseModules(): List<Module> = listOf(androidDatabaseModule)
+
+    /** Syncing to Google Drive in the background. Tests swap in a store in memory. */
+    protected open fun syncModules(): List<Module> =
+        listOf(
+            module {
+                single<SyncScheduler> { WorkSyncScheduler(androidContext()) }
+                single { GoogleDriveAccess(androidContext()) } bind SyncStores::class
+                single { CloudConsentFactory { activity -> DriveConsent(activity, get()) } }
+            },
+        )
 }

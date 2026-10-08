@@ -4,6 +4,15 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
+- **Google Drive sync: check on the phone** (added 2026-10-08). Tests cover the engine, the Drive layout and
+  the REST calls against a fake Drive; Google's sign-in and the real Drive are only seen on a device.
+  - Settings › Your data › Sync with Google Drive › Connect: Google's consent screen shows, and after it
+    the account's email. "Not synced yet" turns into "Synced today at …" within a minute or so.
+  - In Drive on the web, Settings › Manage apps › Liora shows some hidden app data.
+  - Log a workout, leave the app: it syncs again (the time updates).
+  - On a second install (the debug app is one), connect the same account: everything arrives, photos too.
+  - Disconnect, then connect again; turn the network off and on (a quiet "couldn't be reached" while off).
+
 - **Rest sound: check on the phone** (added 2026-10-03). The sounds were made without listening to
   them, so pick one in Settings › Workout and say if it needs to change (`tools/sound/MakeSounds.java`).
   - Let a rest run out locked, with the phone on vibrate, and with music in headphones. It plays at media
