@@ -56,7 +56,12 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - **Backups:** `BackupRepository` (`core/data/backup`) writes a ZIP of `liora.json` and the photos, and restores by
   merging row by row on HLC, like sync. The JSON format (`BackupFormat.kt`) is public and versioned: new fields
   are optional, and only a breaking change bumps `BackupJson.VERSION`. A new synced table also goes into the
-  backup: `BackupDao`, `BackupFormat.kt`, `BackupRows.kt`, and the snapshot and merge in `BackupRepository`.
+  backup, which is how it syncs too: `BackupDao`, `BackupFormat.kt`, `BackupRows.kt`, the snapshot and merge in
+  `SyncedTables`, and a `pushed…` query in `SyncDao`.
+- **Sync:** `SyncEngine` (`core/data/sync`) pulls other devices' batches through a `SyncBackend`, then pushes
+  this device's. A batch is a backup of the rows changed since the last push (`RowSelection.Changed`), deletions
+  included, and merging one is restoring it, except that pulled rows aren't dirty. The workout in progress
+  never syncs. The clock starts past the newest HLC merged (`NEWEST_MERGED_HLC`), so edits after a restart win.
 - **Imports:** `core/domain/importing` reads Hevy and Strong CSVs and matches their exercise names
   (`ExerciseMatcher`); `ImportRepository` writes them. A name is never merged into a different exercise
   silently: anything not the same words becomes a custom variation. Tests use synthetic files in the real layouts.

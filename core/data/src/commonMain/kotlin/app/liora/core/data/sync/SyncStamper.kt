@@ -25,17 +25,26 @@ class SyncStamper(
         existing.copy(deletedAt = nowMillis(), hlc = hlc.now().encoded, dirty = true)
 
     /**
-     * A row restored from a backup. It keeps the [hlc] it was written with, so it merges like any other
-     * version of the row, and the clock moves past it, so edits made here afterwards still win.
+     * A row from a backup or another device. It keeps the [hlc] it was written with, so it merges like any
+     * other version of the row, and the clock moves past it, so edits made here afterwards still win. It's
+     * [dirty] when the sync store may not have it (a restored backup), not when it came from there.
      */
     suspend fun restored(
         createdAt: Long,
         hlc: String,
+        deletedAt: Long?,
+        dirty: Boolean,
     ): SyncMetadata {
         this.hlc.receive(Hlc.parse(hlc))
-        return SyncMetadata(createdAt = createdAt, hlc = hlc, dirty = true)
+        return SyncMetadata(createdAt = createdAt, hlc = hlc, deletedAt = deletedAt, dirty = dirty)
     }
 }
+
+/**
+ * The `local_meta` key of the newest HLC merged from a backup or another device. The clock starts past
+ * it after a restart (see [HybridLogicalClock]).
+ */
+internal const val NEWEST_MERGED_HLC = "newest_merged_hlc"
 
 /** This installation's stable id, used as the HLC node so concurrent edits from two devices never tie. */
 class DeviceIdentity(

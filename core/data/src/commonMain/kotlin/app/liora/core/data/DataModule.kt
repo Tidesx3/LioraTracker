@@ -1,10 +1,12 @@
 package app.liora.core.data
 
+import app.liora.core.common.Hlc
 import app.liora.core.common.HybridLogicalClock
 import app.liora.core.common.IdGenerator
 import app.liora.core.data.backup.BackupRepository
 import app.liora.core.data.backup.OfflineBackupRepository
 import app.liora.core.data.backup.OfflineWorkoutCsvExport
+import app.liora.core.data.backup.SyncedTables
 import app.liora.core.data.backup.WorkoutCsvExport
 import app.liora.core.data.body.BodyRepository
 import app.liora.core.data.body.OfflineBodyRepository
@@ -23,6 +25,8 @@ import app.liora.core.data.seed.ExerciseCatalogSeeder
 import app.liora.core.data.settings.OfflineSettingsRepository
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.sync.DeviceIdentity
+import app.liora.core.data.sync.NEWEST_MERGED_HLC
+import app.liora.core.data.sync.SyncEngine
 import app.liora.core.data.sync.SyncStamper
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.LocalRestTimerRepository
@@ -31,6 +35,7 @@ import app.liora.core.data.workout.OfflineWorkoutHistoryRepository
 import app.liora.core.data.workout.RestTimerRepository
 import app.liora.core.data.workout.SetLogger
 import app.liora.core.data.workout.WorkoutHistoryRepository
+import app.liora.core.database.dao.LocalMetaDao
 import app.liora.core.database.databaseModule
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -47,7 +52,12 @@ val dataModule =
         single<Clock> { Clock.System }
         single { IdGenerator(clock = get()) }
         singleOf(::DeviceIdentity)
-        single { HybridLogicalClock(clock = get()) { get<DeviceIdentity>().deviceId() } }
+        single {
+            val meta = get<LocalMetaDao>()
+            HybridLogicalClock(clock = get(), seen = { meta.get(NEWEST_MERGED_HLC)?.let(Hlc::parse) }) {
+                get<DeviceIdentity>().deviceId()
+            }
+        }
         singleOf(::SyncStamper)
         singleOf(::ExerciseCatalogSeeder)
         singleOf(::LegacyNotes)
@@ -65,7 +75,9 @@ val dataModule =
         singleOf(::OfflineWorkoutHistoryRepository) bind WorkoutHistoryRepository::class
         singleOf(::OfflineBodyRepository) bind BodyRepository::class
         singleOf(::OfflineProgressPhotoRepository) bind ProgressPhotoRepository::class
+        singleOf(::SyncedTables)
         singleOf(::OfflineBackupRepository) bind BackupRepository::class
+        singleOf(::SyncEngine)
         singleOf(::OfflineWorkoutCsvExport) bind WorkoutCsvExport::class
         singleOf(::OfflineImportRepository) bind ImportRepository::class
         // The workout in progress has one set logger, shared by the logger and the notification.

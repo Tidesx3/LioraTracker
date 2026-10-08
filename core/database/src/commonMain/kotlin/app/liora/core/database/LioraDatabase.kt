@@ -18,6 +18,7 @@ import app.liora.core.database.dao.MeasurementDao
 import app.liora.core.database.dao.PreferenceDao
 import app.liora.core.database.dao.ProgressPhotoDao
 import app.liora.core.database.dao.RoutineDao
+import app.liora.core.database.dao.SyncDao
 import app.liora.core.database.dao.WorkoutDao
 import app.liora.core.database.model.ExerciseEntity
 import app.liora.core.database.model.ExerciseNameEntity
@@ -83,6 +84,8 @@ abstract class LioraDatabase : RoomDatabase() {
     abstract fun gymProfileDao(): GymProfileDao
 
     abstract fun backupDao(): BackupDao
+
+    abstract fun syncDao(): SyncDao
 }
 
 // Room generates the actual implementations for each platform.

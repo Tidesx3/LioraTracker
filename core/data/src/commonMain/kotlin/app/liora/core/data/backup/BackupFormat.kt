@@ -27,6 +27,9 @@ import kotlin.time.Instant
  * Only what the user made is in it: custom exercises (built-ins come with the app), and finished
  * workouts (the one in progress isn't history yet). Device-local state (the rest timer, the gym in
  * use) stays on the device. Optional fields are left out when empty.
+ *
+ * Sync batches are in the same format (see `SyncEngine`): the rows changed since a device last pushed,
+ * each nested under its parents (which come along unchanged), and deletions as rows with a `deletedAt`.
  */
 
 /** A whole backup. */
@@ -63,6 +66,8 @@ class BackupExercise(
     val notes: String? = null,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
+    /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
+    @Serializable(with = IsoMillis::class) val deletedAt: Long? = null,
 )
 
 /** The user's own settings for an exercise, built-in or custom. */
@@ -75,6 +80,8 @@ class BackupExerciseSettings(
     val archived: Boolean = false,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
+    /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
+    @Serializable(with = IsoMillis::class) val deletedAt: Long? = null,
 )
 
 @Serializable
@@ -84,6 +91,8 @@ class BackupRoutineFolder(
     val position: Int,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
+    /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
+    @Serializable(with = IsoMillis::class) val deletedAt: Long? = null,
 )
 
 @Serializable
@@ -95,6 +104,8 @@ class BackupRoutine(
     val position: Int,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
+    /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
+    @Serializable(with = IsoMillis::class) val deletedAt: Long? = null,
     val exercises: List<BackupRoutineExercise> = emptyList(),
 )
 
@@ -108,6 +119,8 @@ class BackupRoutineExercise(
     val notes: String? = null,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
+    /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
+    @Serializable(with = IsoMillis::class) val deletedAt: Long? = null,
     val sets: List<BackupRoutineSet> = emptyList(),
 )
 
@@ -124,6 +137,8 @@ class BackupRoutineSet(
     val targetRpe: Double? = null,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
+    /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
+    @Serializable(with = IsoMillis::class) val deletedAt: Long? = null,
 )
 
 /** A finished workout. */
@@ -138,6 +153,8 @@ class BackupWorkout(
     val bodyweightKg: Double? = null,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
+    /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
+    @Serializable(with = IsoMillis::class) val deletedAt: Long? = null,
     val exercises: List<BackupWorkoutExercise> = emptyList(),
 )
 
@@ -151,6 +168,8 @@ class BackupWorkoutExercise(
     val notes: String? = null,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
+    /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
+    @Serializable(with = IsoMillis::class) val deletedAt: Long? = null,
     val sets: List<BackupWorkoutSet> = emptyList(),
 )
 
@@ -170,6 +189,8 @@ class BackupWorkoutSet(
     val targetRepsMax: Int? = null,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
+    /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
+    @Serializable(with = IsoMillis::class) val deletedAt: Long? = null,
 )
 
 /** A body measurement: kg for bodyweight, percent for body fat, metres for circumferences. */
@@ -181,6 +202,8 @@ class BackupMeasurement(
     val value: Double,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
+    /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
+    @Serializable(with = IsoMillis::class) val deletedAt: Long? = null,
 )
 
 /** A progress photo; [file] is its image in the backup archive, if it's there. */
@@ -194,6 +217,8 @@ class BackupPhoto(
     val notes: String? = null,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
+    /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
+    @Serializable(with = IsoMillis::class) val deletedAt: Long? = null,
 )
 
 /** A gym's equipment, in kilograms; [unit] is what its plates are labelled in. */
@@ -212,6 +237,8 @@ class BackupGym(
     val stackStepKg: Double,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
+    /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
+    @Serializable(with = IsoMillis::class) val deletedAt: Long? = null,
 )
 
 /** One setting, as `SettingsRepository` stores it. */
@@ -221,6 +248,8 @@ class BackupPreference(
     val value: String,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
+    /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
+    @Serializable(with = IsoMillis::class) val deletedAt: Long? = null,
 )
 
 /** The file isn't a backup, or it's damaged. */
@@ -248,7 +277,12 @@ object BackupJson {
             ignoreUnknownKeys = true
         }
 
+    /** Sync batches are read by apps, not people. */
+    private val compactJson = Json(json) { prettyPrint = false }
+
     fun encode(backup: Backup): String = json.encodeToString(backup)
+
+    fun encodeCompact(backup: Backup): String = compactJson.encodeToString(backup)
 
     /**
      * The backup in [text]. Throws [InvalidBackupException] when it isn't one or is damaged, and

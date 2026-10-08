@@ -46,6 +46,26 @@ class HybridLogicalClockTest {
         }
 
     @Test
+    fun aRestartedClockStartsPastWhatItHadSeen() =
+        runTest {
+            val remote = Hlc(millis = wallMillis + 60_000, counter = 3, node = "device-b")
+            val restarted = HybridLogicalClock(clock, seen = { remote }) { "device-a" }
+            val local = restarted.now()
+            assertTrue(local > remote)
+            assertEquals("device-a", local.node)
+        }
+
+    @Test
+    fun receivingAFullCounterMovesToTheNextMillisecond() =
+        runTest {
+            val remote = Hlc(millis = wallMillis + 60_000, counter = 0xFFFF, node = "device-b")
+            hlc.receive(remote)
+            val local = hlc.now()
+            assertTrue(local > remote)
+            assertTrue(local.encoded > remote.encoded)
+        }
+
+    @Test
     fun encodingRoundTripsAndSortsLikeComparison() {
         val stamps =
             listOf(

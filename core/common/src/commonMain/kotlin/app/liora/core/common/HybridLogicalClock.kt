@@ -40,20 +40,32 @@ data class Hlc(
 /**
  * Issues monotonically increasing [Hlc]s for local writes and folds in timestamps seen from other
  * devices, so a local edit made after syncing always wins over what it replaced, even if this
- * device's wall clock is behind.
+ * device's wall clock is behind. [seen] is the newest timestamp received before this process started,
+ * which the clock starts past, so that holds across restarts too.
  */
 class HybridLogicalClock(
     private val clock: Clock = Clock.System,
+    private val seen: suspend () -> Hlc? = { null },
     private val nodeId: suspend () -> String,
 ) {
     private val mutex = Mutex()
     private var last: Hlc? = null
+    private var started = false
+
+    /** The last timestamp issued or received, starting from [seen]. Call with [mutex] held. */
+    private suspend fun last(): Hlc? {
+        if (!started) {
+            started = true
+            last = seen()?.let { Hlc(it.millis, it.counter, nodeId()) }
+        }
+        return last
+    }
 
     suspend fun now(): Hlc =
         mutex.withLock {
-            val node = last?.node ?: nodeId()
+            val previous = last()
+            val node = previous?.node ?: nodeId()
             val wall = clock.now().toEpochMilliseconds()
-            val previous = last
             val next =
                 when {
                     previous == null || wall > previous.millis -> Hlc(wall, 0, node)
@@ -67,8 +79,9 @@ class HybridLogicalClock(
     /** Advances past a timestamp received from another device. */
     suspend fun receive(remote: Hlc) {
         mutex.withLock {
-            val node = last?.node ?: nodeId()
-            val local = last ?: Hlc(0, 0, node)
+            val previous = last()
+            val node = previous?.node ?: nodeId()
+            val local = previous ?: Hlc(0, 0, node)
             val wall = clock.now().toEpochMilliseconds()
             val millis = maxOf(wall, local.millis, remote.millis)
             val counter =
@@ -78,7 +91,8 @@ class HybridLogicalClock(
                     millis == remote.millis -> remote.counter + 1
                     else -> 0
                 }
-            last = Hlc(millis, counter, node)
+            // The counter has four digits in the encoding, so it can't run past them.
+            last = if (counter > Hlc.MAX_COUNTER) Hlc(millis + 1, 0, node) else Hlc(millis, counter, node)
         }
     }
 }

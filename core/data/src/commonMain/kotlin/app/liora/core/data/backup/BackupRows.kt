@@ -42,6 +42,7 @@ internal fun ExerciseEntity.toBackup() =
         notes = notes,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
+        deletedAt = sync.deletedAt,
     )
 
 internal fun BackupExercise.toEntity(sync: SyncMetadata) =
@@ -71,6 +72,7 @@ internal fun ExerciseSettingsEntity.toBackup() =
         archived = archived,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
+        deletedAt = sync.deletedAt,
     )
 
 internal fun BackupExerciseSettings.toEntity(sync: SyncMetadata) =
@@ -84,7 +86,14 @@ internal fun BackupExerciseSettings.toEntity(sync: SyncMetadata) =
     )
 
 internal fun RoutineFolderEntity.toBackup() =
-    BackupRoutineFolder(id = id, name = name, position = position, createdAt = sync.createdAt, hlc = sync.hlc)
+    BackupRoutineFolder(
+        id = id,
+        name = name,
+        position = position,
+        createdAt = sync.createdAt,
+        hlc = sync.hlc,
+        deletedAt = sync.deletedAt,
+    )
 
 internal fun BackupRoutineFolder.toEntity(sync: SyncMetadata) =
     RoutineFolderEntity(id = id, name = name, position = position, sync = sync)
@@ -98,6 +107,7 @@ internal fun RoutineEntity.toBackup(exercises: List<BackupRoutineExercise>) =
         position = position,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
+        deletedAt = sync.deletedAt,
         exercises = exercises,
     )
 
@@ -114,6 +124,7 @@ internal fun RoutineExerciseEntity.toBackup(sets: List<BackupRoutineSet>) =
         notes = notes,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
+        deletedAt = sync.deletedAt,
         sets = sets,
     )
 
@@ -144,6 +155,7 @@ internal fun RoutineSetEntity.toBackup() =
         targetRpe = targetRpe,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
+        deletedAt = sync.deletedAt,
     )
 
 internal fun BackupRoutineSet.toEntity(
@@ -175,6 +187,7 @@ internal fun WorkoutEntity.toBackup(exercises: List<BackupWorkoutExercise>) =
         bodyweightKg = bodyweightKg,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
+        deletedAt = sync.deletedAt,
         exercises = exercises,
     )
 
@@ -200,6 +213,7 @@ internal fun WorkoutExerciseEntity.toBackup(sets: List<BackupWorkoutSet>) =
         notes = notes,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
+        deletedAt = sync.deletedAt,
         sets = sets,
     )
 
@@ -232,6 +246,7 @@ internal fun WorkoutSetEntity.toBackup() =
         targetRepsMax = targetRepsMax,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
+        deletedAt = sync.deletedAt,
     )
 
 internal fun BackupWorkoutSet.toEntity(
@@ -261,6 +276,7 @@ internal fun MeasurementEntity.toBackup() =
         value = value,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
+        deletedAt = sync.deletedAt,
     )
 
 internal fun BackupMeasurement.toEntity(sync: SyncMetadata) =
@@ -277,6 +293,7 @@ internal fun ProgressPhotoEntity.toBackup(file: String?) =
         notes = notes,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
+        deletedAt = sync.deletedAt,
     )
 
 internal fun BackupPhoto.toEntity(
@@ -305,6 +322,7 @@ internal fun GymProfileEntity.toBackup() =
         stackStepKg = stackStepKg,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
+        deletedAt = sync.deletedAt,
     )
 
 internal fun BackupGym.toEntity(sync: SyncMetadata) =
@@ -321,7 +339,13 @@ internal fun BackupGym.toEntity(sync: SyncMetadata) =
     )
 
 internal fun PreferenceEntity.toBackup() =
-    BackupPreference(key = key, value = value, createdAt = sync.createdAt, hlc = sync.hlc)
+    BackupPreference(
+        key = key,
+        value = value,
+        createdAt = sync.createdAt,
+        hlc = sync.hlc,
+        deletedAt = sync.deletedAt,
+    )
 
 internal fun BackupPreference.toEntity(sync: SyncMetadata) = PreferenceEntity(key = key, value = value, sync = sync)
 

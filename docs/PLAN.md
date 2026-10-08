@@ -198,8 +198,22 @@ As of 2026-10-03:
     translated: "Der erste Satz fehlt noch" (Satz as set and sentence), "Bitte recht freundlich" for
     photos, "Zugabe gefällig?" when every set is done, "Kein Drama" for an empty workout. Messages that
     delete, restore or explain stay plain.
-- **Phase 2 is done**, pending the device checks for motion in TODO.md. Phase 3 (Google Drive sync and
-  Health Connect) is next.
+- **Phase 2 is done**, pending the device checks for motion in TODO.md.
+- **Phase 3 (Google Drive sync and Health Connect)** is planned in parts 3a–3c (see the Phase 3 roadmap
+  below). The Google Cloud project is set up (2026-10-08).
+  - **3a (done): the sync engine.** No schema change. A batch is a backup (`BackupFormat.kt`) with an optional
+    `deletedAt` per row. `SyncedTables` (`core/data/backup`) reads the synced tables by `RowSelection` (live for
+    a backup; changed since the last push for a batch, each row with its parents; everything for a new store)
+    and merges a backup back, for restores and pulls alike. `SyncEngine` (`core/data/sync`) pulls first
+    (images before rows, then the rows and the new cursor in one transaction, not dirty), then pushes the dirty
+    rows as one batch with the images of the photos in it, then clears `dirty` through `SyncDao` where the HLC
+    hasn't moved. `startOver()` makes the next sync pull from the start and push everything. Photos' images
+    are blobs named by the photo's id, fetched only when the image isn't here; a photo deleted elsewhere
+    loses its image here. The clock starts past `NEWEST_MERGED_HLC` after a restart, and `receive` no
+    longer lets the counter overflow its four digits. `SyncEngineTest` runs two phones against an
+    in-memory store; the phone helpers moved to `TestPhone.kt`.
+- **Release builds** (2026-10-08, `05d7ba2`): signed with a local key named in the gitignored
+  `keystore.properties` (README › Release builds), smoke-tested with R8. Judge speed on them, not on debug.
 - **After the first real workout (2026-10-03):** fixes from logging one on the phone. No schema change.
   - Done sets turn emerald (`LioraColors.completed`, #0E9F6E in light, #34D399 with a dark tick in dark),
     so done reads apart from the violet that marks what's next.
@@ -528,10 +542,55 @@ the app gets its character before sync, the server and the web GUI build on it.
 
 ### Phase 3: Sync and integrations
 - `sync/gdrive` backend and the sync settings screen (connect, last sync, sync now).
-  - One-time setup on your side: a Google Cloud project with an Android OAuth client (debug + release SHA-1). Testing mode is enough for personal use.
+  - One-time setup on your side: a Google Cloud project with the Drive API, a consent screen published to
+    production (`drive.appdata` is non-sensitive, so there's no review; in testing mode access expires after
+    7 days), and an Android OAuth client per build: `app.liora` with the release SHA-1, `app.liora.debug`
+    with the debug SHA-1. The app holds no client id: Google matches the package and signing key.
 - Health Connect:
   - Writes a finished workout as an `ExerciseSessionRecord` (strength training).
   - Reads `WeightRecord` and `BodyFatRecord` into Body.
+
+**How it runs** (planned 2026-10-08):
+- **One format for backups and sync.** A sync batch is a backup (`BackupFormat.kt`) holding the rows changed
+  since the last push, each with its parents so it nests the same way, and deletions as rows with a
+  `deletedAt` (a new optional field, so format version 1 stays). Restoring a backup and merging a batch are
+  the same merge: per row, the newer HLC wins. A synced table that goes into backups syncs with them.
+- **What syncs** is what a backup holds, plus deletions. The workout in progress stays on its device until
+  it's finished, and so does device state in `local_meta` (the rest timer, the gym in use).
+- **A sync** (`SyncEngine` in `core/data/sync`, one at a time):
+  - Pull first: other devices' batches since the cursor, merged in one transaction that also stores the new
+    cursor, with photos' images fetched before. Rows that arrive this way aren't dirty: the store has them.
+  - Then push this device's dirty rows as one batch, uploading the images of photos it hasn't sent yet.
+  - Then clear `dirty` on the rows pushed, unless they changed meanwhile (their HLC moved on).
+- **The clock survives restarts.** The highest HLC merged from elsewhere is kept in `local_meta`, and the
+  clock starts past it, so an edit made after a restart beats the version it replaces even when this
+  phone's clock is behind.
+- **`SyncBackend`** (`core/data/sync`): push a batch, pull batches since a cursor, put and get blobs. The
+  cursor belongs to the backend (Drive's per-device sequence numbers; the server's sequence in Phase 4).
+- **Google Drive** (`sync/gdrive`, Android):
+  - The app data folder: hidden from the user's Drive, counted against their quota.
+  - `AuthorizationClient` for the `drive.appdata` scope, and REST v3 through the Ktor client.
+  - Files: `changes-<deviceId>-<seq>.json.gz`, each written only by its device, so there is no contention;
+    the photos as `blob-<photoId>.jpg`.
+  - Compaction: a device with more than 100 batches writes everything it has (deletions too) as
+    `snapshot-<deviceId>-<seq>.json.gz` and deletes its batches up to there. A device whose cursor is behind
+    reads the snapshot instead; merging the same rows twice changes nothing.
+- **When:** WorkManager, with network: after a workout finishes, when Liora goes to the background with
+  changes not yet synced, twice a day, and on "Sync now". Failures retry with backoff; nothing waits on sync.
+- **Settings › Sync:** connect Google Drive (consent once), the account, when it last synced (or what went
+  wrong), Sync now, and Disconnect (stops syncing and revokes access; the data stays here and in Drive).
+  Connecting marks every row dirty and resets the cursor, so a new store gets everything.
+- **Health Connect** (`integration/healthconnect`, Android): Settings › Health Connect asks for its
+  permissions. Finished workouts are written as `ExerciseSessionRecord`s (strength training: name, start, end,
+  notes), keyed by the workout's id (`clientRecordId`), so an edit replaces one and a deletion removes it.
+  Weight and body fat are read into Body, one value per type and day, Liora's own entries winning; records
+  Liora wrote itself are skipped.
+- **Parts:**
+  - **3a, the sync engine:** `deletedAt` in the format, choosing a batch's rows, the shared merge, the
+    persisted clock, `SyncEngine` and `SyncBackend` with photos' images, tested with two phones and an
+    in-memory backend. Needs no Google setup.
+  - **3b, Google Drive:** sign-in, the Drive backend with compaction, WorkManager, Settings › Sync.
+  - **3c, Health Connect.**
 
 ### Phase 4: Self-hosted server
 - `server/`: Ktor, PostgreSQL, Exposed, Flyway, Argon2 passwords, JWT access tokens plus refresh tokens per device.

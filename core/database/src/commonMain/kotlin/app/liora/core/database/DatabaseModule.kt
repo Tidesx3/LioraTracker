@@ -21,4 +21,5 @@ val databaseModule =
         single { get<LioraDatabase>().preferenceDao() }
         single { get<LioraDatabase>().gymProfileDao() }
         single { get<LioraDatabase>().backupDao() }
+        single { get<LioraDatabase>().syncDao() }
     }
