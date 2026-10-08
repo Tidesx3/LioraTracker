@@ -1,5 +1,6 @@
 package app.liora.android
 
+import android.os.Bundle
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
@@ -152,6 +153,31 @@ class BodyPhotosFlowTest {
         composeRule.onNodeWithContentDescription("Vergleichen").performClick()
         waitForText("8 Wochen dazwischen · −2,5 kg")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/de_body_compare_dark.png")
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun theGalleryIsStillThereAfterAndroidEndsLiora() {
+        val first = Robolectric.buildActivity(MainActivity::class.java).setup()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Progress").performClick()
+        waitForText("Body")
+        composeRule.onNodeWithText("Body").performClick()
+        waitForText("Progress photos")
+        composeRule.onNodeWithText("Progress photos").performClick()
+        waitForPhotos(7)
+
+        // What Android keeps when it ends the process while the camera app is open; the view models go.
+        val saved = Bundle()
+        first
+            .saveInstanceState(saved)
+            .pause()
+            .stop()
+            .destroy()
+        Robolectric.buildActivity(MainActivity::class.java).setup(saved)
+
+        // Back in the gallery, where the camera's photo is going.
+        waitForPhotos(7)
     }
 
     private fun openBody(

@@ -36,10 +36,6 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
   gotcha in CLAUDE.md); saving itself is covered in `core:data`.
 - **Editing a past workout: check the start and end time pickers on a device.** UI tests drive the date
   picker only. The time math is covered in `core:domain` (`WorkoutTimesTest`), the writes in `core:data`.
-- **A photo taken while Android kills Liora is lost.** Opening the camera puts Liora in the background,
-  and on a phone short of memory Android may end the process. The back stack isn't restored after that,
-  so the gallery that asked for the photo isn't there to receive it. Saving the navigator's back stack
-  (it's serializable route keys) would fix this, and other screens too.
 - **Backups: check on a device.** Save one to Google Drive and to the phone, restore it after a reinstall,
   and time it with a real photo library. Tests cover the format, the merge and the ZIP through `file://`
   locations; real document providers (Drive in particular, and its handling of the `"wt"` write mode)

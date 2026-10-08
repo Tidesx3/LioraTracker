@@ -23,8 +23,10 @@ class Navigator(
         require(startRoute in topLevelRoutes) { "startRoute must be a top-level route" }
     }
 
+    private val tabs = topLevelRoutes.toList()
+
     private val stacks: Map<NavKey, SnapshotStateList<NavKey>> =
-        topLevelRoutes.associateWith { mutableStateListOf(it) }
+        tabs.associateWith { mutableStateListOf(it) }
 
     var topLevelRoute: NavKey by mutableStateOf(startRoute)
         private set
@@ -101,6 +103,25 @@ class Navigator(
         val index = stack.lastIndexOf(route)
         lastMove = NavigationMove.Back
         if (index > 0) stack.removeRange(index, stack.size) else goBack()
+    }
+
+    /** The current tab, by its place among the tabs, and every tab's stack: what `save()` writes down. */
+    internal fun snapshot(): Pair<Int, List<List<NavKey>>> =
+        tabs.indexOf(topLevelRoute) to tabs.map { stacks.getValue(it).toList() }
+
+    /** Puts back a [snapshot]; one for other tabs than these is left alone. */
+    internal fun restore(
+        topLevel: Int,
+        saved: List<List<NavKey>>,
+    ) {
+        if (saved.size != tabs.size || topLevel !in tabs.indices) return
+        if (saved.withIndex().any { (index, stack) -> stack.firstOrNull() != tabs[index] }) return
+        tabs.forEachIndexed { index, tab ->
+            val stack = stacks.getValue(tab)
+            stack.clear()
+            stack.addAll(saved[index])
+        }
+        topLevelRoute = tabs[topLevel]
     }
 
     fun goBack() {

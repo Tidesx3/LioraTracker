@@ -7,6 +7,34 @@ class NavigatorTest {
     private val navigator = Navigator(startRoute = TrainRoute, topLevelRoutes = setOf(TrainRoute, ExercisesRoute))
 
     @Test
+    fun theStacksComeBackAfterTheProcessEnds() {
+        navigator.navigate(BodyRoute)
+        navigator.navigate(ProgressPhotosRoute)
+        navigator.selectTopLevel(ExercisesRoute)
+        navigator.navigate(ExercisePickerRoute(requestKey = "add", multiple = true))
+        navigator.selectTopLevel(TrainRoute)
+
+        val saved = checkNotNull(navigator.save())
+        val restored = Navigator(startRoute = TrainRoute, topLevelRoutes = setOf(TrainRoute, ExercisesRoute))
+        restored.restore(saved)
+
+        assertEquals(navigator.backStack, restored.backStack)
+        restored.selectTopLevel(ExercisesRoute)
+        assertEquals(ExercisePickerRoute(requestKey = "add", multiple = true), restored.currentRoute)
+    }
+
+    @Test
+    fun aSavedStackForOtherTabsIsLeftAlone() {
+        val other = Navigator(startRoute = TrainRoute, topLevelRoutes = setOf(TrainRoute, HistoryRoute))
+        other.navigate(SettingsRoute)
+
+        navigator.restore(checkNotNull(other.save()))
+        navigator.restore("not a navigator")
+
+        assertEquals(listOf(TrainRoute), navigator.backStack)
+    }
+
+    @Test
     fun openingFromAListReplacesWhatItOpenedBefore() {
         navigator.selectTopLevel(ExercisesRoute)
         navigator.openFromList(ExercisesRoute, ExerciseDetailRoute("bench"))
