@@ -38,16 +38,10 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
     can't skip recomposition. A Compose stability config for `app.liora.core.model` may fix that.
     `ExerciseThumbnail` moved from the exercises feature to `core:ui` in `deca2e8`.
   - The lazy list: stable keys and a `contentType` for rows versus headers.
-- **Workout notification: the header countdown runs 1–2 s behind the title.** Android ticks the header
-  itself and rounds down; the title ("Rest 1:23") rounds up and updates twice a second. Make them agree,
-  or drop the time from the title.
 - **Save as routine: check the name dialog on a device.** UI tests can't drive it (see the Robolectric
   gotcha in CLAUDE.md); saving itself is covered in `core:data`.
 - **Editing a past workout: check the start and end time pickers on a device.** UI tests drive the date
   picker only. The time math is covered in `core:domain` (`WorkoutTimesTest`), the writes in `core:data`.
-- **Exercise library: the "New custom exercise" button has no accessible name.** Material's
-  `ExtendedFloatingActionButton` clears its text's semantics, so TalkBack announces only "Button". Body's
-  button sets a content description to fix this (`BodyScreen`); do the same here.
 - **A photo taken while Android kills Liora is lost.** Opening the camera puts Liora in the background,
   and on a phone short of memory Android may end the process. The back stack isn't restored after that,
   so the gallery that asked for the photo isn't there to receive it. Saving the navigator's back stack

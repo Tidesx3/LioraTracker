@@ -39,6 +39,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.EmptyState
@@ -142,10 +144,13 @@ private fun ExerciseLibraryContent(
             )
         },
         floatingActionButton = {
+            val label = stringResource(Res.string.exercises_new_custom)
             ExtendedFloatingActionButton(
                 onClick = { actions.onCreateExercise(null) },
                 icon = { Icon(painterResource(LioraIcons.Add), contentDescription = null) },
-                text = { Text(stringResource(Res.string.exercises_new_custom)) },
+                text = { Text(label) },
+                // Material clears the text's semantics, which would leave the button unnamed.
+                modifier = Modifier.semantics { contentDescription = label },
             )
         },
     ) { padding ->
