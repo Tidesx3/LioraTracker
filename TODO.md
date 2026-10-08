@@ -58,8 +58,9 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
   or Strong"; a sample would tell which names to add (`StrongCsv`).
 - **Violet: check on the phone.** The workout notification's tint in light and dark, the rest pill's
   outline counting down, the floating tabs over long lists, and Sora's numbers on the cover screen.
-- **Logger in pounds: the "Previous" column cuts off** converted weights such as "176.37 lb × 10". Round
-  converted values for display, or give the column more room.
+- **Logger: a record's trophy squeezes the "Previous" column** on the cover screen with the RPE column on
+  ("176.4 lb …"). Weights in pounds now show to the tenth, which fits every other row; the trophy could sit
+  over the set number instead.
 - **Motion (Phase 2c): check on the phone.** Only the device tells whether it feels good:
   - Tick a few sets quickly on the cover screen: the check's pop and the row's fill never hold up the
     next tap, and the haptic tick lands with the tap rather than after it.

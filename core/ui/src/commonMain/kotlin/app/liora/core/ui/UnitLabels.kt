@@ -24,14 +24,15 @@ val TrackingType.longDistance: Boolean get() = this == TrackingType.DistanceDura
 fun Units.distanceFor(trackingType: TrackingType): LengthUnit =
     if (trackingType.longDistance) distance.long else distance.short
 
-/** A weight in the chosen unit, the way the locale writes it: "82,5 kg", "180 lb". */
+/** A weight in the chosen unit, the way the locale writes it, as finely as the unit goes: "82,5 kg", "176.4 lb". */
 @Composable
 fun weightText(
     weight: Mass,
     maxFractionDigits: Int = 2,
 ): String {
     val unit = LocalUnits.current.weight
-    return "${rememberNumberFormatter().format(weight.inUnit(unit), maxFractionDigits)} ${unit.symbol}"
+    val digits = minOf(maxFractionDigits, unit.fractionDigits)
+    return "${rememberNumberFormatter().format(weight.inUnit(unit), digits)} ${unit.symbol}"
 }
 
 /** Volume lifted, to the whole kilo or pound: "12.345 kg". */

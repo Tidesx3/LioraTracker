@@ -173,7 +173,7 @@ class RoutinesFlowTest {
         waitForText(PPL)
         composeRule.onNodeWithText("Push").performClick()
         waitForText("Start workout")
-        composeRule.onAllNodesWithText("176.37 lb × 8–12").assertCountEquals(3)
+        composeRule.onAllNodesWithText("176.4 lb × 8–12").assertCountEquals(3)
 
         composeRule.onNodeWithContentDescription("Edit").performClick()
         waitForText("Edit routine")

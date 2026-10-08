@@ -362,7 +362,7 @@ internal fun valueText(
     numbers: NumberFormatter,
 ): String? =
     when (field) {
-        SetField.Weight -> set.weight?.let { numbers.format(it.inUnit(units.weight)) }
+        SetField.Weight -> set.weight?.let { numbers.format(it.inUnit(units.weight), units.weight.fractionDigits) }
         SetField.Reps -> set.reps?.let { numbers.format(it) }
         SetField.Distance -> set.distanceMeters?.let { numbers.format(units.distanceFor(trackingType).fromMeters(it)) }
         SetField.Duration -> set.duration?.formatAsClock()

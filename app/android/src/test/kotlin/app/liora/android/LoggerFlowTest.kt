@@ -294,10 +294,11 @@ class LoggerFlowTest {
         waitForText("Start")
         composeRule.onNodeWithText("Start").performClick()
         waitForText("Finish")
-        // Last time's 80 kg, in pounds; the RPE column is empty, never filled in from last time.
+        // Last time's 80 kg, in pounds to the tenth, so the column has room for it; the RPE column is
+        // empty, never filled in from last time.
         composeRule.onNodeWithText("lb").assertIsDisplayed()
         composeRule.onNodeWithText("RPE").assertIsDisplayed()
-        composeRule.onAllNodesWithText("176.37 lb × 10").assertCountEquals(3)
+        composeRule.onAllNodesWithText("176.4 lb × 10").assertCountEquals(3)
 
         // 185 lb for 8 at RPE 8.5: typed in pounds, stored in kilograms.
         composeRule.onAllNodesWithTag(LoggerTags.CELL)[0].performClick()
