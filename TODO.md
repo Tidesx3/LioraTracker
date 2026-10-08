@@ -27,17 +27,11 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 - **Notes: check typing on the cover screen.** Add an exercise note and a note for the workout from the
   card's menu: the keyboard comes up, the number pad goes away, and the note stays above the keyboard.
 
-- **Exercise picker: fast scrolling stutters, and photos seem to load again** (reported 2026-09-30 on
-  the Fold 7). Scrolling the list of exercises quickly, e.g. when adding one to a workout, isn't smooth
-  any more. Thumbnails look like they're loaded again each time a row comes back into view. Places to
-  look:
-  - Measure first: recomposition counts in the Layout Inspector, and a trace of a fast fling.
-  - Photos: whether Coil's memory cache hits when rows scroll back (the app uses Coil's default
-    loader), and whether thumbnails decode at their small size or at the photo's full size.
-  - Stability: `Exercise` comes from `core:model`, which has no Compose compiler, so rows that take one
-    can't skip recomposition. A Compose stability config for `app.liora.core.model` may fix that.
-    `ExerciseThumbnail` moved from the exercises feature to `core:ui` in `deca2e8`.
-  - The lazy list: stable keys and a `contentType` for rows versus headers.
+- **Exercise picker: check fast scrolling on the phone** (reported 2026-09-30, fixed 2026-10-08 without a
+  trace). Thumbnails asked Coil for a size only after layout, so a row scrolling back showed its initial
+  for a frame before the photo, and photos decoded larger than needed. They now ask for their own pixel
+  size (`ExerciseThumbnail`): cached photos show at once and many more fit. If flinging still stutters,
+  take a trace of a fast fling and count recompositions in the Layout Inspector.
 - **Save as routine: check the name dialog on a device.** UI tests can't drive it (see the Robolectric
   gotcha in CLAUDE.md); saving itself is covered in `core:data`.
 - **Editing a past workout: check the start and end time pickers on a device.** UI tests drive the date

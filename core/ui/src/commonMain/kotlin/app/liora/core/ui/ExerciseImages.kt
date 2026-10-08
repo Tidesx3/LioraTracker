@@ -16,9 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import app.liora.core.model.Exercise
 import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
 
 /**
  * The exercise's photo, or its initial on a tonal tile when there is none (custom exercises, or no
@@ -45,8 +48,21 @@ fun ExerciseThumbnail(
             color = MaterialTheme.colorScheme.primary,
         )
         exercise.imageUrls.firstOrNull()?.let { url ->
+            // A fixed size lets Coil look in its memory cache before the first frame, so a row scrolling
+            // back into view shows its photo at once rather than its initial first; and it decodes the
+            // photo at thumbnail size, so many more fit in that cache.
+            val context = LocalPlatformContext.current
+            val pixels = with(LocalDensity.current) { size.roundToPx() }
+            val request =
+                remember(url, pixels) {
+                    ImageRequest
+                        .Builder(context)
+                        .data(url)
+                        .size(pixels)
+                        .build()
+                }
             AsyncImage(
-                model = url,
+                model = request,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize(),
