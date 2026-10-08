@@ -158,7 +158,10 @@ class WorkoutNotifier(
             builder
                 .setContentTitle(context.getString(R.string.notif_rest_remaining, rest.remainingClock(clock.now())))
                 .setContentText(next?.let { context.getString(R.string.notif_next, text.describe(it)) })
-                .setWhen(rest.endsAt.toEpochMilliseconds())
+                // Android's countdown in the header (and the Live Update chip) rounds the time left down,
+                // the title and the logger round it up: ending it just under a second later makes it read
+                // the same, flipping on the same whole seconds.
+                .setWhen(rest.endsAt.toEpochMilliseconds() + COUNTDOWN_ROUNDING_MS)
                 .setChronometerCountDown(true)
                 .setStyle(restProgress(rest))
                 .addAction(
@@ -228,5 +231,8 @@ class WorkoutNotifier(
          * leaving a rest on screen that was long over.
          */
         val MIN_POST_GAP = 500.milliseconds
+
+        /** Just under a second: rounding down then gives what rounding up gave. */
+        const val COUNTDOWN_ROUNDING_MS = 999L
     }
 }

@@ -101,6 +101,9 @@ class WorkoutNotificationTest {
         val timer = runBlocking { koin.get<RestTimerRepository>().current() }!!
         assertEquals(90.seconds, timer.total)
         awaitAlarmAt(timer.endsAt.toEpochMilliseconds())
+        // The header's countdown rounds down, the title up: its end is set just under a second later so
+        // both read the same.
+        assertEquals(timer.endsAt.toEpochMilliseconds() + 999, resting.`when`)
 
         // +15 s and −15 s move the end of the rest, and the alarm with it.
         resting.actions[1].actionIntent.send()
