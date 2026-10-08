@@ -5,7 +5,7 @@ Check it when a milestone or phase starts, and keep **Progress** below current w
 
 ## Progress
 
-As of 2026-10-03:
+As of 2026-10-09:
 
 - **Phase 0** is done.
 - **Phase 1**, milestones 1–5 are done: database and seed, domain, exercises and foldables, routines, and the logger
@@ -260,6 +260,17 @@ As of 2026-10-03:
       off, after asking. Tests use `TestHealthStore`.
     - Progress: the Body card moved up, under the monthly report (on request).
   - **3d, first launch,** is next.
+- **Fixes from TODO.md (2026-10-08/09),** each committed on its own:
+  - The rest countdown in the notification header agrees with the title (it ended a second early on
+    purpose: Android rounds down, the title rounds up).
+  - Weights in pounds show to the tenth (`WeightUnit.fractionDigits`), and a record's trophy sits on the set
+    number's corner, so the logger's Previous column fits on the cover screen.
+  - Exercise thumbnails ask Coil for their pixel size, so cached photos show at once when a row scrolls back.
+  - The navigator's back stack is saved with the activity (`SavedNavigation.kt`), so screens survive Android
+    ending the process; a progress photo taken with the camera app meanwhile is no longer lost.
+  - The custom exercise button has an accessible name.
+  - The Robolectric dialog problem is narrowed down (a layout loop, see TODO.md), not solved.
+- **Next:** 3d, the first-launch walkthrough; then Phase 4.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.
