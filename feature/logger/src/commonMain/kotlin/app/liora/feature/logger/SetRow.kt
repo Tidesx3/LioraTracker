@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -229,8 +230,20 @@ internal fun SetRow(
             Box {
                 SetTypeMenu(set.type, state.number, onPick = { actions.onTypeChange(set.id, it) })
                 if (state.isCurrent && !set.isCompleted) CurrentMarker(Modifier.align(Alignment.CenterStart))
+                // On the set number's corner, so last time's values keep their room.
+                if (state.hints.isRecord) {
+                    RecordMark(
+                        celebrate = !wasRecord,
+                        seed = state.number,
+                        modifier =
+                            Modifier
+                                .align(
+                                    Alignment.TopEnd,
+                                ).offset(x = RecordOffset, y = -RecordOffset)
+                                .zIndex(1f),
+                    )
+                }
             }
-            if (state.hints.isRecord) RecordMark(celebrate = !wasRecord, seed = state.number, Modifier.zIndex(1f))
             Text(
                 text = previousText(state, numbers),
                 style = MaterialTheme.typography.bodyMedium.tabularNumbers(),
@@ -394,6 +407,9 @@ internal val RowHeight = 52.dp
 internal val RowPadding = 12.dp
 private val CellHeight = 40.dp
 private val CellGap = 6.dp
+
+/** How far a record's trophy sits out from the set number's corner. */
+private val RecordOffset = 6.dp
 private val BadgeWidth = 32.dp
 internal val CheckSize = 40.dp
 private const val COMPLETED_ALPHA = 0.14f
