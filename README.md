@@ -53,6 +53,32 @@ Requirements: JDK 21 and the Android SDK (platform 37). Android Studio provides 
 ./gradlew :app:android:recordRoborazziDebug   # refresh UI screenshots in app/android/src/test/screenshots
 ```
 
+### Release builds
+
+Debug builds are much slower than what you'd ship: the code isn't optimized or precompiled. Judge speed on a
+release build. It installs as its own app (`app.liora`, debug is `app.liora.debug`) with its own data; move
+workouts over with Settings › Back up and Restore.
+
+Release builds are signed with the key named in `keystore.properties` at the repo root (gitignored). Without
+that file they come out unsigned and won't install. To set one up:
+
+```sh
+keytool -genkeypair -keystore ~/.liora/liora-release.jks -alias liora -keyalg RSA -keysize 4096 -validity 10000
+```
+
+```properties
+storeFile=C:/Users/you/.liora/liora-release.jks
+storePassword=...
+keyAlias=liora
+keyPassword=...
+```
+
+Keep a copy of both files somewhere safe: a release build can only be updated with the key it was signed with.
+
+```sh
+./gradlew :app:android:installRelease
+```
+
 ## Layout
 
 ```

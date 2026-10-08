@@ -16,6 +16,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - `./gradlew check`: all tests plus Spotless, detekt and Android Lint. Run it before committing.
 - `./gradlew spotlessApply`: formats code (ktlint_official style plus compose-rules).
 - `./gradlew :app:android:assembleDebug` or `installDebug`.
+- `./gradlew :app:android:installRelease`: R8-shrunk and signed with the key in the gitignored `keystore.properties` (README › Release builds); unsigned without it. Judge speed on this build, never on debug.
 - `./gradlew :app:android:recordRoborazziDebug`: re-renders screenshots to `app/android/src/test/screenshots/`. Read the PNGs to review UI changes.
 - `java tools/icons/MakeIcons.java logo.png app/android/src/main/res build/icon-preview.png`: rebuilds the launcher and notification icons from `logo.png` (light artwork on black) and writes a preview sheet to check them by eye.
 - `java tools/sound/MakeSounds.java app/android/src/main/res/raw build/sound-preview.png`: rebuilds the end-of-rest sounds (synthesized, no samples) and writes their waveforms to check for clipping and clicks.

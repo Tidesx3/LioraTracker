@@ -1,7 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.liora.android.application)
     alias(libs.plugins.roborazzi)
 }
+
+// Release signing comes from keystore.properties at the repo root (gitignored, see README).
+// Without it, release builds come out unsigned, as on CI.
+val releaseSigning =
+    providers
+        .fileContents(rootProject.layout.projectDirectory.file("keystore.properties"))
+        .asText
+        .map { text -> Properties().apply { load(text.reader()) } }
+        .orNull
 
 android {
     namespace = "app.liora.android"
@@ -12,12 +23,24 @@ android {
         versionName = "0.1.0"
     }
 
+    signingConfigs {
+        if (releaseSigning != null) {
+            create("release") {
+                storeFile = rootProject.file(releaseSigning.getProperty("storeFile"))
+                storePassword = releaseSigning.getProperty("storePassword")
+                keyAlias = releaseSigning.getProperty("keyAlias")
+                keyPassword = releaseSigning.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
         }
         release {
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
