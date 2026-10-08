@@ -251,6 +251,8 @@ class HistoryFlowTest {
     fun innerScreen_correctingAWorkoutTakesTheWholeWindow() {
         openHistory()
         waitForText("Pick a workout")
+        // The placeholder shows at once; the list follows once Room has it.
+        waitForText("Push")
         composeRule.onAllNodesWithText("Push").onFirst().performClick()
         waitForText("Repeat workout")
         composeRule.onNodeWithContentDescription("Edit workout").performClick()
@@ -276,6 +278,8 @@ class HistoryFlowTest {
     fun innerScreen_listBesideTheOpenWorkout() {
         openHistory()
         waitForText("Pick a workout")
+        // The placeholder shows at once; the list follows once Room has it.
+        waitForText("Push")
         composeRule.onAllNodesWithText("Push").onFirst().performClick()
         waitForText("Repeat workout")
         // Both panes: the list stays, the open workout is highlighted, and nothing needs a back arrow.
