@@ -71,4 +71,10 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
   - Unfold and fold on a detail screen and in the logger: a crossfade, with the place kept. On the inner
     screen, open a few items from a list: each arrives in the detail pane.
 - **Robolectric: a text field in a dialog never lets Compose go idle.** Find the cause, so the rename
-  and save-as-routine dialogs can get UI tests.
+  and save-as-routine dialogs can get UI tests. Narrowed down on 2026-10-08:
+  - It isn't idling that's stuck but a layout loop: with the logger's rename dialog open, every
+    Choreographer frame runs another traversal of the dialog window (`DecorView.onMeasure` → the
+    AlertDialog's content), so Espresso's drain of the main looper never ends.
+  - An AlertDialog with an OutlinedTextField on its own goes idle, also in an edge-to-edge activity with
+    `adjustResize`. So something on Liora's screens behind it sets it off; next suspects are the logger's
+    keyboard and number pad handling (insets, focus) and the duration that ticks every second.
