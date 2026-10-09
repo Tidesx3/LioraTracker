@@ -52,9 +52,8 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * A newer Liora and getting it: what's new in it, Update, then the download, the install, or why it
- * didn't go through. Nothing for a state without a newer release. The Train tab shows it with Not now
- * ([onDismiss]); Settings shows it without.
+ * A newer Liora and getting it, on a card of its own, as the Train tab shows it: "Liora 0.5.0 is here",
+ * then [UpdateDetails] with Not now ([onDismiss]). Nothing for a state without a newer release.
  */
 @Composable
 fun UpdateCard(
@@ -65,8 +64,6 @@ fun UpdateCard(
     onDismiss: (() -> Unit)? = null,
 ) {
     val release = state.release ?: return
-    val language = currentLanguage()
-    val notes = remember(release.notes, language) { ReleaseNotes.forLanguage(release.notes, language) }
     LioraCard(modifier.fillMaxWidth()) {
         Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -82,14 +79,35 @@ fun UpdateCard(
                     style = MaterialTheme.typography.titleMedium,
                 )
             }
-            if (notes.isNotEmpty()) {
-                Spacer(Modifier.height(8.dp))
-                Notes(notes)
-            }
             Spacer(Modifier.height(8.dp))
-            Progress(state)
-            Actions(state, onUpdate, onInstall, onDismiss)
+            UpdateDetails(state, onUpdate, onInstall, onDismiss = onDismiss)
         }
+    }
+}
+
+/**
+ * What's new in a newer Liora, Update, then the download, the install, or why it didn't go through:
+ * without a card or a title, for a place that already says which version is out, such as Settings ›
+ * About Liora. Nothing for a state without a newer release.
+ */
+@Composable
+fun UpdateDetails(
+    state: UpdateState,
+    onUpdate: () -> Unit,
+    onInstall: () -> Unit,
+    modifier: Modifier = Modifier,
+    onDismiss: (() -> Unit)? = null,
+) {
+    val release = state.release ?: return
+    val language = currentLanguage()
+    val notes = remember(release.notes, language) { ReleaseNotes.forLanguage(release.notes, language) }
+    Column(modifier) {
+        if (notes.isNotEmpty()) {
+            Notes(notes)
+            Spacer(Modifier.height(8.dp))
+        }
+        Progress(state)
+        Actions(state, onUpdate, onInstall, onDismiss)
     }
 }
 
@@ -166,7 +184,7 @@ private fun Actions(
             else -> return
         }
     Row(
-        Modifier.fillMaxWidth().padding(top = 8.dp),
+        Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
         verticalAlignment = Alignment.CenterVertically,
     ) {

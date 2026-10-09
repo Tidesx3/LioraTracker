@@ -82,9 +82,12 @@ class UpdateFlowTest {
         composeRule.onNodeWithText("Not now").performClick()
         composeRule.waitUntil(TIMEOUT_MS) { !nodeExists(hasText("Liora 0.5.0 is here")) }
 
+        // In About Liora: what's new under the version that says it's out, and Update.
         openAbout()
         waitForText("Version 0.5.0 is out")
-        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Liora 0.5.0 is here"))
+        waitForText("Rotations take turns", substring = true)
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("How Liora works"))
+        composeRule.onNodeWithText("Update").assertExists()
         composeRule.onRoot().captureRoboImage("src/test/screenshots/settings_update_dark.png")
     }
 

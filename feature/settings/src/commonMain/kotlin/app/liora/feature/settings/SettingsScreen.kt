@@ -53,7 +53,7 @@ import app.liora.core.model.WeightUnit
 import app.liora.core.ui.AppLanguage
 import app.liora.core.ui.AppLanguages
 import app.liora.core.ui.RestTimePicker
-import app.liora.core.ui.UpdateCard
+import app.liora.core.ui.UpdateDetails
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.rememberAppLanguage
 import app.liora.core.ui.rememberFileOpener
@@ -347,15 +347,15 @@ private fun SettingsContent(
                 )
             }
             item(key = "about") {
-                // A newer Liora, where it's said what's new in it.
-                UpdateCard(
-                    state = updates.update,
-                    onUpdate = updatesActions.onUpdate,
-                    onInstall = updatesActions.onInstall,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                )
                 SettingsGroup(stringResource(Res.string.section_about)) {
                     VersionRow(updates, onCheck = updatesActions.onCheck)
+                    // A newer Liora: what's new in it, right under the version that says it's out.
+                    UpdateDetails(
+                        state = updates.update,
+                        onUpdate = updatesActions.onUpdate,
+                        onInstall = updatesActions.onInstall,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                    )
                     AutoCheckRow(updates, onAutoCheck = updatesActions.onAutoCheck)
                     SettingRow(
                         stringResource(Res.string.walkthrough_title),
