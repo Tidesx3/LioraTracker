@@ -259,7 +259,8 @@ As of 2026-10-09:
       store page), an invitation to set it up, or what goes out and comes in, with its settings and Turn
       off, after asking. Tests use `TestHealthStore`.
     - Progress: the Body card moved up, under the monthly report (on request).
-  - **3d (done, pending the device check in TODO.md): first launch.** No schema change. A walkthrough of five
+  - **3d (done, checked on the phone from Settings; a fresh install's first start is in TODO.md): first
+    launch.** No schema change. A walkthrough of five
     pages in place of the tabs, once per phone (`WalkthroughRepository`, `feature/walkthrough`): Welcome with
     kilograms or pounds, routines, logging with a demo set to tick off (the check and row fill now live in
     `designsystem/motion`), progress, and Google Drive sync with a way into the Hevy and Strong import.
