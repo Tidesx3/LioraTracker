@@ -277,7 +277,7 @@ As of 2026-10-09:
     ending the process; a progress photo taken with the camera app meanwhile is no longer lost.
   - The custom exercise button has an accessible name.
   - The Robolectric dialog problem is narrowed down (a layout loop, see TODO.md), not solved.
-- **Next:** Phase 4, starting with programs and progression rules.
+- **Next:** Phase 4a, double progression (spec under the Phase 4 roadmap, worked out on 2026-10-09).
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.
@@ -737,15 +737,89 @@ the app gets its character before sync, the server and the web GUI build on it.
   until one is set up) and starter routines (with programs in Phase 4).
 
 ### Phase 4: Programs, progression, and extras (moved up 2026-10-09 on request)
-- Programs and progression engine: multi-week blocks, and rules like double progression or linear progression with deload (5/3/1, GZCLP).
+- Progression and rotations (decided 2026-10-09: double progression, and a folder of routines as a rotation;
+  linear, 5/3/1 and GZCLP aren't planned, though the engine leaves room for more rules).
   - **Progression rules** (added 2026-09-30 on request): a pure `core/domain` function takes a rule and the recent
     history and returns the next session's targets (weight and reps per set) plus the reason, e.g. "8 reps on
     all 3 sets at 80 kg last time, so +2.5 kg". Target weights go through the active gym profile's load rounding.
   - The reason is structured (a reason type plus its values), not an English sentence, so the UI renders it in
     English or German with locale-aware numbers.
-  - **Safety bound:** a target more than X % (default 10 %) above the recent best (by e1RM, over the last few
-    weeks) is flagged before it is shown. The same check guards AI suggestions in Phase 6.
-- Wear OS companion, home-screen widget.
+  - **Safety bound:** a target too far above the recent best is flagged before it is shown (defined below). The
+    same check guards AI suggestions in Phase 6.
+- Home-screen widget, and the workout on the lock screen instead of Wear OS (4d below).
+
+**How it works** (spec 2026-10-09, worked out with the user):
+- **Who it's for first:** the main user (see Context) trains a rotation of several routines, mostly 3–4
+  working sets of 8–20 reps on machines, cables and dumbbells, with a good share of exercises in more than
+  one routine, and a set of routines per gym.
+- **Parts,** each committed on its own:
+  - **4a, double progression** on a routine's exercises: the engine, the routine editor, targets in the logger.
+  - **4b, rotations:** a folder of routines that take turns, with what's next on the Train tab.
+  - **4c, the home-screen widget.**
+  - **4d, the lock screen:** the workout as an Android 16 Live Update, instead of Wear OS.
+- **4a, double progression:**
+  - **The rule** is set per exercise of a routine (`ProgressionRule` in `core/model`, one kind for now:
+    double progression). Without it, an exercise works as today: last time's values, and "Update the
+    routine" at the end. It's offered for exercises counted in weight and reps (`WeightReps`,
+    `WeightedBodyweight`); each working set needs a rep range (say 8–12), and the editor asks for one.
+  - **Last time** is the exercise's latest session in a workout started from this routine, so a lighter
+    day in another routine stays its own thing. Without one yet (a new rule, or history imported from Hevy
+    or Strong, which isn't tied to routines), it's the exercise's latest session anywhere.
+  - **Next targets,** set by set (each planned working set against its counterpart last time, as the
+    Previous column pairs them; warm-ups and drop sets don't count):
+    - **Every working set reached the top of its range:** each goes up a step from the weight lifted, and
+      the reps start again at the bottom.
+    - **Two sessions in a row with a set below the bottom:** each goes down a step, and climbs again from
+      there. One bad day changes nothing.
+    - **Otherwise:** the same weights, aiming for a rep more than last time on each set, up to the top.
+    - A set skipped last time means not every set reached the top: no step up.
+  - **A step:** the next weight the gym can load for the exercise's equipment (`LoadRounding.step`: the
+    rack for dumbbells, plates for bars, the stack step for machines and cables). A machine or cable can
+    have its own step (`exercise_settings`, set on the exercise's page), added to the weight lifted, so a
+    stack starting at 7 kg goes 7, 12, 17. The logger's ± uses it too.
+  - **The engine** (`Progression.next` in `core/domain`, pure): the rule, the planned sets, the sessions,
+    the gym and the equipment go in; each working set's target (weight, and the reps aimed for) and a
+    reason come out. The reason is structured (`ProgressionReason`: first time, top reached, keep going,
+    below the range twice), so the UI says it in English or German with the locale's numbers: "12 reps on
+    all 3 sets at 80 kg last time, so 82.5 kg".
+  - **Safety bound:** a target is flagged when it is more than 10 % above the heaviest weight lifted in the
+    last 6 weeks and more than one gym step above it (Settings › Progress can change the 10 %). By weight,
+    not e1RM, since the reps drop as the weight goes up; and one step is never flagged, as a step on a light
+    cable is already 30 % or more. It catches a typo in an exercise's own step or a stray weight in the
+    history. It never blocks.
+  - **In the logger:** starting the routine fills each set's weight with its target, and the reps aimed for
+    are the placeholder, logged with one tap like last time's values are now. Under the exercise's name, the
+    reason, with an arrow when the weight goes up or down. Routine detail shows each exercise's next
+    targets. "Update the routine" at the end leaves exercises with a rule alone, since their targets come
+    from the history.
+  - **Stored:** schema v4 (`AutoMigration` 3→4, with a migration test) adds `routine_exercise.progression`
+    (the rule, null for none), `exercise_settings.load_step_kg`, and `workout_set.aim_reps` (the reps a
+    planned set aims for, which come before last time's as its placeholder, so the notification's "log set"
+    logs them too). All three are optional fields in the backup format (no version bump), so they sync.
+    Targets are worked out when the routine starts; the reasons are worked out again where they're shown,
+    and never stored.
+  - **Tests:** the engine in `core/domain` (top reached, keep going, below twice, a skipped set, a first
+    session, the fallback to any routine; kg and lb gyms; racks, plates, stacks and an exercise's own step;
+    the safety bound), the migration and the backup round trip, and the editor and logger in Robolectric
+    with screenshots at cover and inner sizes.
+- **4b, rotations:**
+  - A folder can be made a rotation (`routine_folder.rotation`, in the same schema v4). Its routines take
+    turns in their order: next up is the one after the routine of the latest workout started from the
+    folder, or the first.
+  - The Train tab heads with "Next up" and Start, for the rotation trained last; other rotations mark their
+    next routine in the folder. Starting any routine of a rotation moves it on from that one, so skipping a
+    day is just starting another.
+  - One rotation per gym works naturally, as a gym's routines sit in their own folder. No blocks or
+    deloads for now.
+- **4c, the widget** (Jetpack Glance): next up in the rotation with Start, and the streak; during a workout,
+  its name, time, sets done and the rest countdown, opening the logger. In the app's look, light and dark.
+  Its spec is filled in when 4b is done.
+- **4d, the lock screen** (decided 2026-10-09 instead of Wear OS: with wrist straps on, a watch is hard to
+  use mid-set; a watch app stays a maybe for later): the live workout notification becomes an Android 16
+  Live Update (a promoted ongoing notification), with the rest countdown as a chip in the status bar and
+  large on the lock screen, readable without unlocking. On the Fold, check whether Samsung's Now Bar shows
+  it too. Below Android 16 the notification stays as it is. Together with the end-of-rest sound in
+  headphones, which is already there, rest needs no hands. Its spec is filled in when 4c is done.
 
 ### Phase 5: Self-hosted server and web GUI (moved back 2026-10-09 on request: not a priority now)
 - `server/`: Ktor, PostgreSQL, Exposed, Flyway, Argon2 passwords, JWT access tokens plus refresh tokens per device.
