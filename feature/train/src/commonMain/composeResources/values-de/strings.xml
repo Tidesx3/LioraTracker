@@ -31,6 +31,12 @@
   <string name="routine_copy_name">%1$s (Kopie)</string>
   <string name="folder_new_routine">Neue Routine hier</string>
   <string name="folder_rename">Umbenennen</string>
+  <string name="folder_rotation_on">Als Rotation nutzen</string>
+  <string name="folder_rotation_off">Rotation beenden</string>
+  <string name="cd_rotation">Rotation</string>
+  <string name="train_next_up">Als Nächstes in %1$s</string>
+  <string name="train_next_label">Als Nächstes dran</string>
+  <string name="train_start_next">%1$s starten</string>
   <string name="folder_delete">Ordner löschen</string>
 
   <string name="dialog_cancel">Abbrechen</string>

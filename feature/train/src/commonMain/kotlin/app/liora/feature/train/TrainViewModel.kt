@@ -3,9 +3,11 @@ package app.liora.feature.train
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.exercise.ExerciseRepository
+import app.liora.core.data.routine.RotationRepository
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.sync.SyncRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
+import app.liora.core.domain.RotationTurn
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineFolder
 import app.liora.feature.train.routine.RoutineDialog
@@ -45,8 +47,21 @@ data class TrainUiState(
     val dialog: RoutineDialog? = null,
     /** Sync has stopped until the user does something in Settings. */
     val settingsNeedYou: Boolean = false,
+    /** What's next in each rotation, the one trained most recently first. */
+    val turns: List<RotationTurn> = emptyList(),
 ) {
     val isEmpty: Boolean get() = folders.isEmpty() && sections.all { it.routines.isEmpty() }
+
+    /** The routine up next in each rotation. */
+    val nextRoutineIds: Set<String> get() = turns.map { it.nextRoutineId }.toSet()
+
+    /** The rotation trained most recently and its routine up next, for the top of the tab. */
+    val nextUp: Pair<RoutineFolder, RoutineCardState>? get() {
+        val turn = turns.firstOrNull() ?: return null
+        val section = sections.firstOrNull { it.folder?.id == turn.folderId } ?: return null
+        val card = section.routines.firstOrNull { it.routine.id == turn.nextRoutineId } ?: return null
+        return section.folder?.let { it to card }
+    }
 }
 
 @Suppress("TooManyFunctions") // one function per user intent
@@ -55,6 +70,7 @@ class TrainViewModel(
     private val routines: RoutineRepository,
     exercises: ExerciseRepository,
     sync: SyncRepository,
+    rotations: RotationRepository,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
     private val dialog = MutableStateFlow<RoutineDialog?>(null)
@@ -85,6 +101,8 @@ class TrainViewModel(
             )
         }.combine(sync.state.map { it.needsYou }.distinctUntilChanged()) { state, needsYou ->
             state.copy(settingsNeedYou = needsYou)
+        }.combine(rotations.turns) { state, turns ->
+            state.copy(turns = turns)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TrainUiState())
 
     fun setLanguage(value: String) {
@@ -121,6 +139,11 @@ class TrainViewModel(
     ) = write { routines.renameFolder(id, name) }
 
     fun deleteFolder(id: String) = write { routines.deleteFolder(id) }
+
+    fun setRotation(
+        id: String,
+        rotation: Boolean,
+    ) = write { routines.setRotation(id, rotation) }
 
     fun moveRoutine(
         routineId: String,

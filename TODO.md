@@ -4,6 +4,12 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
+- **Rotations: check on the phone** (added 2026-10-09). Make a folder a rotation (its ⋮ › Make it a
+  rotation): the Train tab heads with the routine up next and marks it in the folder. The history imported
+  from Hevy counts by the workouts' names, so the next one should follow the last Push/Pull/Leg day logged.
+  Finish a workout from it and see the next one come up; start another than the next and see it move on
+  from there.
+
 - **Double progression: check on the phone** (added 2026-10-09). Turn it on for a few machine and cable
   exercises in a routine (Edit › an exercise's ⋮ › Double progression) and give their sets rep ranges.
   - After a workout where every set reached the top: routine detail shows a step heavier and why, and

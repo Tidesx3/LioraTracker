@@ -287,7 +287,10 @@ As of 2026-10-09:
     logger's ± uses it too). Settings › Progression tunes it: the reps to aim for (by default a rep more on
     the weakest set, after trying it on the phone), when to step up, what a session below the range does,
     what counts as last time, and the jump limit.
-- **Next:** 4b, rotations.
+  - **4b (done, pending the device check in TODO.md): rotations.** No schema change (the column came with v4).
+    A folder's menu makes it a rotation; the Train tab heads with the routine up next in the one trained
+    last, and marks the next routine in every rotation. Imported history counts by the routines' names.
+- **Next:** 4c, the home-screen widget.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.
@@ -833,6 +836,12 @@ the app gets its character before sync, the server and the web GUI build on it.
     day is just starting another.
   - One rotation per gym works naturally, as a gym's routines sit in their own folder. No blocks or
     deloads for now.
+  - As built: `Rotations` (`core/domain`) works out a folder's turn; `RotationRepository` (`core/data`) gives
+    each rotation's turn from the folders, routines and finished workouts, the one trained last first. A
+    workout counts for a routine when it was started from it, or, for history imported from another app,
+    when it has the routine's name. The folder's menu makes it a rotation or stops it; its header shows the
+    turning arrows. The Next up card shares a list item with Quick start (whose button turns tonal beside
+    it), so one that appears later, as a folder is made a rotation, isn't scrolled away above the top.
 - **4c, the widget** (Jetpack Glance): next up in the rotation with Start, and the streak; during a workout,
   its name, time, sets done and the rest countdown, opening the logger. In the app's look, light and dark.
   Its spec is filled in when 4b is done.

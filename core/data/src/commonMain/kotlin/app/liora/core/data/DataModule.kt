@@ -23,7 +23,9 @@ import app.liora.core.data.importing.ImportRepository
 import app.liora.core.data.importing.OfflineImportRepository
 import app.liora.core.data.progression.OfflineProgressionRepository
 import app.liora.core.data.progression.ProgressionRepository
+import app.liora.core.data.routine.OfflineRotationRepository
 import app.liora.core.data.routine.OfflineRoutineRepository
+import app.liora.core.data.routine.RotationRepository
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.seed.ExerciseCatalogSeeder
 import app.liora.core.data.settings.OfflineSettingsRepository
@@ -73,6 +75,7 @@ val dataModule =
         singleOf(::AppStartup)
         singleOf(::OfflineExerciseRepository) bind ExerciseRepository::class
         singleOf(::OfflineRoutineRepository) bind RoutineRepository::class
+        singleOf(::OfflineRotationRepository) bind RotationRepository::class
         singleOf(::OfflineSettingsRepository) bind SettingsRepository::class
         singleOf(::OfflineGymProfileRepository) bind GymProfileRepository::class
         single<ActiveWorkoutRepository> {

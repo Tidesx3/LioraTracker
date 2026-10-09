@@ -62,10 +62,17 @@ interface RoutineRepository {
         name: String,
     )
 
+    /** Makes the folder a rotation, its routines taking turns in their order, or a plain folder again. */
+    suspend fun setRotation(
+        id: String,
+        rotation: Boolean,
+    )
+
     /** Deletes a folder. Its routines move out of it rather than disappearing with it. */
     suspend fun deleteFolder(id: String)
 }
 
+@Suppress("TooManyFunctions") // one function per thing a routine or a folder can have done to it
 internal class OfflineRoutineRepository(
     private val routineDao: RoutineDao,
     private val transactions: TransactionRunner,
@@ -73,7 +80,9 @@ internal class OfflineRoutineRepository(
     private val stamper: SyncStamper,
 ) : RoutineRepository {
     override val folders: Flow<List<RoutineFolder>> =
-        routineDao.observeFolders().map { rows -> rows.map { RoutineFolder(id = it.id, name = it.name) } }
+        routineDao.observeFolders().map { rows ->
+            rows.map { RoutineFolder(id = it.id, name = it.name, rotation = it.rotation) }
+        }
 
     override val routines: Flow<List<Routine>> =
         combine(
@@ -190,6 +199,16 @@ internal class OfflineRoutineRepository(
         transactions.inTransaction {
             val folder = routineDao.getFolder(id) ?: return@inTransaction
             routineDao.upsertFolder(folder.copy(name = name.trim(), sync = stamper.touch(folder.sync)))
+        }
+    }
+
+    override suspend fun setRotation(
+        id: String,
+        rotation: Boolean,
+    ) {
+        transactions.inTransaction {
+            val folder = routineDao.getFolder(id)?.takeIf { it.rotation != rotation } ?: return@inTransaction
+            routineDao.upsertFolder(folder.copy(rotation = rotation, sync = stamper.touch(folder.sync)))
         }
     }
 

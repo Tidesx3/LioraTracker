@@ -6,6 +6,8 @@ import kotlin.time.Duration
 data class RoutineFolder(
     val id: String,
     val name: String,
+    /** Its routines take turns in their order, and the Train tab says which is next. */
+    val rotation: Boolean = false,
 )
 
 /** A saved workout plan: exercises in order, each with its target sets. Starting it prefills a workout. */

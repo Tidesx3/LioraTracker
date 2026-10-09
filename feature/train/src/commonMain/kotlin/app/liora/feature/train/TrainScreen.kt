@@ -59,11 +59,14 @@ import app.liora.core.navigation.rememberSharedContainer
 import app.liora.core.ui.currentLanguage
 import app.liora.feature.train.resources.Res
 import app.liora.feature.train.resources.cd_more
+import app.liora.feature.train.resources.cd_rotation
 import app.liora.feature.train.resources.cd_settings
 import app.liora.feature.train.resources.cd_settings_attention
 import app.liora.feature.train.resources.folder_delete
 import app.liora.feature.train.resources.folder_new_routine
 import app.liora.feature.train.resources.folder_rename
+import app.liora.feature.train.resources.folder_rotation_off
+import app.liora.feature.train.resources.folder_rotation_on
 import app.liora.feature.train.resources.routine_copy_name
 import app.liora.feature.train.resources.routine_delete
 import app.liora.feature.train.resources.routine_duplicate
@@ -73,6 +76,7 @@ import app.liora.feature.train.resources.train_folder_empty
 import app.liora.feature.train.resources.train_my_routines
 import app.liora.feature.train.resources.train_new_folder
 import app.liora.feature.train.resources.train_new_routine
+import app.liora.feature.train.resources.train_next_label
 import app.liora.feature.train.resources.train_quick_start
 import app.liora.feature.train.resources.train_quick_start_body
 import app.liora.feature.train.resources.train_resume
@@ -123,6 +127,7 @@ internal fun TrainScreen(
                 onNewRoutine = navigation.onNewRoutine,
                 onShowDialog = viewModel::showDialog,
                 onOpenSettings = navigation.onOpenSettings,
+                onSetRotation = viewModel::setRotation,
                 routine =
                     RoutineCardActions(
                         onOpen = navigation.onOpenRoutine,
@@ -160,11 +165,12 @@ private class TrainActions(
     val onNewRoutine: (folderId: String?) -> Unit,
     val onShowDialog: (RoutineDialog) -> Unit,
     val onOpenSettings: () -> Unit,
+    val onSetRotation: (folderId: String, rotation: Boolean) -> Unit,
     val routine: RoutineCardActions,
 )
 
 /** What a routine card offers, each taking the routine's id. */
-private class RoutineCardActions(
+internal class RoutineCardActions(
     val onOpen: (String) -> Unit,
     val onStart: (String) -> Unit,
     val onEdit: (String) -> Unit,
@@ -196,11 +202,22 @@ private fun TrainContent(
                     bottom = padding.calculateBottomPadding() + 24.dp,
                 ),
         ) {
+            // One item with Quick start: as an item of its own above it, a Next up card arriving later (a folder
+            // just made a rotation) would land above the top, the list keeping Quick start in view.
             item(key = "quick-start") {
+                uiState.nextUp?.let { (folder, card) ->
+                    NextUpCard(
+                        folder = folder,
+                        card = card,
+                        actions = actions.routine,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                }
                 QuickStartCard(
                     hasActiveWorkout = uiState.hasActiveWorkout,
                     onStartWorkout = actions.onStartWorkout,
                     onResumeWorkout = actions.onResumeWorkout,
+                    secondary = uiState.nextUp != null,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
@@ -229,6 +246,7 @@ private fun TrainContent(
                             folder = folder,
                             onNewRoutine = { actions.onNewRoutine(folder.id) },
                             onShowDialog = actions.onShowDialog,
+                            onSetRotation = { actions.onSetRotation(folder.id, it) },
                         )
                     }
                 } else if (uiState.folders.isNotEmpty() && section.routines.isNotEmpty()) {
@@ -248,6 +266,7 @@ private fun TrainContent(
                     RoutineCard(
                         card = card,
                         selected = card.routine.id == selectedRoutineId,
+                        next = card.routine.id in uiState.nextRoutineIds,
                         actions = actions.routine,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                     )
@@ -281,6 +300,8 @@ private fun RoutineButtons(
 private fun FolderTitle(
     title: String,
     modifier: Modifier = Modifier,
+    /** A rotation shows the turning arrows instead of the folder. */
+    rotation: Boolean = false,
     trailing: @Composable () -> Unit = {},
 ) {
     Row(
@@ -288,9 +309,9 @@ private fun FolderTitle(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            painterResource(LioraIcons.Folder),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            painterResource(if (rotation) LioraIcons.Repeat else LioraIcons.Folder),
+            contentDescription = if (rotation) stringResource(Res.string.cd_rotation) else null,
+            tint = if (rotation) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(18.dp),
         )
         Spacer(Modifier.width(8.dp))
@@ -311,13 +332,16 @@ private fun FolderHeader(
     folder: RoutineFolder,
     onNewRoutine: () -> Unit,
     onShowDialog: (RoutineDialog) -> Unit,
+    onSetRotation: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    FolderTitle(title = folder.name, modifier = modifier) {
+    val rotation = if (folder.rotation) Res.string.folder_rotation_off else Res.string.folder_rotation_on
+    FolderTitle(title = folder.name, modifier = modifier, rotation = folder.rotation) {
         OverflowMenu(
             items =
                 listOf(
                     stringResource(Res.string.folder_new_routine) to onNewRoutine,
+                    stringResource(rotation) to { onSetRotation(!folder.rotation) },
                     stringResource(Res.string.folder_rename) to { onShowDialog(RoutineDialog.RenameFolder(folder)) },
                     stringResource(Res.string.folder_delete) to { onShowDialog(RoutineDialog.DeleteFolder(folder)) },
                 ),
@@ -329,6 +353,8 @@ private fun FolderHeader(
 private fun RoutineCard(
     card: RoutineCardState,
     selected: Boolean,
+    /** Up next in its rotation. */
+    next: Boolean,
     actions: RoutineCardActions,
     modifier: Modifier = Modifier,
 ) {
@@ -352,6 +378,13 @@ private fun RoutineCard(
         border = if (selected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
     ) {
         Column(Modifier.padding(start = 20.dp, end = 8.dp, top = 12.dp, bottom = 16.dp)) {
+            if (next) {
+                Text(
+                    text = stringResource(Res.string.train_next_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = routine.name,
@@ -399,7 +432,7 @@ private fun RoutineCard(
 }
 
 @Composable
-private fun exerciseList(names: List<String>): String =
+internal fun exerciseList(names: List<String>): String =
     if (names.isEmpty()) stringResource(Res.string.train_routine_no_exercises) else names.joinToString(", ")
 
 @Composable
@@ -428,6 +461,8 @@ private fun QuickStartCard(
     onStartWorkout: () -> Unit,
     onResumeWorkout: () -> Unit,
     modifier: Modifier = Modifier,
+    /** With a rotation's next routine above it, starting empty steps back to a tonal button. */
+    secondary: Boolean = false,
 ) {
     LioraCard(
         modifier = modifier.fillMaxWidth(),
@@ -449,6 +484,12 @@ private fun QuickStartCard(
             Button(
                 onClick = if (hasActiveWorkout) onResumeWorkout else onStartWorkout,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
+                colors =
+                    if (secondary && !hasActiveWorkout) {
+                        ButtonDefaults.filledTonalButtonColors()
+                    } else {
+                        ButtonDefaults.buttonColors()
+                    },
             ) {
                 Icon(
                     painter = painterResource(LioraIcons.Play),

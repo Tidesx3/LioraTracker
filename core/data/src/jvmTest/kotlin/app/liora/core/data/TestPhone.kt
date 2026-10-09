@@ -198,6 +198,8 @@ internal class TestPhone(
             )
         exercises.setLoadStep(legPress, Mass(2.5))
         val folder = routines.createFolder("PPL")
+        // A rotation, which comes back from a backup too.
+        routines.setRotation(folder, true)
         routines.save(
             Routine(
                 id = "push",
