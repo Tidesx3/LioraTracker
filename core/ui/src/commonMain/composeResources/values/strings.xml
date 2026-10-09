@@ -141,4 +141,19 @@
   <string name="progression_below_once">Under %1$s reps at %2$s last time, so %3$s</string>
   <string name="progression_below_twice">Under %1$s reps twice in a row at %2$s, so %3$s</string>
   <string name="progression_big_jump">%1$s is a big jump from %2$s, your heaviest in six weeks. Worth a second look.</string>
+
+  <string name="update_title">Liora %1$s is here</string>
+  <string name="update_action">Update</string>
+  <string name="update_not_now">Not now</string>
+  <string name="update_more">All of what’s new</string>
+  <string name="update_less">Less</string>
+  <string name="update_after_workout">The update waits until your workout’s done.</string>
+  <string name="update_downloading">Downloading…</string>
+  <string name="update_ready">Downloaded and checked.</string>
+  <string name="update_install">Install</string>
+  <string name="update_installing">Android is installing it, and closes Liora to do so.</string>
+  <string name="update_failed_network">The download broke off. Try again once you’re online.</string>
+  <string name="update_failed_not_genuine">The download didn’t check out, so it wasn’t installed.</string>
+  <string name="update_failed_not_installed">Android didn’t install it.</string>
+  <string name="update_retry">Try again</string>
 </resources>

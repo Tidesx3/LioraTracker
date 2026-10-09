@@ -15,6 +15,10 @@
   <!-- Brings a workout's notification and rest alarm back after a reboot. -->
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+  <!-- Updates from GitHub (update/AppUpdater.kt): Liora installs a newer release of itself when the user says
+       so. Android asks once to allow it, then confirms each install, or not at all once Liora installed itself. -->
+  <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
   <!-- Health Connect, only once the user allows it there: finished workouts out, weight and body fat in.
        The same set as HealthConnectStore.permissions. -->
   <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
@@ -97,6 +101,10 @@
         android:name="android.appwidget.provider"
         android:resource="@xml/liora_widget_info" />
     </receiver>
+    <!-- Android's answers about an update Liora handed it. -->
+    <receiver
+      android:name=".update.UpdateInstallReceiver"
+      android:exported="false" />
     <receiver
       android:name=".workout.WorkoutActionReceiver"
       android:exported="false" />

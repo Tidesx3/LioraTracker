@@ -36,6 +36,8 @@ import app.liora.core.data.sync.OfflineSyncRepository
 import app.liora.core.data.sync.SyncEngine
 import app.liora.core.data.sync.SyncRepository
 import app.liora.core.data.sync.SyncStamper
+import app.liora.core.data.update.LocalUpdateRepository
+import app.liora.core.data.update.UpdateRepository
 import app.liora.core.data.walkthrough.LocalWalkthroughRepository
 import app.liora.core.data.walkthrough.WalkthroughRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
@@ -54,7 +56,8 @@ import kotlin.time.Clock
 
 /**
  * Repositories and their plumbing. The app also has to provide the platform database module, an
- * `ExerciseSeedSource`, a `PhotoStorage`, `ExportFiles`, for sync a `SyncScheduler` and `SyncStores`, and a
+ * `ExerciseSeedSource`, a `PhotoStorage`, `ExportFiles`, for sync a `SyncScheduler` and `SyncStores`, for updates a
+ * `ReleaseSource` and an `UpdateInstaller`, and a
  * `HealthStore`.
  */
 val dataModule =
@@ -99,6 +102,7 @@ val dataModule =
         singleOf(::LocalRestTimerRepository) bind RestTimerRepository::class
         singleOf(::LocalWalkthroughRepository) bind WalkthroughRepository::class
         singleOf(::OfflineProgressionRepository) bind ProgressionRepository::class
+        singleOf(::LocalUpdateRepository) bind UpdateRepository::class
     }
 
 /** Work that runs once per process start, off the main thread. */

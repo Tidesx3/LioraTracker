@@ -4,6 +4,16 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
+- **Updates from GitHub: a real one on the phone** (added 2026-10-10, finishes 4e). Needs `main` pushed.
+  - Publish 0.4.0 (`node tools/release/release.mjs`) and install it from GitHub over the release app.
+  - Publish 0.4.1. In the release app, Settings › About Liora finds it (or the Train tab, the next day):
+    Update downloads it, Android asks once to allow installs from Liora, then installs it; the data stays.
+  - Then 0.4.2: from Android 12 on, Liora updating itself shouldn't ask again.
+  - Try it with a workout running (it waits), offline (Try again), and Not now (only Settings offers it).
+  - Then move to the release app: Back up in the debug app, Restore in the release app.
+- **`progression_load_step_dark.png` changes every day** (found 2026-10-10). It shows the sessions' dates, and
+  `ProgressionFlowTest` logs them on the real clock. Give it a fixed clock, as `ProgressFlowTest` has; until then,
+  leave that screenshot out of commits that don't touch it.
 - **Home-screen widget: check on the phone** (added 2026-10-09). Add Liora's widget on the cover and the
   inner screen, at two cells wide and at four by two. With a rotation it says what's next, and Start starts
   it and opens the logger; without one, Quick start. During a workout it shows the time running and the

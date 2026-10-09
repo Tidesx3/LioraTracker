@@ -88,6 +88,15 @@
   <string name="section_about">About Liora</string>
   <string name="walkthrough_title">How Liora works</string>
   <string name="walkthrough_body">The short tour from the first start</string>
+  <string name="updates_version">Version %1$s</string>
+  <string name="updates_up_to_date">Up to date as of %1$s, %2$s</string>
+  <string name="updates_never_checked">Tap to look for a newer one</string>
+  <string name="updates_checking">Looking on GitHub…</string>
+  <string name="updates_unreachable">GitHub is out of reach. Tap to try again</string>
+  <string name="updates_newer">Version %1$s is out</string>
+  <string name="updates_debug">Debug builds don’t update themselves</string>
+  <string name="updates_auto_check">Look for updates</string>
+  <string name="updates_auto_check_body">Once a day, on GitHub</string>
 
   <string name="section_data">Your data</string>
   <string name="backup_title">Back up everything</string>

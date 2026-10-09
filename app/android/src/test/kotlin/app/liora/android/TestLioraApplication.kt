@@ -16,10 +16,14 @@ import app.liora.core.data.sync.PulledBatches
 import app.liora.core.data.sync.SyncBackend
 import app.liora.core.data.sync.SyncScheduler
 import app.liora.core.data.sync.SyncStores
+import app.liora.core.data.update.InstallProgress
+import app.liora.core.data.update.ReleaseSource
+import app.liora.core.data.update.UpdateInstaller
 import app.liora.core.data.walkthrough.WalkthroughRepository
 import app.liora.core.data.workout.RestSoundPlayer
 import app.liora.core.database.LioraDatabase
 import app.liora.core.domain.RestSound
+import app.liora.core.domain.update.Release
 import app.liora.core.ui.CloudConnection
 import app.liora.core.ui.CloudConsent
 import app.liora.core.ui.HealthConnectScreens
@@ -96,6 +100,14 @@ class TestLioraApplication : LioraApplication() {
             },
         )
 
+    override fun updateModules(): List<Module> =
+        listOf(
+            module {
+                single { TestReleases() } bind ReleaseSource::class
+                single { TestUpdateInstaller() } bind UpdateInstaller::class
+            },
+        )
+
     override fun databaseModules(): List<Module> =
         listOf(
             module {
@@ -105,6 +117,30 @@ class TestLioraApplication : LioraApplication() {
                 single<SQLiteDriver> { AndroidSQLiteDriver() }
             },
         )
+}
+
+/** GitHub's latest release, as a test sets it: none by default. */
+class TestReleases : ReleaseSource {
+    @Volatile var latest: Release? = null
+
+    override suspend fun latest(): Release? = latest
+}
+
+/** A release build that updates itself, at 0.4.0; downloads and installs are only noted. */
+class TestUpdateInstaller : UpdateInstaller {
+    override val enabled = true
+    override val versionName = "0.4.0"
+    override val progress = MutableStateFlow<InstallProgress>(InstallProgress.Idle)
+    val started: MutableList<Release> = CopyOnWriteArrayList()
+
+    override fun start(release: Release) {
+        started += release
+        progress.value = InstallProgress.Downloading(release.version, fraction = null)
+    }
+
+    override fun install() {
+        (progress.value as? InstallProgress.Ready)?.let { progress.value = InstallProgress.Installing(it.version) }
+    }
 }
 
 /** Notes the rest sounds asked for instead of playing them. */

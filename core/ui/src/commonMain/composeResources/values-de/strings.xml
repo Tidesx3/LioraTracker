@@ -141,4 +141,19 @@
   <string name="progression_below_once">Letztes Mal unter %1$s Wdh. mit %2$s, jetzt also %3$s</string>
   <string name="progression_below_twice">Zweimal in Folge unter %1$s Wdh. mit %2$s, jetzt also %3$s</string>
   <string name="progression_big_jump">%1$s ist ein großer Sprung von %2$s, deinem Schwersten der letzten sechs Wochen. Lieber noch mal prüfen.</string>
+
+  <string name="update_title">Liora %1$s ist da</string>
+  <string name="update_action">Aktualisieren</string>
+  <string name="update_not_now">Später</string>
+  <string name="update_more">Alles, was neu ist</string>
+  <string name="update_less">Weniger</string>
+  <string name="update_after_workout">Das Update wartet, bis dein Training fertig ist.</string>
+  <string name="update_downloading">Wird geladen …</string>
+  <string name="update_ready">Geladen und geprüft.</string>
+  <string name="update_install">Installieren</string>
+  <string name="update_installing">Android installiert es und schließt dafür Liora.</string>
+  <string name="update_failed_network">Der Download ist abgebrochen. Versuch es noch mal, sobald du online bist.</string>
+  <string name="update_failed_not_genuine">Der Download war nicht in Ordnung, deshalb wurde nichts installiert.</string>
+  <string name="update_failed_not_installed">Android hat es nicht installiert.</string>
+  <string name="update_retry">Noch mal versuchen</string>
 </resources>

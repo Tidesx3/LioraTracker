@@ -17,6 +17,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - `./gradlew spotlessApply`: formats code (ktlint_official style plus compose-rules).
 - `./gradlew :app:android:assembleDebug` or `installDebug`.
 - `./gradlew :app:android:installRelease`: R8-shrunk and signed with the key in the gitignored `keystore.properties` (README › Release builds); unsigned without it. Judge speed on this build, never on debug.
+- `node tools/release/release.mjs [--dry-run]`: publishes a GitHub release of the version in `version.properties`, with the notes in `docs/releases/<version>.md` (README › Publishing a release). Publishing is public: only when the user asks.
 - `./gradlew :app:android:recordRoborazziDebug`: re-renders screenshots to `app/android/src/test/screenshots/`. Read the PNGs to review UI changes.
 - `java tools/icons/MakeIcons.java logo.png app/android/src/main/res build/icon-preview.png`: rebuilds the launcher and notification icons from `logo.png` (light artwork on black) and writes a preview sheet to check them by eye.
 - `java tools/sound/MakeSounds.java app/android/src/main/res/raw build/sound-preview.png`: rebuilds the end-of-rest sounds (synthesized, no samples) and writes their waveforms to check for clipping and clicks.
@@ -70,6 +71,10 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - **Health Connect:** `HealthRepository` (`core/data/health`) decides what goes out and comes in;
   `integration/healthconnect` is only the platform side. Readings never overwrite a day that has a value of its
   own. UI tests use `TestLioraApplication.healthModules()`.
+- **Updates:** `UpdateRepository` (`core/data/update`) decides when to look and what's newer; `integration/github`
+  reads the releases, and `app/.../update/` downloads (WorkManager), checks (`ApkCheck`: same key, higher
+  version) and installs (`PackageInstaller`). Only the release build updates itself (`BuildConfig.UPDATES_FROM_GITHUB`).
+  UI tests use `TestLioraApplication.updateModules()` and never reach GitHub.
 - **Imports:** `core/domain/importing` reads Hevy and Strong CSVs and matches their exercise names
   (`ExerciseMatcher`); `ImportRepository` writes them. A name is never merged into a different exercise
   silently: anything not the same words becomes a custom variation. Tests use synthetic files in the real layouts.

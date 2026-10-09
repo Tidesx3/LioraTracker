@@ -56,6 +56,7 @@ import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
 import app.liora.core.navigation.SharedKeys
 import app.liora.core.navigation.rememberSharedContainer
+import app.liora.core.ui.UpdateCard
 import app.liora.core.ui.currentLanguage
 import app.liora.feature.train.resources.Res
 import app.liora.feature.train.resources.cd_more
@@ -137,6 +138,9 @@ internal fun TrainScreen(
                         onShowDialog = viewModel::showDialog,
                     ),
             ),
+        onUpdate = viewModel::update,
+        onInstallUpdate = viewModel::installUpdate,
+        onDismissUpdate = viewModel::dismissUpdate,
         modifier = modifier,
     )
 
@@ -183,6 +187,9 @@ private fun TrainContent(
     uiState: TrainUiState,
     selectedRoutineId: String?,
     actions: TrainActions,
+    onUpdate: () -> Unit,
+    onInstallUpdate: () -> Unit,
+    onDismissUpdate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -203,8 +210,18 @@ private fun TrainContent(
                 ),
         ) {
             // One item with Quick start: as an item of its own above it, a Next up card arriving later (a folder
-            // just made a rotation) would land above the top, the list keeping Quick start in view.
+            // just made a rotation) or an update found would land above the top, the list keeping Quick start
+            // in view.
             item(key = "quick-start") {
+                uiState.update?.let {
+                    UpdateCard(
+                        state = it,
+                        onUpdate = onUpdate,
+                        onInstall = onInstallUpdate,
+                        onDismiss = onDismissUpdate,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                }
                 uiState.nextUp?.let { (folder, card) ->
                     NextUpCard(
                         folder = folder,

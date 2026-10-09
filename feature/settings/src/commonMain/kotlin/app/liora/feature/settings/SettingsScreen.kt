@@ -53,6 +53,7 @@ import app.liora.core.model.WeightUnit
 import app.liora.core.ui.AppLanguage
 import app.liora.core.ui.AppLanguages
 import app.liora.core.ui.RestTimePicker
+import app.liora.core.ui.UpdateCard
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.rememberAppLanguage
 import app.liora.core.ui.rememberFileOpener
@@ -103,6 +104,7 @@ import kotlin.time.Duration.Companion.seconds
 internal fun SettingsScreen(
     viewModel: SettingsViewModel,
     dataViewModel: DataViewModel,
+    updatesViewModel: UpdatesViewModel,
     onBack: () -> Unit,
     onOpenGyms: () -> Unit,
     onOpenSync: () -> Unit,
@@ -119,6 +121,7 @@ internal fun SettingsScreen(
     }
     val gym by viewModel.gym.collectAsStateWithLifecycle()
     val data by dataViewModel.uiState.collectAsStateWithLifecycle()
+    val updates by updatesViewModel.uiState.collectAsStateWithLifecycle()
     val exerciseLanguage = currentLanguage()
     val untitled = workoutDisplayName(null)
     val today = dataViewModel.today().toString()
@@ -142,6 +145,14 @@ internal fun SettingsScreen(
         onChange = viewModel::update,
         onPreviewSound = viewModel::preview,
         onShowWalkthrough = viewModel::showWalkthrough,
+        updates = updates,
+        updatesActions =
+            UpdatesActions(
+                onCheck = updatesViewModel::check,
+                onUpdate = updatesViewModel::update,
+                onInstall = updatesViewModel::install,
+                onAutoCheck = updatesViewModel::setAutoCheck,
+            ),
         dataActions =
             DataActions(
                 onBackUp = { backupSaver.save(backupName) },
@@ -201,6 +212,8 @@ private fun SettingsContent(
     onChange: (SettingsChange) -> Unit,
     onPreviewSound: (RestSound) -> Unit,
     onShowWalkthrough: () -> Unit,
+    updates: UpdatesUiState,
+    updatesActions: UpdatesActions,
     dataActions: DataActions,
     language: AppLanguage,
     modifier: Modifier = Modifier,
@@ -334,7 +347,16 @@ private fun SettingsContent(
                 )
             }
             item(key = "about") {
+                // A newer Liora, where it's said what's new in it.
+                UpdateCard(
+                    state = updates.update,
+                    onUpdate = updatesActions.onUpdate,
+                    onInstall = updatesActions.onInstall,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                )
                 SettingsGroup(stringResource(Res.string.section_about)) {
+                    VersionRow(updates, onCheck = updatesActions.onCheck)
+                    AutoCheckRow(updates, onAutoCheck = updatesActions.onAutoCheck)
                     SettingRow(
                         stringResource(Res.string.walkthrough_title),
                         stringResource(Res.string.walkthrough_body),

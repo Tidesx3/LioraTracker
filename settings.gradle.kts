@@ -53,3 +53,4 @@ include(":feature:walkthrough")
 
 include(":sync:gdrive")
 include(":integration:healthconnect")
+include(":integration:github")

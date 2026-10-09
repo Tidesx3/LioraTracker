@@ -34,6 +34,7 @@ fun EntryProviderScope<NavKey>.settingsEntries(navigator: Navigator) {
         SettingsScreen(
             viewModel = koinViewModel(),
             dataViewModel = koinViewModel(),
+            updatesViewModel = koinViewModel(),
             onBack = navigator::goBack,
             onOpenGyms = { navigator.navigate(GymsRoute) },
             onOpenSync = { navigator.navigate(SyncRoute) },
@@ -81,6 +82,7 @@ val settingsModule =
     module {
         viewModelOf(::SettingsViewModel)
         viewModelOf(::DataViewModel)
+        viewModelOf(::UpdatesViewModel)
         viewModelOf(::GymsViewModel)
         viewModelOf(::SyncViewModel)
         viewModelOf(::HealthViewModel)

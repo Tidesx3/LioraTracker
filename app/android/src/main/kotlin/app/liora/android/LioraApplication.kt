@@ -10,6 +10,8 @@ import app.liora.android.sync.CloudConsentFactory
 import app.liora.android.sync.DriveConsent
 import app.liora.android.sync.SyncTriggers
 import app.liora.android.sync.WorkSyncScheduler
+import app.liora.android.update.AppUpdater
+import app.liora.android.update.UpdateTriggers
 import app.liora.android.widget.WidgetUpdater
 import app.liora.android.workout.RestAlarmScheduler
 import app.liora.android.workout.WorkoutNotifications
@@ -19,6 +21,8 @@ import app.liora.core.data.dataModule
 import app.liora.core.data.health.HealthStore
 import app.liora.core.data.sync.SyncScheduler
 import app.liora.core.data.sync.SyncStores
+import app.liora.core.data.update.ReleaseSource
+import app.liora.core.data.update.UpdateInstaller
 import app.liora.core.database.androidDatabaseModule
 import app.liora.feature.body.bodyModule
 import app.liora.feature.exercises.exercisesModule
@@ -28,10 +32,12 @@ import app.liora.feature.progress.progressModule
 import app.liora.feature.settings.settingsModule
 import app.liora.feature.train.trainModule
 import app.liora.feature.walkthrough.walkthroughModule
+import app.liora.integration.github.gitHubReleases
 import app.liora.integration.healthconnect.HealthConnectStore
 import app.liora.sync.gdrive.GoogleDriveAccess
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
+import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
@@ -44,7 +50,7 @@ open class LioraApplication : Application() {
         startKoin {
             androidContext(this@LioraApplication)
             modules(
-                databaseModules() + syncModules() + healthModules() +
+                databaseModules() + syncModules() + healthModules() + updateModules() +
                     listOf(
                         appModule,
                         dataModule,
@@ -69,6 +75,8 @@ open class LioraApplication : Application() {
         get<SyncTriggers>().start(processScope)
         get<HealthTriggers>().start(processScope)
         get<WidgetUpdater>().start(processScope)
+        get<UpdateTriggers>().start(processScope)
+        getKoin().getOrNull<AppUpdater>()?.start()
     }
 
     /** Where the database lives. Tests swap in an in-memory database. */
@@ -81,6 +89,15 @@ open class LioraApplication : Application() {
                 single<SyncScheduler> { WorkSyncScheduler(androidContext()) }
                 single { GoogleDriveAccess(androidContext()) } bind SyncStores::class
                 single { CloudConsentFactory { activity -> DriveConsent(activity, get()) } }
+            },
+        )
+
+    /** Updates from GitHub, which the release build looks for and installs. Tests swap in fakes. */
+    protected open fun updateModules(): List<Module> =
+        listOf(
+            module {
+                single { gitHubReleases(BuildConfig.GITHUB_REPO) } bind ReleaseSource::class
+                single { AppUpdater(androidContext(), get<ProcessScope>(), get()) } bind UpdateInstaller::class
             },
         )
 

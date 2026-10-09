@@ -300,7 +300,12 @@ As of 2026-10-09:
     already nearly a Live Update; it meets Android 16's rules (read in AOSP; `WorkoutNotificationTest`
     checks them, since Robolectric's Android 16 predates them) and is now public on the lock screen. On the
     Fold it's promoted: the chip in the status bar, and the Now Bar on the lock screen.
-- **Next:** 4e, updates from GitHub, worked out with the user first (its open questions are in the spec).
+  - **4e (under way): updates from GitHub.** Worked out with the user (2026-10-10). Done: `version.properties`
+    and the release script (`tools/release/release.mjs`, dry run checked: signed with the release key), the
+    check (`integration/github`, `UpdateRepository`), the download, checks and install (`app/.../update/`), and
+    the card on the Train tab and in Settings › About Liora. Still to do: the first releases and a real update
+    on the phone (TODO.md), then moving the user's data from the debug app to the release app.
+- **Next:** publish 0.4.0 and update to 0.4.1 on the phone, which finishes 4e.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.
@@ -898,31 +903,45 @@ the app gets its character before sync, the server and the web GUI build on it.
     the lock screen, Samsung's Now Bar shows it without unlocking: "Pause 0:51" and what's next, a long
     exercise name cutting off the values. Left as it is, on the user's call: no Settings row for Live
     Updates and no reordered line.
-- **4e, updates from GitHub** (added 2026-10-09 on request; a sketch, worked out with the user when it's next):
-  Liora is sideloaded, so nothing tells it about a new version. The release app should check this repo's
-  GitHub Releases, and when one is newer than what's installed, download it and install it, with what's new.
-  - **Releases first:** none are published yet, and `versionCode`/`versionName` are still fixed at 1 / 0.1.0.
-    Each version needs a bumped `versionCode`, a tag (`v0.2.0`), and a GitHub Release with the signed
-    release APK and its SHA-256 attached. The signing key lives only on the dev machine (`~/.liora`), so
-    releases are either uploaded from there (`gh release create`) or built in CI with the key as a GitHub
-    secret (open question).
-  - **Checking:** GitHub's REST API (`/repos/<owner>/LioraTracker/releases/latest`, no token for a public
-    repo, 60 requests an hour) through Ktor, at most once a day when Liora comes to the front, and on
-    demand from Settings. Release notes come from the release's text, shown before installing.
-  - **Downloading:** in the background (WorkManager) into app-private storage, then checked: the SHA-256
-    matches, and the APK is signed with the same key as the installed app (`PackageManager`), so nothing
-    else can pass for an update.
-  - **Installing:** through `PackageInstaller` with `REQUEST_INSTALL_PACKAGES`. Android asks once to allow
-    installing unknown apps from Liora, and then confirms each update with its own dialog; from Android 12,
-    an app that installed itself can update without that prompt (`USER_ACTION_NOT_REQUIRED`), which the
-    first self-update makes possible. Same package and key, so the data stays, and Room migrates as usual.
-    A workout in progress is never interrupted: the install waits until none is running.
-  - **Only the release build** (`app.liora`) updates itself; debug builds never check.
-  - **Settings:** a section for updates: the version installed, check automatically (on by default), Check
-    now, and what's new in the latest.
-  - **Open questions:** where releases are built (dev machine or CI); stable releases only, or a beta
-    channel from pre-releases; whether to install by itself on Wi-Fi or always ask first. Obtainium already
-    does this for any app on GitHub; a built-in one fits Liora's own release notes, voice and look.
+- **4e, updates from GitHub** (added 2026-10-09 on request; worked out with the user 2026-10-10): Liora is
+  sideloaded, so nothing tells it about a new version. The release app checks this repo's GitHub Releases,
+  says when one is newer than what's installed, with what's new, and on a tap downloads it and installs it.
+  Obtainium already does this for any app on GitHub; a built-in one fits Liora's own notes, voice and look.
+  - **Decided with the user:** releases are built and signed on the dev machine (the key never leaves
+    `~/.liora`); Liora asks before downloading anything; stable releases only, no beta channel; and the
+    user moves from the debug app to the release app (a backup carries the data over), since only the
+    release app updates itself.
+  - **Versions:** one place, `version.properties` at the root (`version=0.4.0`); the version code follows
+    from it (major × 10000 + minor × 100 + patch), so it only grows. The first release is 0.4.0, Phase 4.
+  - **Releasing** (`node tools/release/release.mjs`): on a clean, pushed `main`, it runs `check`, builds the
+    signed release APK, checks its signature with `apksigner`, tags `v0.4.0`, and publishes a GitHub
+    Release with `liora-0.4.0.apk` and the notes from `docs/releases/0.4.0.md`. `--dry-run` stops before
+    tagging. GitHub gives each file a SHA-256 (`digest`), so there's no checksum file.
+  - **Release notes** are written for people, in English and German: `## English` and `## Deutsch`
+    sections, of which Liora shows the one in its language (English otherwise).
+  - **Checking:** GitHub's REST API (`releases/latest`, which leaves out drafts and pre-releases; no token,
+    60 requests an hour) through Ktor in a new `integration/github` module, tested with `MockEngine`. At
+    most once a day when Liora comes to the front (an hour after a failed try), while "Look for updates" is
+    on (Settings, on by default, per phone), and whenever asked from Settings. What it found is kept in
+    `local_meta`, so it survives a restart.
+  - **Telling the user:** a card (`UpdateCard` in `core:ui`) at the top of the Train tab, "Liora 0.5.0 is
+    here", with the first lines of what's new, Update and Not now (which hides it for that version; Settings still offers it). Settings ›
+    About Liora shows the version installed and where updates stand: up to date (checked when), a newer
+    one with what's new and Update, or GitHub out of reach. Debug builds show their version and say they
+    don't update themselves.
+  - **Downloading:** after Update, in the background (WorkManager) into app-private storage, with its
+    progress on the card and in Settings. Then checked: the size and SHA-256 match, it's Liora, a higher
+    version, and signed with the same key as the installed app (`PackageManager`), so nothing else can
+    pass for an update.
+  - **Installing:** through `PackageInstaller` (`REQUEST_INSTALL_PACKAGES`), started from the screen, so
+    Android's confirmation can show. The first time, Android asks to allow installs from Liora. Once Liora
+    has installed itself, Android 12 and later can update it without that dialog
+    (`USER_ACTION_NOT_REQUIRED`). Same package and key, so the data stays and Room migrates as usual.
+    Never during a workout: Update waits until it's finished. The APK is deleted once it's installed.
+  - **Tests:** versions and notes (domain), the GitHub client (`MockEngine`), the repository's rules (once
+    a day, Not now, a newer version showing again), the APK checks, and the card and Settings in UI tests
+    with screenshots, the GitHub side faked. The device check is a real update: 0.4.0 installed from
+    GitHub, then 0.4.1 published and installed from Liora.
 
 ### Phase 5: Self-hosted server and web GUI (moved back 2026-10-09 on request: not a priority now)
 - `server/`: Ktor, PostgreSQL, Exposed, Flyway, Argon2 passwords, JWT access tokens plus refresh tokens per device.

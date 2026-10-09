@@ -6,8 +6,11 @@ import app.liora.core.data.exercise.ExerciseRepository
 import app.liora.core.data.routine.RotationRepository
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.sync.SyncRepository
+import app.liora.core.data.update.UpdateRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.domain.RotationTurn
+import app.liora.core.domain.update.UpdateState
+import app.liora.core.domain.update.release
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineFolder
 import app.liora.feature.train.routine.RoutineDialog
@@ -49,7 +52,12 @@ data class TrainUiState(
     val settingsNeedYou: Boolean = false,
     /** What's next in each rotation, the one trained most recently first. */
     val turns: List<RotationTurn> = emptyList(),
+    val updateState: UpdateState = UpdateState.Off,
 ) {
+    /** A newer Liora for the top of the tab: until it's installed, unless Not now was tapped on it. */
+    val update: UpdateState? get() =
+        updateState.takeIf { it.release != null && !(it is UpdateState.Available && it.dismissed) }
+
     val isEmpty: Boolean get() = folders.isEmpty() && sections.all { it.routines.isEmpty() }
 
     /** The routine up next in each rotation. */
@@ -71,6 +79,7 @@ class TrainViewModel(
     exercises: ExerciseRepository,
     sync: SyncRepository,
     rotations: RotationRepository,
+    private val updates: UpdateRepository,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
     private val dialog = MutableStateFlow<RoutineDialog?>(null)
@@ -103,6 +112,8 @@ class TrainViewModel(
             state.copy(settingsNeedYou = needsYou)
         }.combine(rotations.turns) { state, turns ->
             state.copy(turns = turns)
+        }.combine(updates.state) { state, update ->
+            state.copy(updateState = update)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TrainUiState())
 
     fun setLanguage(value: String) {
@@ -121,6 +132,18 @@ class TrainViewModel(
         }
         viewModelScope.launch { activeWorkouts.startFromRoutine(routineId) }
         return true
+    }
+
+    fun update() {
+        viewModelScope.launch { updates.update() }
+    }
+
+    fun installUpdate() {
+        viewModelScope.launch { updates.install() }
+    }
+
+    fun dismissUpdate() {
+        viewModelScope.launch { updates.dismiss() }
     }
 
     fun showDialog(value: RoutineDialog) {

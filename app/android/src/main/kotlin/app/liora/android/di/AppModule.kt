@@ -6,6 +6,7 @@ import app.liora.android.health.HealthTriggers
 import app.liora.android.photos.AndroidPhotoStorage
 import app.liora.android.sync.SyncTriggers
 import app.liora.android.ui.LioraAppViewModel
+import app.liora.android.update.UpdateTriggers
 import app.liora.android.widget.WidgetStates
 import app.liora.android.widget.WidgetUpdater
 import app.liora.android.workout.AndroidRestSoundPlayer
@@ -40,6 +41,7 @@ val appModule =
         single { HealthTriggers(get(), get()) }
         single { WidgetStates(get(), get(), get(), get(), get(), get()) }
         single { WidgetUpdater(androidContext(), get()) }
+        single { UpdateTriggers(get()) }
     }
 
 /** The catalog built by `tools/seed/build-seed.mjs`, shipped in `assets/seed/`. */

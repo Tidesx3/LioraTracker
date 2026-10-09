@@ -14,13 +14,30 @@ val releaseSigning =
         .map { text -> Properties().apply { load(text.reader()) } }
         .orNull
 
+// The version lives in version.properties, which the release script reads too. The code follows from it,
+// major × 10000 + minor × 100 + patch, so a newer version always installs over an older one.
+val lioraVersion =
+    providers
+        .fileContents(rootProject.layout.projectDirectory.file("version.properties"))
+        .asText
+        .map { text -> Properties().apply { load(text.reader()) }.getProperty("version") }
+        .get()
+val lioraVersionCode =
+    lioraVersion
+        .split('.')
+        .map(String::toInt)
+        .also { require(it.size == 3) { "version.properties: expected major.minor.patch, got $lioraVersion" } }
+        .let { (major, minor, patch) -> major * 10_000 + minor * 100 + patch }
+
 android {
     namespace = "app.liora.android"
 
     defaultConfig {
         applicationId = "app.liora"
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = lioraVersionCode
+        versionName = lioraVersion
+        // Where releases are published; the release build checks it for updates (UPDATES_FROM_GITHUB).
+        buildConfigField("String", "GITHUB_REPO", "\"Tidesx3/LioraTracker\"")
     }
 
     signingConfigs {
@@ -38,8 +55,11 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
+            // Only releases come from GitHub, signed with the release key: a debug build never updates itself.
+            buildConfigField("boolean", "UPDATES_FROM_GITHUB", "false")
         }
         release {
+            buildConfigField("boolean", "UPDATES_FROM_GITHUB", "true")
             signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
@@ -80,6 +100,7 @@ dependencies {
 
     implementation(projects.sync.gdrive)
     implementation(projects.integration.healthconnect)
+    implementation(projects.integration.github)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)

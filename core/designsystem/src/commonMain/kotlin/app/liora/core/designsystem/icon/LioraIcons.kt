@@ -13,6 +13,7 @@ import app.liora.core.designsystem.resources.ic_chevron_right
 import app.liora.core.designsystem.resources.ic_close
 import app.liora.core.designsystem.resources.ic_compare
 import app.liora.core.designsystem.resources.ic_delete
+import app.liora.core.designsystem.resources.ic_download
 import app.liora.core.designsystem.resources.ic_drag_indicator
 import app.liora.core.designsystem.resources.ic_edit
 import app.liora.core.designsystem.resources.ic_exercise
@@ -106,4 +107,7 @@ object LioraIcons {
 
     /** Something worth a second look, such as a big jump in weight. */
     val Warning: DrawableResource = Res.drawable.ic_warning
+
+    /** A newer Liora to download. */
+    val Download: DrawableResource = Res.drawable.ic_download
 }

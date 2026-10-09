@@ -87,6 +87,21 @@ Keep a copy of both files somewhere safe: a release build can only be updated wi
 ./gradlew :app:android:installRelease
 ```
 
+### Publishing a release
+
+Releases are built and signed on this machine and published on GitHub, where the release app looks for
+updates once a day (Settings › About Liora). Set the version in `version.properties`, write what's new in
+`docs/releases/<version>.md` (an `## English` and a `## Deutsch` section; the app shows the one in its
+language), commit and push, then:
+
+```sh
+node tools/release/release.mjs --dry-run   # builds and checks it, publishes nothing
+node tools/release/release.mjs             # tags v<version> and publishes liora-<version>.apk
+```
+
+It runs `check`, makes sure the APK is `app.liora` at that version and signed with the release key, then
+tags and publishes with `gh`. Only the release build updates itself; debug builds never look.
+
 ## Layout
 
 ```
@@ -98,7 +113,11 @@ core/database      Room KMP database
 core/data          Repositories (offline-first)
 core/navigation    Route keys + tab-aware navigator
 core/designsystem  Theme, icons, shared components
+core/ui            Composables that know the domain: units, labels, records, the update card
 feature/*          One module per app area: train, logger, history, exercises, progress, body, settings
+sync/gdrive        Sync through the user's Google Drive
+integration/*      Health Connect, and Liora's releases on GitHub
+tools/             Exercise catalog, icons, rest sounds, and publishing releases
 build-logic        Gradle convention plugins (liora.kmp.library, liora.cmp.feature, ...)
 ```
 
@@ -112,6 +131,7 @@ build-logic        Gradle convention plugins (liora.kmp.library, liora.cmp.featu
 2. Design and motion polish: more character, a bit quirky and playful, with animations that make
    logging feel good
 3. Google Drive (appDataFolder) sync and Health Connect
-4. Programs with auto-progression, home-screen widget, Wear OS
+4. Double progression, rotations, a home-screen widget, the workout on the lock screen, and updates from
+   GitHub
 5. Self-hosted Ktor + PostgreSQL server (Docker) and web GUI
 6. Opt-in AI on that server: ask your log, insights, natural-language logging, program generation
