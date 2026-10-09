@@ -4,14 +4,6 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
-- **Workout on the lock screen: check on the phone** (added 2026-10-10, finishes 4d). Start a workout:
-  - `adb shell dumpsys notification --noredact` should show `PROMOTED_ONGOING` in the workout
-    notification's flags. Note the Android and One UI versions (`getprop`).
-  - The status bar chip: the set ("1/3") between sets, the rest counting down while resting.
-  - The lock screen, with "hide content" on and off: the set and the rest readable without unlocking. The
-    Now Bar, and the cover screen's lock screen.
-  - Settings › Notifications on the phone: are Live Updates (or Samsung's live notifications) on for Liora
-    by default, and can they be turned off? If so, Liora's Settings gets a row for them (PLAN 4d).
 - **Home-screen widget: check on the phone** (added 2026-10-09). Add Liora's widget on the cover and the
   inner screen, at two cells wide and at four by two. With a rotation it says what's next, and Start starts
   it and opens the logger; without one, Quick start. During a workout it shows the time running and the

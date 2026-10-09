@@ -296,11 +296,11 @@ As of 2026-10-09:
     follows its state while Glance keeps its session; `WidgetUpdater` wakes it when the state changes, a
     rest running out included. Start goes through `MainActivity`, which starts the workout in the
     process's scope and opens the logger. Its faces are screenshot from the real `RemoteViews`.
-  - **4d (under way): the workout on the lock screen.** The workout notification meets Android 16's rules
-    for a Live Update (read in AOSP; `WorkoutNotificationTest` checks them, since Robolectric's Android 16
-    predates them), and it's public on the lock screen. What the Fold makes of it is the device check in
-    TODO.md, which decides whether anything else is needed.
-- **Next:** the device check for 4d, then 4e, updates from GitHub.
+  - **4d (done, checked on the phone): the workout on the lock screen.** The workout notification was
+    already nearly a Live Update; it meets Android 16's rules (read in AOSP; `WorkoutNotificationTest`
+    checks them, since Robolectric's Android 16 predates them) and is now public on the lock screen. On the
+    Fold it's promoted: the chip in the status bar, and the Now Bar on the lock screen.
+- **Next:** 4e, updates from GitHub, worked out with the user first (its open questions are in the spec).
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.
@@ -892,10 +892,12 @@ the app gets its character before sync, the server and the web GUI build on it.
   - **On the lock screen without unlocking:** the workout notification and the end-of-rest heads-up are
     public (`VISIBILITY_PUBLIC`), so a lock screen that hides what notifications say still shows the set and
     the rest. Nothing in them is private.
-  - **The device check decides the rest:** whether the Fold promotes it (`dumpsys notification` shows
-    `PROMOTED_ONGOING`), how the chip and the lock screen look, whether the Now Bar takes it, and whether
-    Live Updates are on for Liora by default. If they can be off, Settings gets a row that says so and opens
-    Android's setting for them (`ACTION_APP_NOTIFICATION_PROMOTION_SETTINGS`).
+  - **On the Fold** (checked 2026-10-10, Android 16 QPR2, One UI 8.5): Android promotes it
+    (`dumpsys notification` shows `PROMOTED_ONGOING` and `vis=PUBLIC`). The status bar chip, in violet
+    with the logo, says "1/4" between sets and counts the rest down ("01:15"; Android pads the minutes). On
+    the lock screen, Samsung's Now Bar shows it without unlocking: "Pause 0:51" and what's next, a long
+    exercise name cutting off the values. Left as it is, on the user's call: no Settings row for Live
+    Updates and no reordered line.
 - **4e, updates from GitHub** (added 2026-10-09 on request; a sketch, worked out with the user when it's next):
   Liora is sideloaded, so nothing tells it about a new version. The release app should check this repo's
   GitHub Releases, and when one is newer than what's installed, download it and install it, with what's new.

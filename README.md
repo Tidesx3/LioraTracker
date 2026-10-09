@@ -32,9 +32,9 @@ Samsung Health. On the first start, a short walkthrough shows how Liora works, a
 and offers sync. Phase 4 has begun: a routine's exercises can use double progression, so the next workout
 starts a step heavier once the sets reach the top of their rep ranges, and says why (Settings › Progression
 tunes how). A folder of routines can be a rotation, and the Train tab says which one is next, as does a
-home-screen widget, which follows the workout while it runs. The workout on the lock screen and updates
-from GitHub follow. Details and progress are in
-[docs/PLAN.md](docs/PLAN.md).
+home-screen widget, which follows the workout while it runs. On Android 16 the workout is a Live Update: the
+set and the rest in the status bar and on the lock screen. Updates from GitHub follow. Details and progress
+are in [docs/PLAN.md](docs/PLAN.md).
 
 ## Principles
 
