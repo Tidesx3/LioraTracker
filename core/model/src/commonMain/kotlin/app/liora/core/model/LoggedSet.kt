@@ -19,6 +19,8 @@ data class LoggedSet(
     val completedAt: Instant? = null,
     /** The routine's rep target for this set, shown as a hint while logging. */
     val targetReps: RepRange? = null,
+    /** The reps progression aims for this time; the placeholder before last time's. */
+    val aimReps: Int? = null,
 ) {
     val isCompleted: Boolean get() = completedAt != null
 

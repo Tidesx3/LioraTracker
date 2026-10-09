@@ -134,8 +134,8 @@ fun restAfter(
 
 /**
  * Placeholders: what an empty field shows greyed out, and what gets logged when a set is ticked off
- * without typing. They come from last session, so repeating it is one tap per set; a routine's rep
- * target fills in when there is no last session.
+ * without typing. They come from last session, so repeating it is one tap per set; the reps progression
+ * aims for come first, and a routine's rep target fills in when there is no last session.
  */
 object SetPlaceholders {
     /**
@@ -160,7 +160,7 @@ object SetPlaceholders {
     ): LoggedSet =
         set.copy(
             weight = set.weight ?: previous?.weight,
-            reps = set.reps ?: previous?.reps ?: set.targetReps?.min,
+            reps = set.reps ?: set.aimReps ?: previous?.reps ?: set.targetReps?.min,
             duration = set.duration ?: previous?.duration,
             distanceMeters = set.distanceMeters ?: previous?.distanceMeters,
         )

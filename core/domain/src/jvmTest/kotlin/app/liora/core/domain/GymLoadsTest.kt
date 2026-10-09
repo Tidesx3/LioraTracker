@@ -57,6 +57,17 @@ class LoadRoundingTest {
     }
 
     @Test
+    fun aMachineWithItsOwnStepMovesByItFromTheWeightLifted() {
+        // A stack that starts at 7 kg and goes in fives: 7, 12, 17, not onto the gym's 5 kg grid.
+        assertEquals(kg(12.0), LoadRounding.step(kg(7.0), up = true, Equipment.Machine, kgGym, ownStep = kg(5.0)))
+        assertEquals(kg(12.0), LoadRounding.step(kg(17.0), up = false, Equipment.Cable, kgGym, ownStep = kg(5.0)))
+        // In a pound gym it works in pounds.
+        assertEquals(lb(20.0), LoadRounding.step(lb(10.0), up = true, Equipment.Cable, lbGym, ownStep = lb(10.0)))
+        // Dumbbells and bars keep to the rack and the plates.
+        assertEquals(kg(42.5), LoadRounding.step(kg(40.0), up = true, Equipment.Dumbbell, kgGym, ownStep = kg(5.0)))
+    }
+
+    @Test
     fun otherEquipmentMovesInTwoOfTheSmallestPlate() {
         assertEquals(kg(14.5), LoadRounding.step(kg(12.0), up = true, Equipment.Kettlebell, kgGym))
         assertEquals(lb(15.0), LoadRounding.step(lb(10.0), up = true, Equipment.Other, lbGym))

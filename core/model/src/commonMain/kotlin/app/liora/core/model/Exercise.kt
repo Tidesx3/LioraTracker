@@ -35,4 +35,9 @@ data class ExerciseSettings(
     val restWorkingSeconds: Int? = null,
     val restWarmupSeconds: Int? = null,
     val archived: Boolean = false,
+    /**
+     * For a machine or cable whose stack doesn't move in the gym's step: how much a step adds. Progression
+     * and the logger's ± add it to the weight lifted, so a stack starting at 7 kg goes 7, 12, 17.
+     */
+    val loadStep: Mass? = null,
 )

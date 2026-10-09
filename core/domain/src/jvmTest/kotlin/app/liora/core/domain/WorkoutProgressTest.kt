@@ -136,6 +136,11 @@ class WorkoutProgressTest {
             LoggedSet("t", reps = 8, targetReps = RepRange(8, 12)),
             SetPlaceholders.fill(LoggedSet("t", targetReps = RepRange(8, 12)), null),
         )
+        // The reps progression aims for come before last time's.
+        assertEquals(
+            LoggedSet("t", weight = Mass(80.0), reps = 9, aimReps = 9),
+            SetPlaceholders.fill(LoggedSet("t", aimReps = 9), previous),
+        )
     }
 
     @Test

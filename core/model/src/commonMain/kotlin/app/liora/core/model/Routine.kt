@@ -32,7 +32,25 @@ data class RoutineExercise(
      */
     val notes: String? = null,
     val sets: List<RoutineSet> = emptyList(),
+    /** How its targets move on from session to session; null repeats last time. */
+    val progression: ProgressionRule? = null,
 )
+
+/** How a routine's exercise moves on from one session to the next. */
+enum class ProgressionRule(
+    val key: String,
+) {
+    /**
+     * Each working set has a rep range as its goal. Once every one reaches the top, the weight goes up a
+     * step and the reps start again at the bottom; two sessions in a row below the range take it down.
+     */
+    DoubleProgression("double"),
+    ;
+
+    companion object {
+        fun fromKey(key: String?): ProgressionRule? = entries.firstOrNull { it.key == key }
+    }
+}
 
 /** One planned set. Which targets apply depends on the exercise's [TrackingType]. */
 data class RoutineSet(

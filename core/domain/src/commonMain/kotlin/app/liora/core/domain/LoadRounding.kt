@@ -22,15 +22,18 @@ object LoadRounding {
 
     /**
      * The next load up or down from [from] that the gym can make for [equipment], or [from] itself when
-     * there is none that way. From an empty field (zero), up is the lightest load, such as the bar.
+     * there is none that way. From an empty field (zero), up is the lightest load, such as the bar. A
+     * machine or cable with its own step (`ExerciseSettings.loadStep`) moves by that from [from].
      */
     fun step(
         from: Mass,
         up: Boolean,
         equipment: Equipment,
         gym: GymProfile,
+        ownStep: Mass? = null,
     ): Mass {
-        val loading = loading(equipment, gym)
+        val own = ownStep?.toMilli(gym.unit)?.takeIf { it > 0 && equipment.isStack }
+        val loading = if (own != null) Loading.Free(own) else loading(equipment, gym)
         val milli = from.toMilli(gym.unit)
         return (if (up) loading.up(milli) else loading.down(milli))?.toMass(gym.unit) ?: from
     }
@@ -86,7 +89,7 @@ object LoadRounding {
                 Loading.Rack(dumbbells)
             }
 
-            (equipment == Equipment.Machine || equipment == Equipment.Cable) && gym.stackStep.toMilli(unit) > 0 -> {
+            equipment.isStack && gym.stackStep.toMilli(unit) > 0 -> {
                 Loading.Steps(gym.stackStep.toMilli(unit))
             }
 
@@ -170,6 +173,9 @@ object LoadRounding {
             override fun down(from: Long): Long? = if (from <= 0) null else (from - step).coerceAtLeast(0)
         }
     }
+
+    /** Loaded from a weight stack. */
+    private val Equipment.isStack: Boolean get() = this == Equipment.Machine || this == Equipment.Cable
 
     private fun Mass.toMilli(unit: WeightUnit): Long = (inUnit(unit) * MILLI_D).roundToLong()
 
