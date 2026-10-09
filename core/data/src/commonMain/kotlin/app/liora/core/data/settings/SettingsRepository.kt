@@ -78,6 +78,7 @@ internal object SettingsCodec {
     private const val BODY_LENGTH_UNIT = "units.body_length"
     private const val FORMULA = "progress.e1rm_formula"
     private const val STALL_WINDOW = "progress.stall_window_days"
+    private const val JUMP_LIMIT = "progress.jump_limit_percent"
     private const val THEME = "appearance.theme"
     private const val DYNAMIC_COLOR = "appearance.dynamic_color"
 
@@ -109,6 +110,7 @@ internal object SettingsCodec {
             BODY_LENGTH_UNIT to bodyLengthUnits.getValue(settings.units.bodyLength),
             FORMULA to formulas.getValue(settings.oneRepMaxFormula),
             STALL_WINDOW to settings.stallWindow.inWholeDays.toString(),
+            JUMP_LIMIT to settings.jumpLimitPercent.toString(),
             THEME to themes.getValue(settings.theme),
             DYNAMIC_COLOR to settings.dynamicColor.toString(),
         )
@@ -127,6 +129,7 @@ internal object SettingsCodec {
             units = decodeUnits(values, defaults.units),
             oneRepMaxFormula = values[FORMULA]?.let { formulas.keyFor(it) } ?: defaults.oneRepMaxFormula,
             stallWindow = values[STALL_WINDOW]?.toIntOrNull()?.takeIf { it > 0 }?.days ?: defaults.stallWindow,
+            jumpLimitPercent = values[JUMP_LIMIT]?.toIntOrNull()?.takeIf { it > 0 } ?: defaults.jumpLimitPercent,
             theme = values[THEME]?.let { themes.keyFor(it) } ?: defaults.theme,
             dynamicColor = values[DYNAMIC_COLOR]?.toBooleanStrictOrNull() ?: defaults.dynamicColor,
         )

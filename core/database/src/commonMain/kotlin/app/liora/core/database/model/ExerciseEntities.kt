@@ -61,5 +61,7 @@ data class ExerciseSettingsEntity(
     @ColumnInfo(name = "rest_working_sec") val restWorkingSeconds: Int?,
     @ColumnInfo(name = "rest_warmup_sec") val restWarmupSeconds: Int?,
     val archived: Boolean,
+    /** A machine or cable's own load step, when its stack doesn't move in the gym's (schema v4). */
+    @ColumnInfo(name = "load_step_kg") val loadStepKg: Double? = null,
     @Embedded override val sync: SyncMetadata,
 ) : Syncable

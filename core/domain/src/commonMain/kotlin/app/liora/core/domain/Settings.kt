@@ -19,6 +19,8 @@ data class Settings(
     val oneRepMaxFormula: OneRepMaxFormula = OneRepMaxFormula.Epley,
     /** How long a lift can go without a new best before it counts as stalled. */
     val stallWindow: Duration = Stalls.DEFAULT_WINDOW,
+    /** How far above the heaviest lately a progression target may go before it is flagged, in percent. */
+    val jumpLimitPercent: Int = DEFAULT_JUMP_LIMIT,
     val theme: ThemeMode = ThemeMode.System,
     /** Colors from the wallpaper, where the phone offers them (Android 12 and up). */
     val dynamicColor: Boolean = false,
@@ -26,6 +28,11 @@ data class Settings(
     companion object {
         /** The stall windows to choose from: two to eight weeks. */
         val STALL_WINDOWS: List<Duration> = listOf(2, 3, 4, 6, 8).map { (it * DAYS_PER_WEEK).days }
+
+        /** The jump limits to choose from, in percent. */
+        val JUMP_LIMITS: List<Int> = listOf(5, 10, 15, 20, 25)
+
+        const val DEFAULT_JUMP_LIMIT = 10
 
         private const val DAYS_PER_WEEK = 7
     }

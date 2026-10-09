@@ -110,6 +110,7 @@ internal fun WorkoutSetEntity.toLoggedSet() =
         rpe = rpe,
         completedAt = completedAt?.let(Instant::fromEpochMilliseconds),
         targetReps = RepRange.of(targetRepsMin, targetRepsMax),
+        aimReps = aimReps,
     )
 
 /** [set]'s values on this row; identity, position and sync stay. */
@@ -124,6 +125,7 @@ internal fun WorkoutSetEntity.withValues(set: LoggedSet) =
         completedAt = set.completedAt?.toEpochMilliseconds(),
         targetRepsMin = set.targetReps?.min,
         targetRepsMax = set.targetReps?.max,
+        aimReps = set.aimReps,
     )
 
 /** Clears the values [trackingType] has no column for, e.g. reps after switching to a timed exercise. */

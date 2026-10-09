@@ -20,7 +20,8 @@ object RoutineUpdate {
      * What was planned but not done stays as planned, so a set or an exercise skipped on a tired day
      * doesn't shrink the plan; one deleted from the workout leaves it. Sets and exercises added today
      * join only once logged. The routine's own rows are reused where the exercise is the same, so only
-     * what really changed gets synced.
+     * what really changed gets synced. An exercise with progression keeps its planned sets, since its
+     * targets come from the history; only its place and superset follow the workout.
      */
     fun fromWorkout(
         routine: Routine,
@@ -41,7 +42,9 @@ object RoutineUpdate {
         val exercises =
             workoutExercises.mapNotNull { done ->
                 val match = unmatched.firstOrNull { it.exerciseId == done.exerciseId }?.also { unmatched.remove(it) }
-                val sets = setsFor(done.sets, match?.sets.orEmpty(), newId)
+                // With progression, the plan comes from the history: its sets stay as they were.
+                val sets =
+                    match?.takeIf { it.progression != null }?.sets ?: setsFor(done.sets, match?.sets.orEmpty(), newId)
                 if (sets.isEmpty()) return@mapNotNull null
                 RoutineExercise(
                     id = match?.id ?: newId(),
@@ -51,6 +54,7 @@ object RoutineUpdate {
                     // Today's notes stay with the workout; they don't become the plan.
                     notes = match?.notes,
                     sets = sets,
+                    progression = match?.progression,
                 )
             }
         val groups = Supersets.normalize(exercises.map { it.supersetGroup })

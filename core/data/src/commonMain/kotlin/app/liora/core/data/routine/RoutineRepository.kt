@@ -11,6 +11,7 @@ import app.liora.core.database.model.RoutineSetEntity
 import app.liora.core.database.model.SyncMetadata
 import app.liora.core.database.model.SyncedRow
 import app.liora.core.model.Mass
+import app.liora.core.model.ProgressionRule
 import app.liora.core.model.RepRange
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineExercise
@@ -246,6 +247,7 @@ private fun RoutineExercise.toEntity(
     supersetGroup = supersetGroup,
     restSeconds = restSeconds,
     notes = notes?.trim()?.ifEmpty { null },
+    progression = progression?.key,
     sync = NO_SYNC,
 )
 
@@ -287,6 +289,7 @@ private fun assemble(
                         supersetGroup = exercise.supersetGroup,
                         restSeconds = exercise.restSeconds,
                         notes = exercise.notes,
+                        progression = ProgressionRule.fromKey(exercise.progression),
                         sets = setsByExercise[exercise.id].orEmpty().sortedBy { it.position }.map { it.toModel() },
                     )
                 },

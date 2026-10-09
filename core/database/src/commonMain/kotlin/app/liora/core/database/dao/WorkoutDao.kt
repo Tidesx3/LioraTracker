@@ -74,6 +74,46 @@ private const val SESSIONS_OF_EXERCISE =
     ORDER BY w.started_at, we.position, s.position
     """
 
+/**
+ * One exercise's completed sets in its latest `:sessions` finished workouts that started before `:before`,
+ * newest first; with a `:routineId`, only workouts started from that routine. What progression goes on.
+ */
+private const val RECENT_SESSIONS_OF_EXERCISE =
+    """
+    SELECT w.id AS session_workout_id, w.name AS session_workout_name, w.started_at AS session_started_at, s.*
+    FROM workout_set s
+    JOIN workout_exercise we ON we.id = s.workout_exercise_id
+    JOIN workout w ON w.id = we.workout_id
+    WHERE we.exercise_id = :exerciseId
+      AND s.completed_at IS NOT NULL AND s.deleted_at IS NULL AND we.deleted_at IS NULL
+      AND w.id IN (
+        SELECT w2.id FROM workout w2
+        JOIN workout_exercise we2 ON we2.workout_id = w2.id
+        JOIN workout_set s2 ON s2.workout_exercise_id = we2.id
+        WHERE we2.exercise_id = :exerciseId
+          AND s2.completed_at IS NOT NULL AND s2.deleted_at IS NULL AND we2.deleted_at IS NULL
+          AND w2.ended_at IS NOT NULL AND w2.deleted_at IS NULL AND w2.started_at < :before
+          AND (:routineId IS NULL OR w2.routine_id = :routineId)
+        GROUP BY w2.id
+        ORDER BY w2.started_at DESC LIMIT :sessions
+      )
+    ORDER BY w.started_at DESC, we.position, s.position
+    """
+
+/**
+ * The heaviest working set (no warm-ups) of an exercise in finished workouts that started from `:since`
+ * up to `:before`, in kilograms: what the safety bound measures a target against.
+ */
+private const val HEAVIEST_SINCE =
+    """
+    SELECT MAX(s.weight_kg) FROM workout_set s
+    JOIN workout_exercise we ON we.id = s.workout_exercise_id
+    JOIN workout w ON w.id = we.workout_id
+    WHERE we.exercise_id = :exerciseId AND s.set_type != 'warmup'
+      AND s.completed_at IS NOT NULL AND s.deleted_at IS NULL AND we.deleted_at IS NULL
+      AND w.ended_at IS NOT NULL AND w.deleted_at IS NULL AND w.started_at >= :since AND w.started_at < :before
+    """
+
 /** History: every finished workout, newest first. */
 private const val FINISHED_WORKOUTS =
     "SELECT * FROM workout WHERE ended_at IS NOT NULL AND deleted_at IS NULL ORDER BY started_at DESC"
@@ -152,6 +192,21 @@ interface WorkoutDao {
 
     @Query(SESSIONS_OF_EXERCISE)
     fun observeSessionSets(exerciseId: String): Flow<List<SessionSetRow>>
+
+    @Query(RECENT_SESSIONS_OF_EXERCISE)
+    suspend fun recentSessionSets(
+        exerciseId: String,
+        routineId: String?,
+        before: Long,
+        sessions: Int,
+    ): List<SessionSetRow>
+
+    @Query(HEAVIEST_SINCE)
+    suspend fun heaviestKg(
+        exerciseId: String,
+        since: Long,
+        before: Long,
+    ): Double?
 
     @Query(FINISHED_WORKOUTS)
     fun observeFinished(): Flow<List<WorkoutEntity>>

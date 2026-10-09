@@ -78,6 +78,8 @@ class BackupExerciseSettings(
     val restWorkingSec: Int? = null,
     val restWarmupSec: Int? = null,
     val archived: Boolean = false,
+    /** A machine or cable's own load step (since schema v4). */
+    val loadStepKg: Double? = null,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
     /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
@@ -89,6 +91,8 @@ class BackupRoutineFolder(
     val id: String,
     val name: String,
     val position: Int,
+    /** Its routines take turns in their order (since schema v4). */
+    val rotation: Boolean = false,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
     /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
@@ -117,6 +121,8 @@ class BackupRoutineExercise(
     val supersetGroup: Int? = null,
     val restSec: Int? = null,
     val notes: String? = null,
+    /** How its targets move on: a `ProgressionRule` key such as "double" (since schema v4). */
+    val progression: String? = null,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
     /** When it was deleted: only sync batches carry deletions, backups hold what's live. */
@@ -187,6 +193,8 @@ class BackupWorkoutSet(
     @Serializable(with = IsoMillis::class) val completedAt: Long? = null,
     val targetRepsMin: Int? = null,
     val targetRepsMax: Int? = null,
+    /** The reps progression aimed for (since schema v4). */
+    val aimReps: Int? = null,
     @Serializable(with = IsoMillis::class) val createdAt: Long,
     val hlc: String,
     /** When it was deleted: only sync batches carry deletions, backups hold what's live. */

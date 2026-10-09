@@ -1,6 +1,8 @@
 package app.liora.core.data.workout
 
 import app.liora.core.common.IdGenerator
+import app.liora.core.data.progression.ExerciseProgression
+import app.liora.core.data.progression.ProgressionRepository
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.sync.SyncStamper
 import app.liora.core.database.TransactionRunner
@@ -21,6 +23,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlin.time.Instant
 
 /**
  * Owns the single in-progress workout. It lives in the database from the first tap, so it survives
@@ -57,10 +60,12 @@ interface ActiveWorkoutRepository : WorkoutSession {
     suspend fun discard()
 }
 
+@Suppress("LongParameterList") // the workout's rows, the routine it follows and its progression, the rest timer, writes
 internal class OfflineActiveWorkoutRepository(
     private val workoutDao: WorkoutDao,
     exerciseDao: ExerciseDao,
     private val routines: RoutineRepository,
+    private val progression: ProgressionRepository,
     private val restTimer: RestTimerRepository,
     private val transactions: TransactionRunner,
     private val ids: IdGenerator,
@@ -113,9 +118,11 @@ internal class OfflineActiveWorkoutRepository(
 
     override suspend fun startFromRoutine(routineId: String): ActiveWorkout {
         val routine = requireNotNull(routines.get(routineId)) { "No routine $routineId" }
+        // Progression's targets for exercises with a rule, from the sessions before this one.
+        val targets = progression.targets(routine, Instant.fromEpochMilliseconds(stamper.nowMillis()))
         return transactions.inTransaction {
             workoutDao.activeRows()?.toModel()
-                ?: startPlanned(name = routine.name, routineId = routine.id, plan = routine)
+                ?: startPlanned(name = routine.name, routineId = routine.id, plan = routine, targets = targets)
         }
     }
 
@@ -135,6 +142,7 @@ internal class OfflineActiveWorkoutRepository(
         name: String?,
         routineId: String?,
         plan: Routine,
+        targets: Map<String, ExerciseProgression> = emptyMap(),
     ): ActiveWorkout {
         val sync = stamper.newRow()
         val workout =
@@ -149,7 +157,7 @@ internal class OfflineActiveWorkoutRepository(
                 sync = sync,
             )
         workoutDao.upsert(workout)
-        val (exercises, sets) = plannedRows(workout.id, plan)
+        val (exercises, sets) = plannedRows(workout.id, plan, targets)
         if (exercises.isNotEmpty()) workoutDao.upsertExercises(exercises)
         if (sets.isNotEmpty()) workoutDao.upsertSets(sets)
         return workout.toActiveWorkout(exercises, sets)
@@ -181,14 +189,19 @@ internal class OfflineActiveWorkoutRepository(
         }
     }
 
-    /** The routine as a plan: sets not yet ticked off, carrying the routine's targets. */
+    /**
+     * The routine as a plan: sets not yet ticked off, carrying the routine's targets, with progression's
+     * [targets] (by routine exercise id) in place of its weights and as the reps to aim for.
+     */
     private suspend fun plannedRows(
         workoutId: String,
         routine: Routine,
+        targets: Map<String, ExerciseProgression>,
     ): Pair<List<WorkoutExerciseEntity>, List<WorkoutSetEntity>> {
         val exercises = mutableListOf<WorkoutExerciseEntity>()
         val sets = mutableListOf<WorkoutSetEntity>()
         routine.exercises.forEachIndexed { position, planned ->
+            val aims = targets[planned.id]?.target?.sets
             val exercise =
                 WorkoutExerciseEntity(
                     id = ids.newId(),
@@ -204,13 +217,14 @@ internal class OfflineActiveWorkoutRepository(
                 )
             exercises += exercise
             planned.sets.forEachIndexed { index, set ->
+                val aim = aims?.getOrNull(index)
                 sets +=
                     WorkoutSetEntity(
                         id = ids.newId(),
                         workoutExerciseId = exercise.id,
                         position = index,
                         setType = set.type,
-                        weightKg = set.weight?.kilograms,
+                        weightKg = (aim?.weight ?: set.weight)?.kilograms,
                         // An exact target is the plan; a range stays a hint until the set is logged.
                         reps = set.reps?.takeUnless { it.isRange }?.min,
                         durationSeconds = set.duration?.inWholeSeconds?.toInt(),
@@ -219,6 +233,7 @@ internal class OfflineActiveWorkoutRepository(
                         completedAt = null,
                         targetRepsMin = set.reps?.min,
                         targetRepsMax = set.reps?.max,
+                        aimReps = aim?.reps,
                         sync = stamper.newRow(),
                     )
             }

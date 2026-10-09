@@ -47,6 +47,7 @@ class WorkoutEditingTest {
             database.workoutDao(),
             database.exerciseDao(),
             routines,
+            NoProgression,
             restTimer,
             transactions,
             ids,

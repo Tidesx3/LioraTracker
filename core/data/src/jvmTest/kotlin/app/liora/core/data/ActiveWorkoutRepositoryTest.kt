@@ -42,6 +42,7 @@ class ActiveWorkoutRepositoryTest {
             workoutDao = database.workoutDao(),
             exerciseDao = database.exerciseDao(),
             routines = routines,
+            progression = NoProgression,
             restTimer = LocalRestTimerRepository(database.localMetaDao(), clock),
             transactions = TransactionRunner(database),
             ids = ids,

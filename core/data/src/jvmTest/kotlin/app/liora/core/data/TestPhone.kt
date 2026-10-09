@@ -12,6 +12,7 @@ import app.liora.core.data.body.OfflineProgressPhotoRepository
 import app.liora.core.data.body.PhotoStorage
 import app.liora.core.data.exercise.OfflineExerciseRepository
 import app.liora.core.data.gym.OfflineGymProfileRepository
+import app.liora.core.data.progression.OfflineProgressionRepository
 import app.liora.core.data.routine.OfflineRoutineRepository
 import app.liora.core.data.settings.OfflineSettingsRepository
 import app.liora.core.data.sync.DeviceIdentity
@@ -37,6 +38,7 @@ import app.liora.core.model.Mass
 import app.liora.core.model.MeasurementType
 import app.liora.core.model.Muscle
 import app.liora.core.model.PhotoPose
+import app.liora.core.model.ProgressionRule
 import app.liora.core.model.RepRange
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineExercise
@@ -74,11 +76,22 @@ internal class TestPhone(
     val exercises = OfflineExerciseRepository(database.exerciseDao(), transactions, ids, stamper)
     val routines = OfflineRoutineRepository(database.routineDao(), transactions, ids, stamper)
     private val restTimer = LocalRestTimerRepository(meta, clock)
+    val settings = OfflineSettingsRepository(database.preferenceDao(), transactions, stamper)
+    val gyms =
+        OfflineGymProfileRepository(database.gymProfileDao(), meta, settings, transactions, ids, stamper)
     val workouts =
         OfflineActiveWorkoutRepository(
             database.workoutDao(),
             database.exerciseDao(),
             routines,
+            OfflineProgressionRepository(
+                database.workoutDao(),
+                database.exerciseDao(),
+                routines,
+                gyms,
+                settings,
+                clock,
+            ),
             restTimer,
             transactions,
             ids,
@@ -96,9 +109,6 @@ internal class TestPhone(
         )
     val body = OfflineBodyRepository(database.measurementDao(), transactions, ids, stamper, clock)
     val photos = OfflineProgressPhotoRepository(database.progressPhotoDao(), storage, ids, stamper, clock)
-    val settings = OfflineSettingsRepository(database.preferenceDao(), transactions, stamper)
-    val gyms =
-        OfflineGymProfileRepository(database.gymProfileDao(), meta, settings, transactions, ids, stamper)
     private val tables = SyncedTables(database.backupDao(), database.exerciseDao(), meta, stamper)
     val backups = OfflineBackupRepository(tables, files, storage, transactions, clock)
     val sync =
@@ -186,6 +196,7 @@ internal class TestPhone(
                     notes = "Sitz auf 4",
                 ),
             )
+        exercises.setLoadStep(legPress, Mass(2.5))
         val folder = routines.createFolder("PPL")
         routines.save(
             Routine(
@@ -205,6 +216,8 @@ internal class TestPhone(
                                     RoutineSet("w", SetType.Warmup, Mass(40.0), RepRange(10)),
                                     RoutineSet("s1", weight = Mass(80.0), reps = RepRange(8, 12)),
                                 ),
+                            // Its sets aim for reps (aimReps), which come back from a backup too.
+                            progression = ProgressionRule.DoubleProgression,
                         ),
                     ),
             ),

@@ -49,5 +49,7 @@ data class WorkoutSetEntity(
     /** Rep target copied from the routine (schema v2), shown as a hint while logging. */
     @ColumnInfo(name = "target_reps_min") val targetRepsMin: Int? = null,
     @ColumnInfo(name = "target_reps_max") val targetRepsMax: Int? = null,
+    /** The reps progression aims for, the placeholder before last time's (schema v4). */
+    @ColumnInfo(name = "aim_reps") val aimReps: Int? = null,
     @Embedded override val sync: SyncMetadata,
 ) : SyncedRow

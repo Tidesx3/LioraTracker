@@ -88,4 +88,64 @@ class MigrationTest {
         }
         migrated.close()
     }
+
+    @Test
+    fun v3To4KeepsRoutinesAndSetsAndAddsProgressionAndRotations() {
+        helper.createDatabase(3).apply {
+            execSQL(
+                """
+                INSERT INTO routine_folder (id, name, position, created_at, hlc, deleted_at, dirty)
+                VALUES ('f1', 'Push Pull Legs', 0, 1000, 'hlc', NULL, 1)
+                """.trimIndent(),
+            )
+            execSQL(
+                """
+                INSERT INTO routine_exercise (id, routine_id, exercise_id, position, superset_group, rest_sec, notes,
+                    created_at, hlc, deleted_at, dirty)
+                VALUES ('re1', 'r1', 'fedb.bench', 0, NULL, 120, NULL, 1000, 'hlc', NULL, 1)
+                """.trimIndent(),
+            )
+            execSQL(
+                """
+                INSERT INTO exercise_settings (exercise_id, sticky_note, rest_working_sec, rest_warmup_sec, archived,
+                    created_at, hlc, deleted_at, dirty)
+                VALUES ('fedb.bench', 'Seat 4', NULL, NULL, 0, 1000, 'hlc', NULL, 1)
+                """.trimIndent(),
+            )
+            execSQL(
+                """
+                INSERT INTO workout_set (id, workout_exercise_id, position, set_type, weight_kg, reps, duration_sec,
+                    distance_m, rpe, completed_at, target_reps_min, target_reps_max, created_at, hlc, deleted_at, dirty)
+                VALUES ('s1', 'we1', 0, 'normal', 80.0, 12, NULL, NULL, NULL, 1000, 8, 12, 1000, 'hlc', NULL, 1)
+                """.trimIndent(),
+            )
+            close()
+        }
+
+        val migrated = helper.runMigrationsAndValidate(4)
+        // Folders aren't rotations until made one; exercises have no rule, no own step, sets no aim.
+        migrated.prepare("SELECT name, rotation FROM routine_folder").use { row ->
+            assertTrue(row.step())
+            assertEquals("Push Pull Legs", row.getText(0))
+            assertEquals(0, row.getLong(1))
+        }
+        migrated.prepare("SELECT rest_sec, progression FROM routine_exercise").use { row ->
+            assertTrue(row.step())
+            assertEquals(120, row.getLong(0))
+            assertTrue(row.isNull(1))
+        }
+        migrated.prepare("SELECT sticky_note, load_step_kg FROM exercise_settings").use { row ->
+            assertTrue(row.step())
+            assertEquals("Seat 4", row.getText(0))
+            assertTrue(row.isNull(1))
+        }
+        migrated.prepare("SELECT weight_kg, reps, target_reps_max, aim_reps FROM workout_set").use { row ->
+            assertTrue(row.step())
+            assertEquals(80.0, row.getDouble(0))
+            assertEquals(12, row.getLong(1))
+            assertEquals(12, row.getLong(2))
+            assertTrue(row.isNull(3))
+        }
+        migrated.close()
+    }
 }

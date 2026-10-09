@@ -15,6 +15,8 @@ data class RoutineFolderEntity(
     @PrimaryKey override val id: String,
     val name: String,
     val position: Int,
+    /** Its routines take turns in their order (schema v4, used from Phase 4b). */
+    @ColumnInfo(defaultValue = "0") val rotation: Boolean = false,
     @Embedded override val sync: SyncMetadata,
 ) : SyncedRow
 
@@ -37,6 +39,8 @@ data class RoutineExerciseEntity(
     @ColumnInfo(name = "superset_group") val supersetGroup: Int?,
     @ColumnInfo(name = "rest_sec") val restSeconds: Int?,
     val notes: String?,
+    /** How its targets move on, by `ProgressionRule.key`; null repeats last time (schema v4). */
+    val progression: String? = null,
     @Embedded override val sync: SyncMetadata,
 ) : SyncedRow
 

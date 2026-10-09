@@ -3,6 +3,7 @@ package app.liora.core.domain
 import app.liora.core.model.ActiveWorkout
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.Mass
+import app.liora.core.model.ProgressionRule
 import app.liora.core.model.RepRange
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineExercise
@@ -67,6 +68,23 @@ class FinishWorkoutTest {
             RoutineUpdate.changes(updated, updated.copy(exercises = updated.exercises.map { it.copy(id = "other") })),
         )
         assertEquals(listOf(RoutineChange.Added("dips")), RoutineUpdate.changeList(routine, updated))
+    }
+
+    @Test
+    fun anExerciseWithProgressionKeepsItsPlanAndItsRule() {
+        val routine = pushRoutine()
+        val progressing =
+            routine.copy(
+                exercises =
+                    routine.exercises.mapIndexed { index, exercise ->
+                        if (index == 0) exercise.copy(progression = ProgressionRule.DoubleProgression) else exercise
+                    },
+            )
+        val updated = RoutineUpdate.fromWorkout(progressing, pushWorkout()) { "new" }
+
+        // Its targets come from the history, so today's weights don't overwrite the plan.
+        assertEquals(progressing.exercises.first(), updated.exercises.first())
+        assertEquals(ProgressionRule.DoubleProgression, updated.exercises.first().progression)
     }
 
     @Test

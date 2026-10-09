@@ -12,6 +12,7 @@ import app.liora.core.model.Exercise
 import app.liora.core.model.ExerciseCategory
 import app.liora.core.model.ExerciseDraft
 import app.liora.core.model.ExerciseSettings
+import app.liora.core.model.Mass
 import app.liora.core.model.TrackingType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -46,6 +47,15 @@ interface ExerciseRepository {
     suspend fun setNote(
         id: String,
         note: String?,
+    )
+
+    /**
+     * A machine or cable's own load step, for a stack that doesn't move in the gym's; null goes back to
+     * the gym's. Progression and the logger's ± add it to the weight lifted.
+     */
+    suspend fun setLoadStep(
+        id: String,
+        step: Mass?,
     )
 
     /** Hides an exercise from pickers and the library; its history stays intact. */
@@ -102,7 +112,7 @@ internal class OfflineExerciseRepository(
         transactions.inTransaction {
             exerciseDao.upsertExercises(listOf(draft.toEntity(id, stamper.newRow())))
             exerciseDao.upsertNames(listOf(customName(id, draft.name)))
-            writeNote(id, draft.notes)
+            writeNote(exerciseDao, stamper, id, draft.notes)
         }
         return id
     }
@@ -123,7 +133,7 @@ internal class OfflineExerciseRepository(
             exerciseDao.upsertExercises(listOf(draft.toEntity(id, stamper.touch(existing.sync))))
             exerciseDao.deleteNames(id)
             exerciseDao.upsertNames(listOf(customName(id, draft.name)))
-            writeNote(id, draft.notes)
+            writeNote(exerciseDao, stamper, id, draft.notes)
         }
     }
 
@@ -131,7 +141,20 @@ internal class OfflineExerciseRepository(
         id: String,
         note: String?,
     ) {
-        transactions.inTransaction { writeNote(id, note) }
+        transactions.inTransaction { writeNote(exerciseDao, stamper, id, note) }
+    }
+
+    override suspend fun setLoadStep(
+        id: String,
+        step: Mass?,
+    ) {
+        val kilograms = step?.kilograms?.takeIf { it > 0 }
+        transactions.inTransaction {
+            if (exerciseDao.getSettings(id)?.takeIf { it.sync.deletedAt == null }?.loadStepKg == kilograms) {
+                return@inTransaction
+            }
+            editSettings(exerciseDao, stamper, id) { copy(loadStepKg = kilograms) }
+        }
     }
 
     override suspend fun setArchived(
@@ -139,15 +162,6 @@ internal class OfflineExerciseRepository(
         archived: Boolean,
     ) {
         transactions.inTransaction { editSettings(exerciseDao, stamper, id) { copy(archived = archived) } }
-    }
-
-    private suspend fun writeNote(
-        id: String,
-        note: String?,
-    ) {
-        val text = note?.trim()?.ifEmpty { null }
-        if (exerciseDao.getSettings(id)?.takeIf { it.sync.deletedAt == null }?.stickyNote == text) return
-        editSettings(exerciseDao, stamper, id) { copy(stickyNote = text) }
     }
 
     override suspend fun isInUse(id: String): Boolean = exerciseDao.isInUse(id)
@@ -188,6 +202,18 @@ internal suspend fun editSettings(
                 sync = stamper.newRow(),
             )
     exerciseDao.upsertSettings(base.change())
+}
+
+/** Makes [note] the exercise's own note, trimmed, unless it already is. Call it inside a transaction. */
+private suspend fun writeNote(
+    exerciseDao: ExerciseDao,
+    stamper: SyncStamper,
+    id: String,
+    note: String?,
+) {
+    val text = note?.trim()?.ifEmpty { null }
+    if (exerciseDao.getSettings(id)?.takeIf { it.sync.deletedAt == null }?.stickyNote == text) return
+    editSettings(exerciseDao, stamper, id) { copy(stickyNote = text) }
 }
 
 /** A custom exercise is found by the one name the user gave it, in any language. */
@@ -274,6 +300,7 @@ internal fun ExerciseEntity.toModel(
                     restWorkingSeconds = it.restWorkingSeconds,
                     restWarmupSeconds = it.restWarmupSeconds,
                     archived = it.archived,
+                    loadStep = it.loadStepKg?.let(::Mass),
                 )
             } ?: ExerciseSettings(),
     )

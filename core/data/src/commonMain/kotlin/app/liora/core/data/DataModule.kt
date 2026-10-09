@@ -21,6 +21,8 @@ import app.liora.core.data.health.HealthRepository
 import app.liora.core.data.health.OfflineHealthRepository
 import app.liora.core.data.importing.ImportRepository
 import app.liora.core.data.importing.OfflineImportRepository
+import app.liora.core.data.progression.OfflineProgressionRepository
+import app.liora.core.data.progression.ProgressionRepository
 import app.liora.core.data.routine.OfflineRoutineRepository
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.seed.ExerciseCatalogSeeder
@@ -75,7 +77,7 @@ val dataModule =
         singleOf(::OfflineGymProfileRepository) bind GymProfileRepository::class
         single<ActiveWorkoutRepository> {
             val settings = get<SettingsRepository>()
-            OfflineActiveWorkoutRepository(get(), get(), get(), get(), get(), get(), get()) {
+            OfflineActiveWorkoutRepository(get(), get(), get(), get(), get(), get(), get(), get()) {
                 settings.current().rest
             }
         }
@@ -93,6 +95,7 @@ val dataModule =
         single<SetLogger> { get<ActiveWorkoutRepository>().sets }
         singleOf(::LocalRestTimerRepository) bind RestTimerRepository::class
         singleOf(::LocalWalkthroughRepository) bind WalkthroughRepository::class
+        singleOf(::OfflineProgressionRepository) bind ProgressionRepository::class
     }
 
 /** Work that runs once per process start, off the main thread. */

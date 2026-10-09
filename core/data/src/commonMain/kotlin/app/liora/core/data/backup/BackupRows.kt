@@ -70,6 +70,7 @@ internal fun ExerciseSettingsEntity.toBackup() =
         restWorkingSec = restWorkingSeconds,
         restWarmupSec = restWarmupSeconds,
         archived = archived,
+        loadStepKg = loadStepKg,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
         deletedAt = sync.deletedAt,
@@ -82,6 +83,7 @@ internal fun BackupExerciseSettings.toEntity(sync: SyncMetadata) =
         restWorkingSeconds = restWorkingSec,
         restWarmupSeconds = restWarmupSec,
         archived = archived,
+        loadStepKg = loadStepKg,
         sync = sync,
     )
 
@@ -90,13 +92,14 @@ internal fun RoutineFolderEntity.toBackup() =
         id = id,
         name = name,
         position = position,
+        rotation = rotation,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
         deletedAt = sync.deletedAt,
     )
 
 internal fun BackupRoutineFolder.toEntity(sync: SyncMetadata) =
-    RoutineFolderEntity(id = id, name = name, position = position, sync = sync)
+    RoutineFolderEntity(id = id, name = name, position = position, rotation = rotation, sync = sync)
 
 internal fun RoutineEntity.toBackup(exercises: List<BackupRoutineExercise>) =
     BackupRoutine(
@@ -122,6 +125,7 @@ internal fun RoutineExerciseEntity.toBackup(sets: List<BackupRoutineSet>) =
         supersetGroup = supersetGroup,
         restSec = restSeconds,
         notes = notes,
+        progression = progression,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
         deletedAt = sync.deletedAt,
@@ -139,6 +143,7 @@ internal fun BackupRoutineExercise.toEntity(
     supersetGroup = supersetGroup,
     restSeconds = restSec,
     notes = notes,
+    progression = progression,
     sync = sync,
 )
 
@@ -244,6 +249,7 @@ internal fun WorkoutSetEntity.toBackup() =
         completedAt = completedAt,
         targetRepsMin = targetRepsMin,
         targetRepsMax = targetRepsMax,
+        aimReps = aimReps,
         createdAt = sync.createdAt,
         hlc = sync.hlc,
         deletedAt = sync.deletedAt,
@@ -265,6 +271,7 @@ internal fun BackupWorkoutSet.toEntity(
     completedAt = completedAt,
     targetRepsMin = targetRepsMin,
     targetRepsMax = targetRepsMax,
+    aimReps = aimReps,
     sync = sync,
 )
 

@@ -56,12 +56,15 @@ import kotlinx.coroutines.IO
         LocalMetaEntity::class,
         GymProfileEntity::class,
     ],
-    version = 3,
+    version = 4,
     autoMigrations = [
         // v2: workout_set.target_reps_min/max, so a workout started from a routine keeps its rep targets.
         AutoMigration(from = 1, to = 2),
         // v3: gym_profile, the gyms whose plates, dumbbells and stacks weights round to.
         AutoMigration(from = 2, to = 3),
+        // v4: progression (routine_exercise.progression, exercise_settings.load_step_kg,
+        // workout_set.aim_reps) and rotations (routine_folder.rotation).
+        AutoMigration(from = 3, to = 4),
     ],
 )
 @ConstructedBy(LioraDatabaseConstructor::class)

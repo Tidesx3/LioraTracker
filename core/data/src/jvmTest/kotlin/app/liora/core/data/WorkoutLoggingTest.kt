@@ -52,6 +52,7 @@ class WorkoutLoggingTest {
             workoutDao = database.workoutDao(),
             exerciseDao = database.exerciseDao(),
             routines = routines,
+            progression = NoProgression,
             restTimer = restTimer,
             transactions = transactions,
             ids = ids,

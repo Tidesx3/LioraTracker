@@ -48,6 +48,7 @@ class WorkoutHistoryTest {
             database.workoutDao(),
             database.exerciseDao(),
             routines,
+            NoProgression,
             restTimer,
             transactions,
             ids,

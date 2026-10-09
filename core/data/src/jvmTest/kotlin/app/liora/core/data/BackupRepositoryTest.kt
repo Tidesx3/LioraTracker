@@ -110,6 +110,10 @@ class BackupRepositoryTest {
             // The workout still going on the old phone wasn't history yet.
             assertNull(newPhone.workouts.activeWorkout.first())
 
+            // Progression came along: the rule, the machine's own step, the reps a set aimed for.
+            for (field in listOf("\"progression\": \"double\"", "\"loadStepKg\": 2.5", "\"aimReps\": 8")) {
+                assertTrue(field in json(BACKUP), "$field in the backup")
+            }
             // Nothing lost or changed on the way: the new phone's backup is the old one's.
             newPhone.backups.backUp(SECOND_BACKUP)
             assertEquals(json(BACKUP).withoutExportTime(), json(SECOND_BACKUP).withoutExportTime())
