@@ -284,7 +284,9 @@ As of 2026-10-09:
     own step and the aim), and the app. The routine editor turns it on per exercise from its menu and asks
     for rep ranges; routine detail shows next time's targets and why; the logger says why under each
     exercise (`ProgressionNote` in `core:ui`); an exercise's page sets a machine or cable's own step (the
-    logger's ± uses it too); Settings › Progress sets the jump limit.
+    logger's ± uses it too). Settings › Progression tunes it: the reps to aim for (by default a rep more on
+    the weakest set, after trying it on the phone), when to step up, what a session below the range does,
+    what counts as last time, and the jump limit.
 - **Next:** 4b, rotations.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
@@ -812,6 +814,14 @@ the app gets its character before sync, the server and the web GUI build on it.
     session, the fallback to any routine; kg and lb gyms; racks, plates, stacks and an exercise's own step;
     the safety bound), the migration and the backup round trip, and the editor and logger in Robolectric
     with screenshots at cover and inner sizes.
+  - **Settings › Progression** (added 2026-10-09 on request, after trying it on the phone): the choices above
+    become the defaults of `ProgressionSettings`, each a synced preference row (`progression.*`), so they
+    follow the user from phone to phone. Reps to aim for (a rep more on the weakest set, on the first set
+    below the top, the same as last time, or on every set); a step heavier when every set reaches the top,
+    the sets add up to the top, or the first set reaches it; below the range, step down after two sessions
+    in a row, right away, or never; last time means the routine's own last session or the latest anywhere.
+    The jump limit moved here from Progress. Each choice shows an example in its dialog, and the reasons
+    in the logger and on routine detail follow whichever is chosen.
 - **4b, rotations:**
   - A folder can be made a rotation (`routine_folder.rotation`, in the same schema v4). Its routines take
     turns in their order: next up is the one after the routine of the latest workout started from the

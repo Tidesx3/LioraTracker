@@ -13,6 +13,7 @@ import app.liora.core.data.workout.OfflineActiveWorkoutRepository
 import app.liora.core.database.TransactionRunner
 import app.liora.core.database.inMemoryLioraDatabase
 import app.liora.core.domain.BigJump
+import app.liora.core.domain.LastTime
 import app.liora.core.domain.ProgressionReason
 import app.liora.core.model.ActiveWorkout
 import app.liora.core.model.Equipment
@@ -116,6 +117,16 @@ class ProgressionRepositoryTest {
                     .target
             assertEquals(ProgressionReason.KeepGoing(Mass(60.0), listOf(10, 10, 9), set = 3), target.reason)
             assertEquals(listOf(10, 10, 10), target.sets.filterNotNull().map { it.reps })
+
+            // Unless Settings say the latest session anywhere: the heavier day counts too.
+            settings.update { it.copy(progression = it.progression.copy(lastTime = LastTime.Anywhere)) }
+            val anywhere =
+                progression
+                    .targets(push, clock.now())
+                    .values
+                    .single()
+                    .target
+            assertEquals(ProgressionReason.TopReached(3, 12, Mass(70.0), Mass(75.0)), anywhere.reason)
         }
 
     @Test

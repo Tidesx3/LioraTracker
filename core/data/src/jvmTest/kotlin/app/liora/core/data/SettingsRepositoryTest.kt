@@ -7,9 +7,14 @@ import app.liora.core.database.TransactionRunner
 import app.liora.core.database.inMemoryLioraDatabase
 import app.liora.core.database.model.PreferenceEntity
 import app.liora.core.database.model.SyncMetadata
+import app.liora.core.domain.BelowRange
+import app.liora.core.domain.LastTime
 import app.liora.core.domain.OneRepMaxFormula
+import app.liora.core.domain.ProgressionSettings
+import app.liora.core.domain.RepAims
 import app.liora.core.domain.RestSound
 import app.liora.core.domain.Settings
+import app.liora.core.domain.StepUpWhen
 import app.liora.core.domain.ThemeMode
 import app.liora.core.model.DistanceUnit
 import app.liora.core.model.LengthUnit
@@ -106,6 +111,31 @@ class SettingsRepositoryTest {
 
             settings.update { it.copy(restSound = RestSound.Off) }
             assertEquals(RestSound.Off, settings.current().restSound)
+        }
+
+    @Test
+    fun progressionChoicesAreKept() =
+        runTest {
+            assertEquals(ProgressionSettings(), settings.current().progression)
+            val chosen =
+                ProgressionSettings(
+                    repAims = RepAims.FirstBelowTop,
+                    stepUp = StepUpWhen.TotalReps,
+                    belowRange = BelowRange.Never,
+                    lastTime = LastTime.Anywhere,
+                )
+            settings.update { it.copy(progression = chosen) }
+
+            assertEquals(chosen, settings.settings.first().progression)
+            assertEquals(
+                mapOf(
+                    "progression.rep_aims" to "first",
+                    "progression.step_up" to "total",
+                    "progression.below_range" to "never",
+                    "progression.last_time" to "anywhere",
+                ),
+                dao.all().associate { it.key to it.value },
+            )
         }
 
     @Test

@@ -25,23 +25,45 @@ sealed interface ProgressionReason {
         val to: Mass,
     ) : ProgressionReason
 
-    /** Every set reached the top, but the gym loads nothing heavier than [weight] for the exercise. */
+    /** The working sets added up to [total] reps at [from] last time, the top of their ranges: up a step, to [to]. */
+    data class TotalReached(
+        val total: Int,
+        val from: Mass,
+        val to: Mass,
+    ) : ProgressionReason
+
+    /** The first working set reached the top of its range ([reps]) at [from] last time: up a step, to [to]. */
+    data class FirstSetReached(
+        val reps: Int,
+        val from: Mass,
+        val to: Mass,
+    ) : ProgressionReason
+
+    /** The sets reached the top, but the gym loads nothing heavier than [weight] for the exercise. */
     data class NothingHeavier(
         val weight: Mass,
     ) : ProgressionReason
 
     /**
-     * Not every set reached the top: [weight] again, each set aiming for last time's [reps], and one more on
-     * the weakest set: the one numbered [set], or null when it has no number (a failure set, or one skipped).
+     * Not at the top yet: [weight] again, each set aiming for last time's [reps], more as [aim] says. With
+     * one set getting a rep more, [set] is its number, or null when it has none (a failure set).
      */
     data class KeepGoing(
         val weight: Mass,
         val reps: List<Int>,
         val set: Int? = null,
+        val aim: RepAims = RepAims.WeakestSet,
     ) : ProgressionReason
 
     /** Below the bottom of the range ([reps]) two sessions in a row at [from]: down a step, to [to]. */
     data class BelowTwice(
+        val reps: Int,
+        val from: Mass,
+        val to: Mass,
+    ) : ProgressionReason
+
+    /** Below the bottom of the range ([reps]) at [from] last time: down a step, to [to]. */
+    data class BelowOnce(
         val reps: Int,
         val from: Mass,
         val to: Mass,
@@ -65,11 +87,12 @@ data class ProgressionTarget(
 }
 
 /**
- * Double progression: each working set has a rep range as its goal. When every one reached the top of its
- * range last time, each goes up a step from the weight lifted and the reps start again at the bottom. When
- * a set fell below the bottom two sessions in a row, each goes down a step. Otherwise the weights stay, each
- * set aims for last time's reps, and the weakest for one more: a rep more in all, so 8, 8, 8 becomes 9, 8, 8
- * and 10, 9, 8 becomes 10, 9, 9.
+ * Double progression: each working set has a rep range as its goal. By Liora's defaults
+ * ([ProgressionSettings], which Settings can change): when every one reached the top of its range last time,
+ * each goes up a step from the weight lifted and the reps start again at the bottom. When a set fell below
+ * the bottom two sessions in a row, each goes down a step. Otherwise the weights stay, each set aims for last
+ * time's reps, and the weakest for one more: a rep more in all, so 8, 8, 8 becomes 9, 8, 8 and 10, 9, 8
+ * becomes 10, 9, 9.
  *
  * Planned working sets pair with last time's by count, as the Previous column pairs them; warm-ups and drop
  * sets don't count. A set skipped last time didn't reach the top, so there's no step up.
@@ -84,18 +107,32 @@ object Progression {
         planned: List<RoutineSet>,
         sessions: List<List<LoggedSet>>,
         step: (from: Mass, up: Boolean) -> Mass,
+        settings: ProgressionSettings = ProgressionSettings(),
     ): ProgressionTarget {
         val counted = planned.indices.filter { planned[it].type.counts }
         val last = sessions.firstOrNull()?.working().orEmpty()
         if (last.isEmpty()) return firstTime(planned, counted)
         val sets = Pairing(planned, counted, last)
-        val ranged = sets.ranged()
-        val before = sessions.getOrNull(1)?.working().orEmpty()
+        val below =
+            when (settings.belowRange) {
+                BelowRange.TwiceInARow -> {
+                    val before = sessions.getOrNull(1)?.working().orEmpty()
+                    sets.anyBelow() && Pairing(planned, counted, before).anyBelow()
+                }
+
+                BelowRange.RightAway -> {
+                    sets.anyBelow()
+                }
+
+                BelowRange.Never -> {
+                    false
+                }
+            }
         return when {
-            ranged.isNotEmpty() && ranged.all { it.reachedTop } -> stepUp(sets, step)
-            sets.anyBelow() && Pairing(planned, counted, before).anyBelow() -> stepDown(sets, step) ?: keepGoing(sets)
-            else -> keepGoing(sets)
-        }
+            sets.reachedTop(settings.stepUp) -> stepUp(sets, step, settings.stepUp)
+            below -> stepDown(sets, step, twice = settings.belowRange == BelowRange.TwiceInARow)
+            else -> null
+        } ?: keepGoing(sets, settings.repAims)
     }
 
     /**
@@ -137,6 +174,7 @@ object Progression {
     private fun stepUp(
         sets: Pairing,
         step: (Mass, Boolean) -> Mass,
+        mode: StepUpWhen,
     ): ProgressionTarget {
         val targets = sets.targets { set -> set.range?.let { SetTarget(step(set.weight, true), it.min) } ?: set.same() }
         val ranged = sets.ranged()
@@ -148,14 +186,28 @@ object Progression {
                 reason = ProgressionReason.NothingHeavier(from),
             )
         }
-        val top = ranged.firstNotNullOf { it.range }.max
-        return ProgressionTarget(targets, ProgressionReason.TopReached(ranged.size, top, from, to))
+        val reason =
+            when (mode) {
+                StepUpWhen.EverySetAtTop -> {
+                    ProgressionReason.TopReached(ranged.size, ranged.firstNotNullOf { it.range }.max, from, to)
+                }
+
+                StepUpWhen.TotalReps -> {
+                    ProgressionReason.TotalReached(sets.doneReps().sum(), from, to)
+                }
+
+                StepUpWhen.FirstSetAtTop -> {
+                    ProgressionReason.FirstSetReached(ranged.first().done?.reps ?: 0, from, to)
+                }
+            }
+        return ProgressionTarget(targets, reason)
     }
 
     /** A step down for every ranged set, or null when the gym has nothing lighter. */
     private fun stepDown(
         sets: Pairing,
         step: (Mass, Boolean) -> Mass,
+        twice: Boolean,
     ): ProgressionTarget? {
         val ranged = sets.ranged()
         if (ranged.all { step(it.weight, false) == it.weight }) return null
@@ -163,48 +215,42 @@ object Progression {
             sets.targets { set ->
                 set.range?.let { SetTarget(step(set.weight, false), it.min) } ?: set.same()
             }
-        val to = targets.mapNotNull { it?.weight }.maxOrNull() ?: sets.heaviest()
+        val from = sets.heaviest()
+        val to = targets.mapNotNull { it?.weight }.maxOrNull() ?: from
         val bottom = ranged.firstNotNullOf { it.range }.min
-        return ProgressionTarget(targets, ProgressionReason.BelowTwice(bottom, sets.heaviest(), to))
+        val reason =
+            if (twice) ProgressionReason.BelowTwice(bottom, from, to) else ProgressionReason.BelowOnce(bottom, from, to)
+        return ProgressionTarget(targets, reason)
     }
 
     /**
-     * The same weights, each set aiming for last time's reps and the weakest one for a rep more: one rep more
-     * in all, where it's likeliest to come, since the later sets of a session tire first.
+     * The same weights, each set aiming for last time's reps, and more as [aim] says. By default the weakest
+     * set gets a rep more: one rep more in all, where it's likeliest to come, since the later sets of a
+     * session tire first.
      */
-    private fun keepGoing(sets: Pairing): ProgressionTarget {
-        val weakest = sets.weakest()
+    private fun keepGoing(
+        sets: Pairing,
+        aim: RepAims,
+    ): ProgressionTarget {
+        val onlyOne =
+            when (aim) {
+                RepAims.WeakestSet -> sets.weakest()
+                RepAims.FirstBelowTop -> sets.firstBelowTop()
+                RepAims.SameAsLastTime, RepAims.EverySet -> null
+            }
+        val more = { set: PairedSet -> aim == RepAims.EverySet || set === onlyOne }
         return ProgressionTarget(
             sets =
                 sets.targets { set ->
                     val range = set.range
                     val reps = set.done?.reps
                     when {
-                        range == null -> {
-                            set.same()
-                        }
-
-                        reps == null -> {
-                            SetTarget(set.weight, range.min)
-                        }
-
-                        else -> {
-                            SetTarget(
-                                set.weight,
-                                (
-                                    if (set ===
-                                        weakest
-                                    ) {
-                                        reps + 1
-                                    } else {
-                                        reps
-                                    }
-                                ).coerceIn(range.min, range.max),
-                            )
-                        }
+                        range == null -> set.same()
+                        reps == null -> SetTarget(set.weight, range.min)
+                        else -> SetTarget(set.weight, (reps + if (more(set)) 1 else 0).coerceIn(range.min, range.max))
                     }
                 },
-            reason = ProgressionReason.KeepGoing(sets.heaviest(), sets.doneReps(), weakest?.number),
+            reason = ProgressionReason.KeepGoing(sets.heaviest(), sets.doneReps(), onlyOne?.number, aim),
         )
     }
 
@@ -261,6 +307,25 @@ object Progression {
         fun ranged(): List<PairedSet> = paired.values.filter { it.range != null }
 
         fun anyBelow(): Boolean = paired.values.any { it.below }
+
+        /** Whether the sets made it to the top, as [mode] counts it. */
+        fun reachedTop(mode: StepUpWhen): Boolean {
+            val ranged = ranged()
+            if (ranged.isEmpty()) return false
+            return when (mode) {
+                StepUpWhen.EverySetAtTop -> ranged.all { it.reachedTop }
+                StepUpWhen.TotalReps -> ranged.sumOf { it.done?.reps ?: 0 } >= ranged.sumOf { it.range?.max ?: 0 }
+                StepUpWhen.FirstSetAtTop -> ranged.first().reachedTop
+            }
+        }
+
+        /** The first set, in order, that did some reps last time and is still below its top. */
+        fun firstBelowTop(): PairedSet? =
+            paired.values.firstOrNull { set ->
+                val reps = set.done?.reps
+                val range = set.range
+                reps != null && range != null && reps < range.max
+            }
 
         fun heaviest(): Mass = paired.values.maxOfOrNull { it.weight } ?: Mass.Zero
 

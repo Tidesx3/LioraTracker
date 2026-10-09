@@ -12,6 +12,10 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
     the target and the logger's ±.
   - The history imported from Hevy counts for a routine that has no workouts of its own yet.
   - "Update the routine" at the end leaves exercises with progression as they were.
+  - Settings › Progression: try a few choices and see routine detail's targets and reasons follow
+    (checked on the phone 2026-10-09: the logger, routine detail and the weight step dialog, before the
+    settings existed).
+  - Set the cables' own steps: the pushdown is logged at 31,5 kg, off the gym's 5 kg grid.
 
 - **First-launch walkthrough: see a real first start** (added 2026-10-09). Opened from Settings it works on
   the phone (checked 2026-10-09). Still to see, on a fresh install (say, the next time the release app is

@@ -7,9 +7,11 @@ import app.liora.core.data.workout.toLoggedSet
 import app.liora.core.database.dao.ExerciseDao
 import app.liora.core.database.dao.WorkoutDao
 import app.liora.core.domain.BigJump
+import app.liora.core.domain.LastTime
 import app.liora.core.domain.LoadRounding
 import app.liora.core.domain.Progression
 import app.liora.core.domain.ProgressionTarget
+import app.liora.core.domain.Settings
 import app.liora.core.model.GymProfile
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.Mass
@@ -65,9 +67,9 @@ internal class OfflineProgressionRepository(
         val progressing = routine.exercises.filter { it.progression != null && it.sets.any { set -> set.reps != null } }
         if (progressing.isEmpty()) return emptyMap()
         val gym = gyms.active.first()
-        val limit = settings.current().jumpLimitPercent
+        val preferences = settings.current()
         return progressing
-            .mapNotNull { exercise -> targetFor(exercise, routine.id, at, gym, limit)?.let { exercise.id to it } }
+            .mapNotNull { exercise -> targetFor(exercise, routine.id, at, gym, preferences)?.let { exercise.id to it } }
             .toMap()
     }
 
@@ -81,7 +83,7 @@ internal class OfflineProgressionRepository(
         routineId: String,
         at: Instant,
         gym: GymProfile,
-        limitPercent: Int,
+        preferences: Settings,
     ): ExerciseProgression? {
         val entity = exerciseDao.get(exercise.exerciseId) ?: return null
         if (entity.trackingType !in PROGRESSING) return null
@@ -89,7 +91,10 @@ internal class OfflineProgressionRepository(
         val step = { from: Mass, up: Boolean ->
             LoadRounding.step(from, up, entity.equipment, gym, ownStep?.let(::Mass))
         }
-        val target = Progression.next(exercise.sets, sessions(exercise.exerciseId, routineId, at), step)
+        // "Last time" from the same routine first, unless Settings say the latest session anywhere.
+        val scope = routineId.takeIf { preferences.progression.lastTime == LastTime.SameRoutine }
+        val sessions = sessions(exercise.exerciseId, scope, at)
+        val target = Progression.next(exercise.sets, sessions, step, preferences.progression)
         val heaviest =
             workoutDao
                 .heaviestKg(exercise.exerciseId, (at - RECENT).toEpochMilliseconds(), at.toEpochMilliseconds())
@@ -102,23 +107,23 @@ internal class OfflineProgressionRepository(
                     heaviest = heaviest,
                     // The gym's own step, so a mistyped step of the exercise's own still shows.
                     oneStepUp = LoadRounding.step(heaviest, up = true, entity.equipment, gym),
-                    limitPercent = limitPercent,
+                    limitPercent = preferences.jumpLimitPercent,
                 )
         return ExerciseProgression(target, if (bigJump) BigJump(aimed, heaviest) else null)
     }
 
     /**
-     * The exercise's latest two sessions in workouts started from the routine, newest first; without
-     * any yet (a new rule, or history imported from another app), its latest two anywhere.
+     * The exercise's latest two sessions in workouts started from [routineId], newest first; without
+     * any yet (a new rule, or history imported from another app), or without a routine, its latest two anywhere.
      */
     private suspend fun sessions(
         exerciseId: String,
-        routineId: String,
+        routineId: String?,
         at: Instant,
     ): List<List<LoggedSet>> {
         val before = at.toEpochMilliseconds()
         val rows =
-            workoutDao.recentSessionSets(exerciseId, routineId, before, SESSIONS).ifEmpty {
+            routineId?.let { workoutDao.recentSessionSets(exerciseId, it, before, SESSIONS) }.orEmpty().ifEmpty {
                 workoutDao.recentSessionSets(exerciseId, null, before, SESSIONS)
             }
         return rows.groupBy { it.workoutId }.values.map { session -> session.map { it.set.toLoggedSet() } }

@@ -4,10 +4,15 @@ import app.liora.core.data.sync.SyncStamper
 import app.liora.core.database.TransactionRunner
 import app.liora.core.database.dao.PreferenceDao
 import app.liora.core.database.model.PreferenceEntity
+import app.liora.core.domain.BelowRange
+import app.liora.core.domain.LastTime
 import app.liora.core.domain.OneRepMaxFormula
+import app.liora.core.domain.ProgressionSettings
+import app.liora.core.domain.RepAims
 import app.liora.core.domain.RestDefaults
 import app.liora.core.domain.RestSound
 import app.liora.core.domain.Settings
+import app.liora.core.domain.StepUpWhen
 import app.liora.core.domain.ThemeMode
 import app.liora.core.model.DistanceUnit
 import app.liora.core.model.LengthUnit
@@ -79,6 +84,10 @@ internal object SettingsCodec {
     private const val FORMULA = "progress.e1rm_formula"
     private const val STALL_WINDOW = "progress.stall_window_days"
     private const val JUMP_LIMIT = "progress.jump_limit_percent"
+    private const val REP_AIMS = "progression.rep_aims"
+    private const val STEP_UP = "progression.step_up"
+    private const val BELOW_RANGE = "progression.below_range"
+    private const val LAST_TIME = "progression.last_time"
     private const val THEME = "appearance.theme"
     private const val DYNAMIC_COLOR = "appearance.dynamic_color"
 
@@ -94,6 +103,18 @@ internal object SettingsCodec {
             RestSound.Off to "off",
         )
     private val themes = mapOf(ThemeMode.System to "system", ThemeMode.Light to "light", ThemeMode.Dark to "dark")
+    private val repAims =
+        mapOf(
+            RepAims.WeakestSet to "weakest",
+            RepAims.FirstBelowTop to "first",
+            RepAims.SameAsLastTime to "same",
+            RepAims.EverySet to "each",
+        )
+    private val stepUps =
+        mapOf(StepUpWhen.EverySetAtTop to "every", StepUpWhen.TotalReps to "total", StepUpWhen.FirstSetAtTop to "first")
+    private val belowRanges =
+        mapOf(BelowRange.TwiceInARow to "twice", BelowRange.RightAway to "once", BelowRange.Never to "never")
+    private val lastTimes = mapOf(LastTime.SameRoutine to "routine", LastTime.Anywhere to "anywhere")
 
     fun encode(settings: Settings): Map<String, String> =
         mapOf(
@@ -111,6 +132,10 @@ internal object SettingsCodec {
             FORMULA to formulas.getValue(settings.oneRepMaxFormula),
             STALL_WINDOW to settings.stallWindow.inWholeDays.toString(),
             JUMP_LIMIT to settings.jumpLimitPercent.toString(),
+            REP_AIMS to repAims.getValue(settings.progression.repAims),
+            STEP_UP to stepUps.getValue(settings.progression.stepUp),
+            BELOW_RANGE to belowRanges.getValue(settings.progression.belowRange),
+            LAST_TIME to lastTimes.getValue(settings.progression.lastTime),
             THEME to themes.getValue(settings.theme),
             DYNAMIC_COLOR to settings.dynamicColor.toString(),
         )
@@ -130,6 +155,7 @@ internal object SettingsCodec {
             oneRepMaxFormula = values[FORMULA]?.let { formulas.keyFor(it) } ?: defaults.oneRepMaxFormula,
             stallWindow = values[STALL_WINDOW]?.toIntOrNull()?.takeIf { it > 0 }?.days ?: defaults.stallWindow,
             jumpLimitPercent = values[JUMP_LIMIT]?.toIntOrNull()?.takeIf { it > 0 } ?: defaults.jumpLimitPercent,
+            progression = decodeProgression(values, defaults.progression),
             theme = values[THEME]?.let { themes.keyFor(it) } ?: defaults.theme,
             dynamicColor = values[DYNAMIC_COLOR]?.toBooleanStrictOrNull() ?: defaults.dynamicColor,
         )
@@ -142,6 +168,16 @@ internal object SettingsCodec {
         weight = values[WEIGHT_UNIT]?.let { weightUnits.keyFor(it) } ?: defaults.weight,
         distance = values[DISTANCE_UNIT]?.let { distanceUnits.keyFor(it) } ?: defaults.distance,
         bodyLength = values[BODY_LENGTH_UNIT]?.let { bodyLengthUnits.keyFor(it) } ?: defaults.bodyLength,
+    )
+
+    private fun decodeProgression(
+        values: Map<String, String>,
+        defaults: ProgressionSettings,
+    ) = ProgressionSettings(
+        repAims = values[REP_AIMS]?.let { repAims.keyFor(it) } ?: defaults.repAims,
+        stepUp = values[STEP_UP]?.let { stepUps.keyFor(it) } ?: defaults.stepUp,
+        belowRange = values[BELOW_RANGE]?.let { belowRanges.keyFor(it) } ?: defaults.belowRange,
+        lastTime = values[LAST_TIME]?.let { lastTimes.keyFor(it) } ?: defaults.lastTime,
     )
 
     private fun <K> Map<K, String>.keyFor(value: String): K? = entries.firstOrNull { it.value == value }?.key

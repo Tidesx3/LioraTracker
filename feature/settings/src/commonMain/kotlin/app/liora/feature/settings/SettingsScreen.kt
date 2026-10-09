@@ -72,8 +72,6 @@ import app.liora.feature.settings.resources.dialog_done
 import app.liora.feature.settings.resources.dynamic_color
 import app.liora.feature.settings.resources.formula
 import app.liora.feature.settings.resources.gym
-import app.liora.feature.settings.resources.jump_limit
-import app.liora.feature.settings.resources.jump_limit_value
 import app.liora.feature.settings.resources.language
 import app.liora.feature.settings.resources.rest_hint
 import app.liora.feature.settings.resources.rest_sound
@@ -170,7 +168,7 @@ private val IMPORT_TYPES =
     listOf("text/*", "application/csv", "application/vnd.ms-excel", "application/octet-stream")
 
 /** Which choice is open in a dialog. */
-private enum class Choice {
+internal enum class Choice {
     RestWorking,
     RestWarmup,
     RestSound,
@@ -179,6 +177,10 @@ private enum class Choice {
     BodyLength,
     Formula,
     StallWindow,
+    RepAims,
+    StepUp,
+    BelowRange,
+    LastTime,
     JumpLimit,
     Theme,
     Language,
@@ -292,12 +294,10 @@ private fun SettingsContent(
                         stallText(settings.stallWindow),
                         onClick = { open = Choice.StallWindow },
                     )
-                    SettingRow(
-                        stringResource(Res.string.jump_limit),
-                        stringResource(Res.string.jump_limit_value, settings.jumpLimitPercent),
-                        onClick = { open = Choice.JumpLimit },
-                    )
                 }
+            }
+            item(key = "progression") {
+                ProgressionGroup(settings, onOpen = { open = it })
             }
             item(key = "appearance") {
                 SettingsGroup(stringResource(Res.string.section_appearance)) {
@@ -436,8 +436,12 @@ private fun ChoiceDialogs(
             )
         }
 
-        Choice.Formula, Choice.StallWindow, Choice.JumpLimit -> {
+        Choice.Formula, Choice.StallWindow -> {
             ProgressChoiceDialog(open, settings, choose, onClose)
+        }
+
+        Choice.RepAims, Choice.StepUp, Choice.BelowRange, Choice.LastTime, Choice.JumpLimit -> {
+            ProgressionChoiceDialog(open, settings, choose, onClose)
         }
 
         Choice.Theme -> {
@@ -468,7 +472,7 @@ private fun ChoiceDialogs(
     }
 }
 
-/** The Progress section's choices: the e1RM formula, the stall window and the jump limit. */
+/** The Progress section's choices: the e1RM formula and the stall window. */
 @Composable
 private fun ProgressChoiceDialog(
     open: Choice,
@@ -489,24 +493,13 @@ private fun ProgressChoiceDialog(
             )
         }
 
-        Choice.StallWindow -> {
+        else -> {
             ChoiceDialog(
                 title = stringResource(Res.string.stall_window),
                 options = Settings.STALL_WINDOWS,
                 selected = settings.stallWindow,
                 label = { stallText(it) },
                 onChoose = { window -> choose { it.copy(stallWindow = window) } },
-                onDismiss = onClose,
-            )
-        }
-
-        else -> {
-            ChoiceDialog(
-                title = stringResource(Res.string.jump_limit),
-                options = Settings.JUMP_LIMITS,
-                selected = settings.jumpLimitPercent,
-                label = { stringResource(Res.string.jump_limit_value, it) },
-                onChoose = { limit -> choose { it.copy(jumpLimitPercent = limit) } },
                 onDismiss = onClose,
             )
         }
@@ -530,7 +523,7 @@ internal fun SettingsGroup(
 
 /** A setting: its name, and what it's set to. */
 @Composable
-private fun SettingRow(
+internal fun SettingRow(
     title: String,
     value: String,
     onClick: () -> Unit,
@@ -564,7 +557,7 @@ private fun SwitchRow(
 
 /** One of a few options, picked with radio buttons; picking closes it. */
 @Composable
-private fun <T> ChoiceDialog(
+internal fun <T> ChoiceDialog(
     title: String,
     options: List<T>,
     selected: T,

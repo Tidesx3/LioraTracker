@@ -21,6 +21,8 @@ data class Settings(
     val stallWindow: Duration = Stalls.DEFAULT_WINDOW,
     /** How far above the heaviest lately a progression target may go before it is flagged, in percent. */
     val jumpLimitPercent: Int = DEFAULT_JUMP_LIMIT,
+    /** How double progression behaves. */
+    val progression: ProgressionSettings = ProgressionSettings(),
     val theme: ThemeMode = ThemeMode.System,
     /** Colors from the wallpaper, where the phone offers them (Android 12 and up). */
     val dynamicColor: Boolean = false,

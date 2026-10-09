@@ -133,6 +133,12 @@
   <string name="progression_nothing_heavier">Alle Sätze am oberen Ende, doch schwerer als %1$s geht es hier nicht</string>
   <string name="progression_keep_going">Letztes Mal %1$s mit %2$s: eine Wiederholung mehr in Satz %3$d</string>
   <string name="progression_keep_going_weakest">Letztes Mal %1$s mit %2$s: eine Wiederholung mehr im schwächsten Satz</string>
+  <string name="progression_keep_going_first">Letztes Mal %1$s mit %2$s: eine Wiederholung mehr im ersten Satz unter dem oberen Ende</string>
+  <string name="progression_keep_going_each">Letztes Mal %1$s mit %2$s: in jedem Satz eine Wiederholung mehr</string>
+  <string name="progression_keep_going_same">Letztes Mal %1$s mit %2$s: dasselbe noch mal, gern auch mehr</string>
+  <string name="progression_total_reached">Letztes Mal %1$s Wdh. insgesamt mit %2$s, das obere Ende, jetzt also %3$s</string>
+  <string name="progression_first_set_reached">Letztes Mal %1$s Wdh. im ersten Satz mit %2$s, jetzt also %3$s</string>
+  <string name="progression_below_once">Letztes Mal unter %1$s Wdh. mit %2$s, jetzt also %3$s</string>
   <string name="progression_below_twice">Zweimal in Folge unter %1$s Wdh. mit %2$s, jetzt also %3$s</string>
   <string name="progression_big_jump">%1$s ist ein großer Sprung von %2$s, deinem Schwersten der letzten sechs Wochen. Lieber noch mal prüfen.</string>
 </resources>

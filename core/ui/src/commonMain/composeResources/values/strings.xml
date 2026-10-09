@@ -133,6 +133,12 @@
   <string name="progression_nothing_heavier">Every set at the top, but nothing here goes heavier than %1$s</string>
   <string name="progression_keep_going">%1$s at %2$s last time: a rep more on set %3$d</string>
   <string name="progression_keep_going_weakest">%1$s at %2$s last time: a rep more on the weakest set</string>
+  <string name="progression_keep_going_first">%1$s at %2$s last time: a rep more on the first set below the top</string>
+  <string name="progression_keep_going_each">%1$s at %2$s last time: a rep more on each set</string>
+  <string name="progression_keep_going_same">%1$s at %2$s last time: the same again, or better</string>
+  <string name="progression_total_reached">%1$s reps in all at %2$s last time, the top of the range, so %3$s</string>
+  <string name="progression_first_set_reached">%1$s reps on the first set at %2$s last time, so %3$s</string>
+  <string name="progression_below_once">Under %1$s reps at %2$s last time, so %3$s</string>
   <string name="progression_below_twice">Under %1$s reps twice in a row at %2$s, so %3$s</string>
   <string name="progression_big_jump">%1$s is a big jump from %2$s, your heaviest in six weeks. Worth a second look.</string>
 </resources>

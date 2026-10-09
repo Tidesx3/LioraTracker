@@ -16,14 +16,21 @@ import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.domain.BigJump
 import app.liora.core.domain.ProgressionReason
+import app.liora.core.domain.RepAims
 import app.liora.core.ui.resources.Res
+import app.liora.core.ui.resources.progression_below_once
 import app.liora.core.ui.resources.progression_below_twice
 import app.liora.core.ui.resources.progression_big_jump
+import app.liora.core.ui.resources.progression_first_set_reached
 import app.liora.core.ui.resources.progression_first_time
 import app.liora.core.ui.resources.progression_keep_going
+import app.liora.core.ui.resources.progression_keep_going_each
+import app.liora.core.ui.resources.progression_keep_going_first
+import app.liora.core.ui.resources.progression_keep_going_same
 import app.liora.core.ui.resources.progression_keep_going_weakest
 import app.liora.core.ui.resources.progression_nothing_heavier
 import app.liora.core.ui.resources.progression_top_reached
+import app.liora.core.ui.resources.progression_total_reached
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -43,7 +50,10 @@ fun ProgressionNote(
         when {
             bigJump != null -> LioraIcons.Warning
             reason is ProgressionReason.TopReached -> LioraIcons.StepUp
+            reason is ProgressionReason.TotalReached -> LioraIcons.StepUp
+            reason is ProgressionReason.FirstSetReached -> LioraIcons.StepUp
             reason is ProgressionReason.BelowTwice -> LioraIcons.StepDown
+            reason is ProgressionReason.BelowOnce -> LioraIcons.StepDown
             else -> null
         }
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.Top) {
@@ -97,18 +107,30 @@ fun progressionReasonText(reason: ProgressionReason): String {
             )
         }
 
+        is ProgressionReason.TotalReached -> {
+            stringResource(
+                Res.string.progression_total_reached,
+                numbers.format(reason.total),
+                weightText(reason.from),
+                weightText(reason.to),
+            )
+        }
+
+        is ProgressionReason.FirstSetReached -> {
+            stringResource(
+                Res.string.progression_first_set_reached,
+                numbers.format(reason.reps),
+                weightText(reason.from),
+                weightText(reason.to),
+            )
+        }
+
         is ProgressionReason.NothingHeavier -> {
             stringResource(Res.string.progression_nothing_heavier, weightText(reason.weight))
         }
 
         is ProgressionReason.KeepGoing -> {
-            val reps = reason.reps.joinToString(", ") { numbers.format(it) }
-            val set = reason.set
-            if (set != null) {
-                stringResource(Res.string.progression_keep_going, reps, weightText(reason.weight), set)
-            } else {
-                stringResource(Res.string.progression_keep_going_weakest, reps, weightText(reason.weight))
-            }
+            keepGoingText(reason, reason.reps.joinToString(", ") { numbers.format(it) })
         }
 
         is ProgressionReason.BelowTwice -> {
@@ -119,5 +141,31 @@ fun progressionReasonText(reason: ProgressionReason): String {
                 weightText(reason.to),
             )
         }
+
+        is ProgressionReason.BelowOnce -> {
+            stringResource(
+                Res.string.progression_below_once,
+                numbers.format(reason.reps),
+                weightText(reason.from),
+                weightText(reason.to),
+            )
+        }
+    }
+}
+
+/** Last time's [reps] at the same weight, and what to aim for, as Settings' rep aims have it. */
+@Composable
+private fun keepGoingText(
+    reason: ProgressionReason.KeepGoing,
+    reps: String,
+): String {
+    val weight = weightText(reason.weight)
+    val set = reason.set
+    return when {
+        reason.aim == RepAims.EverySet -> stringResource(Res.string.progression_keep_going_each, reps, weight)
+        reason.aim == RepAims.SameAsLastTime -> stringResource(Res.string.progression_keep_going_same, reps, weight)
+        set != null -> stringResource(Res.string.progression_keep_going, reps, weight, set)
+        reason.aim == RepAims.FirstBelowTop -> stringResource(Res.string.progression_keep_going_first, reps, weight)
+        else -> stringResource(Res.string.progression_keep_going_weakest, reps, weight)
     }
 }

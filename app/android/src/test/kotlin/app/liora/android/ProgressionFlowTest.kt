@@ -2,6 +2,7 @@ package app.liora.android
 
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasScrollToKeyAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
@@ -12,11 +13,14 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performTextInput
 import app.liora.core.data.AppStartup
 import app.liora.core.data.exercise.ExerciseRepository
 import app.liora.core.data.routine.RoutineRepository
+import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
+import app.liora.core.domain.RepAims
 import app.liora.core.model.Mass
 import app.liora.core.model.ProgressionRule
 import app.liora.core.model.RepRange
@@ -181,6 +185,36 @@ class ProgressionFlowTest {
     }
 
     @Test
+    @Config(qualifiers = COVER)
+    fun settingsTuneHowItProgresses() {
+        launch()
+        composeRule.onNodeWithContentDescription("Settings").performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasScrollToKeyAction()) }
+        composeRule.onNode(hasScrollToKeyAction()).performScrollToKey("progression")
+        waitForText("Reps to aim for")
+        composeRule.onNodeWithText("A rep more on the weakest set").assertExists()
+        composeRule.onNodeWithText("Every set reaches the top").assertExists()
+        composeRule.onNodeWithText("Step down after two sessions in a row").assertExists()
+        composeRule.onNodeWithText("The routine’s own last session").assertExists()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/progression_settings_dark.png")
+
+        composeRule.onNodeWithText("Reps to aim for").performClick()
+        waitForText("8, 8, 8 becomes 9, 8, 8, then 9, 9, 8")
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/progression_settings_rep_aims_dark.png")
+        composeRule.onNodeWithText("The same as last time").performClick()
+        waitForText("The same as last time")
+        assertEquals(
+            RepAims.SameAsLastTime,
+            runBlocking {
+                koin
+                    .get<SettingsRepository>()
+                    .current()
+                    .progression.repAims
+            },
+        )
+    }
+
+    @Test
     @Config(qualifiers = INNER)
     fun onTheInnerScreen() {
         launch()
@@ -222,6 +256,6 @@ class ProgressionFlowTest {
         const val PUSHDOWN = "fedb.Triceps_Pushdown"
         const val ROW = "fedb.Seated_Cable_Rows"
         const val TOP_REACHED = "12 reps on all 3 sets at 25 kg last time, so 30 kg"
-        const val EDITOR_LABEL = "Double progression: a step heavier once every set reaches the top"
+        const val EDITOR_LABEL = "Double progression: a step heavier at the top of the range, as Settings has it"
     }
 }

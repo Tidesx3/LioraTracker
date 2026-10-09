@@ -175,6 +175,66 @@ class ProgressionTest {
     }
 
     @Test
+    fun repAimsAsChosenInSettings() {
+        fun aims(
+            aim: RepAims,
+            vararg reps: Int,
+        ) = Progression
+            .next(plan, listOf(session(80.0, *reps)), machine, ProgressionSettings(repAims = aim))
+            .sets
+            .map { it?.reps }
+
+        assertEquals(listOf(11, 9, 8), aims(RepAims.FirstBelowTop, 10, 9, 8))
+        assertEquals(listOf(12, 10, 8), aims(RepAims.FirstBelowTop, 12, 9, 8))
+        assertEquals(listOf(10, 9, 8), aims(RepAims.SameAsLastTime, 10, 9, 8))
+        assertEquals(listOf(11, 10, 9), aims(RepAims.EverySet, 10, 9, 8))
+        val first =
+            Progression.next(
+                plan,
+                listOf(session(80.0, 12, 9, 8)),
+                machine,
+                ProgressionSettings(repAims = RepAims.FirstBelowTop),
+            )
+        assertEquals(
+            ProgressionReason.KeepGoing(kg(80.0), listOf(12, 9, 8), set = 2, aim = RepAims.FirstBelowTop),
+            first.reason,
+        )
+    }
+
+    @Test
+    fun stepUpAsChosenInSettings() {
+        val total = ProgressionSettings(stepUp = StepUpWhen.TotalReps)
+        // 13, 12, 11 adds up to 36, the top of 3 × 8–12.
+        val enough = Progression.next(plan, listOf(session(80.0, 13, 12, 11)), machine, total)
+        assertEquals(ProgressionReason.TotalReached(36, kg(80.0), kg(85.0)), enough.reason)
+        assertTrue(
+            Progression
+                .next(
+                    plan,
+                    listOf(session(80.0, 12, 12, 11)),
+                    machine,
+                    total,
+                ).reason is ProgressionReason.KeepGoing,
+        )
+        // Every set at the top isn't needed when the first one is.
+        val first = ProgressionSettings(stepUp = StepUpWhen.FirstSetAtTop)
+        val firstUp = Progression.next(plan, listOf(session(80.0, 12, 10, 9)), machine, first)
+        assertEquals(ProgressionReason.FirstSetReached(12, kg(80.0), kg(85.0)), firstUp.reason)
+        assertEquals(List(3) { SetTarget(kg(85.0), 8) }, firstUp.sets)
+    }
+
+    @Test
+    fun belowTheRangeAsChosenInSettings() {
+        val once = listOf(session(85.0, 9, 7, 6), session(85.0, 10, 9, 8))
+        val rightAway = Progression.next(plan, once, machine, ProgressionSettings(belowRange = BelowRange.RightAway))
+        assertEquals(ProgressionReason.BelowOnce(8, kg(85.0), kg(80.0)), rightAway.reason)
+        val twice = listOf(session(85.0, 9, 7, 6), session(85.0, 8, 7, 7))
+        val never = Progression.next(plan, twice, machine, ProgressionSettings(belowRange = BelowRange.Never))
+        assertTrue(never.reason is ProgressionReason.KeepGoing)
+        assertEquals(kg(85.0), never.heaviest)
+    }
+
+    @Test
     fun aBigJumpIsFlaggedButOneStepNeverIs() {
         // One step on a light cable is a big share of it, and still fine.
         assertFalse(Progression.isBigJump(kg(15.0), heaviest = kg(10.0), oneStepUp = kg(15.0), limitPercent = 10))
