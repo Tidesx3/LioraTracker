@@ -259,7 +259,7 @@ As of 2026-10-09:
       store page), an invitation to set it up, or what goes out and comes in, with its settings and Turn
       off, after asking. Tests use `TestHealthStore`.
     - Progress: the Body card moved up, under the monthly report (on request).
-  - **3d, first launch,** is next.
+  - **3d, first launch,** is next. Its spec is drafted under the Phase 3 roadmap, awaiting review.
 - **Fixes from TODO.md (2026-10-08/09),** each committed on its own:
   - The rest countdown in the notification header agrees with the title (it ended a second early on
     purpose: Android rounds down, the title rounds up).
@@ -655,6 +655,77 @@ the app gets its character before sync, the server and the web GUI build on it.
   - **3c, Health Connect.**
   - **3d, first launch** (added 2026-10-08 on request): a short walkthrough on the first start, showing how
     Liora works (routines, the logger, progress) and ending with an offer to set up Google Drive sync.
+
+**3d, first launch** (spec drafted 2026-10-09, for review). No schema change.
+- **What it is:** five pages, swiped or stepped through with Next, shown once per device in place of the tabs
+  (no rail, no bottom bar). Dots show the page. Skip, on pages 1–4, jumps to the last page, because its
+  offers are choices rather than tour. Back goes to the page before; on the first page it leaves Liora as
+  usual, and the walkthrough comes back next time.
+  1. **Welcome** (a new `Illustration.Welcome` scene): what Liora is in one line, and "Kilograms or pounds?"
+     as two chips, the current setting selected (kg on a new install). Tapping one writes it at once through
+     `SettingsRepository.update`, so weight, distance and body measurements follow together (lb with miles and
+     yards, and inches); the details stay in Settings. Asked first so the demo on page 3 shows the right unit.
+     Leaving kg as it is writes nothing, so a second phone that connects to Drive on page 5 takes the units
+     from the other phone.
+  2. **Routines** (`Illustration.Routines`): plan workouts once as routines, from the exercise catalog, with
+     folders and supersets; or start an empty workout and add as you go.
+  3. **Logging** (`Illustration.Workout` above a demo): one set row as the logger draws it, with last time's
+     values in the Previous column and round numbers in the chosen unit (60 kg or 135 lb × 8). Tapping its
+     check ticks it for real: the check pops, the done tint spreads across the row, and `LioraHaptics.setLogged`
+     fires. Tapping again reopens it. The text says the rest timer starts by itself and the workout stays in
+     the notification. For this, the check and the row fill (`CheckButton`, `drawFill` in the logger's
+     `SetMotion.kt`) move to `designsystem/motion`, and the logger uses them from there.
+  4. **Progress** (`Illustration.Chart`): records as they happen, a chart for every lift, the weekly streak
+     and the monthly report.
+  5. **Your data** (`Illustration.Sync`): Google Drive sync, the same as Settings › Sync: Connect asks through
+     `LocalCloudConsent`, then `SyncRepository.connect`. The page shows the account once `SyncState.account`
+     has it (reacting to the data, not to the call). Declined changes nothing; Failed says it can be set up
+     later in Settings › Your data. One line covers a second phone: connect the same account and the
+     workouts come over. Below that, a quiet "Coming from Hevy or Strong?" opens the file picker
+     (`rememberFileOpener`); a picked file finishes the walkthrough and opens `ImportRoute(source)` over the
+     Train tab, so back from the review lands there. "Start training" finishes.
+- **Copy:** in the voice of the empty states, light and warm, and still saying what to do; what sync does is
+  explained plainly. Drafts: "Welcome to Liora", "Plan it once", "One tap per set", "Watch it add up",
+  "Keep it safe", "Start training". German is written on its own, not translated.
+- **Who sees it:** `WalkthroughRepository` (`core/data/walkthrough`) keeps a `walkthrough` key in `local_meta`,
+  `pending` or `done`, so each phone decides for itself (a second phone needs page 5 most).
+  - `settle()` decides once when the key is missing: an install that already has a seed version
+    (`exercise_seed_version`, so it ran an earlier Liora) is `done`, anything else `pending`. It returns
+    whether the walkthrough is pending.
+  - `AppStartup` settles before seeding, and `MainActivity` settles up front (like the settings), so the first
+    frame is the walkthrough or the tabs, with no flash. Whichever runs first decides. The seed version is only
+    written after `AppStartup` has settled, so a new install can't pass for an old one. Existing installs,
+    the phone with real data among them, never see it.
+  - `finish()` writes `done`; `showAgain()` writes `pending`.
+- **Where it lives:** `feature/walkthrough` (`WalkthroughScreen`, `WalkthroughViewModel`, `walkthroughModule`).
+  It isn't a route: `LioraApp` shows it in place of the shell while `pending` is true, and the shell comes
+  back when `finish()` lands, so the screen closes in reaction to the data. The navigator's back stack is
+  kept underneath. The page survives folding (the pager's state is saveable) and Android ending the process.
+  The import link hands its source to `LioraApp`, which navigates.
+- **Seeing it again:** Settings gets a last row, "How Liora works", which calls `showAgain()`. Finishing it
+  returns to Settings. It shows the current units and sync state, and changes nothing unless something is
+  tapped. It is also how the walkthrough gets its device check, since the test phone already has data.
+- **Layouts:** on the cover screen, a scrolling column: illustration, title, text, the page's control, and the
+  dots with Next at the bottom. On the inner screen, the illustration sits beside the text, centred, capped
+  at about 840 dp. Only drawing moves: the pager follows the finger, the current dot widens, and nothing
+  advances or loops on its own.
+- **Accessibility:** each page reads as its heading and text; the dots read as "Page 2 of 5"; the demo
+  check has the logger's description.
+- **Tests:**
+  - `core/data` (jvmTest): a new database settles as pending and an existing one (seed version, no key) as
+    done; settling again changes nothing; `AppStartup` settles before seeding, so a new database is still
+    pending after it runs; `finish()` and `showAgain()`.
+  - `TestLioraApplication` marks the walkthrough done before each test, so existing tests open on the tabs.
+    The walkthrough's tests opt in.
+  - `WalkthroughFlowTest` (Robolectric): a new install shows the walkthrough, not the tabs; Next and swiping
+    step through it; Skip jumps to page 5; the lb chip writes the units and the demo row shows pounds;
+    ticking the demo check; Connect with the test consent shows the account and turns sync on; Start
+    training opens the Train tab, and the walkthrough doesn't come back after the activity is recreated;
+    Settings › How Liora works shows it again, and finishing returns to Settings.
+  - Screenshots of each page at cover and inner sizes, and the new scene in `IllustrationsTest`.
+- **Not in 3d:** Health Connect (Settings has it), the notification permission (still asked as the first
+  workout starts), the language (the phone's, or Settings on Android 13+), gym setup (standard equipment
+  until one is set up) and starter routines (with programs in Phase 4).
 
 ### Phase 4: Programs, progression, and extras (moved up 2026-10-09 on request)
 - Programs and progression engine: multi-week blocks, and rules like double progression or linear progression with deload (5/3/1, GZCLP).
