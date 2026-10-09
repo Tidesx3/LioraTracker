@@ -1,5 +1,6 @@
 package app.liora.core.designsystem.theme
 
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
@@ -88,3 +89,9 @@ internal val LioraLightColorScheme =
         surfaceContainerHigh = Color(0xFFE8E7F0),
         surfaceContainerHighest = Color(0xFFE1E0EB),
     )
+
+/** Liora's color schemes, for surfaces outside Compose's theme, such as the home-screen widget. */
+object LioraColorSchemes {
+    val light: ColorScheme get() = LioraLightColorScheme
+    val dark: ColorScheme get() = LioraDarkColorScheme
+}

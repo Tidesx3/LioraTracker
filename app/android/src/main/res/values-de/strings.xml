@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
   <string name="tab_train">Training</string>
   <string name="tab_history">Verlauf</string>
   <string name="tab_progress">Fortschritt</string>
@@ -20,5 +20,22 @@
   <plurals name="notif_reps">
     <item quantity="one">%1$s Wdh.</item>
     <item quantity="other">%1$s Wdh.</item>
+  </plurals>
+
+  <string name="widget_description">Was als Nächstes dran ist, und dein Training, während es läuft</string>
+  <string name="widget_next_up">Als Nächstes in %1$s</string>
+  <string name="widget_start">Starten</string>
+  <string name="widget_quick_start">Schnellstart</string>
+  <string name="widget_quick_start_body">Frei loggen, unterwegs ergänzen</string>
+  <string name="widget_start_empty">Leeres Training starten</string>
+  <string name="widget_rest">Pause</string>
+  <plurals name="widget_sets_done">
+    <item quantity="one">%1$d Satz geschafft</item>
+    <item quantity="other">%1$d Sätze geschafft</item>
+  </plurals>
+  <!-- "in Folge" is right here; lint takes it for "infolge". -->
+  <plurals name="widget_streak" tools:ignore="Typos">
+    <item quantity="one">%1$d Woche in Folge</item>
+    <item quantity="other">%1$d Wochen in Folge</item>
   </plurals>
 </resources>

@@ -10,6 +10,7 @@ import app.liora.android.sync.CloudConsentFactory
 import app.liora.android.sync.DriveConsent
 import app.liora.android.sync.SyncTriggers
 import app.liora.android.sync.WorkSyncScheduler
+import app.liora.android.widget.WidgetUpdater
 import app.liora.android.workout.RestAlarmScheduler
 import app.liora.android.workout.WorkoutNotifications
 import app.liora.android.workout.WorkoutNotifier
@@ -67,6 +68,7 @@ open class LioraApplication : Application() {
         get<RestAlarmScheduler>().start(processScope)
         get<SyncTriggers>().start(processScope)
         get<HealthTriggers>().start(processScope)
+        get<WidgetUpdater>().start(processScope)
     }
 
     /** Where the database lives. Tests swap in an in-memory database. */

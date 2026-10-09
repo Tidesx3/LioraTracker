@@ -25,4 +25,20 @@
     <item quantity="one">%1$s rep</item>
     <item quantity="other">%1$s reps</item>
   </plurals>
+
+  <string name="widget_description">What’s next, and your workout as it runs</string>
+  <string name="widget_next_up">Next up in %1$s</string>
+  <string name="widget_start">Start</string>
+  <string name="widget_quick_start">Quick start</string>
+  <string name="widget_quick_start_body">Log freely, add as you go</string>
+  <string name="widget_start_empty">Start empty workout</string>
+  <string name="widget_rest">Rest</string>
+  <plurals name="widget_sets_done">
+    <item quantity="one">%1$d set done</item>
+    <item quantity="other">%1$d sets done</item>
+  </plurals>
+  <plurals name="widget_streak">
+    <item quantity="one">%1$d week in a row</item>
+    <item quantity="other">%1$d weeks in a row</item>
+  </plurals>
 </resources>

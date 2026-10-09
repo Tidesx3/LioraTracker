@@ -85,6 +85,18 @@
         android:resource="@xml/photo_paths" />
     </provider>
 
+    <!-- The home-screen widget (widget/LioraWidget.kt). -->
+    <receiver
+      android:name=".widget.LioraWidgetReceiver"
+      android:exported="true"
+      android:label="@string/app_name">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+      <meta-data
+        android:name="android.appwidget.provider"
+        android:resource="@xml/liora_widget_info" />
+    </receiver>
     <receiver
       android:name=".workout.WorkoutActionReceiver"
       android:exported="false" />

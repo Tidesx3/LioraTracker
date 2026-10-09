@@ -290,7 +290,14 @@ As of 2026-10-09:
   - **4b (done, pending the device check in TODO.md): rotations.** No schema change (the column came with v4).
     A folder's menu makes it a rotation; the Train tab heads with the routine up next in the one trained
     last, and marks the next routine in every rotation. Imported history counts by the routines' names.
-- **Next:** 4c, the home-screen widget.
+  - **4c (done, pending the device check in TODO.md): the home-screen widget.** Glance 1.2, in
+    `app/android/.../widget/`: the workout as it runs (its clocks are `Chronometer`s that tick by
+    themselves), else the routine up next with Start, else Quick start, with the weekly streak. The widget
+    follows its state while Glance keeps its session; `WidgetUpdater` wakes it when the state changes, a
+    rest running out included. Start goes through `MainActivity`, which starts the workout in the
+    process's scope and opens the logger. Its faces are screenshot from the real `RemoteViews`.
+- **Next:** 4d, the workout on the lock screen. The workout notification already asks to be promoted
+  (`setRequestPromotedOngoing`), so 4d starts by checking on the phone what Android 16 makes of it.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.
@@ -844,7 +851,27 @@ the app gets its character before sync, the server and the web GUI build on it.
     it), so one that appears later, as a folder is made a rotation, isn't scrolled away above the top.
 - **4c, the widget** (Jetpack Glance): next up in the rotation with Start, and the streak; during a workout,
   its name, time, sets done and the rest countdown, opening the logger. In the app's look, light and dark.
-  Its spec is filled in when 4b is done.
+  - **One widget, three states** (`app/android/.../widget/`, Glance 1.2):
+    - **Training:** the workout's name, the time since it started, the sets done, and while resting the
+      time left. The clocks are `Chronometer`s (through `AndroidRemoteViews`), so they tick by themselves
+      without the app redrawing the widget every second. Tapping it opens the logger.
+    - **A rotation:** "Next up in Push Pull Legs", the routine, and Start, which starts it and opens the
+      logger. With several rotations, the one trained last, as on the Train tab.
+    - **Otherwise:** Quick start, with Start empty workout.
+    - Under the idle states, the weekly streak when there is one ("3 weeks in a row").
+  - **Sizes:** resizable; at two cells wide only the main line and its button or clock.
+  - **Look:** Liora's violet color schemes, light and dark with the phone, or the wallpaper's colors when
+    that setting is on (`glance-material3`). The system font, since widgets can't load Sora; the corners
+    follow the launcher's.
+  - **Keeping it current:** `WidgetUpdater`, started with the process like the workout notification, watches
+    the workout, the rest timer, the rotations and when workouts were trained, and redraws the widget when
+    what it shows changes. The clocks tick on their own.
+  - **Starting from it:** Start opens `MainActivity` with the routine (or nothing, for an empty workout);
+    the activity starts the workout in the process's scope, so it finishes even if the activity goes, then
+    opens the logger. A workout already running opens instead (the widget shows it anyway, so only a race
+    gets there).
+  - **Tests:** the widget's state from the repositories in each case; the widget's content in each state
+    with `glance-appwidget-testing`; and screenshots of the three states.
 - **4d, the lock screen** (decided 2026-10-09 instead of Wear OS: with wrist straps on, a watch is hard to
   use mid-set; a watch app stays a maybe for later): the live workout notification becomes an Android 16
   Live Update (a promoted ongoing notification), with the rest countdown as a chip in the status bar and

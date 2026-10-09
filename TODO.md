@@ -4,6 +4,12 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
+- **Home-screen widget: check on the phone** (added 2026-10-09). Add Liora's widget on the cover and the
+  inner screen, at two cells wide and at four by two. With a rotation it says what's next, and Start starts
+  it and opens the logger; without one, Quick start. During a workout it shows the time running and the
+  sets done; tick a set off and the rest counts down in violet, then the workout's time comes back when it
+  runs out, also with the app closed. Try it light and dark, and with Colors from the wallpaper (Settings ›
+  Appearance). The corners should follow the launcher's.
 - **Rotations: check on the phone** (added 2026-10-09). Make a folder a rotation (its ⋮ › Make it a
   rotation): the Train tab heads with the routine up next and marks it in the folder. The history imported
   from Hevy counts by the workouts' names, so the next one should follow the last Push/Pull/Leg day logged.

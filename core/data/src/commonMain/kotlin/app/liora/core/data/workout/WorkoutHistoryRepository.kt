@@ -31,6 +31,9 @@ interface WorkoutHistoryRepository {
     /** Every finished workout with its exercises and sets, newest first. */
     val workouts: Flow<List<FinishedWorkout>>
 
+    /** When each finished workout started, newest first: what streaks count, without loading any sets. */
+    val trainingStarts: Flow<List<Instant>>
+
     /** Every finished session of one exercise, oldest first: what its charts, records and history show. */
     fun sessionsOf(exerciseId: String): Flow<List<ExerciseSession>>
 
@@ -90,6 +93,12 @@ internal class OfflineWorkoutHistoryRepository(
             val setsByExercise = sets.groupBy { it.workoutExerciseId }
             workouts.map { it.toFinishedWorkout(exercisesByWorkout[it.id].orEmpty(), setsByExercise) }
         }.distinctUntilChanged()
+
+    override val trainingStarts: Flow<List<Instant>> =
+        workoutDao
+            .observeFinished()
+            .map { workouts -> workouts.map { Instant.fromEpochMilliseconds(it.startedAt) } }
+            .distinctUntilChanged()
 
     override fun sessionsOf(exerciseId: String): Flow<List<ExerciseSession>> =
         workoutDao

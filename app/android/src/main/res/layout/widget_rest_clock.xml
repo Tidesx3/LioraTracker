@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The rest countdown on the widget, in the accent, counting down by itself. -->
+<Chronometer xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_rest_clock"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:countDown="true"
+    android:fontFamily="sans-serif-medium"
+    android:fontFeatureSettings="tnum"
+    android:includeFontPadding="false"
+    android:textColor="@color/liora_accent"
+    android:textSize="28sp" />

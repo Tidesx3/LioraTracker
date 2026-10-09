@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import app.liora.android.widget.WidgetIntents
 import app.liora.core.data.AppStartup
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
@@ -30,6 +31,7 @@ import org.koin.core.context.GlobalContext
 import org.koin.core.context.stopKoin
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import org.robolectric.android.controller.ActivityController
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
@@ -104,6 +106,17 @@ class RotationFlowTest {
         composeRule.onRoot().captureRoboImage("src/test/screenshots/rotation_next_up_dark.png")
 
         composeRule.onNodeWithText("Start Pull Day").performClick()
+        waitForText("Finish")
+        val active = runBlocking { koin.get<ActiveWorkoutRepository>().activeWorkout.first() }
+        assertEquals("pull", active?.routineId)
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun theWidgetsStartStartsTheRoutineAndOpensTheLogger() {
+        val start = WidgetIntents.startRoutine(RuntimeEnvironment.getApplication(), "pull")
+        Robolectric.buildActivity(MainActivity::class.java, start).setup()
+        composeRule.waitForIdle()
         waitForText("Finish")
         val active = runBlocking { koin.get<ActiveWorkoutRepository>().activeWorkout.first() }
         assertEquals("pull", active?.routineId)

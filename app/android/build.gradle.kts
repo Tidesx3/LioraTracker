@@ -97,6 +97,9 @@ dependencies {
     implementation(libs.jb.lifecycle.viewmodel.navigation3)
     implementation(libs.jb.navigation3.ui)
 
+    implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
+
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.android)
     implementation(libs.koin.compose)
@@ -117,4 +120,5 @@ dependencies {
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
     testImplementation(libs.androidx.window.testing)
+    testImplementation(libs.glance.appwidget.testing)
 }
