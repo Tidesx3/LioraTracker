@@ -131,7 +131,8 @@ internal fun LoggedSet.withTyped(
 /**
  * The set with [field] one step up or down, starting from its value or else its placeholder: the next weight
  * [gym] can load for [equipment] (the next plate pair, dumbbell or stack step), one rep, 15 seconds, a tenth
- * of a kilometre or mile on a run, 10 metres or yards on a carry, half an RPE point. Never below zero.
+ * of a kilometre or mile on a run, 10 metres or yards on a carry, half an RPE point. Never below zero. A
+ * machine or cable with its own step ([ownStep]) moves by that instead.
  */
 internal fun LoggedSet.stepped(
     field: SetField,
@@ -141,12 +142,13 @@ internal fun LoggedSet.stepped(
     units: Units,
     equipment: Equipment,
     gym: GymProfile,
+    ownStep: Mass? = null,
 ): LoggedSet {
     val from = SetPlaceholders.fill(this, placeholder)
     val sign = if (up) 1 else -1
     return when (field) {
         SetField.Weight -> {
-            copy(weight = LoadRounding.step(from.weight ?: Mass.Zero, up, equipment, gym))
+            copy(weight = LoadRounding.step(from.weight ?: Mass.Zero, up, equipment, gym, ownStep))
         }
 
         SetField.Reps -> {

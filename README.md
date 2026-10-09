@@ -29,8 +29,10 @@ their own. Phase 3 is done: everything syncs through a hidden folder in your own
 › Your data), in the background, deletions and photos included, with what's still waiting and the space it
 takes in view. Health Connect gets every finished workout and brings in weight and body fat from apps like
 Samsung Health. On the first start, a short walkthrough shows how Liora works, asks kilograms or pounds,
-and offers sync. Programs with auto-progression are next. Details and progress are in
-[docs/PLAN.md](docs/PLAN.md).
+and offers sync. Phase 4 has begun: a routine's exercises can use double progression, so the next workout
+starts a step heavier once every set reaches the top of its rep range, and says why. Rotations (what's next
+in a folder of routines), a home-screen widget and the workout on the lock screen follow. Details and
+progress are in [docs/PLAN.md](docs/PLAN.md).
 
 ## Principles
 

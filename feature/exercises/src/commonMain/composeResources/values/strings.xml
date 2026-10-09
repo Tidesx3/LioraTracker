@@ -55,6 +55,14 @@
   <string name="detail_delete_title">Delete exercise?</string>
   <string name="detail_delete_body">This custom exercise will be removed.</string>
   <string name="detail_cancel">Cancel</string>
+  <string name="detail_load_step">Weight step</string>
+  <string name="detail_load_step_gym">As the gym: %1$s</string>
+  <string name="detail_load_step_own">%1$s on this one</string>
+  <string name="detail_load_step_body">How much one step adds on this machine. Progression and the logger’s ± go up and down by it.</string>
+  <string name="detail_load_step_reset">Use the gym’s step</string>
+  <string name="detail_load_step_save">Save</string>
+  <string name="cd_load_step_down">Smaller step</string>
+  <string name="cd_load_step_up">Bigger step</string>
   <string name="detail_in_use_title">Can’t delete this exercise</string>
   <string name="detail_in_use_body">It’s part of your history or a routine. Hide it instead; your records stay intact.</string>
   <string name="detail_in_use_hide">Hide</string>

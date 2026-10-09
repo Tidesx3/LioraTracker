@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.exercise.ExerciseInUseException
 import app.liora.core.data.exercise.ExerciseRepository
+import app.liora.core.data.gym.GymProfileRepository
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.domain.ExerciseProgress
@@ -17,6 +18,7 @@ import app.liora.core.domain.Stall
 import app.liora.core.domain.Stalls
 import app.liora.core.model.Exercise
 import app.liora.core.model.ExerciseSession
+import app.liora.core.model.Mass
 import app.liora.core.model.TrackingType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,6 +50,8 @@ sealed interface ExerciseDetailUiState {
         /** Null until the exercise has been trained. */
         val progress: ExerciseProgressState?,
         val dialog: DetailDialog?,
+        /** The gym's stack step, which a machine or cable moves by unless it has its own. */
+        val gymStep: Mass? = null,
     ) : ExerciseDetailUiState
 }
 
@@ -129,6 +133,7 @@ class ExerciseDetailViewModel(
     private val repository: ExerciseRepository,
     history: WorkoutHistoryRepository,
     settings: SettingsRepository,
+    gyms: GymProfileRepository,
     clock: Clock,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
@@ -159,6 +164,8 @@ class ExerciseDetailViewModel(
                 val progress = ExerciseProgressState.of(exercise.trackingType, sessions, chosen, preferences, clock)
                 ExerciseDetailUiState.Loaded(exercise, baseName, progress, open)
             }
+        }.combine(gyms.active) { state, gym ->
+            (state as? ExerciseDetailUiState.Loaded)?.copy(gymStep = gym.stackStep) ?: state
         }
             // Records and charts go through every session of the exercise; keep that off the main thread.
             .flowOn(Dispatchers.Default)
@@ -179,6 +186,11 @@ class ExerciseDetailViewModel(
     /** The exercise's own note, saved as it's typed; it finishes even if the page closes meanwhile. */
     fun setNote(note: String) {
         viewModelScope.launch { withContext(NonCancellable) { repository.setNote(exerciseId, note) } }
+    }
+
+    /** A machine or cable's own load step, or null for the gym's; it finishes even if the page closes. */
+    fun setLoadStep(step: Mass?) {
+        viewModelScope.launch { withContext(NonCancellable) { repository.setLoadStep(exerciseId, step) } }
     }
 
     /** Asks for confirmation, or explains why deleting isn't possible. */

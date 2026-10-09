@@ -4,6 +4,15 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
+- **Double progression: check on the phone** (added 2026-10-09). Turn it on for a few machine and cable
+  exercises in a routine (Edit › an exercise's ⋮ › Double progression) and give their sets rep ranges.
+  - After a workout where every set reached the top: routine detail shows a step heavier and why, and
+    starting the routine fills the weights in with the reps to aim for greyed.
+  - A machine whose stack moves in its own steps: set it on the exercise's page (Weight step), then check
+    the target and the logger's ±.
+  - The history imported from Hevy counts for a routine that has no workouts of its own yet.
+  - "Update the routine" at the end leaves exercises with progression as they were.
+
 - **First-launch walkthrough: see a real first start** (added 2026-10-09). Opened from Settings it works on
   the phone (checked 2026-10-09). Still to see, on a fresh install (say, the next time the release app is
   reinstalled): it shows before the tabs, with no flash of the Train tab first.

@@ -72,6 +72,8 @@ import app.liora.feature.settings.resources.dialog_done
 import app.liora.feature.settings.resources.dynamic_color
 import app.liora.feature.settings.resources.formula
 import app.liora.feature.settings.resources.gym
+import app.liora.feature.settings.resources.jump_limit
+import app.liora.feature.settings.resources.jump_limit_value
 import app.liora.feature.settings.resources.language
 import app.liora.feature.settings.resources.rest_hint
 import app.liora.feature.settings.resources.rest_sound
@@ -177,6 +179,7 @@ private enum class Choice {
     BodyLength,
     Formula,
     StallWindow,
+    JumpLimit,
     Theme,
     Language,
 }
@@ -288,6 +291,11 @@ private fun SettingsContent(
                         stringResource(Res.string.stall_window),
                         stallText(settings.stallWindow),
                         onClick = { open = Choice.StallWindow },
+                    )
+                    SettingRow(
+                        stringResource(Res.string.jump_limit),
+                        stringResource(Res.string.jump_limit_value, settings.jumpLimitPercent),
+                        onClick = { open = Choice.JumpLimit },
                     )
                 }
             }
@@ -428,27 +436,8 @@ private fun ChoiceDialogs(
             )
         }
 
-        Choice.Formula -> {
-            ChoiceDialog(
-                title = stringResource(Res.string.formula),
-                options = OneRepMaxFormula.entries,
-                selected = settings.oneRepMaxFormula,
-                label = { formulaName(it) },
-                description = { formulaDescription(it) },
-                onChoose = { formula -> choose { it.copy(oneRepMaxFormula = formula) } },
-                onDismiss = onClose,
-            )
-        }
-
-        Choice.StallWindow -> {
-            ChoiceDialog(
-                title = stringResource(Res.string.stall_window),
-                options = Settings.STALL_WINDOWS,
-                selected = settings.stallWindow,
-                label = { stallText(it) },
-                onChoose = { window -> choose { it.copy(stallWindow = window) } },
-                onDismiss = onClose,
-            )
+        Choice.Formula, Choice.StallWindow, Choice.JumpLimit -> {
+            ProgressChoiceDialog(open, settings, choose, onClose)
         }
 
         Choice.Theme -> {
@@ -473,6 +462,51 @@ private fun ChoiceDialogs(
                     onClose()
                     language.choose(it)
                 },
+                onDismiss = onClose,
+            )
+        }
+    }
+}
+
+/** The Progress section's choices: the e1RM formula, the stall window and the jump limit. */
+@Composable
+private fun ProgressChoiceDialog(
+    open: Choice,
+    settings: Settings,
+    choose: (SettingsChange) -> Unit,
+    onClose: () -> Unit,
+) {
+    when (open) {
+        Choice.Formula -> {
+            ChoiceDialog(
+                title = stringResource(Res.string.formula),
+                options = OneRepMaxFormula.entries,
+                selected = settings.oneRepMaxFormula,
+                label = { formulaName(it) },
+                description = { formulaDescription(it) },
+                onChoose = { formula -> choose { it.copy(oneRepMaxFormula = formula) } },
+                onDismiss = onClose,
+            )
+        }
+
+        Choice.StallWindow -> {
+            ChoiceDialog(
+                title = stringResource(Res.string.stall_window),
+                options = Settings.STALL_WINDOWS,
+                selected = settings.stallWindow,
+                label = { stallText(it) },
+                onChoose = { window -> choose { it.copy(stallWindow = window) } },
+                onDismiss = onClose,
+            )
+        }
+
+        else -> {
+            ChoiceDialog(
+                title = stringResource(Res.string.jump_limit),
+                options = Settings.JUMP_LIMITS,
+                selected = settings.jumpLimitPercent,
+                label = { stringResource(Res.string.jump_limit_value, it) },
+                onChoose = { limit -> choose { it.copy(jumpLimitPercent = limit) } },
                 onDismiss = onClose,
             )
         }

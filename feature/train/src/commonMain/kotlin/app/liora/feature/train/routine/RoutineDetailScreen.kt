@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.liora.core.data.progression.ExerciseProgression
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraIconButton
@@ -50,6 +51,7 @@ import app.liora.core.navigation.rememberSharedContainer
 import app.liora.core.ui.ExerciseNote
 import app.liora.core.ui.ExerciseThumbnail
 import app.liora.core.ui.NoteKind
+import app.liora.core.ui.ProgressionNote
 import app.liora.core.ui.SetTypeBadge
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.restLabel
@@ -210,6 +212,7 @@ private fun RoutineDetailContent(
                 PlannedExercise(
                     planned = planned,
                     exercise = state.exercises[planned.exerciseId],
+                    progression = state.progression[planned.id],
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                 )
             }
@@ -217,11 +220,15 @@ private fun RoutineDetailContent(
     }
 }
 
-/** One exercise of the plan with its sets, on a card; a superset's cards share the accent outline. */
+/**
+ * One exercise of the plan with its sets, on a card; a superset's cards share the accent outline. With
+ * [progression], its sets show next time's targets, and why.
+ */
 @Composable
 private fun PlannedExercise(
     planned: RoutineExercise,
     exercise: Exercise?,
+    progression: ExerciseProgression?,
     modifier: Modifier = Modifier,
 ) {
     val trackingType = exercise?.trackingType ?: TrackingType.WeightReps
@@ -244,14 +251,22 @@ private fun PlannedExercise(
                     }
                 }
             }
+            progression?.let { ProgressionNote(it.target.reason, bigJump = it.bigJump) }
             exercise?.settings?.stickyNote?.let { ExerciseNote(it, NoteKind.Exercise) }
             val numbers = setNumbers(planned.sets.map { it.type })
             planned.sets.forEachIndexed { index, set ->
+                // Next time's weight, with the range still the goal.
+                val weight =
+                    progression
+                        ?.target
+                        ?.sets
+                        ?.getOrNull(index)
+                        ?.weight ?: set.weight
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     SetTypeBadge(set.type, numbers[index])
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        text = setSummary(trackingType, set.weight, set.reps, set.duration, set.distanceMeters),
+                        text = setSummary(trackingType, weight, set.reps, set.duration, set.distanceMeters),
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }

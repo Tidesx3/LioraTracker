@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.exercise.ExerciseRepository
 import app.liora.core.data.gym.GymProfileRepository
+import app.liora.core.data.progression.ExerciseProgression
+import app.liora.core.data.progression.ProgressionRepository
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
@@ -41,6 +43,7 @@ import app.liora.core.model.Exercise
 import app.liora.core.model.FinishedWorkout
 import app.liora.core.model.GymProfile
 import app.liora.core.model.LoggedSet
+import app.liora.core.model.Mass
 import app.liora.core.model.RestTimer
 import app.liora.core.model.Routine
 import app.liora.core.model.SetType
@@ -63,6 +66,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -120,6 +124,8 @@ sealed interface LoggerUiState {
         val invalid: CellRef?,
         /** When the workout ended, if it's a finished one opened from history to correct it. */
         val endedAt: Instant? = null,
+        /** Why progression set each exercise's targets, by exercise id, for a workout started from a routine. */
+        val progression: Map<String, ExerciseProgression> = emptyMap(),
     ) : LoggerUiState {
         /** A finished workout being corrected: no clock, no rest, and Done instead of Finish. */
         val isFinished: Boolean get() = endedAt != null
@@ -299,6 +305,7 @@ class LoggerViewModel(
     private val exerciseRepository: ExerciseRepository,
     routines: RoutineRepository,
     private val gymProfiles: GymProfileRepository,
+    private val progressionTargets: ProgressionRepository,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
     private val edit = MutableStateFlow<CellEdit?>(null)
@@ -365,13 +372,29 @@ class LoggerViewModel(
 
     private val restTimer = if (correctsHistory) flowOf(null) else restTimers.timer
 
+    /**
+     * Why progression set the targets, by exercise id: worked out again as of the workout's start, so it
+     * reads as it did when the routine started. The first of an exercise's places in the routine speaks for it.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val progression: Flow<Map<String, ExerciseProgression>> =
+        combine(routine, activeWorkouts.activeWorkout.map { it?.startedAt }.distinctUntilChanged(), ::Pair)
+            .mapLatest { (plan, startedAt) ->
+                if (plan == null || startedAt == null) return@mapLatest emptyMap()
+                val targets = progressionTargets.targets(plan, startedAt)
+                plan.exercises
+                    .filter { it.id in targets }
+                    .distinctBy { it.exerciseId }
+                    .associate { it.exerciseId to targets.getValue(it.id) }
+            }.onStart { emit(emptyMap()) }
+
     val uiState: StateFlow<LoggerUiState> =
         combine(
             sessions,
             exercises,
             restTimer,
             editing,
-            combine(routine, settings.settings, gymProfiles.active, gymProfiles.profiles, ::Context),
+            combine(routine, settings.settings, gymProfiles.active, gymProfiles.profiles, progression, ::Context),
         ) { session, byId, timer, (cell, error), context ->
             val workout = session.workout?.workout
             if (workout == null) {
@@ -394,6 +417,7 @@ class LoggerViewModel(
                     edit = cell?.takeIf { workout.find(it.cell.setId) != null },
                     invalid = error?.takeIf { workout.find(it.setId) != null },
                     endedAt = session.workout.endedAt,
+                    progression = context.progression,
                 )
             }
         }
@@ -419,6 +443,7 @@ class LoggerViewModel(
         val settings: Settings,
         val gym: GymProfile,
         val gyms: List<GymProfile>,
+        val progression: Map<String, ExerciseProgression>,
     )
 
     private val active: LoggerUiState.Active? get() = uiState.value as? LoggerUiState.Active
@@ -469,6 +494,8 @@ class LoggerViewModel(
         val units: Units,
         val equipment: Equipment,
         val gym: GymProfile,
+        /** A machine or cable's own load step, which ± moves by. */
+        val ownStep: Mass?,
     )
 
     private fun typingTarget(edit: CellEdit): TypingTarget? {
@@ -484,6 +511,7 @@ class LoggerViewModel(
             units = state.units,
             equipment = state.equipmentOf(exerciseId),
             gym = state.gym,
+            ownStep = state.exercises[exerciseId]?.settings?.loadStep,
         )
     }
 
@@ -515,6 +543,7 @@ class LoggerViewModel(
                 target.units,
                 target.equipment,
                 target.gym,
+                target.ownStep,
             )
         }
     }

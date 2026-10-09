@@ -55,6 +55,14 @@
   <string name="detail_delete_title">Übung löschen?</string>
   <string name="detail_delete_body">Diese eigene Übung wird entfernt.</string>
   <string name="detail_cancel">Abbrechen</string>
+  <string name="detail_load_step">Gewichtsschritt</string>
+  <string name="detail_load_step_gym">Wie im Studio: %1$s</string>
+  <string name="detail_load_step_own">%1$s an diesem Gerät</string>
+  <string name="detail_load_step_body">So viel legt ein Schritt an diesem Gerät drauf. Progression und das ± im Logger gehen um diesen Schritt hoch und runter.</string>
+  <string name="detail_load_step_reset">Schritt vom Studio nehmen</string>
+  <string name="detail_load_step_save">Speichern</string>
+  <string name="cd_load_step_down">Kleinerer Schritt</string>
+  <string name="cd_load_step_up">Größerer Schritt</string>
   <string name="detail_in_use_title">Übung kann nicht gelöscht werden</string>
   <string name="detail_in_use_body">Sie steckt in deinem Verlauf oder einer Routine. Blende sie stattdessen aus, deine Rekorde bleiben erhalten.</string>
   <string name="detail_in_use_hide">Ausblenden</string>

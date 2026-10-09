@@ -37,6 +37,8 @@
   <string name="formula_brzycki">Brzycki</string>
   <string name="formula_brzycki_body">Vorsichtiger ab etwa 10 Wiederholungen</string>
   <string name="stall_window">Stagnation melden nach</string>
+  <string name="jump_limit">Großen Sprung melden ab</string>
+  <string name="jump_limit_value">Mehr als %1$d %</string>
   <plurals name="stall_weeks">
     <item quantity="one">%1$d Woche ohne neue Bestleistung</item>
     <item quantity="other">%1$d Wochen ohne neue Bestleistung</item>

@@ -58,6 +58,7 @@ import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.model.Exercise
 import app.liora.core.model.Mass
+import app.liora.core.model.ProgressionRule
 import app.liora.core.model.RoutineExercise
 import app.liora.core.model.RoutineSet
 import app.liora.core.model.SetType
@@ -91,6 +92,10 @@ import app.liora.feature.train.resources.editor_keep_editing
 import app.liora.feature.train.resources.editor_name
 import app.liora.feature.train.resources.editor_new_title
 import app.liora.feature.train.resources.editor_notes
+import app.liora.feature.train.resources.editor_progression_label
+import app.liora.feature.train.resources.editor_progression_needs_ranges
+import app.liora.feature.train.resources.editor_progression_off
+import app.liora.feature.train.resources.editor_progression_on
 import app.liora.feature.train.resources.editor_remove_exercise
 import app.liora.feature.train.resources.editor_reps_max_hint
 import app.liora.feature.train.resources.editor_rest
@@ -356,9 +361,16 @@ private fun ReorderableCollectionItemScope.ExerciseEditorCard(
                     isLast = isLast,
                     onChooseRest = { choosingRest = true },
                     onAddNote = { addingNote = true }.takeIf { exercise != null && note == null && !addingNote },
+                    onToggleProgression =
+                        {
+                            actions.onChange(planned.id) {
+                                copy(progression = if (progression == null) ProgressionRule.DoubleProgression else null)
+                            }
+                        }.takeIf { trackingType in PROGRESSING },
                     actions = actions,
                 )
             }
+            ProgressionLabel(planned, Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
             if (exercise != null && (note != null || addingNote)) {
                 ExerciseNoteField(
                     note = note,
@@ -407,6 +419,8 @@ private fun ExerciseMenu(
     onChooseRest: () -> Unit,
     /** Null when the exercise has a note already. */
     onAddNote: (() -> Unit)?,
+    /** Null for exercises progression doesn't fit, such as timed ones. */
+    onToggleProgression: (() -> Unit)?,
     actions: ExerciseActions,
     modifier: Modifier = Modifier,
 ) {
@@ -420,6 +434,17 @@ private fun ExerciseMenu(
                 add(Res.string.editor_superset_remove to { actions.onUnlink(planned.id) })
             }
             add(Res.string.editor_rest to onChooseRest)
+            onToggleProgression?.let {
+                val label =
+                    if (planned.progression ==
+                        null
+                    ) {
+                        Res.string.editor_progression_on
+                    } else {
+                        Res.string.editor_progression_off
+                    }
+                add(label to it)
+            }
             onAddNote?.let { add(Res.string.editor_add_note to it) }
             add(Res.string.editor_remove_exercise to { actions.onRemove(planned.id) })
         }
@@ -436,6 +461,49 @@ private fun ExerciseMenu(
         }
     }
 }
+
+/**
+ * Shown while [planned] has double progression: what it does, and when a working set has no rep range to
+ * climb through, that it needs one.
+ */
+@Composable
+private fun ProgressionLabel(
+    planned: RoutineExercise,
+    modifier: Modifier = Modifier,
+) {
+    if (planned.progression == null) return
+    val missingRanges = planned.sets.any { it.type.progresses && it.reps?.isRange != true }
+    Column(modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painterResource(LioraIcons.StepUp),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(16.dp),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = stringResource(Res.string.editor_progression_label),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (missingRanges) {
+            Text(
+                text = stringResource(Res.string.editor_progression_needs_ranges),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(start = 22.dp, top = 2.dp),
+            )
+        }
+    }
+}
+
+/** Exercises double progression fits: counted in weight and reps. */
+private val PROGRESSING = setOf(TrackingType.WeightReps, TrackingType.WeightedBodyweight)
+
+/** Sets progression counts: neither warm-ups nor drop sets. */
+private val SetType.progresses: Boolean get() = this != SetType.Warmup && this != SetType.Drop
 
 /** Column titles that line up with [SetEditorRow]'s fields. */
 @Composable

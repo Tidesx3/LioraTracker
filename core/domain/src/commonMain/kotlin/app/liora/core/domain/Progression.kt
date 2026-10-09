@@ -44,6 +44,12 @@ sealed interface ProgressionReason {
     ) : ProgressionReason
 }
 
+/** A target the safety bound flagged: [target] against [heaviestLately], the heaviest weight of the last weeks. */
+data class BigJump(
+    val target: Mass,
+    val heaviestLately: Mass,
+)
+
 /** The next session's targets for one exercise of a routine, and why. */
 data class ProgressionTarget(
     /** One per planned set, in order; null for warm-ups and drop sets, which keep the routine's values. */

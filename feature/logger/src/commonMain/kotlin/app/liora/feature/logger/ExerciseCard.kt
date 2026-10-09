@@ -39,6 +39,7 @@ import app.liora.core.model.WorkoutExercise
 import app.liora.core.ui.ExerciseNoteField
 import app.liora.core.ui.ExerciseThumbnail
 import app.liora.core.ui.NoteKind
+import app.liora.core.ui.ProgressionNote
 import app.liora.core.ui.RestTimePicker
 import app.liora.core.ui.restLabel
 import app.liora.core.ui.setNumbers
@@ -141,6 +142,13 @@ internal fun ExerciseCard(
                 hasExerciseNote = exerciseNote != null || adding == NoteKind.Exercise,
                 hasWorkoutNote = workoutExercise.notes != null || adding == NoteKind.Workout,
                 actions = actions,
+            )
+        }
+        state.progression[workoutExercise.exerciseId]?.let { progression ->
+            ProgressionNote(
+                reason = progression.target.reason,
+                bigJump = progression.bigJump,
+                modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 2.dp),
             )
         }
         CardNotes(

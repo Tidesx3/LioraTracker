@@ -74,6 +74,10 @@
   <string name="editor_superset_next">Superset with next</string>
   <string name="editor_superset_remove">Remove from superset</string>
   <string name="editor_rest">Rest timer</string>
+  <string name="editor_progression_on">Double progression</string>
+  <string name="editor_progression_off">Stop progression</string>
+  <string name="editor_progression_label">Double progression: a step heavier once every set reaches the top</string>
+  <string name="editor_progression_needs_ranges">Give each working set a rep range, like 8–12</string>
   <string name="editor_add_note">Add exercise note</string>
   <string name="editor_remove_exercise">Remove exercise</string>
   <string name="editor_discard_title">Discard changes?</string>

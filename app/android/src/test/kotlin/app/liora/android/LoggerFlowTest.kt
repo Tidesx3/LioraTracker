@@ -411,6 +411,8 @@ class LoggerFlowTest {
         composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasTestTag(LoggerTags.PAD)) }
         listOf("8", "2", ",", "5").forEach { padKey(it).performClick() }
         waitForText("82,5")
+        // The plates follow a moment after the digits.
+        waitForPlates("Pro Seite: 25 · 5 · 1,25 kg")
         composeRule.onRoot().captureRoboImage("src/test/screenshots/de_logger_pad_dark.png")
     }
 

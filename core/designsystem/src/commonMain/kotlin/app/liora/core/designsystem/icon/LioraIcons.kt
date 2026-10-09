@@ -40,9 +40,12 @@ import app.liora.core.designsystem.resources.ic_skip_next
 import app.liora.core.designsystem.resources.ic_swap_horiz
 import app.liora.core.designsystem.resources.ic_timer
 import app.liora.core.designsystem.resources.ic_today
+import app.liora.core.designsystem.resources.ic_trending_down
+import app.liora.core.designsystem.resources.ic_trending_up
 import app.liora.core.designsystem.resources.ic_trophy
 import app.liora.core.designsystem.resources.ic_view_agenda
 import app.liora.core.designsystem.resources.ic_visibility_off
+import app.liora.core.designsystem.resources.ic_warning
 import org.jetbrains.compose.resources.DrawableResource
 
 /** Material Symbols (Rounded) used across the app. Source: google/material-design-icons, Apache 2.0. */
@@ -94,4 +97,13 @@ object LioraIcons {
 
     /** A note for one workout only. */
     val Today: DrawableResource = Res.drawable.ic_today
+
+    /** Progression takes the weight up a step. */
+    val StepUp: DrawableResource = Res.drawable.ic_trending_up
+
+    /** Progression takes the weight down a step. */
+    val StepDown: DrawableResource = Res.drawable.ic_trending_down
+
+    /** Something worth a second look, such as a big jump in weight. */
+    val Warning: DrawableResource = Res.drawable.ic_warning
 }

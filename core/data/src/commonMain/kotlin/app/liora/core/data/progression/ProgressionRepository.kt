@@ -6,6 +6,7 @@ import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.toLoggedSet
 import app.liora.core.database.dao.ExerciseDao
 import app.liora.core.database.dao.WorkoutDao
+import app.liora.core.domain.BigJump
 import app.liora.core.domain.LoadRounding
 import app.liora.core.domain.Progression
 import app.liora.core.domain.ProgressionTarget
@@ -27,10 +28,11 @@ import kotlin.time.Instant
 /** A routine exercise's next targets, and whether they jump too far above what was lifted lately. */
 data class ExerciseProgression(
     val target: ProgressionTarget,
-    /** The heaviest target is more than Settings' limit, and more than one gym step, above [heaviestLately]. */
-    val bigJump: Boolean = false,
-    /** The heaviest working weight of the last six weeks, which a big jump is measured against. */
-    val heaviestLately: Mass? = null,
+    /**
+     * Set when the heaviest target is more than Settings' limit, and more than one gym step, above the
+     * heaviest working weight of the last six weeks.
+     */
+    val bigJump: BigJump? = null,
 )
 
 /** The next targets of a routine's exercises that have progression, worked out from their history. */
@@ -102,7 +104,7 @@ internal class OfflineProgressionRepository(
                     oneStepUp = LoadRounding.step(heaviest, up = true, entity.equipment, gym),
                     limitPercent = limitPercent,
                 )
-        return ExerciseProgression(target, bigJump, heaviest)
+        return ExerciseProgression(target, if (bigJump) BigJump(aimed, heaviest) else null)
     }
 
     /**

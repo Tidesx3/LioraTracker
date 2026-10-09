@@ -277,7 +277,15 @@ As of 2026-10-09:
     ending the process; a progress photo taken with the camera app meanwhile is no longer lost.
   - The custom exercise button has an accessible name.
   - The Robolectric dialog problem is narrowed down (a layout loop, see TODO.md), not solved.
-- **Next:** Phase 4a, double progression (spec under the Phase 4 roadmap, worked out on 2026-10-09).
+- **Phase 4** is planned in parts 4a–4d (spec under the Phase 4 roadmap, worked out on 2026-10-09).
+  - **4a (done, pending the device check in TODO.md): double progression.** Schema v4. In three commits:
+    the engine (`Progression` in `core/domain`, with the safety bound), the data (`ProgressionRepository`;
+    starting a routine fills in target weights and the reps to aim for; backups carry the rule, a machine's
+    own step and the aim), and the app. The routine editor turns it on per exercise from its menu and asks
+    for rep ranges; routine detail shows next time's targets and why; the logger says why under each
+    exercise (`ProgressionNote` in `core:ui`); an exercise's page sets a machine or cable's own step (the
+    logger's ± uses it too); Settings › Progress sets the jump limit.
+- **Next:** 4b, rotations.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.

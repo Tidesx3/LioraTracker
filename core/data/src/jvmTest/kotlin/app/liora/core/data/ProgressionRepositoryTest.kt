@@ -12,6 +12,7 @@ import app.liora.core.data.workout.LocalRestTimerRepository
 import app.liora.core.data.workout.OfflineActiveWorkoutRepository
 import app.liora.core.database.TransactionRunner
 import app.liora.core.database.inMemoryLioraDatabase
+import app.liora.core.domain.BigJump
 import app.liora.core.domain.ProgressionReason
 import app.liora.core.model.ActiveWorkout
 import app.liora.core.model.Equipment
@@ -29,7 +30,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Duration
@@ -162,28 +163,21 @@ class ProgressionRepositoryTest {
             val press = machine("Chest Press")
             val push = routine("push", press)
             train(push, kilograms = 60.0, 12, 12, 12)
-            assertFalse(
-                progression
-                    .targets(push, clock.now())
-                    .values
-                    .single()
-                    .bigJump,
-            )
+            assertNull(bigJump(push))
 
             exercises.setLoadStep(press, Mass(25.0))
-            val jump = progression.targets(push, clock.now()).values.single()
-            assertTrue(jump.bigJump)
-            assertEquals(Mass(60.0), jump.heaviestLately)
+            assertEquals(BigJump(target = Mass(85.0), heaviestLately = Mass(60.0)), bigJump(push))
             // A looser limit lets it through.
             settings.update { it.copy(jumpLimitPercent = 50) }
-            assertFalse(
-                progression
-                    .targets(push, clock.now())
-                    .values
-                    .single()
-                    .bigJump,
-            )
+            assertNull(bigJump(push))
         }
+
+    private suspend fun bigJump(routine: Routine) =
+        progression
+            .targets(routine, clock.now())
+            .values
+            .single()
+            .bigJump
 
     @Test
     fun exercisesWithoutARuleStartAsTheyAlwaysHave() =

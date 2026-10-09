@@ -37,6 +37,8 @@
   <string name="formula_brzycki">Brzycki</string>
   <string name="formula_brzycki_body">More cautious above about 10 reps</string>
   <string name="stall_window">Stall alert after</string>
+  <string name="jump_limit">Flag a target heavier by</string>
+  <string name="jump_limit_value">More than %1$d%</string>
   <plurals name="stall_weeks">
     <item quantity="one">%1$d week without a new best</item>
     <item quantity="other">%1$d weeks without a new best</item>

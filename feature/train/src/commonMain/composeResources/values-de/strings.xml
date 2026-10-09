@@ -74,6 +74,10 @@
   <string name="editor_superset_next">Supersatz mit nächster Übung</string>
   <string name="editor_superset_remove">Aus Supersatz lösen</string>
   <string name="editor_rest">Pausentimer</string>
+  <string name="editor_progression_on">Doppelte Progression</string>
+  <string name="editor_progression_off">Progression beenden</string>
+  <string name="editor_progression_label">Doppelte Progression: eine Stufe schwerer, sobald jeder Satz oben ankommt</string>
+  <string name="editor_progression_needs_ranges">Gib jedem Arbeitssatz eine Spanne, etwa 8–12</string>
   <string name="editor_add_note">Übungsnotiz hinzufügen</string>
   <string name="editor_remove_exercise">Übung entfernen</string>
   <string name="editor_discard_title">Änderungen verwerfen?</string>

@@ -51,7 +51,9 @@ import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.domain.ProgressMetric
+import app.liora.core.model.Equipment
 import app.liora.core.model.Exercise
+import app.liora.core.model.Mass
 import app.liora.core.model.Muscle
 import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
@@ -104,6 +106,7 @@ private class ExerciseDetailActions(
     val onDelete: () -> Unit,
     val onSelectMetric: (ProgressMetric) -> Unit,
     val onNoteChange: (String) -> Unit,
+    val onLoadStepChange: (Mass?) -> Unit,
 )
 
 @Composable
@@ -130,6 +133,7 @@ internal fun ExerciseDetailScreen(
                 onDelete = viewModel::requestDelete,
                 onSelectMetric = viewModel::selectMetric,
                 onNoteChange = viewModel::setNote,
+                onLoadStepChange = viewModel::setLoadStep,
             ),
         modifier = modifier,
     )
@@ -221,6 +225,17 @@ private fun ExerciseDetailContent(
                     onNoteChange = actions.onNoteChange,
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                 )
+            }
+            // A stack can move in other steps than the gym's other machines.
+            if (exercise.equipment == Equipment.Machine || exercise.equipment == Equipment.Cable) {
+                item(key = "load_step") {
+                    LoadStepRow(
+                        ownStep = exercise.settings.loadStep,
+                        gymStep = state.gymStep,
+                        onChange = actions.onLoadStepChange,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                    )
+                }
             }
             // Once trained, how it's going comes first; the how-to is for learning it.
             state.progress?.let { progress -> progressItems(progress, actions) }

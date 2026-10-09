@@ -3,6 +3,8 @@ package app.liora.feature.train.routine
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.exercise.ExerciseRepository
+import app.liora.core.data.progression.ExerciseProgression
+import app.liora.core.data.progression.ProgressionRepository
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.model.Exercise
@@ -34,6 +36,8 @@ sealed interface RoutineDetailUiState {
         val folders: List<RoutineFolder>,
         val hasActiveWorkout: Boolean,
         val dialog: RoutineDialog?,
+        /** The next targets of exercises with progression, by routine exercise id. */
+        val progression: Map<String, ExerciseProgression> = emptyMap(),
     ) : RoutineDetailUiState
 }
 
@@ -42,6 +46,7 @@ class RoutineDetailViewModel(
     private val routines: RoutineRepository,
     exerciseRepository: ExerciseRepository,
     private val activeWorkouts: ActiveWorkoutRepository,
+    progression: ProgressionRepository,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
     private val dialog = MutableStateFlow<RoutineDialog?>(null)
@@ -68,6 +73,8 @@ class RoutineDetailViewModel(
             } else {
                 RoutineDetailUiState.Loaded(routine, exercisesById, folders, active != null, openDialog)
             }
+        }.combine(progression.observeTargets(routineId).onStart { emit(emptyMap()) }) { state, targets ->
+            (state as? RoutineDetailUiState.Loaded)?.copy(progression = targets) ?: state
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), RoutineDetailUiState.Loading)
 
     fun setLanguage(value: String) {

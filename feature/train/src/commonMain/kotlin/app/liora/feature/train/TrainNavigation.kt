@@ -98,6 +98,6 @@ private const val PICKED_SUFFIX = ".picked"
 val trainModule =
     module {
         viewModelOf(::TrainViewModel)
-        viewModel { (routineId: String) -> RoutineDetailViewModel(routineId, get(), get(), get()) }
+        viewModel { (routineId: String) -> RoutineDetailViewModel(routineId, get(), get(), get(), get()) }
         viewModel { (route: RoutineEditorRoute) -> RoutineEditorViewModel(route, get(), get(), get()) }
     }

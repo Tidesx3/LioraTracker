@@ -124,4 +124,14 @@
   <string name="note_exercise_hint">Shows every time: seat height, grip, the plan</string>
   <string name="note_workout">Note for this workout</string>
   <string name="note_workout_hint">Just for this workout: how it went, what to watch</string>
+
+  <string name="progression_first_time">First time with this plan: start at the bottom of each range</string>
+  <plurals name="progression_top_reached">
+    <item quantity="one">%1$s reps on the set at %3$s last time, so %4$s</item>
+    <item quantity="other">%1$s reps on all %2$d sets at %3$s last time, so %4$s</item>
+  </plurals>
+  <string name="progression_nothing_heavier">Every set at the top, but nothing here goes heavier than %1$s</string>
+  <string name="progression_keep_going">%1$s at %2$s last time: a rep more on each set</string>
+  <string name="progression_below_twice">Under %1$s reps twice in a row at %2$s, so %3$s</string>
+  <string name="progression_big_jump">%1$s is a big jump from %2$s, your heaviest in six weeks. Worth a second look.</string>
 </resources>

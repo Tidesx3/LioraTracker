@@ -198,6 +198,21 @@ class CellInputTest {
                 .stepped(SetField.Weight, up = true, TrackingType.WeightReps, null, metric, Equipment.Cable, sevens)
                 .weight,
         )
+        // A cable with its own step moves by it from the weight there, off the gym's grid.
+        assertEquals(
+            Mass(9.5),
+            LoggedSet("s", weight = Mass(7.0))
+                .stepped(
+                    SetField.Weight,
+                    up = true,
+                    TrackingType.WeightReps,
+                    null,
+                    metric,
+                    Equipment.Cable,
+                    metricGym,
+                    ownStep = Mass(2.5),
+                ).weight,
+        )
     }
 
     private fun typed(

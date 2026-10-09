@@ -124,4 +124,14 @@
   <string name="note_exercise_hint">Steht jedes Mal hier: Sitzhöhe, Griff, der Plan</string>
   <string name="note_workout">Notiz zu diesem Training</string>
   <string name="note_workout_hint">Nur für dieses Training: wie’s lief, was zwickt</string>
+
+  <string name="progression_first_time">Zum ersten Mal mit diesem Plan: Start am unteren Ende jeder Spanne</string>
+  <plurals name="progression_top_reached">
+    <item quantity="one">Letztes Mal %1$s Wdh. im Satz mit %3$s, jetzt also %4$s</item>
+    <item quantity="other">Letztes Mal %1$s Wdh. in allen %2$d Sätzen mit %3$s, jetzt also %4$s</item>
+  </plurals>
+  <string name="progression_nothing_heavier">Alle Sätze am oberen Ende, doch schwerer als %1$s geht es hier nicht</string>
+  <string name="progression_keep_going">Letztes Mal %1$s mit %2$s: in jedem Satz eine Wiederholung mehr</string>
+  <string name="progression_below_twice">Zweimal in Folge unter %1$s Wdh. mit %2$s, jetzt also %3$s</string>
+  <string name="progression_big_jump">%1$s ist ein großer Sprung von %2$s, deinem Schwersten der letzten sechs Wochen. Lieber noch mal prüfen.</string>
 </resources>
