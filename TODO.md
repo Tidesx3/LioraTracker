@@ -4,6 +4,16 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
+- **First-launch walkthrough: check on the phone** (added 2026-10-09). The phone already has data, so it
+  never shows by itself: open it from Settings › About Liora › How Liora works.
+  - Swiping between pages follows the finger; back steps back a page; Skip lands on "Keep it safe".
+  - Tick the demo set: it pops and fills like the logger's, with the same haptic tick.
+  - Pounds turns the demo to 135 lb and Settings to pounds, miles and inches (switch back afterwards).
+  - "Let’s go" lands back on Settings, scrolled where it was. On the inner screen, the illustration sits
+    beside the text.
+  - Once on a fresh install (or after clearing the debug app's data): it shows before the tabs, with no
+    flash of the Train tab first.
+
 - **Health Connect: check on the phone** (added 2026-10-08). Settings › Your data › Health Connect › Set up:
   Health Connect's own permission screen shows Liora's three permissions, and its privacy policy link opens
   PRIVACY.md. Afterwards past workouts appear in Health Connect (and Samsung Health) as strength training,

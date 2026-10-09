@@ -60,17 +60,21 @@ internal fun oval(
         )
     }
 
-/** Part of a circle's outline, from [startDegrees] (0 points right, clockwise) on by [sweepDegrees]. */
+/**
+ * Part of a circle's outline, from [startDegrees] (0 points right, clockwise) on by [sweepDegrees]; with a
+ * [radiusY] of its own, part of an oval's.
+ */
 internal fun arc(
     x: Float,
     y: Float,
     radius: Float,
     startDegrees: Float,
     sweepDegrees: Float,
+    radiusY: Float = radius,
 ): Path =
     Path().apply {
         arcTo(
-            Rect(Offset(x - radius, y - radius), Size(radius * 2, radius * 2)),
+            Rect(Offset(x - radius, y - radiusY), Size(radius * 2, radiusY * 2)),
             startDegrees,
             sweepDegrees,
             forceMoveTo = true,

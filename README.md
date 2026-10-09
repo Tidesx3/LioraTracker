@@ -25,11 +25,12 @@ can load, show the plates per side for a barbell, and add warm-up sets. Everythi
 file (readable JSON plus the photos) that restores on another phone without overwriting newer changes,
 and workouts export as CSV for spreadsheets. Workouts and body measurements import from Hevy and Strong
 exports, with a review of which exercise each name becomes; gym-specific machines become variations of
-their own. Phase 3 is nearly done: everything syncs through a hidden folder in your own Google Drive (Settings
+their own. Phase 3 is done: everything syncs through a hidden folder in your own Google Drive (Settings
 › Your data), in the background, deletions and photos included, with what's still waiting and the space it
 takes in view. Health Connect gets every finished workout and brings in weight and body fat from apps like
-Samsung Health. A first-launch walkthrough is next, then programs with auto-progression. Details and
-progress are in [docs/PLAN.md](docs/PLAN.md).
+Samsung Health. On the first start, a short walkthrough shows how Liora works, asks kilograms or pounds,
+and offers sync. Programs with auto-progression are next. Details and progress are in
+[docs/PLAN.md](docs/PLAN.md).
 
 ## Principles
 

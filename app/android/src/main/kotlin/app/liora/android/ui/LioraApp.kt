@@ -55,6 +55,7 @@ import app.liora.core.designsystem.layout.currentWindowLayout
 import app.liora.core.designsystem.util.workoutDisplayName
 import app.liora.core.model.ActiveWorkout
 import app.liora.core.navigation.EditWorkoutRoute
+import app.liora.core.navigation.ImportRoute
 import app.liora.core.navigation.ListDetailSceneStrategy
 import app.liora.core.navigation.LocalSharedTransitionScope
 import app.liora.core.navigation.LoggerRoute
@@ -66,6 +67,7 @@ import app.liora.feature.logger.loggerEntries
 import app.liora.feature.progress.progressEntries
 import app.liora.feature.settings.settingsEntries
 import app.liora.feature.train.trainEntries
+import app.liora.feature.walkthrough.WalkthroughScreen
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -82,6 +84,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun LioraApp(
     modifier: Modifier = Modifier,
+    /** The first-launch walkthrough takes the window, in place of the tabs, until it's finished. */
+    showWalkthrough: Boolean = false,
     openLogger: Boolean = false,
     onOpenLoggerHandle: () -> Unit = {},
     viewModel: LioraAppViewModel = koinViewModel(),
@@ -97,6 +101,21 @@ fun LioraApp(
         }
     }
     AskForNotificationsDuringWorkouts(workoutRunning = activeWorkout != null)
+    // Held out here, so the screens keep their state (a list's scroll, say) while the walkthrough is shown.
+    val entryDecorators =
+        listOf(
+            rememberSaveableStateHolderNavEntryDecorator<NavKey>(),
+            rememberViewModelStoreNavEntryDecorator(),
+        )
+    if (showWalkthrough) {
+        // The back stack waits underneath; an import picked on the last page opens on top of it.
+        WalkthroughScreen(
+            viewModel = koinViewModel(),
+            onImport = { source -> navigator.navigate(ImportRoute(source)) },
+            modifier = modifier,
+        )
+        return
+    }
     val layout = currentWindowLayout()
     // The logger takes the whole window, on the workout in progress or on a finished one being corrected.
     val inLogger = navigator.currentRoute == LoggerRoute || navigator.currentRoute is EditWorkoutRoute
@@ -133,11 +152,7 @@ fun LioraApp(
                         backStack = navigator.backStack,
                         onBack = navigator::goBack,
                         modifier = Modifier.fillMaxSize(),
-                        entryDecorators =
-                            listOf(
-                                rememberSaveableStateHolderNavEntryDecorator(),
-                                rememberViewModelStoreNavEntryDecorator(),
-                            ),
+                        entryDecorators = entryDecorators,
                         sceneStrategies = listOf(listDetail),
                         sharedTransitionScope = this,
                         transitionSpec = screenTransition(navigator),

@@ -80,6 +80,7 @@ import app.liora.feature.settings.resources.rest_warmup
 import app.liora.feature.settings.resources.rest_working
 import app.liora.feature.settings.resources.rpe
 import app.liora.feature.settings.resources.rpe_body
+import app.liora.feature.settings.resources.section_about
 import app.liora.feature.settings.resources.section_appearance
 import app.liora.feature.settings.resources.section_progress
 import app.liora.feature.settings.resources.section_units
@@ -90,6 +91,8 @@ import app.liora.feature.settings.resources.theme
 import app.liora.feature.settings.resources.unit_body_length
 import app.liora.feature.settings.resources.unit_distance
 import app.liora.feature.settings.resources.unit_weight
+import app.liora.feature.settings.resources.walkthrough_body
+import app.liora.feature.settings.resources.walkthrough_title
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
@@ -138,6 +141,7 @@ internal fun SettingsScreen(
         onOpenGyms = onOpenGyms,
         onChange = viewModel::update,
         onPreviewSound = viewModel::preview,
+        onShowWalkthrough = viewModel::showWalkthrough,
         dataActions =
             DataActions(
                 onBackUp = { backupSaver.save(backupName) },
@@ -191,6 +195,7 @@ private fun SettingsContent(
     onOpenGyms: () -> Unit,
     onChange: (SettingsChange) -> Unit,
     onPreviewSound: (RestSound) -> Unit,
+    onShowWalkthrough: () -> Unit,
     dataActions: DataActions,
     language: AppLanguage,
     modifier: Modifier = Modifier,
@@ -319,6 +324,15 @@ private fun SettingsContent(
                     onOpenHealth = onOpenHealth,
                     actions = dataActions,
                 )
+            }
+            item(key = "about") {
+                SettingsGroup(stringResource(Res.string.section_about)) {
+                    SettingRow(
+                        stringResource(Res.string.walkthrough_title),
+                        stringResource(Res.string.walkthrough_body),
+                        onClick = onShowWalkthrough,
+                    )
+                }
             }
         }
     }

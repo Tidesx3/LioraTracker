@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="skip">Überspringen</string>
+  <string name="next">Weiter</string>
+  <string name="finish">Los geht’s</string>
+  <string name="cd_page">Seite %1$d von %2$d</string>
+
+  <string name="welcome_title">Willkommen bei Liora</string>
+  <string name="welcome_body">Ein Trainingslog, das zwischen den Sätzen mithält. Und deine Daten bleiben deine.</string>
+  <string name="welcome_units">Kilo oder Pfund?</string>
+  <string name="welcome_kilograms">Kilogramm</string>
+  <string name="welcome_pounds">Pfund</string>
+  <string name="welcome_units_hint">Strecken und Körpermaße ziehen mit. Den Feinschliff gibt’s in den Einstellungen.</string>
+
+  <string name="routines_title">Einmal planen, oft trainieren</string>
+  <string name="routines_body">Stell dir Routinen aus dem Übungskatalog zusammen, mit Ordnern und Supersätzen. Oder starte einfach drauflos und nimm Übungen unterwegs dazu.</string>
+
+  <string name="logging_title">Ein Tipp pro Satz</string>
+  <string name="logging_body">Die Zahlen vom letzten Mal stehen schon da. Hak den Satz ab, und die Pause läuft von selbst. Dein Training bleibt in den Benachrichtigungen.</string>
+  <string name="logging_try">Na los, abhaken.</string>
+  <string name="logging_done">Mehr ist es nicht.</string>
+  <string name="col_set">Satz</string>
+  <string name="col_previous">Vorher</string>
+  <string name="col_reps">Wdh.</string>
+
+  <string name="progress_title">Da kommt was zusammen</string>
+  <string name="progress_body">Rekorde, sobald du sie aufstellst, ein Verlauf für jede Übung, eine Serie, die Wochen zählt, und jeden Monat ein Bericht.</string>
+
+  <string name="data_title">Sicher ist sicher</string>
+  <string name="data_body">Alles bleibt auf diesem Handy. Synchronisiere es mit deinem eigenen Google Drive: ein Backup, das immer aktuell ist, und dasselbe Log auf jedem Handy.</string>
+  <string name="data_connect">Google Drive verbinden</string>
+  <string name="data_connected">Synchronisiert mit %1$s</string>
+  <string name="data_second_phone">Liora läuft schon auf einem anderen Handy? Verbinde dasselbe Konto, und deine Trainings ziehen mit um.</string>
+  <string name="data_failed">Google war nicht erreichbar. Verbinden kannst du später unter Einstellungen › Deine Daten.</string>
+  <string name="data_import">Aus Hevy oder Strong importieren</string>
+</resources>

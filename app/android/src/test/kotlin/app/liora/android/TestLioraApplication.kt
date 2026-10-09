@@ -16,6 +16,7 @@ import app.liora.core.data.sync.PulledBatches
 import app.liora.core.data.sync.SyncBackend
 import app.liora.core.data.sync.SyncScheduler
 import app.liora.core.data.sync.SyncStores
+import app.liora.core.data.walkthrough.WalkthroughRepository
 import app.liora.core.data.workout.RestSoundPlayer
 import app.liora.core.database.LioraDatabase
 import app.liora.core.domain.RestSound
@@ -27,6 +28,8 @@ import coil3.SingletonImageLoader
 import coil3.imageDecoderEnabled
 import coil3.serviceLoaderEnabled
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.runBlocking
+import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.loadKoinModules
 import org.koin.core.module.Module
@@ -56,6 +59,8 @@ class TestLioraApplication : LioraApplication() {
                 .build(),
         )
         loadKoinModules(module { single { RecordingRestSoundPlayer() } bind RestSoundPlayer::class })
+        // Tests open on the tabs; the walkthrough's own tests ask for it (WalkthroughFlowTest).
+        runBlocking { get<WalkthroughRepository>().finish() }
     }
 
     override fun syncModules(): List<Module> =

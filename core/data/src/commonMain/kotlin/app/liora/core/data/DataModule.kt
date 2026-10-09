@@ -32,6 +32,8 @@ import app.liora.core.data.sync.OfflineSyncRepository
 import app.liora.core.data.sync.SyncEngine
 import app.liora.core.data.sync.SyncRepository
 import app.liora.core.data.sync.SyncStamper
+import app.liora.core.data.walkthrough.LocalWalkthroughRepository
+import app.liora.core.data.walkthrough.WalkthroughRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.LocalRestTimerRepository
 import app.liora.core.data.workout.OfflineActiveWorkoutRepository
@@ -90,14 +92,18 @@ val dataModule =
         // The workout in progress has one set logger, shared by the logger and the notification.
         single<SetLogger> { get<ActiveWorkoutRepository>().sets }
         singleOf(::LocalRestTimerRepository) bind RestTimerRepository::class
+        singleOf(::LocalWalkthroughRepository) bind WalkthroughRepository::class
     }
 
 /** Work that runs once per process start, off the main thread. */
 class AppStartup(
+    private val walkthrough: WalkthroughRepository,
     private val seeder: ExerciseCatalogSeeder,
     private val legacyNotes: LegacyNotes,
 ) {
     suspend fun run() {
+        // Before the first seed, which is how it tells a new install from one that ran an earlier Liora.
+        walkthrough.settle()
         seeder.seedIfNeeded()
         legacyNotes.move()
     }

@@ -56,6 +56,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.motion.SetCheck
+import app.liora.core.designsystem.motion.SetCheckSize
+import app.liora.core.designsystem.motion.SetFillSpec
+import app.liora.core.designsystem.motion.drawSetFill
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.NumberFormatter
@@ -75,7 +79,6 @@ import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.cd_complete_set
 import app.liora.feature.logger.resources.cd_personal_record
 import app.liora.feature.logger.resources.cd_remove_set
-import app.liora.feature.logger.resources.cd_reopen_set
 import app.liora.feature.logger.resources.col_previous
 import app.liora.feature.logger.resources.col_reps
 import app.liora.feature.logger.resources.col_rpe
@@ -130,7 +133,7 @@ internal fun SetHeader(
         columns.fields.forEach { field ->
             HeaderText(columnTitle(field, columns.trackingType), Modifier.width(field.cellWidth))
         }
-        Box(Modifier.width(CheckSize))
+        Box(Modifier.width(SetCheckSize))
     }
 }
 
@@ -215,14 +218,14 @@ internal fun SetRow(
     ) {
         // Opaque first: the swipe's red delete background sits right behind the row.
         val tint = LioraTheme.colors.completed.copy(alpha = COMPLETED_ALPHA)
-        val filled = animateFloatAsState(if (set.isCompleted) 1f else 0f, FillSpec)
+        val filled = animateFloatAsState(if (set.isCompleted) 1f else 0f, SetFillSpec)
         Row(
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .height(RowHeight)
                     .background(MaterialTheme.colorScheme.surfaceContainer)
-                    .drawBehind { drawFill(filled.value, tint) }
+                    .drawBehind { drawSetFill(filled.value, tint, endPadding = RowPadding) }
                     .padding(horizontal = RowPadding),
             horizontalArrangement = Arrangement.spacedBy(CellGap),
             verticalAlignment = Alignment.CenterVertically,
@@ -272,7 +275,7 @@ internal fun SetRow(
                     onClick = { actions.onCellClick(cell) },
                 )
             }
-            CheckButton(completed = set.isCompleted, onClick = { actions.onToggleComplete(set.id) })
+            SetCheck(completed = set.isCompleted, onClick = { actions.onToggleComplete(set.id) })
         }
     }
 }
@@ -411,6 +414,5 @@ private val CellGap = 6.dp
 /** How far a record's trophy sits out from the set number's corner. */
 private val RecordOffset = 6.dp
 private val BadgeWidth = 32.dp
-internal val CheckSize = 40.dp
 private const val COMPLETED_ALPHA = 0.14f
 private const val PLACEHOLDER_ALPHA = 0.6f

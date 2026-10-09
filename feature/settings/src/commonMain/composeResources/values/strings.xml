@@ -53,6 +53,10 @@
   <string name="language_en" translatable="false">English</string>
   <string name="language_de" translatable="false">Deutsch</string>
 
+  <string name="section_about">About Liora</string>
+  <string name="walkthrough_title">How Liora works</string>
+  <string name="walkthrough_body">The short tour from the first start</string>
+
   <string name="section_data">Your data</string>
   <string name="backup_title">Back up everything</string>
   <string name="backup_body">Workouts, routines, body, photos and settings in one file</string>

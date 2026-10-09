@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="skip">Skip</string>
+  <string name="next">Next</string>
+  <string name="finish">Let’s go</string>
+  <string name="cd_page">Page %1$d of %2$d</string>
+
+  <string name="welcome_title">Welcome to Liora</string>
+  <string name="welcome_body">A training log that keeps up with you between sets, and keeps your data yours.</string>
+  <string name="welcome_units">Kilograms or pounds?</string>
+  <string name="welcome_kilograms">Kilograms</string>
+  <string name="welcome_pounds">Pounds</string>
+  <string name="welcome_units_hint">Distances and body measurements follow along. Settings has the details.</string>
+
+  <string name="routines_title">Plan it once</string>
+  <string name="routines_body">Build routines from the exercise catalog, folders and supersets included. Or just start a workout and add exercises as you go.</string>
+
+  <string name="logging_title">One tap per set</string>
+  <string name="logging_body">Last time’s numbers are already there. Tick a set off and the rest timer starts by itself. Your workout keeps running in the notifications.</string>
+  <string name="logging_try">Go on, tick it off.</string>
+  <string name="logging_done">That’s all it takes.</string>
+  <string name="col_set">Set</string>
+  <string name="col_previous">Previous</string>
+  <string name="col_reps">Reps</string>
+
+  <string name="progress_title">Watch it add up</string>
+  <string name="progress_body">Records the moment you set them, a chart for every lift, a streak that counts weeks, and a report each month.</string>
+
+  <string name="data_title">Keep it safe</string>
+  <string name="data_body">Everything stays on this phone. Sync it with your own Google Drive for a backup that’s always current, and the same log on every phone.</string>
+  <string name="data_connect">Connect Google Drive</string>
+  <string name="data_connected">Syncing with %1$s</string>
+  <string name="data_second_phone">Using Liora on another phone? Connect the same account and your workouts come over.</string>
+  <string name="data_failed">Google couldn’t be reached. You can connect later in Settings › Your data.</string>
+  <string name="data_import">Import from Hevy or Strong</string>
+</resources>

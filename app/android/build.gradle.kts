@@ -76,6 +76,7 @@ dependencies {
     implementation(projects.feature.progress)
     implementation(projects.feature.body)
     implementation(projects.feature.settings)
+    implementation(projects.feature.walkthrough)
 
     implementation(projects.sync.gdrive)
     implementation(projects.integration.healthconnect)

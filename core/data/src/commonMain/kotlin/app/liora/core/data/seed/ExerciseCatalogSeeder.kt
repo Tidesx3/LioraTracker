@@ -54,11 +54,11 @@ class ExerciseCatalogSeeder(
         return true
     }
 
-    private companion object {
+    internal companion object {
         const val KEY_SEED_VERSION = "exercise_seed_version"
-        const val HEADER_LENGTH = 200
-        val VERSION_PATTERN = Regex("\"version\"\\s*:\\s*(\\d+)")
-        val json = Json { ignoreUnknownKeys = true }
+        private const val HEADER_LENGTH = 200
+        private val VERSION_PATTERN = Regex("\"version\"\\s*:\\s*(\\d+)")
+        private val json = Json { ignoreUnknownKeys = true }
     }
 }
 

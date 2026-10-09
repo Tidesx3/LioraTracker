@@ -48,6 +48,9 @@ enum class Illustration {
 
     /** A cloud with a tick on it: a copy kept safe elsewhere. */
     Sync,
+
+    /** Liora's L with its orbit, as on the app's icon. */
+    Welcome,
 }
 
 /**

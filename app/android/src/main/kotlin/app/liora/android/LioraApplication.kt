@@ -26,6 +26,7 @@ import app.liora.feature.logger.loggerModule
 import app.liora.feature.progress.progressModule
 import app.liora.feature.settings.settingsModule
 import app.liora.feature.train.trainModule
+import app.liora.feature.walkthrough.walkthroughModule
 import app.liora.integration.healthconnect.HealthConnectStore
 import app.liora.sync.gdrive.GoogleDriveAccess
 import kotlinx.coroutines.launch
@@ -53,6 +54,7 @@ open class LioraApplication : Application() {
                         progressModule,
                         bodyModule,
                         settingsModule,
+                        walkthroughModule,
                     ),
             )
         }

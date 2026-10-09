@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.gym.GymProfileRepository
 import app.liora.core.data.settings.SettingsRepository
+import app.liora.core.data.walkthrough.WalkthroughRepository
 import app.liora.core.data.workout.RestSoundPlayer
 import app.liora.core.domain.RestSound
 import app.liora.core.domain.Settings
@@ -22,6 +23,7 @@ class SettingsViewModel(
     private val repository: SettingsRepository,
     gyms: GymProfileRepository,
     private val sounds: RestSoundPlayer,
+    private val walkthrough: WalkthroughRepository,
 ) : ViewModel() {
     private var preview: Job? = null
 
@@ -43,5 +45,10 @@ class SettingsViewModel(
     internal fun preview(sound: RestSound) {
         preview?.cancel()
         preview = viewModelScope.launch { sounds.play(sound) }
+    }
+
+    /** The first-launch walkthrough again; the app shows it in place of everything until it's finished. */
+    internal fun showWalkthrough() {
+        viewModelScope.launch { walkthrough.showAgain() }
     }
 }

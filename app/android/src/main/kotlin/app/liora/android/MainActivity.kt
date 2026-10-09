@@ -19,6 +19,7 @@ import app.liora.android.sync.CloudConsentFactory
 import app.liora.android.ui.LioraApp
 import app.liora.android.workout.WorkoutNotifications
 import app.liora.core.data.settings.SettingsRepository
+import app.liora.core.data.walkthrough.WalkthroughRepository
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.domain.ThemeMode
 import app.liora.core.ui.CloudConsent
@@ -36,6 +37,8 @@ class MainActivity : ComponentActivity() {
 
     private val settingsRepository: SettingsRepository by inject()
 
+    private val walkthroughRepository: WalkthroughRepository by inject()
+
     /** Google's consent screen for sync; it registers for its result, so it's made before the activity starts. */
     private lateinit var cloudConsent: CloudConsent
 
@@ -51,8 +54,11 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) openLogger = intent.opensLogger()
         // Read once up front, so a chosen theme and units show from the first frame.
         val initial = runBlocking { settingsRepository.current() }
+        // And whether this is the first start, so the first frame is the walkthrough or the tabs, never both.
+        val walkthroughFirst = runBlocking { walkthroughRepository.settle() }
         setContent {
             val settings by settingsRepository.settings.collectAsStateWithLifecycle(initial)
+            val walkthrough by walkthroughRepository.pending.collectAsStateWithLifecycle(walkthroughFirst)
             val dark =
                 when (settings.theme) {
                     ThemeMode.System -> isSystemInDarkTheme()
@@ -76,7 +82,11 @@ class MainActivity : ComponentActivity() {
                     LocalCloudConsent provides cloudConsent,
                     LocalHealthConnectScreens provides healthConnectScreens,
                 ) {
-                    LioraApp(openLogger = openLogger, onOpenLoggerHandle = { openLogger = false })
+                    LioraApp(
+                        showWalkthrough = walkthrough,
+                        openLogger = openLogger,
+                        onOpenLoggerHandle = { openLogger = false },
+                    )
                 }
             }
         }

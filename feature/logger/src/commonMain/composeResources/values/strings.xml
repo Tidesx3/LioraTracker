@@ -19,7 +19,6 @@
   <string name="cd_rename">Rename workout</string>
   <string name="cd_more">More options</string>
   <string name="cd_complete_set">Log set</string>
-  <string name="cd_reopen_set">Undo logged set</string>
   <string name="cd_remove_set">Remove set</string>
 
   <string name="col_set">Set</string>

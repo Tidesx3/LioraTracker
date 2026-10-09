@@ -109,6 +109,8 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - **App-level UI tests:**
     - Use Robolectric with `@Config(sdk = [36], application = TestLioraApplication::class)`. That app uses an in-memory DB on the framework SQLite driver, because bundled SQLite only ships Android binaries.
     - `stopKoin()` in `@After`.
+    - The test app starts past the first-launch walkthrough; a test that wants it calls
+      `WalkthroughRepository.showAgain()` (see `WalkthroughFlowTest`).
     - Room emits off the main thread, so use `waitUntil` (see `LioraAppTest.waitForText`) rather than asserting immediately.
     - Screens that depend on "now" (Progress, stalls) get a fixed clock: override Koin's `Clock` with `loadKoinModules` before anything uses it (see `ProgressFlowTest`), so screenshots don't change from day to day.
 - **Translations:** `verifyTranslations` (part of `check`) fails when a `values/` string has no `values-de/` counterpart, or when a German string is stale. `translatable="false"` opts a string out.

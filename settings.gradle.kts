@@ -49,6 +49,7 @@ include(":feature:exercises")
 include(":feature:progress")
 include(":feature:body")
 include(":feature:settings")
+include(":feature:walkthrough")
 
 include(":sync:gdrive")
 include(":integration:healthconnect")

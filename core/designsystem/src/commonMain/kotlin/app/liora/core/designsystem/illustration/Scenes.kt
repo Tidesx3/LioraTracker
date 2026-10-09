@@ -17,6 +17,7 @@ internal val Illustration.layers: List<Layer>
             Illustration.UnknownFile -> UnknownFileScene
             Illustration.Done -> DoneScene
             Illustration.Sync -> SyncScene
+            Illustration.Welcome -> WelcomeScene
         }
 
 /** A strip of confetti at ([x], [y]), turned by [degrees]. */
@@ -341,4 +342,31 @@ private val SyncScene =
         fill(Tone.Soft, sparkle(192f, 50f, 6f))
         fill(Tone.Soft, circle(200f, 84f, 3f))
         stroke(Tone.Soft, 2f, circle(56f, 114f, 4.5f))
+    }
+
+private val WelcomeScene =
+    scene {
+        // The orbit, tilted to rise to the right: its far half passes behind the L, its near half in front.
+        fun orbit(
+            startDegrees: Float,
+            sweepDegrees: Float,
+        ) = arc(124f, 84f, 58f, startDegrees, sweepDegrees, radiusY = 17f).rotated(-22f, 124f, 84f)
+        stroke(Tone.Soft, 5f, orbit(180f, 180f))
+        // A serif L: the top slanting up to the right, the foot ending in a spur.
+        fill(
+            Tone.Accent,
+            svg(
+                "M 95 45 L 134 35 C 126 39 122 44 122 52 L 122 111 C 122 114 124 115 127 115 " +
+                    "L 146 115 C 152 115 157 109 162 100 L 149 125 L 95 125 " +
+                    "C 102 121 106 118 106 110 L 106 57 C 106 50 102 47 95 45 Z",
+            ),
+        )
+        // Cut into the L where the near half crosses it, and only there, so the orbit's own ends stay whole.
+        stroke(Tone.Wash, 10f, orbit(85f, 45f))
+        stroke(Tone.Soft, 5f, orbit(0f, 180f))
+        // Where the orbit catches the light.
+        fill(Tone.Accent, sparkle(178f, 58f, 8f))
+        fill(Tone.Soft, sparkle(62f, 48f, 6f))
+        fill(Tone.Soft, circle(196f, 104f, 3f))
+        stroke(Tone.Soft, 2f, circle(60f, 124f, 4.5f))
     }

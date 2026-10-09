@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <string name="cd_back">Zurück</string>
+  <string name="cd_complete_set">Satz abhaken</string>
+  <string name="cd_reopen_set">Satz wieder öffnen</string>
   <string name="cd_open_workout">Training öffnen</string>
   <string name="workout_untitled">Training</string>
 </resources>

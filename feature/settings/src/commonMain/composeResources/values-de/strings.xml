@@ -51,6 +51,10 @@
   <string name="language">Sprache</string>
   <string name="language_system">Wie das Handy</string>
 
+  <string name="section_about">Über Liora</string>
+  <string name="walkthrough_title">So funktioniert Liora</string>
+  <string name="walkthrough_body">Die kurze Tour vom ersten Start</string>
+
   <string name="section_data">Deine Daten</string>
   <string name="backup_title">Alles sichern</string>
   <string name="backup_body">Trainings, Routinen, Körperwerte, Fotos und Einstellungen in einer Datei</string>
