@@ -757,6 +757,7 @@ the app gets its character before sync, the server and the web GUI build on it.
   - **Safety bound:** a target too far above the recent best is flagged before it is shown (defined below). The
     same check guards AI suggestions in Phase 6.
 - Home-screen widget, and the workout on the lock screen instead of Wear OS (4d below).
+- Updates from GitHub: the release app checks for a newer version, downloads it and installs it (4e below).
 
 **How it works** (spec 2026-10-09, worked out with the user):
 - **Who it's for first:** the main user (see Context) trains a rotation of several routines, mostly 3–4
@@ -767,6 +768,7 @@ the app gets its character before sync, the server and the web GUI build on it.
   - **4b, rotations:** a folder of routines that take turns, with what's next on the Train tab.
   - **4c, the home-screen widget.**
   - **4d, the lock screen:** the workout as an Android 16 Live Update, instead of Wear OS.
+  - **4e, updates from GitHub** (added 2026-10-09 on request).
 - **4a, double progression:**
   - **The rule** is set per exercise of a routine (`ProgressionRule` in `core/model`, one kind for now:
     double progression). Without it, an exercise works as today: last time's values, and "Update the
@@ -840,6 +842,31 @@ the app gets its character before sync, the server and the web GUI build on it.
   large on the lock screen, readable without unlocking. On the Fold, check whether Samsung's Now Bar shows
   it too. Below Android 16 the notification stays as it is. Together with the end-of-rest sound in
   headphones, which is already there, rest needs no hands. Its spec is filled in when 4c is done.
+- **4e, updates from GitHub** (added 2026-10-09 on request; a sketch, worked out with the user when it's next):
+  Liora is sideloaded, so nothing tells it about a new version. The release app should check this repo's
+  GitHub Releases, and when one is newer than what's installed, download it and install it, with what's new.
+  - **Releases first:** none are published yet, and `versionCode`/`versionName` are still fixed at 1 / 0.1.0.
+    Each version needs a bumped `versionCode`, a tag (`v0.2.0`), and a GitHub Release with the signed
+    release APK and its SHA-256 attached. The signing key lives only on the dev machine (`~/.liora`), so
+    releases are either uploaded from there (`gh release create`) or built in CI with the key as a GitHub
+    secret (open question).
+  - **Checking:** GitHub's REST API (`/repos/<owner>/LioraTracker/releases/latest`, no token for a public
+    repo, 60 requests an hour) through Ktor, at most once a day when Liora comes to the front, and on
+    demand from Settings. Release notes come from the release's text, shown before installing.
+  - **Downloading:** in the background (WorkManager) into app-private storage, then checked: the SHA-256
+    matches, and the APK is signed with the same key as the installed app (`PackageManager`), so nothing
+    else can pass for an update.
+  - **Installing:** through `PackageInstaller` with `REQUEST_INSTALL_PACKAGES`. Android asks once to allow
+    installing unknown apps from Liora, and then confirms each update with its own dialog; from Android 12,
+    an app that installed itself can update without that prompt (`USER_ACTION_NOT_REQUIRED`), which the
+    first self-update makes possible. Same package and key, so the data stays, and Room migrates as usual.
+    A workout in progress is never interrupted: the install waits until none is running.
+  - **Only the release build** (`app.liora`) updates itself; debug builds never check.
+  - **Settings:** a section for updates: the version installed, check automatically (on by default), Check
+    now, and what's new in the latest.
+  - **Open questions:** where releases are built (dev machine or CI); stable releases only, or a beta
+    channel from pre-releases; whether to install by itself on Wi-Fi or always ask first. Obtainium already
+    does this for any app on GitHub; a built-in one fits Liora's own release notes, voice and look.
 
 ### Phase 5: Self-hosted server and web GUI (moved back 2026-10-09 on request: not a priority now)
 - `server/`: Ktor, PostgreSQL, Exposed, Flyway, Argon2 passwords, JWT access tokens plus refresh tokens per device.
