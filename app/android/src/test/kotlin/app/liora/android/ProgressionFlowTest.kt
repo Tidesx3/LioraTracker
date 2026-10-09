@@ -20,6 +20,7 @@ import app.liora.core.data.exercise.ExerciseRepository
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
+import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.domain.RepAims
 import app.liora.core.model.Mass
 import app.liora.core.model.ProgressionRule
@@ -43,6 +44,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.android.controller.ActivityController
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 /** Double progression in the app: the editor, the next targets on routine detail and in the logger, a cable's step. */
 @RunWith(RobolectricTestRunner::class)
@@ -153,6 +156,12 @@ class ProgressionFlowTest {
     @Test
     @Config(qualifiers = COVER)
     fun aCableGetsItsOwnStep() {
+        // The exercise page shows when it was trained: a fixed day, so the screenshot stays the same.
+        runBlocking {
+            val history = koin.get<WorkoutHistoryRepository>()
+            val last = history.workouts.first().single()
+            history.edit(last.id).setTimes(SHOWN_DAY, SHOWN_DAY + 1.hours)
+        }
         launch()
         composeRule.onNodeWithText("Exercises").performClick()
         composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasSetTextAction()) }
@@ -257,5 +266,8 @@ class ProgressionFlowTest {
         const val ROW = "fedb.Seated_Cable_Rows"
         const val TOP_REACHED = "12 reps on all 3 sets at 25 kg last time, so 30 kg"
         const val EDITOR_LABEL = "Double progression: a step heavier at the top of the range, as Settings has it"
+
+        /** Midday UTC, so the 1st of October from Hawaii to New Zealand. */
+        val SHOWN_DAY = Instant.parse("2026-10-01T12:00:00Z")
     }
 }

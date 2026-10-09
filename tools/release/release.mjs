@@ -30,7 +30,11 @@ const fail = (message) => {
 
 /** Runs a command in the repo with its output shown, and stops if it fails. */
 const run = (command, args) => {
-  const result = spawnSync(command, args, { cwd: root, stdio: 'inherit', shell: windows && command.endsWith('.bat') });
+  // A .bat needs a shell on Windows, which takes one command line (its words are only Gradle tasks).
+  const result =
+    windows && command.endsWith('.bat')
+      ? spawnSync(`"${command}" ${args.join(' ')}`, { cwd: root, stdio: 'inherit', shell: true })
+      : spawnSync(command, args, { cwd: root, stdio: 'inherit' });
   if (result.status !== 0) fail(`${command} ${args.join(' ')} failed`);
 };
 
