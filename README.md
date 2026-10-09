@@ -29,12 +29,13 @@ their own. Phase 3 is done: everything syncs through a hidden folder in your own
 › Your data), in the background, deletions and photos included, with what's still waiting and the space it
 takes in view. Health Connect gets every finished workout and brings in weight and body fat from apps like
 Samsung Health. On the first start, a short walkthrough shows how Liora works, asks kilograms or pounds,
-and offers sync. Phase 4 has begun: a routine's exercises can use double progression, so the next workout
+and offers sync. With Phase 4, a routine's exercises can use double progression, so the next workout
 starts a step heavier once the sets reach the top of their rep ranges, and says why (Settings › Progression
 tunes how). A folder of routines can be a rotation, and the Train tab says which one is next, as does a
 home-screen widget, which follows the workout while it runs. On Android 16 the workout is a Live Update: the
-set and the rest in the status bar and on the lock screen. Updates from GitHub follow. Details and progress
-are in [docs/PLAN.md](docs/PLAN.md).
+set and the rest in the status bar and on the lock screen. And the release app updates itself from this repo's
+GitHub Releases, saying what's new first. Phase 4 is done. Details and progress are in
+[docs/PLAN.md](docs/PLAN.md).
 
 ## Principles
 

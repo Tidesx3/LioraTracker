@@ -300,12 +300,14 @@ As of 2026-10-09:
     already nearly a Live Update; it meets Android 16's rules (read in AOSP; `WorkoutNotificationTest`
     checks them, since Robolectric's Android 16 predates them) and is now public on the lock screen. On the
     Fold it's promoted: the chip in the status bar, and the Now Bar on the lock screen.
-  - **4e (under way): updates from GitHub.** Worked out with the user (2026-10-10). Done: `version.properties`
-    and the release script (`tools/release/release.mjs`, dry run checked: signed with the release key), the
-    check (`integration/github`, `UpdateRepository`), the download, checks and install (`app/.../update/`), and
-    the card on the Train tab and in Settings › About Liora. Still to do: the first releases and a real update
-    on the phone (TODO.md), then moving the user's data from the debug app to the release app.
-- **Next:** publish 0.4.0 and update to 0.4.1 on the phone, which finishes 4e.
+  - **4e (done, checked on the phone): updates from GitHub.** Worked out with the user (2026-10-10):
+    `version.properties` and the release script (`tools/release/release.mjs`), the check (`integration/github`,
+    `UpdateRepository`), the download, checks and install (`app/.../update/`), and the card on the Train tab and
+    in Settings › About Liora. 0.4.0 and 0.4.1 are published; on the Fold, the release app found 0.4.1 and
+    installed it over 0.4.0 with its data, and Android now lists Liora as its own installer. Left for later
+    releases: an update without Android's dialog (0.4.2 on), and the user moving to the release app (TODO.md).
+- **Phase 4 is done** (2026-10-10). **Next:** to be decided with the user; Phase 5 (server, web) was moved
+  back as not a priority.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.
