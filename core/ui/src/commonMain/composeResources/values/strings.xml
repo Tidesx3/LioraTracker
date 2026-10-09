@@ -131,7 +131,8 @@
     <item quantity="other">%1$s reps on all %2$d sets at %3$s last time, so %4$s</item>
   </plurals>
   <string name="progression_nothing_heavier">Every set at the top, but nothing here goes heavier than %1$s</string>
-  <string name="progression_keep_going">%1$s at %2$s last time: a rep more on each set</string>
+  <string name="progression_keep_going">%1$s at %2$s last time: a rep more on set %3$d</string>
+  <string name="progression_keep_going_weakest">%1$s at %2$s last time: a rep more on the weakest set</string>
   <string name="progression_below_twice">Under %1$s reps twice in a row at %2$s, so %3$s</string>
   <string name="progression_big_jump">%1$s is a big jump from %2$s, your heaviest in six weeks. Worth a second look.</string>
 </resources>

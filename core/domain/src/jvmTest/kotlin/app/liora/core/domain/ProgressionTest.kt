@@ -28,14 +28,49 @@ class ProgressionTest {
     }
 
     @Test
-    fun oneSetShortOfTheTopKeepsTheWeightAndAimsForARepMore() {
+    fun oneSetShortOfTheTopKeepsTheWeightAndAimsForARepMoreOnIt() {
         val target = Progression.next(plan, listOf(session(80.0, 12, 12, 11)), machine)
 
         assertEquals(listOf(SetTarget(kg(80.0), 12), SetTarget(kg(80.0), 12), SetTarget(kg(80.0), 12)), target.sets)
-        assertEquals(ProgressionReason.KeepGoing(kg(80.0), listOf(12, 12, 11)), target.reason)
-        // Lower down the range, each set aims a rep past its own.
-        val earlier = Progression.next(plan, listOf(session(80.0, 10, 9, 8)), machine)
-        assertEquals(listOf(11, 10, 9), earlier.sets.map { it?.reps })
+        assertEquals(ProgressionReason.KeepGoing(kg(80.0), listOf(12, 12, 11), set = 3), target.reason)
+    }
+
+    @Test
+    fun aRepMoreInAllOnTheWeakestSet() {
+        // The later sets tire first: the one that did fewest gets the extra rep.
+        val tiring = Progression.next(plan, listOf(session(80.0, 10, 9, 8)), machine)
+        assertEquals(listOf(10, 9, 9), tiring.sets.map { it?.reps })
+        // On a tie, the first: 8, 8, 8 becomes 9, 8, 8, then 9, 9, 8.
+        val even = Progression.next(plan, listOf(session(80.0, 8, 8, 8)), machine)
+        assertEquals(listOf(9, 8, 8), even.sets.map { it?.reps })
+        assertEquals(ProgressionReason.KeepGoing(kg(80.0), listOf(8, 8, 8), set = 1), even.reason)
+        assertEquals(
+            listOf(9, 9, 8),
+            Progression.next(plan, listOf(session(80.0, 9, 8, 8)), machine).sets.map { it?.reps },
+        )
+        // A set at the top stays there while another catches up.
+        assertEquals(
+            listOf(12, 11, 9),
+            Progression.next(plan, listOf(session(80.0, 12, 11, 8)), machine).sets.map { it?.reps },
+        )
+    }
+
+    @Test
+    fun theWeakestSetsNumberIsTheOneOnItsBadge() {
+        // Warm-ups have no number, so the third set here is set 2.
+        val planned = listOf(RoutineSet("w", type = SetType.Warmup, reps = RepRange(10))) + plan.take(2)
+        val done = listOf(set(40.0, 10, SetType.Warmup), set(80.0, 10), set(80.0, 9))
+        assertEquals(
+            ProgressionReason.KeepGoing(kg(80.0), listOf(10, 9), set = 2),
+            Progression.next(planned, listOf(done), machine).reason,
+        )
+        // A failure set has none.
+        val failing = plan.take(1) + RoutineSet("f", type = SetType.Failure, reps = RepRange(8, 12))
+        val tried = listOf(set(80.0, 10), set(80.0, 8, SetType.Failure))
+        assertEquals(
+            ProgressionReason.KeepGoing(kg(80.0), listOf(10, 8), set = null),
+            Progression.next(failing, listOf(tried), machine).reason,
+        )
     }
 
     @Test
@@ -55,10 +90,10 @@ class ProgressionTest {
         assertEquals(ProgressionReason.BelowTwice(reps = 8, from = kg(85.0), to = kg(80.0)), target.reason)
         // Once is just a bad day.
         val once = listOf(session(85.0, 9, 7, 6), session(85.0, 9, 8, 8))
-        assertEquals(
-            ProgressionReason.KeepGoing(kg(85.0), listOf(9, 7, 6)),
-            Progression.next(plan, once, machine).reason,
-        )
+        val holding = Progression.next(plan, once, machine)
+        assertEquals(ProgressionReason.KeepGoing(kg(85.0), listOf(9, 7, 6), set = 3), holding.reason)
+        // Sets below the range aim for its bottom.
+        assertEquals(listOf(9, 8, 8), holding.sets.map { it?.reps })
     }
 
     @Test

@@ -779,7 +779,9 @@ the app gets its character before sync, the server and the web GUI build on it.
       the reps start again at the bottom.
     - **Two sessions in a row with a set below the bottom:** each goes down a step, and climbs again from
       there. One bad day changes nothing.
-    - **Otherwise:** the same weights, aiming for a rep more than last time on each set, up to the top.
+    - **Otherwise:** the same weights, each set aiming for last time's reps and the weakest (fewest reps,
+      the first on a tie) for one more: a rep more in all, so 8, 8, 8 becomes 9, 8, 8 (changed 2026-10-09
+      on request, from a rep more on every set).
     - A set skipped last time means not every set reached the top: no step up.
   - **A step:** the next weight the gym can load for the exercise's equipment (`LoadRounding.step`: the
     rack for dumbbells, plates for bars, the stack step for machines and cables). A machine or cable can

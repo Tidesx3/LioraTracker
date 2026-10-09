@@ -21,6 +21,7 @@ import app.liora.core.ui.resources.progression_below_twice
 import app.liora.core.ui.resources.progression_big_jump
 import app.liora.core.ui.resources.progression_first_time
 import app.liora.core.ui.resources.progression_keep_going
+import app.liora.core.ui.resources.progression_keep_going_weakest
 import app.liora.core.ui.resources.progression_nothing_heavier
 import app.liora.core.ui.resources.progression_top_reached
 import org.jetbrains.compose.resources.painterResource
@@ -101,11 +102,13 @@ fun progressionReasonText(reason: ProgressionReason): String {
         }
 
         is ProgressionReason.KeepGoing -> {
-            stringResource(
-                Res.string.progression_keep_going,
-                reason.reps.joinToString(", ") { numbers.format(it) },
-                weightText(reason.weight),
-            )
+            val reps = reason.reps.joinToString(", ") { numbers.format(it) }
+            val set = reason.set
+            if (set != null) {
+                stringResource(Res.string.progression_keep_going, reps, weightText(reason.weight), set)
+            } else {
+                stringResource(Res.string.progression_keep_going_weakest, reps, weightText(reason.weight))
+            }
         }
 
         is ProgressionReason.BelowTwice -> {

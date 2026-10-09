@@ -30,10 +30,14 @@ sealed interface ProgressionReason {
         val weight: Mass,
     ) : ProgressionReason
 
-    /** Not every set reached the top: [weight] again, aiming a rep past last time's [reps] on each set. */
+    /**
+     * Not every set reached the top: [weight] again, each set aiming for last time's [reps], and one more on
+     * the weakest set: the one numbered [set], or null when it has no number (a failure set, or one skipped).
+     */
     data class KeepGoing(
         val weight: Mass,
         val reps: List<Int>,
+        val set: Int? = null,
     ) : ProgressionReason
 
     /** Below the bottom of the range ([reps]) two sessions in a row at [from]: down a step, to [to]. */
@@ -63,8 +67,9 @@ data class ProgressionTarget(
 /**
  * Double progression: each working set has a rep range as its goal. When every one reached the top of its
  * range last time, each goes up a step from the weight lifted and the reps start again at the bottom. When
- * a set fell below the bottom two sessions in a row, each goes down a step. Otherwise the weights stay and
- * each set aims for a rep more than last time, up to the top.
+ * a set fell below the bottom two sessions in a row, each goes down a step. Otherwise the weights stay, each
+ * set aims for last time's reps, and the weakest for one more: a rep more in all, so 8, 8, 8 becomes 9, 8, 8
+ * and 10, 9, 8 becomes 10, 9, 9.
  *
  * Planned working sets pair with last time's by count, as the Previous column pairs them; warm-ups and drop
  * sets don't count. A set skipped last time didn't reach the top, so there's no step up.
@@ -163,20 +168,45 @@ object Progression {
         return ProgressionTarget(targets, ProgressionReason.BelowTwice(bottom, sets.heaviest(), to))
     }
 
-    private fun keepGoing(sets: Pairing): ProgressionTarget =
-        ProgressionTarget(
+    /**
+     * The same weights, each set aiming for last time's reps and the weakest one for a rep more: one rep more
+     * in all, where it's likeliest to come, since the later sets of a session tire first.
+     */
+    private fun keepGoing(sets: Pairing): ProgressionTarget {
+        val weakest = sets.weakest()
+        return ProgressionTarget(
             sets =
                 sets.targets { set ->
                     val range = set.range
                     val reps = set.done?.reps
                     when {
-                        range == null -> set.same()
-                        reps == null -> SetTarget(set.weight, range.min)
-                        else -> SetTarget(set.weight, (reps + 1).coerceIn(range.min, range.max))
+                        range == null -> {
+                            set.same()
+                        }
+
+                        reps == null -> {
+                            SetTarget(set.weight, range.min)
+                        }
+
+                        else -> {
+                            SetTarget(
+                                set.weight,
+                                (
+                                    if (set ===
+                                        weakest
+                                    ) {
+                                        reps + 1
+                                    } else {
+                                        reps
+                                    }
+                                ).coerceIn(range.min, range.max),
+                            )
+                        }
                     }
                 },
-            reason = ProgressionReason.KeepGoing(sets.heaviest(), sets.doneReps()),
+            reason = ProgressionReason.KeepGoing(sets.heaviest(), sets.doneReps(), weakest?.number),
         )
+    }
 
     /** The sets that count for progression: completed, and neither warm-ups nor drop sets. */
     private fun List<LoggedSet>.working(): List<LoggedSet> = filter { it.isCompleted && it.type.counts }
@@ -190,6 +220,8 @@ object Progression {
         val done: LoggedSet?,
         /** The weight lifted last time, or for a set skipped, the nearest set's before it. */
         val weight: Mass,
+        /** Its number as its badge shows it: normal sets count, other kinds have none. */
+        val number: Int?,
     ) {
         val reachedTop: Boolean get() = range != null && (done?.reps ?: 0) >= range.max
         val below: Boolean get() = range != null && done != null && (done.reps ?: 0) < range.min
@@ -218,7 +250,11 @@ object Progression {
                             // Skipped: the set before it shows where it stood.
                             else -> weight
                         }
-                    put(index, PairedSet(planned[index].reps, done, weight))
+                    val number =
+                        planned[index].type.takeIf { it == SetType.Normal }?.let {
+                            planned.take(index + 1).count { set -> set.type == SetType.Normal }
+                        }
+                    put(index, PairedSet(planned[index].reps, done, weight, number))
                 }
             }
 
@@ -229,6 +265,16 @@ object Progression {
         fun heaviest(): Mass = paired.values.maxOfOrNull { it.weight } ?: Mass.Zero
 
         fun doneReps(): List<Int> = paired.values.mapNotNull { it.done?.reps }
+
+        /** The set with the fewest reps last time that's still below its top; the first of them on a tie. */
+        fun weakest(): PairedSet? =
+            paired.values
+                .mapNotNull { set ->
+                    val reps = set.done?.reps ?: return@mapNotNull null
+                    val range = set.range ?: return@mapNotNull null
+                    (set to reps).takeIf { reps < range.max }
+                }.minByOrNull { (_, reps) -> reps }
+                ?.first
 
         fun targets(target: (PairedSet) -> SetTarget): List<SetTarget?> =
             planned.indices.map { index -> paired[index]?.let(target) }

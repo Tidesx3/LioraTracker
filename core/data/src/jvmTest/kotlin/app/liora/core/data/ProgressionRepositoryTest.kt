@@ -114,8 +114,8 @@ class ProgressionRepositoryTest {
                     .values
                     .single()
                     .target
-            assertEquals(ProgressionReason.KeepGoing(Mass(60.0), listOf(10, 10, 9)), target.reason)
-            assertEquals(listOf(11, 11, 10), target.sets.filterNotNull().map { it.reps })
+            assertEquals(ProgressionReason.KeepGoing(Mass(60.0), listOf(10, 10, 9), set = 3), target.reason)
+            assertEquals(listOf(10, 10, 10), target.sets.filterNotNull().map { it.reps })
         }
 
     @Test
