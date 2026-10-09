@@ -296,8 +296,11 @@ As of 2026-10-09:
     follows its state while Glance keeps its session; `WidgetUpdater` wakes it when the state changes, a
     rest running out included. Start goes through `MainActivity`, which starts the workout in the
     process's scope and opens the logger. Its faces are screenshot from the real `RemoteViews`.
-- **Next:** 4d, the workout on the lock screen. The workout notification already asks to be promoted
-  (`setRequestPromotedOngoing`), so 4d starts by checking on the phone what Android 16 makes of it.
+  - **4d (under way): the workout on the lock screen.** The workout notification meets Android 16's rules
+    for a Live Update (read in AOSP; `WorkoutNotificationTest` checks them, since Robolectric's Android 16
+    predates them), and it's public on the lock screen. What the Fold makes of it is the device check in
+    TODO.md, which decides whether anything else is needed.
+- **Next:** the device check for 4d, then 4e, updates from GitHub.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.
@@ -877,7 +880,22 @@ the app gets its character before sync, the server and the web GUI build on it.
   Live Update (a promoted ongoing notification), with the rest countdown as a chip in the status bar and
   large on the lock screen, readable without unlocking. On the Fold, check whether Samsung's Now Bar shows
   it too. Below Android 16 the notification stays as it is. Together with the end-of-rest sound in
-  headphones, which is already there, rest needs no hands. Its spec is filled in when 4c is done.
+  headphones, which is already there, rest needs no hands.
+  - **Most of it was there already:** the workout notification asks to be promoted
+    (`setRequestPromotedOngoing`), draws the rest with `ProgressStyle`, counts it down in its header, and
+    gives the chip the set ("2/4") between sets and the countdown while resting.
+  - **Android's rules** (read in AOSP, 2026-10-10): Live Updates shipped in Android 16 QPR1. A notification
+    is promoted when it asks to be, is ongoing with a title, uses no style or big text, call or progress, isn't
+    a group summary, draws no views of its own, and is **not** colorized; the user can still turn Live
+    Updates off per app. The first Android 16 release had other rules (colorized only), and Robolectric's
+    Android 16 is that release, so `WorkoutNotificationTest` checks the shipping rules itself.
+  - **On the lock screen without unlocking:** the workout notification and the end-of-rest heads-up are
+    public (`VISIBILITY_PUBLIC`), so a lock screen that hides what notifications say still shows the set and
+    the rest. Nothing in them is private.
+  - **The device check decides the rest:** whether the Fold promotes it (`dumpsys notification` shows
+    `PROMOTED_ONGOING`), how the chip and the lock screen look, whether the Now Bar takes it, and whether
+    Live Updates are on for Liora by default. If they can be off, Settings gets a row that says so and opens
+    Android's setting for them (`ACTION_APP_NOTIFICATION_PROMOTION_SETTINGS`).
 - **4e, updates from GitHub** (added 2026-10-09 on request; a sketch, worked out with the user when it's next):
   Liora is sideloaded, so nothing tells it about a new version. The release app should check this repo's
   GitHub Releases, and when one is newer than what's installed, download it and install it, with what's new.

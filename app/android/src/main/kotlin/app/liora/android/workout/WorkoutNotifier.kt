@@ -100,6 +100,7 @@ class WorkoutNotifier(
                 .setContentTitle(context.getString(R.string.notif_rest_over_title))
                 .setContentText(next?.let(text::describe))
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
                 .setTimeoutAfter(REST_OVER_TIMEOUT.inWholeMilliseconds)
@@ -149,6 +150,9 @@ class WorkoutNotifier(
                 .setOnlyAlertOnce(true)
                 .setSilent(true)
                 .setCategory(NotificationCompat.CATEGORY_WORKOUT)
+                // Nothing private in a set or a rest: readable on the lock screen without unlocking, even
+                // when the phone hides what notifications say there.
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(WorkoutNotifications.openLogger(context))
                 .setShowWhen(true)
                 .setUsesChronometer(true)

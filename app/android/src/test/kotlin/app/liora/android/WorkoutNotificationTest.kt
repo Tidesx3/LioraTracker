@@ -27,6 +27,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -71,9 +72,9 @@ class WorkoutNotificationTest {
         }
         val set = awaitNotification { it.title == "Push" }
         assertEquals("Barbell Bench Press · Set 1 of 3 · 80 kg × 10", set.text)
-        assertTrue(set.flags and Notification.FLAG_ONGOING_EVENT != 0)
-        // Android 16 shows it as a Live Update: status bar chip and the lock screen's Now Bar.
-        assertTrue(set.extras.getBoolean(Notification.EXTRA_REQUEST_PROMOTED_ONGOING))
+        // Android 16 shows it as a Live Update, with a chip in the status bar saying where you are.
+        assertLiveUpdate(set)
+        assertEquals("1/3", set.shortCriticalText)
         assertEquals(listOf("Log set"), set.actions.map { it.title.toString() })
 
         set.actions
@@ -96,6 +97,9 @@ class WorkoutNotificationTest {
                 it.isResting && it.text == "Next: Barbell Bench Press · Set 2 of 3 · 80 kg × 10"
             }
         assertEquals(listOf("−15 s", "+15 s", "Skip rest"), resting.actions.map { it.title.toString() })
+        // Still a Live Update while resting: the chip counts the rest down.
+        assertLiveUpdate(resting)
+        assertTrue(resting.extras.getBoolean(Notification.EXTRA_CHRONOMETER_COUNT_DOWN))
         // The bar counts milliseconds, so it moves on every update instead of once a second.
         assertEquals(90_000, resting.extras.getInt(Notification.EXTRA_PROGRESS_MAX))
         val timer = runBlocking { koin.get<RestTimerRepository>().current() }!!
@@ -124,6 +128,7 @@ class WorkoutNotificationTest {
         awaitTimer { it == null }
         val alert = awaitNotification(WorkoutNotifications.ID_REST_OVER) { it.title == "Break’s over" }
         assertEquals(WorkoutNotifications.CHANNEL_REST_OVER, alert.channelId)
+        assertEquals(Notification.VISIBILITY_PUBLIC, alert.visibility)
         // Liora plays the sound itself, so the channel only vibrates and vibrate mode doesn't mute it.
         assertEquals(listOf(RestSound.Chime), koin.get<RecordingRestSoundPlayer>().played)
         val channel = notifications.getNotificationChannel(alert.channelId)
@@ -172,6 +177,35 @@ class WorkoutNotificationTest {
             sets.completeSet(set.id)
         }
         workouts.finish()
+    }
+
+    /**
+     * What Android 16 asks of a Live Update since it shipped them (QPR1, `Notification.hasPromotableCharacteristics`
+     * with `ui_rich_ongoing` on): it asks for it, it's ongoing with a title, has a style the system can draw
+     * (none, big text, call or progress), isn't a group summary, draws no views of its own, and isn't
+     * colorized. Robolectric's Android 16 is the first release, which still had other rules, so they're
+     * checked here instead of calling the method. And it's readable on the lock screen without unlocking,
+     * even when the phone hides what notifications say there.
+     */
+    private fun assertLiveUpdate(notification: Notification) {
+        assertEquals(Notification.VISIBILITY_PUBLIC, notification.visibility)
+        assertTrue(notification.extras.getBoolean(Notification.EXTRA_REQUEST_PROMOTED_ONGOING))
+        assertTrue(notification.flags and Notification.FLAG_ONGOING_EVENT != 0)
+        assertTrue(notification.title.orEmpty().isNotBlank())
+        val style = notification.extras.getString(Notification.EXTRA_TEMPLATE)
+        assertTrue(
+            "Style $style",
+            style == null || style.substringAfter('$') in setOf("BigTextStyle", "CallStyle", "ProgressStyle"),
+        )
+        assertTrue(notification.flags and Notification.FLAG_GROUP_SUMMARY == 0)
+        @Suppress("DEPRECATION")
+        assertTrue(
+            listOf(notification.contentView, notification.bigContentView, notification.headsUpContentView).all {
+                it ==
+                    null
+            },
+        )
+        assertFalse(notification.extras.getBoolean(Notification.EXTRA_COLORIZED))
     }
 
     private val Notification.title get() = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()
