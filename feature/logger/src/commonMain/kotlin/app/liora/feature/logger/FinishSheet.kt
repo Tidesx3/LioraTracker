@@ -40,13 +40,11 @@ import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.designsystem.util.rememberElapsedTime
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.domain.RoutineChange
-import app.liora.core.ui.RecordsCard
 import app.liora.core.ui.volumeText
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.finish_empty_body
 import app.liora.feature.logger.resources.finish_empty_title
 import app.liora.feature.logger.resources.finish_open_sets
-import app.liora.feature.logger.resources.finish_records
 import app.liora.feature.logger.resources.finish_title
 import app.liora.feature.logger.resources.finish_update_routine
 import app.liora.feature.logger.resources.finish_update_routine_changes
@@ -68,9 +66,9 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Instant
 
 /**
- * Before a workout ends: what it adds up to, the personal records it set, what gets dropped, and the
- * choice to carry today's numbers into the routine it came from. With nothing logged it offers to
- * discard instead.
+ * Before a workout ends: what it adds up to, what gets dropped, and the choice to carry today's numbers
+ * into the routine it came from. With nothing logged it offers to discard instead. The records it set
+ * are celebrated once it's saved, on its summary.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,14 +105,6 @@ internal fun FinishSheet(
             }
             Text(stringResource(Res.string.finish_title), style = MaterialTheme.typography.headlineSmall)
             Totals(summary, startedAt)
-            if (summary.records.isNotEmpty()) {
-                val count = summary.records.sumOf { it.records.size }
-                RecordsCard(
-                    title = pluralStringResource(Res.plurals.finish_records, count, count),
-                    entries = summary.records,
-                    celebrate = true,
-                )
-            }
             if (summary.openSets > 0) {
                 Text(
                     text = pluralStringResource(Res.plurals.finish_open_sets, summary.openSets, summary.openSets),

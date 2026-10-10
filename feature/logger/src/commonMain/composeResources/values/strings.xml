@@ -106,4 +106,17 @@
   <string name="plates_bar_only">Just the bar</string>
   <string name="gym_title">Gym</string>
   <string name="cd_gym">Gym: %1$s</string>
+  <string name="done_title">That’s a wrap</string>
+  <string name="done_first">Your first workout is in the books</string>
+  <plurals name="done_count">
+    <item quantity="one">%1$d workout in the books</item>
+    <item quantity="other">%1$d workouts in the books</item>
+  </plurals>
+  <string name="done_date_time" translatable="false">%1$s · %2$s</string>
+  <string name="done_best_sets">Best sets</string>
+  <plurals name="done_sets">
+    <item quantity="one">%1$d set</item>
+    <item quantity="other">%1$d sets</item>
+  </plurals>
+  <string name="done_close">Done</string>
 </resources>

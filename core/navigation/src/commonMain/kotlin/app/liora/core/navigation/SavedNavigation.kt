@@ -40,6 +40,7 @@ private val routes =
             subclass(RoutineDetailRoute::class)
             subclass(WorkoutDetailRoute::class)
             subclass(EditWorkoutRoute::class)
+            subclass(WorkoutDoneRoute::class)
             subclass(RoutineEditorRoute::class)
         }
     }

@@ -46,6 +46,9 @@ enum class Illustration {
     /** A tick in confetti. */
     Done,
 
+    /** A medal on its ribbon, in confetti: a workout finished. */
+    Medal,
+
     /** A cloud with a tick on it: a copy kept safe elsewhere. */
     Sync,
 

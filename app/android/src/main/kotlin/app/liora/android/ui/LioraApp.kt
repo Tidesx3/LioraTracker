@@ -60,6 +60,7 @@ import app.liora.core.navigation.ListDetailSceneStrategy
 import app.liora.core.navigation.LocalSharedTransitionScope
 import app.liora.core.navigation.LoggerRoute
 import app.liora.core.navigation.Navigator
+import app.liora.core.navigation.WorkoutDoneRoute
 import app.liora.feature.body.bodyEntries
 import app.liora.feature.exercises.exercisesEntries
 import app.liora.feature.history.historyEntries
@@ -117,9 +118,11 @@ fun LioraApp(
         return
     }
     val layout = currentWindowLayout()
-    // The logger takes the whole window, on the workout in progress or on a finished one being corrected.
-    val inLogger = navigator.currentRoute == LoggerRoute || navigator.currentRoute is EditWorkoutRoute
-    val showRail = layout.navigationRail && !inLogger
+    // The logger takes the whole window, on the workout in progress or on a finished one being corrected,
+    // and so does the summary of a workout just finished.
+    val current = navigator.currentRoute
+    val fullWindow = current == LoggerRoute || current is EditWorkoutRoute || current is WorkoutDoneRoute
+    val showRail = layout.navigationRail && !fullWindow
     val showBottomChrome = !layout.navigationRail && navigator.currentRoute in TopLevelDestination.routes
     val listDetail = remember(layout.twoPane) { ListDetailSceneStrategy<NavKey>(layout.twoPane) }
 

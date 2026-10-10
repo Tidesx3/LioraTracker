@@ -15,8 +15,8 @@ import kotlin.time.Duration.Companion.seconds
 
 /**
  * The workout notification's buttons: log the set that's up next, take 15 seconds off the rest or add
- * them, or skip the rest. Works from the lock screen, without opening the app; the logger shows the
- * change next time.
+ * them (with a click to feel it), or skip the rest. Works from the lock screen, without opening the app;
+ * the logger shows the change next time.
  */
 class WorkoutActionReceiver :
     BroadcastReceiver(),
@@ -26,6 +26,10 @@ class WorkoutActionReceiver :
         intent: Intent,
     ) {
         val action = intent.action ?: return
+        // Right away, before the write: the click says the tap landed.
+        if (action == WorkoutNotifications.ACTION_ADD_REST || action == WorkoutNotifications.ACTION_REMOVE_REST) {
+            WorkoutHaptics.restAdjusted(context)
+        }
         val pending = goAsync()
         receiverScope.launch {
             try {

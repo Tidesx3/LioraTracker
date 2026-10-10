@@ -119,6 +119,22 @@ class ExerciseProgressTest {
         assertNull(Stalls.of(TrackingType.BodyweightReps, sessions, now, window = 30.days))
     }
 
+    @Test
+    fun theBestSetIsTheOneTheMainMetricRatesHighest() {
+        val bench = listOf(set(140.0, 1, SetType.Warmup), set(100.0, 5), set(90.0, 8), set(100.0, 5))
+        // 100 × 5 beats 90 × 8 on e1RM; the heavier warm-up never counts, and the first of a tie wins.
+        assertEquals(bench[1], ExerciseProgress.bestSet(TrackingType.WeightReps, bench))
+
+        val pullups = listOf(set(reps = 9), set(reps = 12), set(reps = 10))
+        assertEquals(pullups[1], ExerciseProgress.bestSet(TrackingType.BodyweightReps, pullups))
+
+        val planks =
+            listOf(LoggedSet("p1", duration = 60.seconds, completedAt = now), LoggedSet("p2", completedAt = now))
+        assertEquals(planks[0], ExerciseProgress.bestSet(TrackingType.Duration, planks))
+
+        assertNull(ExerciseProgress.bestSet(TrackingType.WeightReps, listOf(set(60.0, 10, SetType.Warmup))))
+    }
+
     private var nextId = 0
 
     private fun set(

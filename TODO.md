@@ -63,6 +63,12 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
     an app duck others, so it plays over the music.
   - The old "Rest over" channel is replaced by one that only vibrates, so any changes made to it in the
     system settings are gone.
+- **The workout summary and the ±15 s click: check on the phone** (added 2026-10-10).
+  - Finish a workout with a record on the cover screen and on the inner screen: the summary rises in the
+    logger's place, the totals roll in, the records card bursts once, and Done (or back) lands where the
+    workout was started. Say whether it should take more from Hevy (sharing, a streak, the muscles worked).
+  - With the phone locked, tap −15 s and +15 s on the workout notification: each gives one click. It's a
+    notification vibration, so it's off in silent mode and with notification vibration turned off.
 - **Notes: check typing on the cover screen.** Add an exercise note and a note for the workout from the
   card's menu: the keyboard comes up, the number pad goes away, and the note stays above the keyboard.
 
@@ -97,7 +103,7 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
   - Turn on "Remove animations" (Settings › Accessibility): everything shows its end state at once.
 - **Motion (Phase 2d): check on the phone.**
   - Beat last time on a set: the trophy pops and the confetti reads as a celebration, over the rows
-    around it, and is gone before the next tap. Finish: the records card bursts once.
+    around it, and is gone before the next tap. Finish: the records card on the summary bursts once.
   - Open a workout from History, a routine from Train and an exercise from the library on the cover
     screen: each grows from its card or row, and shrinks back on the way back. Nothing flickers at the
     floating tab bar.

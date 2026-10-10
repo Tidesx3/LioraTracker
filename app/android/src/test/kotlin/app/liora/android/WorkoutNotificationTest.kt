@@ -6,6 +6,9 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.content.Intent
 import android.os.Looper
+import android.os.VibrationAttributes
+import android.os.VibrationEffect
+import android.os.VibratorManager
 import app.liora.android.workout.RestAlarmReceiver
 import app.liora.android.workout.WorkoutNotifications
 import app.liora.android.workout.WorkoutNotifier
@@ -39,11 +42,13 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowVibrator
 import kotlin.time.Duration.Companion.seconds
 
 /**
  * The live workout notification: the next set with last session's values, logging it from the
- * notification, the rest countdown with −15 s, +15 s and skip, the end-of-rest alarm and its alert.
+ * notification, the rest countdown with −15 s, +15 s (each with a click) and skip, the end-of-rest alarm
+ * and its alert.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [36], application = TestLioraApplication::class)
@@ -77,11 +82,7 @@ class WorkoutNotificationTest {
         assertEquals("1/3", set.shortCriticalText)
         assertEquals(listOf("Log set"), set.actions.map { it.title.toString() })
 
-        set.actions
-            .single()
-            .actionIntent
-            .send()
-        shadowOf(Looper.getMainLooper()).idle()
+        set.actions.single().tap()
         awaitWorkout {
             it.exercises
                 .single()
@@ -109,12 +110,14 @@ class WorkoutNotificationTest {
         // both read the same.
         assertEquals(timer.endsAt.toEpochMilliseconds() + 999, resting.`when`)
 
-        // +15 s and −15 s move the end of the rest, and the alarm with it.
-        resting.actions[1].actionIntent.send()
-        shadowOf(Looper.getMainLooper()).idle()
+        // +15 s and −15 s move the end of the rest, and the alarm with it, each with a click to feel.
+        assertNoClick()
+        resting.actions[1].tap()
+        assertClicked()
         awaitAlarmAt(awaitTimer { it?.total == 105.seconds }!!.endsAt.toEpochMilliseconds())
-        resting.actions[0].actionIntent.send()
-        shadowOf(Looper.getMainLooper()).idle()
+        ShadowVibrator.reset()
+        resting.actions[0].tap()
+        assertClicked()
         val extended = awaitTimer { it?.total == 90.seconds }!!
         awaitAlarmAt(extended.endsAt.toEpochMilliseconds())
 
@@ -241,6 +244,23 @@ class WorkoutNotificationTest {
             matches(timer)
         }
         return timer
+    }
+
+    /** Taps a button on the notification; its receiver runs on the main thread. */
+    private fun Notification.Action.tap() {
+        actionIntent.send()
+        shadowOf(Looper.getMainLooper()).idle()
+    }
+
+    private val vibrator get() = shadowOf(app.getSystemService(VibratorManager::class.java).defaultVibrator)
+
+    private fun assertNoClick() = assertNull(vibrator.vibrationAttributesFromLastVibration)
+
+    /** One click, as a notification vibration: Android drops touch ones from an app in the background. */
+    private fun assertClicked() {
+        val attributes = vibrator.vibrationAttributesFromLastVibration as VibrationAttributes?
+        assertEquals(VibrationAttributes.USAGE_NOTIFICATION, attributes?.usage)
+        assertEquals(VibrationEffect.EFFECT_CLICK, vibrator.effectId)
     }
 
     private fun awaitAlarmAt(millis: Long) =

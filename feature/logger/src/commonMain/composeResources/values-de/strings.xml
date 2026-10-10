@@ -102,4 +102,16 @@
   <string name="plates_bar_only">Nur die Stange</string>
   <string name="gym_title">Studio</string>
   <string name="cd_gym">Studio: %1$s</string>
+  <string name="done_title">Geschafft</string>
+  <string name="done_first">Dein erstes Training ist im Kasten</string>
+  <plurals name="done_count">
+    <item quantity="one">%1$d Training im Kasten</item>
+    <item quantity="other">%1$d Trainings im Kasten</item>
+  </plurals>
+  <string name="done_best_sets">Beste Sätze</string>
+  <plurals name="done_sets">
+    <item quantity="one">%1$d Satz</item>
+    <item quantity="other">%1$d Sätze</item>
+  </plurals>
+  <string name="done_close">Fertig</string>
 </resources>

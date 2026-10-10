@@ -11,12 +11,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.liora.core.data.health.HealthAccess
 import app.liora.core.data.sync.SyncState
 import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.util.rememberDateFormatter
+import app.liora.core.domain.CsvContent
+import app.liora.feature.settings.ChoiceDialog
 import app.liora.feature.settings.SettingsGroup
 import app.liora.feature.settings.health.healthStatusText
 import app.liora.feature.settings.resources.Res
@@ -28,12 +34,21 @@ import app.liora.feature.settings.resources.backup_routines
 import app.liora.feature.settings.resources.backup_title
 import app.liora.feature.settings.resources.backup_workouts
 import app.liora.feature.settings.resources.csv_body
+import app.liora.feature.settings.resources.csv_both
+import app.liora.feature.settings.resources.csv_both_body
+import app.liora.feature.settings.resources.csv_choice_title
+import app.liora.feature.settings.resources.csv_measurements
+import app.liora.feature.settings.resources.csv_measurements_body
 import app.liora.feature.settings.resources.csv_title
+import app.liora.feature.settings.resources.csv_workouts
+import app.liora.feature.settings.resources.csv_workouts_body
 import app.liora.feature.settings.resources.dialog_cancel
 import app.liora.feature.settings.resources.health_title
 import app.liora.feature.settings.resources.import_row_body
 import app.liora.feature.settings.resources.import_row_title
 import app.liora.feature.settings.resources.message_backup_saved
+import app.liora.feature.settings.resources.message_body_csv_saved
+import app.liora.feature.settings.resources.message_both_csv_saved
 import app.liora.feature.settings.resources.message_csv_saved
 import app.liora.feature.settings.resources.message_newer_backup
 import app.liora.feature.settings.resources.message_not_a_backup
@@ -68,7 +83,7 @@ internal class DataActions(
     val onBackUp: () -> Unit,
     val onRestore: () -> Unit,
     val onImport: () -> Unit,
-    val onExportCsv: () -> Unit,
+    val onExportCsv: (CsvContent) -> Unit,
     val onConfirmRestore: () -> Unit,
     val onCancelRestore: () -> Unit,
     val onMessageShown: () -> Unit,
@@ -76,7 +91,7 @@ internal class DataActions(
 
 /**
  * Sync, then backing up, restoring and exporting; the row at work shows it, and the others wait. [sync] is
- * null until it's known.
+ * null until it's known. Exporting asks first what goes in the file.
  */
 @Composable
 internal fun DataSection(
@@ -89,6 +104,9 @@ internal fun DataSection(
     actions: DataActions,
     modifier: Modifier = Modifier,
 ) {
+    var choosingCsv by rememberSaveable { mutableStateOf(false) }
+    // The last choice stays picked for next time.
+    var csvContent by rememberSaveable { mutableStateOf(CsvContent.Workouts) }
     SettingsGroup(stringResource(Res.string.section_data), modifier) {
         ListItem(
             headlineContent = { Text(stringResource(Res.string.sync_row_title)) },
@@ -151,10 +169,41 @@ internal fun DataSection(
             busy = working == DataWork.Exporting,
             busyText = stringResource(Res.string.working_csv),
             enabled = working == null,
-            onClick = actions.onExportCsv,
+            onClick = { choosingCsv = true },
+        )
+    }
+    if (choosingCsv) {
+        ChoiceDialog(
+            title = stringResource(Res.string.csv_choice_title),
+            options = CsvContent.entries,
+            selected = csvContent,
+            label = { stringResource(it.label) },
+            description = { stringResource(it.description) },
+            onChoose = { content ->
+                choosingCsv = false
+                csvContent = content
+                actions.onExportCsv(content)
+            },
+            onDismiss = { choosingCsv = false },
         )
     }
 }
+
+private val CsvContent.label: StringResource
+    get() =
+        when (this) {
+            CsvContent.Workouts -> Res.string.csv_workouts
+            CsvContent.Body -> Res.string.csv_measurements
+            CsvContent.Both -> Res.string.csv_both
+        }
+
+private val CsvContent.description: StringResource
+    get() =
+        when (this) {
+            CsvContent.Workouts -> Res.string.csv_workouts_body
+            CsvContent.Body -> Res.string.csv_measurements_body
+            CsvContent.Both -> Res.string.csv_both_body
+        }
 
 @Composable
 private fun DataRow(
@@ -226,6 +275,8 @@ internal fun DataMessage.text(): StringResource =
         DataMessage.Restored -> Res.string.message_restored
         DataMessage.NothingNew -> Res.string.message_nothing_new
         DataMessage.CsvSaved -> Res.string.message_csv_saved
+        DataMessage.BodyCsvSaved -> Res.string.message_body_csv_saved
+        DataMessage.BothCsvSaved -> Res.string.message_both_csv_saved
         DataMessage.SaveFailed -> Res.string.message_save_failed
         DataMessage.ReadFailed -> Res.string.message_read_failed
         DataMessage.NotABackup -> Res.string.message_not_a_backup

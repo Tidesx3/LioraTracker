@@ -4,10 +4,10 @@ import app.liora.core.common.Hlc
 import app.liora.core.common.HybridLogicalClock
 import app.liora.core.common.IdGenerator
 import app.liora.core.data.backup.BackupRepository
+import app.liora.core.data.backup.CsvExport
 import app.liora.core.data.backup.OfflineBackupRepository
-import app.liora.core.data.backup.OfflineWorkoutCsvExport
+import app.liora.core.data.backup.OfflineCsvExport
 import app.liora.core.data.backup.SyncedTables
-import app.liora.core.data.backup.WorkoutCsvExport
 import app.liora.core.data.body.BodyRepository
 import app.liora.core.data.body.OfflineBodyRepository
 import app.liora.core.data.body.OfflineProgressPhotoRepository
@@ -95,7 +95,7 @@ val dataModule =
         singleOf(::SyncEngine)
         singleOf(::OfflineSyncRepository) bind SyncRepository::class
         singleOf(::OfflineHealthRepository) bind HealthRepository::class
-        singleOf(::OfflineWorkoutCsvExport) bind WorkoutCsvExport::class
+        singleOf(::OfflineCsvExport) bind CsvExport::class
         singleOf(::OfflineImportRepository) bind ImportRepository::class
         // The workout in progress has one set logger, shared by the logger and the notification.
         single<SetLogger> { get<ActiveWorkoutRepository>().sets }

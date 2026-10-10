@@ -149,6 +149,37 @@ object ExerciseProgress {
         }
     }
 
+    /**
+     * The best of one session's working [sets] by [trackingType]'s main metric (see [metricsFor]): the
+     * highest e1RM for weights and reps, the most reps, the longest hold or the farthest distance. The
+     * first set wins a tie; null when no working set has a value for it.
+     */
+    fun bestSet(
+        trackingType: TrackingType,
+        sets: List<LoggedSet>,
+        formula: OneRepMaxFormula = OneRepMaxFormula.Epley,
+    ): LoggedSet? {
+        val metric = metricsFor(trackingType).first()
+        val key = RecordKey(metric.recordType)
+        val measured =
+            sets.mapNotNull { set ->
+                PersonalRecords.valuesOf(trackingType, set, formula)[key]?.let {
+                    set to
+                        it
+                }
+            }
+        val best = (
+            if (metric.lowerIsBetter) {
+                measured.minOfOrNull {
+                    it.second
+                }
+            } else {
+                measured.maxOfOrNull { it.second }
+            }
+        )
+        return measured.firstOrNull { (_, value) -> value == best }?.first
+    }
+
     /** Whether [value] beats [best] in [metric]'s direction. */
     fun improves(
         metric: ProgressMetric,

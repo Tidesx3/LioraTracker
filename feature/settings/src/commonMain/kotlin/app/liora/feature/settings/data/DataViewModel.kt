@@ -4,14 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.backup.BackupContents
 import app.liora.core.data.backup.BackupRepository
+import app.liora.core.data.backup.CsvExport
 import app.liora.core.data.backup.ExportFileException
 import app.liora.core.data.backup.InvalidBackupException
 import app.liora.core.data.backup.NewerBackupException
-import app.liora.core.data.backup.WorkoutCsvExport
 import app.liora.core.data.health.HealthAccess
 import app.liora.core.data.health.HealthRepository
 import app.liora.core.data.sync.SyncRepository
 import app.liora.core.data.sync.SyncState
+import app.liora.core.domain.CsvContent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +30,18 @@ import kotlin.time.Instant
 enum class DataWork { BackingUp, Reading, Restoring, Exporting }
 
 /** How a piece of work ended, shown once. */
-enum class DataMessage { BackupSaved, Restored, NothingNew, CsvSaved, SaveFailed, ReadFailed, NotABackup, NewerBackup }
+enum class DataMessage {
+    BackupSaved,
+    Restored,
+    NothingNew,
+    CsvSaved,
+    BodyCsvSaved,
+    BothCsvSaved,
+    SaveFailed,
+    ReadFailed,
+    NotABackup,
+    NewerBackup,
+}
 
 /** What a backup holds, shown before it's restored. */
 data class BackupSummary(
@@ -54,7 +66,7 @@ data class DataUiState(
  */
 class DataViewModel(
     private val backups: BackupRepository,
-    private val csv: WorkoutCsvExport,
+    private val csv: CsvExport,
     sync: SyncRepository,
     private val health: HealthRepository,
     private val clock: Clock,
@@ -108,14 +120,19 @@ class DataViewModel(
         state.update { it.copy(pending = null) }
     }
 
-    /** Exports workouts as CSV, with exercise names in [language] and unnamed workouts called [untitled]. */
+    /** Exports [content] as CSV, with exercise names in [language] and unnamed workouts called [untitled]. */
     fun exportCsv(
         destination: String,
+        content: CsvContent,
         language: String,
         untitled: String,
     ) = run(DataWork.Exporting) {
-        csv.export(destination, language, untitled, TimeZone.currentSystemDefault())
-        DataMessage.CsvSaved
+        csv.export(destination, content, language, untitled, TimeZone.currentSystemDefault())
+        when (content) {
+            CsvContent.Workouts -> DataMessage.CsvSaved
+            CsvContent.Body -> DataMessage.BodyCsvSaved
+            CsvContent.Both -> DataMessage.BothCsvSaved
+        }
     }
 
     fun messageShown() {

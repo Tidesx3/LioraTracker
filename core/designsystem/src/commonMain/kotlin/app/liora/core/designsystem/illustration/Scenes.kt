@@ -1,6 +1,9 @@
 package app.liora.core.designsystem.illustration
 
 import androidx.compose.ui.graphics.Path
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 internal val Illustration.layers: List<Layer>
     get() =
@@ -16,6 +19,7 @@ internal val Illustration.layers: List<Layer>
             Illustration.Gym -> GymScene
             Illustration.UnknownFile -> UnknownFileScene
             Illustration.Done -> DoneScene
+            Illustration.Medal -> MedalScene
             Illustration.Sync -> SyncScene
             Illustration.Welcome -> WelcomeScene
         }
@@ -36,6 +40,32 @@ private fun confetto(
 
 private const val CONFETTO_HALF_WIDTH = 2.5f
 private const val CONFETTO_HALF_LENGTH = 6f
+
+/** A five-pointed star, [radius] from its middle to each point, one pointing up. */
+private fun star(
+    x: Float,
+    y: Float,
+    radius: Float,
+): Path =
+    Path().apply {
+        repeat(STAR_CORNERS) { corner ->
+            val distance = if (corner % 2 == 0) radius else radius * STAR_WAIST
+            val angle = (corner * STAR_STEP_DEGREES - QUARTER_TURN_DEGREES) * PI / HALF_TURN_DEGREES
+            val pointX = x + distance * cos(angle).toFloat()
+            val pointY = y + distance * sin(angle).toFloat()
+            if (corner == 0) moveTo(pointX, pointY) else lineTo(pointX, pointY)
+        }
+        close()
+    }
+
+// Five points and the five corners between them, every 36 degrees.
+private const val STAR_CORNERS = 10
+private const val STAR_STEP_DEGREES = 36.0
+private const val QUARTER_TURN_DEGREES = 90.0
+private const val HALF_TURN_DEGREES = 180.0
+
+/** How far in the corners between the points sit, as a share of the radius: a regular star's. */
+private const val STAR_WAIST = 0.42f
 
 /** A weight plate's three grips: arcs [radius] from its middle, evenly around, one at the top. */
 private fun grips(
@@ -325,6 +355,34 @@ private val DoneScene =
         fill(Tone.Soft, circle(208f, 46f, 3f))
         fill(Tone.Accent, circle(40f, 98f, 3f))
         fill(Tone.Soft, circle(156f, 138f, 3f))
+    }
+
+private val MedalScene =
+    scene {
+        // The ribbon: two strips crossing behind the medal.
+        val strip = svg("M 88 16 L 107 16 L 129 76 L 110 76 Z")
+        fill(Tone.Line, strip.mirrored())
+        fill(Tone.Soft, strip)
+        fill(Tone.Accent, circle(120f, 100f, 31f))
+        stroke(Tone.OnAccent, 3f, circle(120f, 100f, 23f))
+        fill(Tone.OnAccent, star(120f, 101f, 12f))
+        listOf(
+            Triple(64f, 62f, 30f),
+            Triple(180f, 112f, 65f),
+            Triple(72f, 124f, 40f),
+            Triple(184f, 38f, 15f),
+        ).forEach { (x, y, degrees) -> fill(Tone.Accent, confetto(x, y, degrees)) }
+        listOf(
+            Triple(172f, 78f, -25f),
+            Triple(52f, 98f, -50f),
+            Triple(164f, 136f, 20f),
+            Triple(60f, 34f, -15f),
+        ).forEach { (x, y, degrees) -> fill(Tone.Soft, confetto(x, y, degrees)) }
+        fill(Tone.Accent, sparkle(196f, 88f, 7f))
+        fill(Tone.Soft, sparkle(76f, 88f, 6f))
+        fill(Tone.Soft, circle(206f, 58f, 3f))
+        fill(Tone.Accent, circle(46f, 120f, 3f))
+        fill(Tone.Soft, circle(96f, 142f, 3f))
     }
 
 private val SyncScene =

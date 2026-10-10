@@ -43,6 +43,7 @@ import app.liora.core.model.SetType
 import app.liora.core.model.Units
 import app.liora.core.model.WeightUnit
 import app.liora.feature.logger.LoggerTags
+import app.liora.feature.logger.done.WorkoutDoneTags
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -166,15 +167,19 @@ class LoggerFlowTest {
 
         composeRule.onNodeWithText("Finish").performClick()
         waitForText("Call it a day?")
-        composeRule.onNodeWithText("3 new personal records!").assertIsDisplayed()
-        // Each record on a row of its own, with the value it was set at.
-        composeRule.onNodeWithText("Heaviest weight").assertIsDisplayed()
-        composeRule.onNodeWithText("85 kg").assertIsDisplayed()
         composeRule.onNodeWithText("1 planned set wasn’t logged and won’t be saved.").assertIsDisplayed()
         composeRule.onNodeWithText("Update “Push” with today’s weights and reps").assertIsDisplayed()
         composeRule.onRoot().captureRoboImage("src/test/screenshots/logger_finish_dark.png")
 
+        // The records wait for the summary, once the workout is saved.
         composeRule.onNode(hasTestTag(LoggerTags.FINISH_CONFIRM)).performClick()
+        waitForText("That’s a wrap")
+        composeRule.onNodeWithText("2 workouts in the books").assertIsDisplayed()
+        composeRule.onNodeWithText("3 new personal records!").assertIsDisplayed()
+        // Each record on a row of its own, with the value it was set at.
+        composeRule.onNodeWithText("Heaviest weight").assertIsDisplayed()
+        composeRule.onNodeWithText("85 kg").assertIsDisplayed()
+        composeRule.onNode(hasTestTag(WorkoutDoneTags.CLOSE)).performClick()
         waitForText("Start empty workout")
         // The set left open was skipped, not deleted, so the plan keeps it.
         val routine = runBlocking { GlobalContext.get().get<RoutineRepository>().get(PUSH.id)!! }
@@ -191,7 +196,7 @@ class LoggerFlowTest {
     @Config(qualifiers = COVER)
     fun finishingNamesHowTheRoutineWouldChange() {
         logLastSession()
-        launch()
+        val activity = launch()
         waitForText("Start")
         composeRule.onNodeWithText("Start").performClick()
         waitForText("Finish")
@@ -212,6 +217,9 @@ class LoggerFlowTest {
         composeRule.onRoot().captureRoboImage("src/test/screenshots/logger_finish_changes_dark.png")
 
         composeRule.onNode(hasTestTag(LoggerTags.FINISH_CONFIRM)).performClick()
+        waitForText("That’s a wrap")
+        // Back closes the summary like Done.
+        composeRule.runOnIdle { activity.onBackPressedDispatcher.onBackPressed() }
         waitForText("Start empty workout")
         val routine = runBlocking { GlobalContext.get().get<RoutineRepository>().get(PUSH.id)!! }
         assertEquals(
@@ -540,9 +548,10 @@ class LoggerFlowTest {
             workouts.finish()
         }
 
-    private fun launch() {
-        Robolectric.buildActivity(MainActivity::class.java).setup()
+    private fun launch(): MainActivity {
+        val activity = Robolectric.buildActivity(MainActivity::class.java).setup().get()
         composeRule.waitForIdle()
+        return activity
     }
 
     private fun padKey(label: String): SemanticsNodeInteraction =

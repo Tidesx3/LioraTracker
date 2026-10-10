@@ -82,9 +82,11 @@ import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-/** What the logger asks of the app: closing, and picking exercises in the exercise picker. */
+/** What the logger asks of the app: closing, the summary of a finished workout, and the exercise picker. */
 internal class LoggerNavigationActions(
     val onClose: () -> Unit,
+    /** The workout in progress is finished: the logger makes way for its summary. */
+    val onFinished: (workoutId: String) -> Unit,
     val onAddExercises: () -> Unit,
     val onReplaceExercise: () -> Unit,
     val onOpenExercise: (exerciseId: String) -> Unit,
@@ -100,7 +102,8 @@ internal fun LoggerScreen(
     LaunchedEffect(language) { viewModel.setLanguage(language) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val corrected by viewModel.corrected.collectAsStateWithLifecycle()
-    CloseWhenDone(uiState, corrected, viewModel.correctsHistory, navigation.onClose)
+    val finished by viewModel.finished.collectAsStateWithLifecycle()
+    CloseWhenDone(uiState, corrected, finished, viewModel.correctsHistory, navigation)
     LoggerHaptics(viewModel.tickOutcomes, uiState)
 
     var dialog by rememberSaveable { mutableStateOf<LoggerDialog?>(null) }
@@ -125,8 +128,10 @@ internal fun LoggerScreen(
     )
 
     val state = uiState
-    // A finished workout that's gone closes; there is nothing to show meanwhile.
-    if (state == LoggerUiState.Loading || (state == LoggerUiState.NoWorkout && viewModel.correctsHistory)) return
+    // A finished workout that's gone closes, and one just finished makes way for its summary; there is
+    // nothing to show meanwhile.
+    val leaving = viewModel.correctsHistory || finished != null
+    if (state == LoggerUiState.Loading || (state == LoggerUiState.NoWorkout && leaving)) return
     LoggerContent(
         state = state as? LoggerUiState.Active,
         actions = loggerActions(viewModel, navigation, onShowDialog = showDialog, onDone = onDone),
@@ -159,26 +164,34 @@ internal fun LoggerScreen(
 
 /**
  * Closes the logger once the database confirms the workout ended, a finished one is gone, or its
- * corrections are saved. Closing right away would clear the ViewModel and cancel the write before it
- * lands.
+ * corrections are saved; a workout finished here opens its summary instead, once the finish has landed.
+ * Closing right away would clear the ViewModel and cancel the write before it lands.
  */
 @Composable
 private fun CloseWhenDone(
     uiState: LoggerUiState,
     corrected: Boolean,
+    finished: Finishing?,
     correctsHistory: Boolean,
-    onClose: () -> Unit,
+    navigation: LoggerNavigationActions,
 ) {
     var hadWorkout by remember { mutableStateOf(false) }
     var closed by remember { mutableStateOf(false) }
-    val currentOnClose by rememberUpdatedState(onClose)
-    LaunchedEffect(uiState, corrected) {
+    val currentNavigation by rememberUpdatedState(navigation)
+    LaunchedEffect(uiState, corrected, finished) {
         if (uiState is LoggerUiState.Active) hadWorkout = true
         val gone = uiState == LoggerUiState.NoWorkout && (hadWorkout || correctsHistory)
         // Once only: the state can still change while the screen leaves, and a second close would go too far.
-        if ((corrected || gone) && !closed) {
+        if (closed) return@LaunchedEffect
+        if (finished != null) {
+            // The workout is gone as soon as the finish writes it; the summary waits for the whole write.
+            if (finished.landed) {
+                closed = true
+                currentNavigation.onFinished(finished.workoutId)
+            }
+        } else if (corrected || gone) {
             closed = true
-            currentOnClose()
+            currentNavigation.onClose()
         }
     }
 }

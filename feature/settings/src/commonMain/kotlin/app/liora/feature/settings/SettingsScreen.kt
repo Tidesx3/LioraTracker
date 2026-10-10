@@ -42,6 +42,7 @@ import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.theme.dynamicColorSupported
 import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.designsystem.util.workoutDisplayName
+import app.liora.core.domain.CsvContent
 import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.RestSound
 import app.liora.core.domain.Settings
@@ -68,6 +69,8 @@ import app.liora.feature.settings.gym.gymName
 import app.liora.feature.settings.resources.Res
 import app.liora.feature.settings.resources.backup_file_name
 import app.liora.feature.settings.resources.csv_file_name
+import app.liora.feature.settings.resources.csv_file_name_body
+import app.liora.feature.settings.resources.csv_file_name_both
 import app.liora.feature.settings.resources.dialog_cancel
 import app.liora.feature.settings.resources.dialog_done
 import app.liora.feature.settings.resources.dynamic_color
@@ -126,10 +129,18 @@ internal fun SettingsScreen(
     val untitled = workoutDisplayName(null)
     val today = dataViewModel.today().toString()
     val backupName = stringResource(Res.string.backup_file_name, today)
-    val csvName = stringResource(Res.string.csv_file_name, today)
+    val csvNames =
+        mapOf(
+            CsvContent.Workouts to stringResource(Res.string.csv_file_name, today),
+            CsvContent.Body to stringResource(Res.string.csv_file_name_body, today),
+            CsvContent.Both to stringResource(Res.string.csv_file_name_both, today),
+        )
+    // What the file being picked is for; the picker can outlast the activity.
+    var csvContent by rememberSaveable { mutableStateOf(CsvContent.Workouts) }
     val backupSaver = rememberFileSaver(BACKUP_TYPE) { dataViewModel.backUp(it) }
     val backupOpener = rememberFileOpener(BACKUP_TYPES) { dataViewModel.read(it) }
-    val csvSaver = rememberFileSaver(CSV_TYPE) { dataViewModel.exportCsv(it, exerciseLanguage, untitled) }
+    val csvSaver =
+        rememberFileSaver(CSV_TYPE) { dataViewModel.exportCsv(it, csvContent, exerciseLanguage, untitled) }
     val importOpener = rememberFileOpener(IMPORT_TYPES, onImport)
     SettingsContent(
         settings = settings,
@@ -158,7 +169,10 @@ internal fun SettingsScreen(
                 onBackUp = { backupSaver.save(backupName) },
                 onRestore = backupOpener::open,
                 onImport = importOpener::open,
-                onExportCsv = { csvSaver.save(csvName) },
+                onExportCsv = { content ->
+                    csvContent = content
+                    csvSaver.save(csvNames.getValue(content))
+                },
                 onConfirmRestore = dataViewModel::restore,
                 onCancelRestore = dataViewModel::cancelRestore,
                 onMessageShown = dataViewModel::messageShown,

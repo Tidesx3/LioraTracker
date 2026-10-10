@@ -98,9 +98,12 @@ As of 2026-10-09:
       here, and anything changed or deleted here since stays (`BackupRepository.restore`). Restored rows keep
       their HLC and the clock moves past them (`SyncStamper.restored`); images are restored through
       `PhotoStorage.restore` before the rows that point at them. Restoring the same file twice changes nothing.
-    - **Export workouts as CSV** (`WorkoutCsv` in `core/domain`): one row per logged set, RFC 4180 with dot
+    - **Export as CSV** (`WorkoutCsv` in `core/domain`): one row per logged set, RFC 4180 with dot
       decimals, weights and distances in the user's units named in the header, local times, exercise names
-      in the app's language.
+      in the app's language. Since 2026-10-10 it first asks what goes in the file: the workouts, the body
+      measurements (`BodyCsv`: a row per day, a column per measurement taken, in the user's units), or both
+      in one file (`WorkoutCsv.formatWithBody`: a `record` column says `set` or `body`, in the order they
+      happened).
     - The platform side is `ExportFiles` (`AndroidExportFiles`: ZIP archives through the content resolver).
       Backups and restores finish even when Settings closes mid-way.
   - **9e (done): Hevy and Strong import.** "Import from Hevy or Strong" in Your data opens a CSV through the
@@ -176,8 +179,8 @@ As of 2026-10-09:
   - **2d (done, pending the device check in TODO.md): celebrations and navigation.**
     - Records: a set that breaks one gets its trophy popping in from nothing with a burst of confetti in
       gold, violet and pink (`ConfettiBurst` in designsystem, drawn past its bounds, seeded so screenshots
-      hold still); the finish sheet's records card bursts from its trophy as it opens
-      (`RecordsCard(celebrate = true)`). Records already set when the logger opens don't celebrate.
+      hold still); the records card bursts from its trophy as it opens (`RecordsCard(celebrate = true)`), on
+      the summary after finishing since 2026-10-10. Records already set when the logger opens don't celebrate.
     - Screens (`ScreenTransitions.kt`): going deeper slides the new screen a tenth of the way in from the
       end as it fades in, and back reverses it; tabs fade through; a fold or unfold, which changes the
       layout but not the screen, crossfades. 300 ms, down from the library's 700 ms crossfade. The
@@ -308,6 +311,16 @@ As of 2026-10-09:
     releases: an update without Android's dialog (0.4.2 on), and the user moving to the release app (TODO.md).
 - **Phase 4 is done** (2026-10-10). **Next:** to be decided with the user; Phase 5 (server, web) was moved
   back as not a priority.
+- **On request (2026-10-10), after Phase 4:** no schema change.
+  - **The workout summary**, after Hevy's: finishing opens `WorkoutDoneRoute` (`feature/logger/done/`) in the
+    logger's place, once the finish has landed (`LoggerViewModel.finished`). A medal (`Illustration.Medal`), how
+    many workouts are in the books, the workout's name, date and totals rolling in, its records with the
+    burst (moved here from the finish sheet, which now only confirms), and each exercise's sets and best set
+    (`ExerciseProgress.bestSet`: by its main metric, with a trophy if it set a record). Done, or back, returns
+    to where the workout was started.
+  - **The notification's −15 s and +15 s click** (`WorkoutHaptics`), as a notification vibration: Android drops
+    touch vibrations from an app in the background, and silent mode turns it off.
+  - **CSV export of body measurements**, alone or with the workouts in one file (see 9d).
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.

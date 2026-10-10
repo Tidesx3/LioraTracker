@@ -14,6 +14,8 @@
     android:maxSdkVersion="32" />
   <!-- Brings a workout's notification and rest alarm back after a reboot. -->
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+  <!-- The click when the notification's −15 s and +15 s change the rest (workout/WorkoutHaptics.kt). -->
+  <uses-permission android:name="android.permission.VIBRATE" />
 
   <!-- Updates from GitHub (update/AppUpdater.kt): Liora installs a newer release of itself when the user says
        so. Android asks once to allow it, then confirms each install, or not at all once Liora installed itself. -->

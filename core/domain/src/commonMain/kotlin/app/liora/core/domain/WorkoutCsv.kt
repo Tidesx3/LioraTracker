@@ -1,20 +1,19 @@
 package app.liora.core.domain
 
 import app.liora.core.model.FinishedWorkout
+import app.liora.core.model.Measurement
 import app.liora.core.model.Units
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlin.math.abs
-import kotlin.math.pow
-import kotlin.math.roundToLong
+import kotlinx.datetime.atStartOfDayIn
 import kotlin.time.Instant
 
+/** What a CSV export holds: the workouts, the body measurements, or both in one file. */
+enum class CsvContent { Workouts, Body, Both }
+
 /**
- * Finished workouts as CSV for spreadsheets: one row per logged set, oldest workout first. It follows
- * RFC 4180 (commas, CRLF, quotes only where needed) with dot decimals, so any tool reads it the same
- * whatever its language. Weights and distances are in the user's units, named in the header
- * (`weight_kg` or `weight_lb`, `distance_km` or `distance_mi`); times are local, as `2026-10-02 18:05`.
- * A byte order mark leads, so Excel reads umlauts right.
+ * Finished workouts as CSV for spreadsheets (see [CsvWriter]): one row per logged set, oldest workout
+ * first. Weights and distances are in the user's units, named in the header (`weight_kg` or `weight_lb`,
+ * `distance_km` or `distance_mi`); times are local, as `2026-10-02 18:05`.
  */
 object WorkoutCsv {
     /**
@@ -27,37 +26,82 @@ object WorkoutCsv {
         units: Units,
         zone: TimeZone,
         untitled: String,
-    ): String =
-        buildString {
-            append(BYTE_ORDER_MARK)
-            appendRow(header(units))
-            for (workout in workouts.sortedBy { it.startedAt }) {
-                for (exercise in workout.exercises) {
-                    exercise.sets.filter { it.isCompleted }.forEachIndexed { index, set ->
-                        appendRow(
+    ): String {
+        val csv = CsvWriter()
+        csv.row(header(units))
+        rows(workouts, names, units, zone, untitled).forEach { csv.row(it.fields) }
+        return csv.toString()
+    }
+
+    /**
+     * Workouts and body measurements in one file, in the order they happened: a `record` column says
+     * what each row is, `set` (the columns of [format]) or `body` (a day, in the columns of [BodyCsv]),
+     * and leaves the other's columns empty. A day's measurements come before that day's workouts.
+     */
+    fun formatWithBody(
+        workouts: List<FinishedWorkout>,
+        measurements: List<Measurement>,
+        names: Map<String, String>,
+        units: Units,
+        zone: TimeZone,
+        untitled: String,
+    ): String {
+        val setHeader = header(units)
+        val types = BodyCsv.measuredTypes(measurements)
+        val bodyHeader = BodyCsv.valueHeader(types, units)
+        val days =
+            BodyCsv.days(measurements, types, units, zone).map { day ->
+                Row(
+                    at = day.date.atStartOfDayIn(zone),
+                    fields =
+                        listOf(BODY_RECORD, CsvWriter.date(day.date)) +
+                            List(setHeader.size - 1) { null } +
+                            day.values,
+                )
+            }
+        val sets =
+            rows(workouts, names, units, zone, untitled).map { set ->
+                set.copy(fields = listOf(SET_RECORD) + set.fields + List(bodyHeader.size) { null })
+            }
+        val csv = CsvWriter()
+        csv.row(listOf(RECORD) + setHeader + bodyHeader)
+        // Sorting keeps the order on a tie, so a day's measurements, at its first moment, stay first.
+        (days + sets).sortedBy { it.at }.forEach { csv.row(it.fields) }
+        return csv.toString()
+    }
+
+    private fun rows(
+        workouts: List<FinishedWorkout>,
+        names: Map<String, String>,
+        units: Units,
+        zone: TimeZone,
+        untitled: String,
+    ): List<Row> =
+        workouts.sortedBy { it.startedAt }.flatMap { workout ->
+            workout.exercises.flatMap { exercise ->
+                exercise.sets.filter { it.isCompleted }.mapIndexed { index, set ->
+                    Row(
+                        at = workout.startedAt,
+                        fields =
                             listOf(
-                                localTime(workout.startedAt, zone),
-                                localTime(workout.endedAt, zone),
+                                CsvWriter.time(workout.startedAt, zone),
+                                CsvWriter.time(workout.endedAt, zone),
                                 workout.name ?: untitled,
                                 names[exercise.exerciseId] ?: exercise.exerciseId,
                                 exercise.supersetGroup?.toString(),
                                 (index + 1).toString(),
                                 set.type.key,
-                                set.weight?.let { decimal(it.inUnit(units.weight), WEIGHT_DECIMALS) },
+                                set.weight?.let { CsvWriter.decimal(it.inUnit(units.weight), WEIGHT_DECIMALS) },
                                 set.reps?.toString(),
                                 set.distanceMeters?.let {
-                                    decimal(
-                                        units.distance.long.fromMeters(it),
-                                        DISTANCE_DECIMALS,
-                                    )
+                                    CsvWriter.decimal(units.distance.long.fromMeters(it), DISTANCE_DECIMALS)
                                 },
                                 set.duration?.inWholeSeconds?.toString(),
-                                set.rpe?.let { decimal(it, RPE_DECIMALS) },
+                                set.rpe?.let { CsvWriter.decimal(it, RPE_DECIMALS) },
                                 exercise.notes,
                                 workout.notes,
                             ),
-                        )
-                    }
+                    )
                 }
             }
         }
@@ -80,46 +124,15 @@ object WorkoutCsv {
             "workout_notes",
         )
 
-    private fun StringBuilder.appendRow(fields: List<String?>) {
-        fields.forEachIndexed { index, field ->
-            if (index > 0) append(',')
-            append(quoted(field.orEmpty()))
-        }
-        append("\r\n")
-    }
+    /** A row and when it happened, to put a combined file in order. */
+    private data class Row(
+        val at: Instant,
+        val fields: List<String?>,
+    )
 
-    /** A field as RFC 4180 has it: in quotes, with quotes doubled, when it holds a comma, quote or line break. */
-    private fun quoted(field: String): String =
-        if (field.any { it in NEEDS_QUOTES }) {
-            "\"" + field.replace("\"", "\"\"") + "\""
-        } else {
-            field
-        }
-
-    private fun localTime(
-        instant: Instant,
-        zone: TimeZone,
-    ): String {
-        val local = instant.toLocalDateTime(zone)
-        val hour = local.hour.toString().padStart(2, '0')
-        val minute = local.minute.toString().padStart(2, '0')
-        return "${local.date} $hour:$minute"
-    }
-
-    /** [value] with up to [decimals] places and a dot, without trailing zeros: 82.5, 100, 0.04. */
-    private fun decimal(
-        value: Double,
-        decimals: Int,
-    ): String {
-        val factor = 10.0.pow(decimals).roundToLong()
-        val scaled = (abs(value) * factor).roundToLong()
-        val fraction = (scaled % factor).toString().padStart(decimals, '0').trimEnd('0')
-        val sign = if (value < 0 && scaled != 0L) "-" else ""
-        return sign + (scaled / factor) + if (fraction.isEmpty()) "" else ".$fraction"
-    }
-
-    private val BYTE_ORDER_MARK = Char(0xFEFF)
-    private val NEEDS_QUOTES = setOf(',', '"', '\n', '\r')
+    private const val RECORD = "record"
+    private const val SET_RECORD = "set"
+    private const val BODY_RECORD = "body"
 
     /** Pounds typed as 225 are stored in kilograms; two places bring them back to 225. */
     private const val WEIGHT_DECIMALS = 2

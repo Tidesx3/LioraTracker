@@ -20,7 +20,6 @@ import app.liora.core.domain.GymProfiles
 import app.liora.core.domain.LoadRounding
 import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.PlateLoad
-import app.liora.core.domain.RecordHighlights
 import app.liora.core.domain.RecordKey
 import app.liora.core.domain.RestDefaults
 import app.liora.core.domain.RoutineChange
@@ -50,7 +49,6 @@ import app.liora.core.model.SetType
 import app.liora.core.model.TrackingType
 import app.liora.core.model.Units
 import app.liora.core.model.WeightUnit
-import app.liora.core.ui.RecordsCardEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -168,14 +166,6 @@ sealed interface LoggerUiState {
                 completedSets = completedSets,
                 openSets = openSets,
                 volumeKg = volumeKg,
-                records =
-                    workout.exercises.mapNotNull { exercise ->
-                        val trackingType = trackingTypeOf(exercise.exerciseId)
-                        RecordHighlights
-                            .of(exercise.sets, newRecords, trackingType, formula)
-                            .takeIf { it.isNotEmpty() }
-                            ?.let { RecordsCardEntry(exercises[exercise.exerciseId]?.name.orEmpty(), trackingType, it) }
-                    },
                 routineToUpdate = routine?.name?.takeIf { updated != null && RoutineUpdate.changes(routine, updated) },
                 routineChanges = changes,
                 exerciseNames =
@@ -251,14 +241,21 @@ data class FinishSummary(
     /** Planned sets that weren't done; finishing drops them. */
     val openSets: Int,
     val volumeKg: Double,
-    /** The records each exercise broke today, in workout order, at the values they were set at. */
-    val records: List<RecordsCardEntry>,
     /** The routine's name, when updating it with today's values would change it. */
     val routineToUpdate: String?,
     /** What updating the routine would change beyond weights and reps; empty when only they change. */
     val routineChanges: List<RoutineChange> = emptyList(),
     /** The names of the exercises in [routineChanges], by id. */
     val exerciseNames: Map<String, String> = emptyMap(),
+)
+
+/**
+ * The workout this logger is finishing. Until the finish has [landed] the screen stays, as leaving would
+ * cancel the write; then it opens the summary.
+ */
+data class Finishing(
+    val workoutId: String,
+    val landed: Boolean,
 )
 
 /** How a tap to tick a set off turned out. */
@@ -312,6 +309,7 @@ class LoggerViewModel(
     private val invalid = MutableStateFlow<CellRef?>(null)
     private val writes = Mutex()
     private val doneCorrecting = MutableStateFlow(false)
+    private val finishing = MutableStateFlow<Finishing?>(null)
 
     /** The finished workout being corrected, or null when logging the one in progress. */
     private val correcting: FinishedWorkoutSession? = finishedWorkoutId?.let(history::edit)
@@ -324,6 +322,9 @@ class LoggerViewModel(
 
     /** True once corrections are tidied up and saved; the screen then closes. */
     val corrected: StateFlow<Boolean> = doneCorrecting.asStateFlow()
+
+    /** A finish under way; once it has landed, the screen opens the workout's summary. */
+    val finished: StateFlow<Finishing?> = finishing.asStateFlow()
 
     private val outcomes = Channel<TickOutcome>(Channel.BUFFERED)
 
@@ -671,7 +672,14 @@ class LoggerViewModel(
 
     fun skipRest() = launch { restTimers.stop() }
 
-    fun finish(updateRoutine: Boolean) = launch { activeWorkouts.finish(updateRoutine) }
+    fun finish(updateRoutine: Boolean) {
+        val id = active?.workout?.id ?: return
+        finishing.value = Finishing(id, landed = false)
+        launch {
+            activeWorkouts.finish(updateRoutine)
+            finishing.value = Finishing(id, landed = true)
+        }
+    }
 
     fun discard() = launch { activeWorkouts.discard() }
 

@@ -5,7 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasScrollToKeyAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -14,6 +17,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToKey
 import app.liora.core.data.AppStartup
+import app.liora.core.data.body.BodyRepository
 import app.liora.core.data.body.ProgressPhotoRepository
 import app.liora.core.data.exercise.ExerciseRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
@@ -21,11 +25,13 @@ import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.model.Equipment
 import app.liora.core.model.ExerciseDraft
 import app.liora.core.model.Mass
+import app.liora.core.model.MeasurementType
 import app.liora.core.model.PhotoPose
 import app.liora.core.model.TrackingType
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -129,7 +135,8 @@ class BackupFlowTest {
     fun exportingWorkoutsAsCsv() {
         openData()
         val csv = file("workouts.csv")
-        composeRule.onNodeWithText("Export workouts as CSV").performClick()
+        composeRule.onNodeWithText("Export as CSV").performClick()
+        chooseCsv("Workouts")
         assertEquals("liora-workouts-2026-10-02.csv", pick(csv).getStringExtra(Intent.EXTRA_TITLE))
         waitForText("Workouts exported")
 
@@ -137,6 +144,45 @@ class BackupFlowTest {
         assertEquals(
             "2026-10-02 17:30,2026-10-02 18:25,Push,Bench Press Studio,,1,normal,80,8,,,,,",
             rows[1],
+        )
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun exportingBodyMeasurementsOnTheirOwnOrWithTheWorkouts() {
+        runBlocking {
+            koin.get<BodyRepository>().saveDay(
+                LocalDate(2026, 10, 2),
+                mapOf(MeasurementType.Bodyweight to 82.4, MeasurementType.Waist to 0.84),
+                zone,
+            )
+        }
+        openData()
+        composeRule.onNodeWithText("Export as CSV").performClick()
+        waitForText("What goes in the file?")
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/settings_csv_choice_dark.png")
+        chooseCsv("Body measurements")
+        val body = file("body.csv")
+        assertEquals("liora-body-2026-10-02.csv", pick(body).getStringExtra(Intent.EXTRA_TITLE))
+        waitForText("Body measurements exported")
+        assertEquals(
+            listOf("date,bodyweight_kg,waist_cm", "2026-10-02,82.4,84", ""),
+            body.readText().removePrefix(Char(0xFEFF).toString()).split("\r\n"),
+        )
+
+        // The last choice stays picked; the combined file puts the day's measurements before its workout.
+        composeRule.onNodeWithText("Export as CSV").performClick()
+        chooseCsv("Both, in one file")
+        val both = file("both.csv")
+        assertEquals("liora-workouts-and-body-2026-10-02.csv", pick(both).getStringExtra(Intent.EXTRA_TITLE))
+        waitForText("Workouts and body measurements exported")
+        val rows = both.readText().removePrefix(Char(0xFEFF).toString()).split("\r\n")
+        assertEquals(
+            listOf(
+                "body,2026-10-02,,,,,,,,,,,,,,82.4,84",
+                "set,2026-10-02 17:30,2026-10-02 18:25,Push,Bench Press Studio,,1,normal,80,8,,,,,,,",
+            ),
+            rows.subList(1, 3),
         )
     }
 
@@ -177,6 +223,12 @@ class BackupFlowTest {
     }
 
     private fun file(name: String) = File(context.cacheDir, name)
+
+    /** Picks what goes into the CSV; Settings has rows by some of the same names. */
+    private fun chooseCsv(option: String) {
+        waitForText("What goes in the file?")
+        composeRule.onNode(hasText(option) and hasAnyAncestor(isDialog())).performClick()
+    }
 
     /** A finished workout with a custom exercise, and a progress photo. */
     private suspend fun seed() {
