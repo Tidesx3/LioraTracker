@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,6 +25,8 @@ import app.liora.core.data.health.HealthAccess
 import app.liora.core.data.health.HealthAvailability
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
+import app.liora.core.designsystem.component.LioraAlertDialog
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.component.LioraScaffold
@@ -165,7 +165,7 @@ private fun HealthContent(
         }
     }
     if (confirmingTurnOff) {
-        AlertDialog(
+        LioraAlertDialog(
             onDismissRequest = { confirmingTurnOff = false },
             title = { Text(stringResource(Res.string.health_turn_off_question)) },
             text = { Text(stringResource(Res.string.health_turn_off_body)) },
@@ -199,7 +199,7 @@ private fun Invitation(
         title = stringResource(title),
         body = stringResource(body),
         modifier = modifier,
-        action = { Button(onClick = onAction) { Text(stringResource(action)) } },
+        action = { LioraButton(onClick = onAction) { Text(stringResource(action)) } },
     )
 }
 
@@ -226,7 +226,7 @@ private fun Connected(
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = onOpenSettings) { Text(stringResource(Res.string.health_settings)) }
+            LioraButton(onClick = onOpenSettings) { Text(stringResource(Res.string.health_settings)) }
             TextButton(onClick = onTurnOff) { Text(stringResource(Res.string.health_turn_off)) }
         }
     }

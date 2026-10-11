@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -21,6 +20,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.LioraAlertDialog
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.rememberNumberFormatter
@@ -99,7 +99,7 @@ internal fun GymDialog(
     onUse: (gymId: String) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    LioraAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.gym_title)) },
         text = {

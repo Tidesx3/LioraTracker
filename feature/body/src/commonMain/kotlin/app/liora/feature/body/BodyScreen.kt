@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,6 +33,7 @@ import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
+import app.liora.core.designsystem.component.LioraFloatingButton
 import app.liora.core.designsystem.component.LioraScaffold
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
@@ -101,7 +101,7 @@ private fun BodyContent(
         },
         floatingActionButton = {
             val label = stringResource(Res.string.body_log)
-            ExtendedFloatingActionButton(
+            LioraFloatingButton(
                 onClick = navigation.onLog,
                 icon = { Icon(painterResource(LioraIcons.Add), contentDescription = null) },
                 text = { Text(label) },

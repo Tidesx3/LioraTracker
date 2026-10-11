@@ -15,12 +15,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
@@ -49,7 +47,9 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.component.LioraIconButton
+import app.liora.core.designsystem.component.LioraOutlinedButton
 import app.liora.core.designsystem.component.LioraScaffold
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.Stat
@@ -307,7 +307,7 @@ private fun LoggerContent(
                 },
                 primaryAction = {
                     if (state != null) {
-                        Button(
+                        LioraButton(
                             onClick = { if (finished) actions.onDone() else actions.onShowDialog(LoggerDialog.Finish) },
                             modifier = Modifier.padding(end = 8.dp).testTag(LoggerTags.FINISH),
                         ) {
@@ -496,7 +496,7 @@ internal fun WorkoutList(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                OutlinedButton(onClick = actions.navigation.onAddExercises, modifier = Modifier.fillMaxWidth()) {
+                LioraOutlinedButton(onClick = actions.navigation.onAddExercises, modifier = Modifier.fillMaxWidth()) {
                     Icon(painterResource(LioraIcons.Add), contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(stringResource(Res.string.logger_add_exercises))

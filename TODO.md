@@ -12,7 +12,11 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
     bar: the drop lifts and follows the finger with a tick over each tab, and letting go switches there.
   - The Exercises tab's Custom exercise button sits above the tabs.
   - Top bars: the back arrow on a glass circle, the other buttons in a glass capsule (Save in the editors);
-    the logger's Finish stays violet beside them.
+    the logger's Finish is violet glass beside them.
+  - Buttons, chips, fields and the pad's keys look like one family; the main buttons (Start empty workout,
+    Start workout, Repeat workout, Finish, Log set) are glass, the bottom ones floating over the content.
+    Dialogs, sheets and menus: solid with a rim of light, nothing showing through. Snackbars (delete a
+    workout, Undo) float as glass.
   - The top bars: content frosts over as it slides under the title and the status bar.
   - Tick a set: the rest timer floats as violet glass over the end of the list, its ring running. On the
     inner screen and in tabletop, the ring runs in a glass disc, with glass pills for −15 s, +15 s and Skip.

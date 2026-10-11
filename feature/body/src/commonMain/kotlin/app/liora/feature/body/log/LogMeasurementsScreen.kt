@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -29,8 +27,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.liora.core.designsystem.component.LioraAssistChip
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraScaffold
+import app.liora.core.designsystem.component.LioraTextField
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
@@ -116,7 +116,7 @@ private fun Fields(
     LazyColumn(modifier = modifier.readableWidth(), contentPadding = contentPadding) {
         item(key = "day") {
             val pickDay = stringResource(Res.string.log_pick_day)
-            AssistChip(
+            LioraAssistChip(
                 onClick = onPickDay,
                 label = { Text(rememberDateFormatter().longDate(form.day)) },
                 leadingIcon = { Icon(painterResource(LioraIcons.Calendar), contentDescription = null) },
@@ -185,7 +185,7 @@ private fun MeasurementField(
     onEdit: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    OutlinedTextField(
+    LioraTextField(
         value = text,
         // Numbers only; both decimal separators, since keyboards differ.
         onValueChange = { typed ->

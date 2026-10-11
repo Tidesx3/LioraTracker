@@ -6,9 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +23,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.BackButton
+import app.liora.core.designsystem.component.LioraAlertDialog
+import app.liora.core.designsystem.component.LioraAssistChip
+import app.liora.core.designsystem.component.LioraFilterChip
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraScaffold
 import app.liora.core.designsystem.component.LioraTopAppBar
@@ -121,7 +121,7 @@ internal fun PhotoScreen(
         )
     }
     if (confirmingDelete) {
-        AlertDialog(
+        LioraAlertDialog(
             onDismissRequest = { confirmingDelete = false },
             title = { Text(stringResource(Res.string.photo_delete_title)) },
             text = { Text(stringResource(Res.string.photo_delete_body)) },
@@ -150,7 +150,7 @@ private fun Details(
 ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            AssistChip(
+            LioraAssistChip(
                 onClick = onPickDay,
                 label = { Text(rememberDateFormatter().longDate(state.day)) },
                 leadingIcon = {
@@ -170,7 +170,7 @@ private fun Details(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             PhotoPose.entries.forEach { pose ->
-                FilterChip(
+                LioraFilterChip(
                     selected = state.photo.pose == pose,
                     onClick = { onTogglePose(pose) },
                     label = { Text(stringResource(pose.label)) },

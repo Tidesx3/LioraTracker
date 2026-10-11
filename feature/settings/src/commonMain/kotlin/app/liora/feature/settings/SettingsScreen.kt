@@ -9,11 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -33,9 +31,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.data.health.HealthAccess
 import app.liora.core.data.sync.SyncState
 import app.liora.core.designsystem.component.BackButton
+import app.liora.core.designsystem.component.LioraAlertDialog
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.component.LioraScaffold
+import app.liora.core.designsystem.component.LioraSnackbarHost
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.layout.readableWidth
@@ -251,7 +251,7 @@ private fun SettingsContent(
                 navigationIcon = { BackButton(onClick = onBack) },
             )
         },
-        snackbarHost = { SnackbarHost(snackbar) },
+        snackbarHost = { LioraSnackbarHost(snackbar) },
     ) { padding ->
         if (settings == null) return@LioraScaffold
         LazyColumn(
@@ -615,7 +615,7 @@ internal fun <T> ChoiceDialog(
     note: String? = null,
     dismissLabel: StringResource = Res.string.dialog_cancel,
 ) {
-    AlertDialog(
+    LioraAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {

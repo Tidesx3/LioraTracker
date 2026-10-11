@@ -368,6 +368,12 @@ As of 2026-10-11:
     runs inside a disc of glass, its buttons glass pills. Fixed: a screen's floating button (the Exercises
     tab's Custom exercise) hid behind the tabs, as Material places it by the window's edge;
     `LioraScaffold` lifts it.
+  - **One look across the app (on request):** Liora's own buttons, chips, fields, dialogs, sheets, menus,
+    snackbars and bottom bars (`LioraButtons.kt`, `LioraFields.kt`, `LioraOverlays.kt`) replace Material's
+    everywhere. Floating parts are glass that bends; the main action is the accent's glass (in a bar, bending
+    what's beneath); buttons, chips, fields and the pad's keys on the page are panes with the rim light
+    (`glassRimBrush`, a border Material takes); dialogs, sheets and menus are solid panels with the rim. The
+    detail screens' bottom bars lose their strip, their button floating. With glass off, all as before.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.

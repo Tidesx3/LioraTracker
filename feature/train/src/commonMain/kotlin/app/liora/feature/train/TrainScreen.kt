@@ -15,17 +15,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,10 +38,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.EmptyState
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
+import app.liora.core.designsystem.component.LioraDropdownMenu
 import app.liora.core.designsystem.component.LioraIconButton
+import app.liora.core.designsystem.component.LioraOutlinedButton
 import app.liora.core.designsystem.component.LioraScaffold
+import app.liora.core.designsystem.component.LioraTonalButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
@@ -313,12 +313,12 @@ private fun RoutineButtons(
     modifier: Modifier = Modifier,
 ) {
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        FilledTonalButton(onClick = onNewRoutine, modifier = Modifier.weight(1f)) {
+        LioraTonalButton(onClick = onNewRoutine, modifier = Modifier.weight(1f)) {
             Icon(painterResource(LioraIcons.Add), contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
             Text(stringResource(Res.string.train_new_routine), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        OutlinedButton(onClick = onNewFolder, modifier = Modifier.weight(1f)) {
+        LioraOutlinedButton(onClick = onNewFolder, modifier = Modifier.weight(1f)) {
             Icon(painterResource(LioraIcons.Folder), contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
             Text(stringResource(Res.string.train_new_folder), maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -447,7 +447,7 @@ private fun RoutineCard(
                 modifier = Modifier.padding(end = 12.dp),
             )
             Spacer(Modifier.height(12.dp))
-            FilledTonalButton(
+            LioraTonalButton(
                 onClick = { actions.onStart(routine.id) },
                 modifier = Modifier.fillMaxWidth().padding(end = 12.dp),
                 // The tonal color is the selected card's color; the open routine's button goes solid instead.
@@ -472,7 +472,7 @@ private fun OverflowMenu(
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     LioraIconButton(LioraIcons.More, stringResource(Res.string.cd_more), { expanded = true }, modifier)
-    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+    LioraDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
         items.forEach { (label, action) ->
             DropdownMenuItem(
                 text = { Text(label) },
@@ -511,15 +511,11 @@ private fun QuickStartCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(12.dp))
-            Button(
+            LioraButton(
                 onClick = if (hasActiveWorkout) onResumeWorkout else onStartWorkout,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 colors =
-                    if (secondary && !hasActiveWorkout) {
-                        ButtonDefaults.filledTonalButtonColors()
-                    } else {
-                        ButtonDefaults.buttonColors()
-                    },
+                    if (secondary && !hasActiveWorkout) ButtonDefaults.filledTonalButtonColors() else null,
             ) {
                 Icon(
                     painter = painterResource(LioraIcons.Play),

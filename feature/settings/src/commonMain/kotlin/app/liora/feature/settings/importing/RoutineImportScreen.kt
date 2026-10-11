@@ -16,9 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -39,9 +37,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.data.importing.FolderPlan
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
+import app.liora.core.designsystem.component.LioraBottomBar
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.component.LioraScaffold
+import app.liora.core.designsystem.component.LioraTonalButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
@@ -197,12 +198,12 @@ private fun Start(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = actions.onOpen) {
+                        LioraButton(onClick = actions.onOpen) {
                             Icon(painterResource(LioraIcons.Folder), contentDescription = null, Modifier.size(18.dp))
                             Spacer(Modifier.width(6.dp))
                             Text(stringResource(Res.string.routine_import_open))
                         }
-                        FilledTonalButton(onClick = actions.onPaste) {
+                        LioraTonalButton(onClick = actions.onPaste) {
                             Text(stringResource(Res.string.routine_import_paste))
                         }
                     }
@@ -397,8 +398,8 @@ private fun ImportBar(
     modifier: Modifier = Modifier,
 ) {
     val routines = state.routines.size
-    Surface(modifier = modifier, color = MaterialTheme.colorScheme.surface) {
-        Button(
+    LioraBottomBar(modifier = modifier) {
+        LioraButton(
             onClick = onImport,
             enabled = !state.importing,
             modifier =
@@ -442,7 +443,9 @@ private fun Done(
         body = lines.joinToString("\n"),
         modifier = modifier.readableWidth().padding(top = 48.dp),
         action = {
-            Button(onClick = { onDone(result.routineIds) }) { Text(stringResource(Res.string.routine_import_done)) }
+            LioraButton(
+                onClick = { onDone(result.routineIds) },
+            ) { Text(stringResource(Res.string.routine_import_done)) }
         },
     )
 }

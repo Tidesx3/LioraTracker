@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -23,6 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.LioraAlertDialog
+import app.liora.core.designsystem.component.LioraTextField
 import app.liora.core.model.RoutineFolder
 import app.liora.feature.train.resources.Res
 import app.liora.feature.train.resources.dialog_cancel
@@ -132,7 +132,7 @@ internal fun RoutineDialogHost(
         }
 
         RoutineDialog.WorkoutInProgress -> {
-            AlertDialog(
+            LioraAlertDialog(
                 onDismissRequest = actions.onDismiss,
                 title = { Text(stringResource(Res.string.in_progress_title)) },
                 text = { Text(stringResource(Res.string.in_progress_body)) },
@@ -162,11 +162,11 @@ private fun NameDialog(
     onDismiss: () -> Unit,
 ) {
     var name by rememberSaveable { mutableStateOf(initialName) }
-    AlertDialog(
+    LioraAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = {
-            OutlinedTextField(
+            LioraTextField(
                 value = name,
                 onValueChange = { name = it },
                 label = { Text(stringResource(Res.string.folder_name)) },
@@ -190,7 +190,7 @@ private fun ConfirmDeleteDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    LioraAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = { Text(body) },
@@ -215,7 +215,7 @@ private fun MoveToFolderDialog(
     onMove: (String?) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    LioraAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.move_title)) },
         text = {

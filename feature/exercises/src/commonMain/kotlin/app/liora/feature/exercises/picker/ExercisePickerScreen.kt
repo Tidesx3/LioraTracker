@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,6 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.liora.core.designsystem.component.LioraBottomBar
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraScaffold
 import app.liora.core.designsystem.component.LioraTopAppBar
@@ -89,8 +90,8 @@ private fun ExercisePickerContent(
         },
         bottomBar = {
             if (uiState.selected.isNotEmpty()) {
-                Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
-                    Button(
+                LioraBottomBar(color = MaterialTheme.colorScheme.surfaceContainer) {
+                    LioraButton(
                         onClick = onDone,
                         modifier =
                             Modifier

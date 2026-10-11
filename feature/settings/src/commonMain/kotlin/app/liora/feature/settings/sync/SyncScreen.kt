@@ -8,12 +8,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,9 +28,12 @@ import app.liora.core.data.sync.SyncProblem
 import app.liora.core.data.sync.SyncState
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
+import app.liora.core.designsystem.component.LioraAlertDialog
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.component.LioraScaffold
+import app.liora.core.designsystem.component.LioraSnackbarHost
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.layout.readableWidth
@@ -123,7 +123,7 @@ private fun SyncContent(
                 navigationIcon = { BackButton(onClick = onBack) },
             )
         },
-        snackbarHost = { SnackbarHost(snackbar) },
+        snackbarHost = { LioraSnackbarHost(snackbar) },
     ) { padding ->
         val sync = state.sync ?: return@LioraScaffold
         val account = sync.account
@@ -134,7 +134,7 @@ private fun SyncContent(
                 body = stringResource(Res.string.sync_off_body),
                 modifier = Modifier.padding(padding).readableWidth(),
                 action = {
-                    Button(onClick = onConnect, enabled = !connecting) {
+                    LioraButton(onClick = onConnect, enabled = !connecting) {
                         Text(stringResource(Res.string.sync_connect))
                     }
                 },
@@ -157,7 +157,7 @@ private fun SyncContent(
         }
     }
     if (confirmingDisconnect) {
-        AlertDialog(
+        LioraAlertDialog(
             onDismissRequest = { confirmingDisconnect = false },
             title = { Text(stringResource(Res.string.sync_disconnect_question)) },
             text = { Text(stringResource(Res.string.sync_disconnect_body)) },
@@ -238,7 +238,7 @@ private fun Connected(
             modifier = Modifier.padding(horizontal = 4.dp),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = onSyncNow, enabled = !sync.running) { Text(stringResource(Res.string.sync_now)) }
+            LioraButton(onClick = onSyncNow, enabled = !sync.running) { Text(stringResource(Res.string.sync_now)) }
             TextButton(onClick = onDisconnect) { Text(stringResource(Res.string.sync_disconnect)) }
         }
     }
@@ -288,7 +288,7 @@ private fun Problem(
                     },
             )
             if (problem == SyncProblem.SignInNeeded) {
-                Button(onClick = onSignIn, enabled = !connecting) { Text(stringResource(Res.string.sync_sign_in)) }
+                LioraButton(onClick = onSignIn, enabled = !connecting) { Text(stringResource(Res.string.sync_sign_in)) }
             }
         }
     }

@@ -20,14 +20,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
@@ -45,7 +43,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
+import app.liora.core.designsystem.component.LioraBottomBar
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.component.LioraScaffold
+import app.liora.core.designsystem.component.LioraSegmentedButton
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
@@ -312,7 +313,7 @@ private fun UnitChoice(
             )
             SingleChoiceSegmentedButtonRow {
                 WeightUnit.entries.forEachIndexed { index, option ->
-                    SegmentedButton(
+                    LioraSegmentedButton(
                         selected = option == unit,
                         onClick = { onUnit(option) },
                         enabled = enabled,
@@ -336,8 +337,8 @@ private fun ImportBar(
     onImport: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(modifier = modifier, color = MaterialTheme.colorScheme.surface) {
-        Button(
+    LioraBottomBar(modifier = modifier) {
+        LioraButton(
             onClick = onImport,
             enabled = !state.isEmpty && !state.importing,
             modifier =
@@ -389,6 +390,6 @@ private fun Done(
         title = stringResource(Res.string.import_done_title),
         body = lines.joinToString("\n"),
         modifier = modifier.readableWidth().padding(top = 48.dp),
-        action = { Button(onClick = onClose) { Text(stringResource(Res.string.import_done)) } },
+        action = { LioraButton(onClick = onClose) { Text(stringResource(Res.string.import_done)) } },
     )
 }

@@ -31,6 +31,15 @@ data class LioraGlass(
     /** Cards: see-through panes over the glows. */
     val card: Color,
     val cardRim: Color,
+    /** Buttons, chips and fields on the page: panes of glass, a little denser than the cards they sit on. */
+    val control: Color,
+    /** The same, tinted with the accent: a secondary action, a selected chip. */
+    val accentControl: Color,
+    /**
+     * Dialogs, sheets and menus: solid, as they open in windows of their own, where the glass can't see the
+     * screen to blur it; see-through, the screen's text would show through crisp. The rim keeps them glass.
+     */
+    val panel: Color,
     /** The soft shadow glass floats on. */
     val shadow: Color,
 )
@@ -42,14 +51,7 @@ internal fun lioraGlass(
     dynamic: Boolean,
     colors: ColorScheme,
 ): LioraGlass {
-    val glows =
-        if (dynamic) {
-            Triple(colors.primary, colors.tertiary, colors.secondary)
-        } else if (dark) {
-            Triple(Color(0xFF5504CF), Color(0xFFC0268F), Color(0xFF2D4BFF))
-        } else {
-            Triple(Color(0xFF7C4DFF), Color(0xFFFF5FB8), Color(0xFF4F8BFF))
-        }
+    val glows = glowColors(dark, dynamic, colors)
     val strength = if (dark) DarkGlowAlphas else LightGlowAlphas
     return LioraGlass(
         enabled = enabled,
@@ -68,8 +70,22 @@ internal fun lioraGlass(
         rim = if (dark) Color(0x52FFFFFF) else Color(0xF2FFFFFF),
         card = if (dark) Color(0x12FFFFFF) else Color(0xB8FFFFFF),
         cardRim = if (dark) Color(0x24FFFFFF) else Color(0xE6FFFFFF),
+        control = if (dark) Color(0x17FFFFFF) else Color(0x0F5504CF),
+        accentControl = colors.primary.copy(alpha = if (dark) 0.2f else 0.12f),
+        panel = if (dark) Color(0xFF1D1C28) else Color(0xFFFBFAFF),
         shadow = if (dark) Color(0x80000000) else Color(0x262A1A5E),
     )
+}
+
+/** The aurora's violet, pink and blue; the wallpaper's own colors when [dynamic]. */
+private fun glowColors(
+    dark: Boolean,
+    dynamic: Boolean,
+    colors: ColorScheme,
+) = when {
+    dynamic -> Triple(colors.primary, colors.tertiary, colors.secondary)
+    dark -> Triple(Color(0xFF5504CF), Color(0xFFC0268F), Color(0xFF2D4BFF))
+    else -> Triple(Color(0xFF7C4DFF), Color(0xFFFF5FB8), Color(0xFF4F8BFF))
 }
 
 private val DarkGlowAlphas = Triple(0.55f, 0.24f, 0.2f)

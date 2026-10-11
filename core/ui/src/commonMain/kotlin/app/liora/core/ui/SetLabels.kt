@@ -3,7 +3,6 @@ package app.liora.core.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -16,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.LioraDropdownMenu
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.designsystem.util.rememberNumberFormatter
@@ -107,7 +107,7 @@ fun SetTypeMenu(
     var expanded by rememberSaveable { mutableStateOf(false) }
     Box(modifier) {
         SetTypeBadge(type, number, Modifier.clickable { expanded = true })
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        LioraDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             SetType.entries.forEach { option ->
                 DropdownMenuItem(
                     text = { Text(stringResource(option.label)) },

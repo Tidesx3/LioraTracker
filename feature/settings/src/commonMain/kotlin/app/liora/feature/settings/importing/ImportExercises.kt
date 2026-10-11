@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -46,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
+import app.liora.core.designsystem.component.LioraAlertDialog
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.component.LioraTopAppBar
@@ -186,7 +186,7 @@ internal fun ExerciseChoiceDialog(
 ) {
     val closest = row.closest
     val picked = (row.choice as? ExerciseChoice.Existing)?.takeIf { it.exerciseId != closest?.id }
-    AlertDialog(
+    LioraAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(row.title) },
         text = {

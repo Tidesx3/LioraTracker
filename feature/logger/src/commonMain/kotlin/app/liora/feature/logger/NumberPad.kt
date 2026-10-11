@@ -1,5 +1,6 @@
 package app.liora.feature.logger
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.glass.glassRimBrush
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.designsystem.util.rememberNumberFormatter
@@ -51,7 +53,12 @@ internal fun NumberPad(
     keyHeight: Dp = KeyHeight,
 ) {
     val separator = rememberDecimalSeparator()
-    Surface(modifier = modifier.testTag(LoggerTags.PAD), color = MaterialTheme.colorScheme.surfaceContainer) {
+    val glass = LioraTheme.glass
+    // With Liquid Glass the pad is a pane of glass over the aurora, its keys glass on it.
+    Surface(
+        modifier = modifier.testTag(LoggerTags.PAD),
+        color = if (glass.enabled) glass.card else MaterialTheme.colorScheme.surfaceContainer,
+    ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(8.dp).navigationBarsPadding(),
             verticalArrangement = Arrangement.spacedBy(KeyGap),
@@ -104,8 +111,9 @@ internal fun NumberPad(
                         icon = LioraIcons.Next,
                         description = stringResource(Res.string.pad_next),
                         height = keyHeight,
-                        container = MaterialTheme.colorScheme.primary,
-                        content = MaterialTheme.colorScheme.onPrimary,
+                        // The accent's glass, like the main buttons, with Liquid Glass.
+                        container = if (glass.enabled) glass.accentTint else MaterialTheme.colorScheme.primary,
+                        content = if (glass.enabled) glass.onAccent else MaterialTheme.colorScheme.onPrimary,
                     ) { onKey(PadKey.Next) }
                 }
             }
@@ -135,7 +143,7 @@ private fun RowScope.IconKey(
     icon: DrawableResource,
     description: String,
     height: Dp,
-    container: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
+    container: Color? = null,
     content: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit,
 ) {
@@ -150,23 +158,48 @@ private fun RowScope.IconKey(
     }
 }
 
+/** A key: a plain one unless it has a [container] of its own (Next). With Liquid Glass, a pane of glass. */
 @Composable
 private fun RowScope.Key(
     height: Dp,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    container: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
+    container: Color? = null,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     content: @Composable () -> Unit,
 ) {
+    val glass = LioraTheme.glass
+    val fill =
+        when {
+            !glass.enabled -> container ?: MaterialTheme.colorScheme.surfaceContainerHighest
+            container == null -> glass.control
+            else -> container.copy(alpha = GLASS_KEY_ALPHA)
+        }
     Surface(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier.weight(1f).height(height),
         shape = MaterialTheme.shapes.medium,
-        color = container,
+        color = fill,
         contentColor = if (enabled) contentColor else contentColor.copy(alpha = DISABLED_ALPHA),
+        border =
+            if (glass.enabled) {
+                BorderStroke(
+                    1.dp,
+                    glassRimBrush(
+                        if (container ==
+                            null
+                        ) {
+                            glass.cardRim
+                        } else {
+                            glass.rim
+                        },
+                    ),
+                )
+            } else {
+                null
+            },
     ) {
         Box(contentAlignment = Alignment.Center) { content() }
     }
@@ -182,3 +215,6 @@ internal fun rememberDecimalSeparator(): Char {
 internal val KeyHeight = 52.dp
 private val KeyGap = 6.dp
 private const val DISABLED_ALPHA = 0.38f
+
+/** A colored key's glass: its color, a touch see-through. */
+private const val GLASS_KEY_ALPHA = 0.88f

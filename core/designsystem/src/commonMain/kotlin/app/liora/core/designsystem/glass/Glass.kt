@@ -12,7 +12,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RenderEffect
+import androidx.compose.ui.graphics.Shader
+import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.SweepGradientShader
 import androidx.compose.ui.graphics.addOutline
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -324,18 +327,39 @@ internal fun DrawScope.drawRim(
 ) {
     if (box.minDimension <= 0f) return
     val center = Offset(box.width / 2, box.height / 2)
-    // Where the light lands: the start of the top edge, past the corner's curve, and the end of the bottom one.
+    clipPath(path) {
+        drawPath(path, Brush.sweepGradient(rimColors(box, radius, color), center = center), style = Stroke(width * 2))
+    }
+}
+
+/**
+ * The rim's light as a brush, for Material parts that take a border ([androidx.compose.foundation.BorderStroke]):
+ * the same light as [drawRim], along a fully rounded shape (a pill, a chip, a field's corners count less).
+ */
+fun glassRimBrush(color: Color): Brush =
+    object : ShaderBrush() {
+        override fun createShader(size: Size): Shader {
+            val radius = size.minDimension / 2
+            return SweepGradientShader(Offset(size.width / 2, size.height / 2), rimColors(size, radius, color))
+        }
+    }
+
+/**
+ * The rim's colors around the sweep, evenly spaced: the light lands on the start of the top edge, past the
+ * corner's curve, and more softly on the end of the bottom one.
+ */
+private fun rimColors(
+    box: Size,
+    radius: Float,
+    color: Color,
+): List<Color> {
+    val center = Offset(box.width / 2, box.height / 2)
     val lit = angleOf(Offset(radius, 0f) - center)
     val opposite = angleOf(Offset(box.width - radius, box.height) - center)
-    // Evenly spaced around the sweep.
-    val colors =
-        List(RIM_STOPS + 1) { i ->
-            val at = i.toFloat() / RIM_STOPS
-            val light = RIM_BASE + RIM_MAIN * gleam(at, lit) + RIM_SECOND * gleam(at, opposite)
-            color.copy(alpha = (color.alpha * light).coerceAtMost(1f))
-        }
-    clipPath(path) {
-        drawPath(path, Brush.sweepGradient(colors, center = center), style = Stroke(width * 2))
+    return List(RIM_STOPS + 1) { i ->
+        val at = i.toFloat() / RIM_STOPS
+        val light = RIM_BASE + RIM_MAIN * gleam(at, lit) + RIM_SECOND * gleam(at, opposite)
+        color.copy(alpha = (color.alpha * light).coerceAtMost(1f))
     }
 }
 

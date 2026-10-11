@@ -8,15 +8,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,6 +27,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.LioraAlertDialog
+import app.liora.core.designsystem.component.LioraBottomSheet
+import app.liora.core.designsystem.component.LioraButton
+import app.liora.core.designsystem.component.LioraTextField
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.dialog_cancel
@@ -162,11 +162,11 @@ private fun RenameDialog(
     onDismiss: () -> Unit,
 ) {
     var text by rememberSaveable { mutableStateOf(name) }
-    AlertDialog(
+    LioraAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.rename_title)) },
         text = {
-            OutlinedTextField(
+            LioraTextField(
                 value = text,
                 onValueChange = { text = it },
                 singleLine = true,
@@ -183,7 +183,7 @@ private fun DiscardDialog(
     onDiscard: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    LioraAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.logger_discard_title)) },
         text = { Text(stringResource(Res.string.logger_discard_body)) },
@@ -218,7 +218,7 @@ private fun ReorderSheet(
         rememberReorderableLazyListState(listState) { from, to ->
             order = order.toMutableList().apply { add(to.index, removeAt(from.index)) }
         }
-    ModalBottomSheet(
+    LioraBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
@@ -231,7 +231,7 @@ private fun ReorderSheet(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.weight(1f),
             )
-            Button(onClick = { onDone(order.map { it.first }) }) { Text(stringResource(Res.string.reorder_done)) }
+            LioraButton(onClick = { onDone(order.map { it.first }) }) { Text(stringResource(Res.string.reorder_done)) }
         }
         LazyColumn(state = listState, modifier = Modifier.navigationBarsPadding().padding(vertical = 8.dp)) {
             items(order, key = { it.first }) { (id, name) ->

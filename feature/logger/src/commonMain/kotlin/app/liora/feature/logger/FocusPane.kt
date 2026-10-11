@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.domain.SetRef
@@ -150,7 +150,7 @@ internal fun UpNext(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Button(
+        LioraButton(
             onClick = { if (state.edit != null) onToggle(set.id) else onLog() },
             enabled = !set.isCompleted,
             modifier = Modifier.padding(top = 8.dp).fillMaxWidth().height(52.dp),

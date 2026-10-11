@@ -18,13 +18,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -61,6 +59,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.LioraOutlinedButton
+import app.liora.core.designsystem.component.LioraTonalButton
 import app.liora.core.designsystem.component.RollingText
 import app.liora.core.designsystem.glass.GlassDefaults
 import app.liora.core.designsystem.glass.LocalGlassBackdrop
@@ -336,9 +336,13 @@ internal fun RestTimerRing(
                 GlassPill(glass, onClick = { onAdjust(ADJUST_SECONDS) }) { Text(stringResource(Res.string.rest_plus)) }
                 GlassPill(glass, onClick = onSkip, accent = true) { SkipLabel() }
             } else {
-                OutlinedButton(onClick = { onAdjust(-ADJUST_SECONDS) }) { Text(stringResource(Res.string.rest_minus)) }
-                OutlinedButton(onClick = { onAdjust(ADJUST_SECONDS) }) { Text(stringResource(Res.string.rest_plus)) }
-                FilledTonalButton(onClick = onSkip) { SkipLabel() }
+                LioraOutlinedButton(
+                    onClick = { onAdjust(-ADJUST_SECONDS) },
+                ) { Text(stringResource(Res.string.rest_minus)) }
+                LioraOutlinedButton(
+                    onClick = { onAdjust(ADJUST_SECONDS) },
+                ) { Text(stringResource(Res.string.rest_plus)) }
+                LioraTonalButton(onClick = onSkip) { SkipLabel() }
             }
         }
     }

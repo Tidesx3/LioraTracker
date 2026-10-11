@@ -12,12 +12,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
@@ -38,8 +35,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import app.liora.core.designsystem.component.LioraAlertDialog
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraScaffold
+import app.liora.core.designsystem.component.LioraSegmentedButton
+import app.liora.core.designsystem.component.LioraTextField
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
@@ -204,7 +204,7 @@ private fun GymEditorContent(
                     .padding(top = padding.calculateTopPadding(), bottom = 32.dp),
         ) {
             Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
+                LioraTextField(
                     value = draft.name,
                     onValueChange = { name -> edit { copy(name = name) } },
                     label = { Text(stringResource(Res.string.gym_name)) },
@@ -297,7 +297,7 @@ private fun UnitChoice(
         )
         SingleChoiceSegmentedButtonRow {
             WeightUnit.entries.forEachIndexed { index, option ->
-                SegmentedButton(
+                LioraSegmentedButton(
                     selected = option == unit,
                     onClick = { onUnit(option) },
                     shape = SegmentedButtonDefaults.itemShape(index, WeightUnit.entries.size),
@@ -432,7 +432,7 @@ private fun ConfirmDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    LioraAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
         text = body?.let { { Text(it) } },

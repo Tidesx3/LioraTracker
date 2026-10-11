@@ -17,13 +17,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -44,8 +40,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.BackButton
+import app.liora.core.designsystem.component.LioraAlertDialog
+import app.liora.core.designsystem.component.LioraDropdownMenu
 import app.liora.core.designsystem.component.LioraIconButton
+import app.liora.core.designsystem.component.LioraOutlinedButton
 import app.liora.core.designsystem.component.LioraScaffold
+import app.liora.core.designsystem.component.LioraSuggestionChip
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
@@ -140,7 +140,7 @@ internal fun ExerciseDetailScreen(
 
     when (loaded.dialog) {
         DetailDialog.ConfirmDelete -> {
-            AlertDialog(
+            LioraAlertDialog(
                 onDismissRequest = viewModel::dismissDialog,
                 title = { Text(stringResource(Res.string.detail_delete_title)) },
                 text = { Text(stringResource(Res.string.detail_delete_body)) },
@@ -154,7 +154,7 @@ internal fun ExerciseDetailScreen(
         }
 
         DetailDialog.InUse -> {
-            AlertDialog(
+            LioraAlertDialog(
                 onDismissRequest = viewModel::dismissDialog,
                 title = { Text(stringResource(Res.string.detail_in_use_title)) },
                 text = { Text(stringResource(Res.string.detail_in_use_body)) },
@@ -258,7 +258,7 @@ private fun ExerciseDetailContent(
             }
             if (!exercise.isCustom) {
                 item {
-                    OutlinedButton(
+                    LioraOutlinedButton(
                         onClick = { navigation.onCreateVariation(exercise.id) },
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                     ) {
@@ -308,9 +308,14 @@ private fun Header(
             )
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            SuggestionChip(onClick = {}, label = { Text(stringResource(exercise.trackingType.label)) })
-            SuggestionChip(onClick = {}, label = { Text(stringResource(exercise.equipment.label)) })
-            if (exercise.isCustom) SuggestionChip(onClick = {}, label = { Text(stringResource(customExerciseBadge)) })
+            LioraSuggestionChip(onClick = {}, label = { Text(stringResource(exercise.trackingType.label)) })
+            LioraSuggestionChip(onClick = {}, label = { Text(stringResource(exercise.equipment.label)) })
+            if (exercise.isCustom) {
+                LioraSuggestionChip(
+                    onClick = {},
+                    label = { Text(stringResource(customExerciseBadge)) },
+                )
+            }
         }
         state.progress?.stallWeeks?.let { StallBadge(it) }
     }
@@ -435,7 +440,7 @@ private fun DetailMenu(
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     LioraIconButton(LioraIcons.More, stringResource(Res.string.cd_more), { expanded = true }, modifier)
-    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+    LioraDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
         val hidden = exercise.settings.archived
         DropdownMenuItem(
             text = { Text(stringResource(if (hidden) Res.string.detail_unhide else Res.string.detail_hide)) },

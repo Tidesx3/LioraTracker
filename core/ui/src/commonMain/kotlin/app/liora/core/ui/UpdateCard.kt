@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -27,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.domain.update.ReleaseNotes
@@ -191,7 +191,7 @@ private fun Actions(
         if (onDismiss != null && state is UpdateState.Available) {
             TextButton(onClick = onDismiss) { Text(stringResource(Res.string.update_not_now)) }
         }
-        Button(onClick = action, enabled = enabled) { Text(stringResource(label)) }
+        LioraButton(onClick = action, enabled = enabled) { Text(stringResource(label)) }
     }
 }
 

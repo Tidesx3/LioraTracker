@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +27,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.liora.core.designsystem.component.LioraBottomBar
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.component.LioraScaffold
@@ -104,8 +105,8 @@ private fun WorkoutDoneContent(
     LioraScaffold(
         modifier = modifier,
         bottomBar = {
-            Surface(color = MaterialTheme.colorScheme.surface) {
-                Button(
+            LioraBottomBar {
+                LioraButton(
                     onClick = onClose,
                     modifier =
                         Modifier

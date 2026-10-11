@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.liora.core.data.health.HealthAccess
 import app.liora.core.data.sync.SyncState
+import app.liora.core.designsystem.component.LioraAlertDialog
 import app.liora.core.designsystem.component.LioraCardDefaults
 import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.core.domain.CsvContent
@@ -258,7 +258,7 @@ internal fun RestoreDialog(
             summary.measurements.counted(Res.plurals.backup_measurements),
             summary.photos.counted(Res.plurals.backup_photos),
         )
-    AlertDialog(
+    LioraAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.restore_question)) },
         text = {

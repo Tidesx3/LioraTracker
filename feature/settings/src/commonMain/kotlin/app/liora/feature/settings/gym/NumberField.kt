@@ -1,7 +1,6 @@
 package app.liora.feature.settings.gym
 
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -11,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import app.liora.core.designsystem.component.LioraTextField
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.domain.parseDecimalInput
 import kotlin.math.abs
@@ -39,7 +39,7 @@ internal fun NumberField(
         val same = if (typed == null || value == null) typed == value else abs(typed - value) < SAME_VALUE
         if (!same) text = value?.let(format).orEmpty()
     }
-    OutlinedTextField(
+    LioraTextField(
         value = text,
         onValueChange = { typed ->
             text = typed

@@ -73,7 +73,7 @@ fun LioraScaffold(
         modifier = modifier,
         topBar = { CompositionLocalProvider(LocalGlassBackdrop provides backdrop, content = topBar) },
         bottomBar = { CompositionLocalProvider(LocalGlassBackdrop provides backdrop, content = bottomBar) },
-        snackbarHost = snackbarHost,
+        snackbarHost = { CompositionLocalProvider(LocalGlassBackdrop provides backdrop, content = snackbarHost) },
         floatingActionButton = {
             // Material places it by the window's edge, not the content's insets: lift it over the tabs.
             Box(Modifier.padding(bottom = floating.asPaddingValues().calculateBottomPadding())) {

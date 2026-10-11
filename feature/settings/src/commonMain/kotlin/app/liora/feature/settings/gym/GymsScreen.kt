@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.RadioButton
@@ -24,6 +23,7 @@ import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
+import app.liora.core.designsystem.component.LioraFloatingButton
 import app.liora.core.designsystem.component.LioraScaffold
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.icon.LioraIcons
@@ -69,7 +69,7 @@ private fun GymsContent(
         },
         floatingActionButton = {
             val label = stringResource(Res.string.gyms_add)
-            ExtendedFloatingActionButton(
+            LioraFloatingButton(
                 onClick = { onOpen(null) },
                 icon = { Icon(painterResource(LioraIcons.Add), contentDescription = null) },
                 text = { Text(label) },

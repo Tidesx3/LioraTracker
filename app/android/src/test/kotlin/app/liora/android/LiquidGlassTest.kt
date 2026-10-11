@@ -34,6 +34,7 @@ import app.liora.core.model.RoutineExercise
 import app.liora.core.model.RoutineSet
 import app.liora.feature.logger.LoggerTags
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.github.takahirom.roborazzi.captureScreenRoboImage
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -138,6 +139,20 @@ class LiquidGlassTest {
         val button = composeRule.onNodeWithContentDescription("Custom exercise").getUnclippedBoundsInRoot()
         val tabs = composeRule.onNodeWithTag(ShellTags.NAVIGATION_BAR).getUnclippedBoundsInRoot()
         assertTrue("the button ends at ${button.bottom}, the tabs start at ${tabs.top}", button.bottom <= tabs.top)
+    }
+
+    @Test
+    @Config(qualifiers = COVER_DARK)
+    fun menusAndDialogsArePanelsOfGlass() {
+        launch()
+        waitForText("Legs")
+        composeRule.onAllNodesWithContentDescription("More options").onFirst().performClick()
+        waitForText("Duplicate")
+        captureScreenRoboImage("src/test/screenshots/glass_menu_dark.png")
+        composeRule.onNodeWithText("Delete").performClick()
+        waitForText("Delete routine?")
+        captureScreenRoboImage("src/test/screenshots/glass_dialog_dark.png")
+        composeRule.onNodeWithText("Cancel").performClick()
     }
 
     @Test

@@ -3,10 +3,8 @@ package app.liora.feature.history.detail
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -16,6 +14,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.LioraAlertDialog
+import app.liora.core.designsystem.component.LioraTextField
 import app.liora.feature.history.resources.Res
 import app.liora.feature.history.resources.delete_body
 import app.liora.feature.history.resources.delete_title
@@ -49,7 +49,7 @@ internal fun WorkoutDialogHost(
         }
 
         WorkoutDialog.Delete -> {
-            AlertDialog(
+            LioraAlertDialog(
                 onDismissRequest = actions.onDismiss,
                 title = { Text(stringResource(Res.string.delete_title)) },
                 text = { Text(stringResource(Res.string.delete_body)) },
@@ -68,7 +68,7 @@ internal fun WorkoutDialogHost(
         }
 
         WorkoutDialog.WorkoutInProgress -> {
-            AlertDialog(
+            LioraAlertDialog(
                 onDismissRequest = actions.onDismiss,
                 title = { Text(stringResource(Res.string.in_progress_title)) },
                 text = { Text(stringResource(Res.string.in_progress_body)) },
@@ -97,13 +97,13 @@ private fun SaveAsRoutineDialog(
     onDismiss: () -> Unit,
 ) {
     var name by rememberSaveable { mutableStateOf(initialName) }
-    AlertDialog(
+    LioraAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.save_routine_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(stringResource(Res.string.save_routine_body))
-                OutlinedTextField(
+                LioraTextField(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text(stringResource(Res.string.save_routine_name)) },

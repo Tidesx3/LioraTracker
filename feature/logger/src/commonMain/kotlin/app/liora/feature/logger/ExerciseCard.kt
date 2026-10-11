@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.liora.core.designsystem.component.LioraCard
+import app.liora.core.designsystem.component.LioraDropdownMenu
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.util.NumberFormatter
@@ -311,7 +311,7 @@ private fun ExerciseMenu(
             add(Res.string.menu_remove to { actions.onRemove(id) })
         }
     LioraIconButton(LioraIcons.More, stringResource(Res.string.cd_more), { expanded = true })
-    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+    LioraDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
         items.forEach { (label, action) ->
             DropdownMenuItem(
                 text = { Text(stringResource(label)) },

@@ -17,17 +17,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -48,10 +44,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import app.liora.core.designsystem.component.LioraAlertDialog
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
+import app.liora.core.designsystem.component.LioraDropdownMenu
 import app.liora.core.designsystem.component.LioraIconButton
+import app.liora.core.designsystem.component.LioraOutlinedButton
 import app.liora.core.designsystem.component.LioraScaffold
+import app.liora.core.designsystem.component.LioraTextField
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.layout.readableWidth
@@ -162,7 +162,7 @@ internal fun RoutineEditorScreen(
     }
 
     if (confirmDiscard) {
-        AlertDialog(
+        LioraAlertDialog(
             onDismissRequest = { confirmDiscard = false },
             title = { Text(stringResource(Res.string.editor_discard_title)) },
             text = { Text(stringResource(Res.string.editor_discard_body)) },
@@ -256,7 +256,7 @@ private fun RoutineEditorContent(
                     Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    OutlinedTextField(
+                    LioraTextField(
                         value = routine.name,
                         onValueChange = actions.onNameChange,
                         label = { Text(stringResource(Res.string.editor_name)) },
@@ -264,7 +264,7 @@ private fun RoutineEditorContent(
                         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    OutlinedTextField(
+                    LioraTextField(
                         value = routine.notes.orEmpty(),
                         onValueChange = actions.onNotesChange,
                         label = { Text(stringResource(Res.string.editor_notes)) },
@@ -296,7 +296,7 @@ private fun RoutineEditorContent(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    OutlinedButton(onClick = actions.onAddExercises, modifier = Modifier.fillMaxWidth()) {
+                    LioraOutlinedButton(onClick = actions.onAddExercises, modifier = Modifier.fillMaxWidth()) {
                         Icon(
                             painterResource(LioraIcons.Add),
                             contentDescription = null,
@@ -449,7 +449,7 @@ private fun ExerciseMenu(
             add(Res.string.editor_remove_exercise to { actions.onRemove(planned.id) })
         }
     LioraIconButton(LioraIcons.More, stringResource(Res.string.cd_more), { expanded = true }, modifier)
-    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+    LioraDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
         items.forEach { (label, action) ->
             DropdownMenuItem(
                 text = { Text(stringResource(label)) },

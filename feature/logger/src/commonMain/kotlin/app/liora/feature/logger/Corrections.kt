@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -24,6 +22,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.LioraAlertDialog
+import app.liora.core.designsystem.component.LioraAssistChip
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.feature.logger.resources.Res
@@ -139,7 +139,7 @@ internal fun WorkoutTimeChips(
     val start = startedAt.toLocalDateTime(zone)
     val end = endedAt.toLocalDateTime(zone)
     FlowRow(modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        AssistChip(
+        LioraAssistChip(
             onClick = { onShowDialog(LoggerDialog.Date) },
             label = { Text(dates.longDate(start.date)) },
             leadingIcon = {
@@ -149,11 +149,11 @@ internal fun WorkoutTimeChips(
         )
         // Start and end stay together when a narrow screen wraps the row.
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            AssistChip(
+            LioraAssistChip(
                 onClick = { onShowDialog(LoggerDialog.Start) },
                 label = { Text(stringResource(Res.string.edit_start, dates.time(start.time))) },
             )
-            AssistChip(
+            LioraAssistChip(
                 onClick = { onShowDialog(LoggerDialog.End) },
                 label = { Text(stringResource(Res.string.edit_end, dates.time(end.time))) },
             )
@@ -230,7 +230,7 @@ internal fun DropOpenSetsDialog(
     onDrop: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    LioraAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.edit_open_title)) },
         text = { Text(pluralStringResource(Res.plurals.edit_open_sets, openSets, openSets)) },
@@ -249,7 +249,7 @@ internal fun DeleteEmptyWorkoutDialog(
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
+    LioraAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.edit_empty_title)) },
         text = { Text(stringResource(Res.string.edit_empty_body)) },

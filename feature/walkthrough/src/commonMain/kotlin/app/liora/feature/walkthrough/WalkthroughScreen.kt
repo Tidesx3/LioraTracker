@@ -21,11 +21,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
@@ -51,7 +48,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.component.LioraCard
+import app.liora.core.designsystem.component.LioraSegmentedButton
+import app.liora.core.designsystem.component.LioraTonalButton
 import app.liora.core.designsystem.glass.aurora
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.illustration.Illustration
@@ -217,9 +217,9 @@ private fun WalkthroughContent(
             ) {
                 PageDots(current = pager.currentPage, count = pages.size, modifier = Modifier.weight(1f))
                 if (pager.currentPage < last) {
-                    Button(onClick = { goTo(pager.currentPage + 1) }) { Text(stringResource(Res.string.next)) }
+                    LioraButton(onClick = { goTo(pager.currentPage + 1) }) { Text(stringResource(Res.string.next)) }
                 } else {
-                    Button(onClick = actions.onFinish) { Text(stringResource(Res.string.finish)) }
+                    LioraButton(onClick = actions.onFinish) { Text(stringResource(Res.string.finish)) }
                 }
             }
         }
@@ -323,7 +323,7 @@ private fun UnitChoice(
         Text(stringResource(Res.string.welcome_units), style = MaterialTheme.typography.titleMedium)
         SingleChoiceSegmentedButtonRow {
             WeightUnit.entries.forEachIndexed { index, unit ->
-                SegmentedButton(
+                LioraSegmentedButton(
                     selected = unit == selected,
                     onClick = { onChoose(unit) },
                     shape = SegmentedButtonDefaults.itemShape(index, WeightUnit.entries.size),
@@ -363,7 +363,7 @@ private fun DataOffer(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         if (account == null) {
-            FilledTonalButton(onClick = actions.onConnect, enabled = !connection.connecting) {
+            LioraTonalButton(onClick = actions.onConnect, enabled = !connection.connecting) {
                 Text(stringResource(Res.string.data_connect))
             }
             val colors = MaterialTheme.colorScheme

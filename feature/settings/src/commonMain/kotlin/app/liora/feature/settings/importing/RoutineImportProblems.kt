@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Button
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,8 +23,11 @@ import androidx.compose.ui.unit.dp
 import app.liora.core.data.importing.ProblemPlace
 import app.liora.core.data.importing.RoutineFileProblem
 import app.liora.core.data.importing.RoutineFileProblem.Kind
+import app.liora.core.designsystem.component.LioraBottomBar
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
+import app.liora.core.designsystem.component.LioraOutlinedButton
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.ui.rememberTextClipboard
 import app.liora.feature.settings.resources.Res
@@ -111,15 +112,15 @@ internal fun ProblemsBar(
     var copied by rememberSaveable { mutableStateOf(false) }
     val label = stringResource(Res.string.routine_import_problems_label)
     val text = problems.map { "${problemPlace(it.place)}: ${problemMessage(it)}" }.joinToString("\n")
-    Surface(modifier = modifier, color = MaterialTheme.colorScheme.surface) {
+    LioraBottomBar(modifier = modifier) {
         Row(
             modifier = Modifier.navigationBarsPadding().readableWidth().padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            OutlinedButton(onClick = onStartOver, modifier = Modifier.weight(1f).height(52.dp)) {
+            LioraOutlinedButton(onClick = onStartOver, modifier = Modifier.weight(1f).height(52.dp)) {
                 Text(stringResource(Res.string.routine_import_start_over))
             }
-            Button(
+            LioraButton(
                 onClick = {
                     clipboard.copy(label, text)
                     copied = true

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.model.RoutineFolder
@@ -71,7 +71,7 @@ internal fun NextUpCard(
                 overflow = TextOverflow.Ellipsis,
             )
             Spacer(Modifier.height(12.dp))
-            Button(onClick = { actions.onStart(routine.id) }, modifier = Modifier.fillMaxWidth()) {
+            LioraButton(onClick = { actions.onStart(routine.id) }, modifier = Modifier.fillMaxWidth()) {
                 Icon(painterResource(LioraIcons.Play), contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
                 Text(

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -29,6 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.liora.core.designsystem.component.ChartPoint
 import app.liora.core.designsystem.component.LineChart
+import app.liora.core.designsystem.component.LioraFilterChip
 import app.liora.core.designsystem.component.Stat
 import app.liora.core.designsystem.component.StatRow
 import app.liora.core.designsystem.theme.tabularNumbers
@@ -104,7 +104,7 @@ internal fun ProgressChart(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 state.metrics.forEach { metric ->
-                    FilterChip(
+                    LioraFilterChip(
                         selected = metric == state.metric,
                         onClick = { onSelectMetric(metric) },
                         label = { Text(metricLabel(metric)) },

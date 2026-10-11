@@ -17,6 +17,8 @@ ij_kotlin_allow_trailing_comma_on_call_site = true
 ktlint_function_naming_ignore_when_annotated_with = Composable
 # compose-rules (io.nlopez.compose.rules)
 compose_allowed_composition_locals = LocalLioraColors,LocalPaneRole,LocalUnits,LocalSharedTransitionScope,LocalCloudConsent,LocalHealthConnectScreens,LocalLioraGlass,LocalGlassBackdrop,LocalFloatingChromeInsets
+# Liora's dialogs, sheets and menus open in windows of their own, like Material's.
+compose_content_emitters_denylist = LioraAlertDialog,LioraBottomSheet,LioraDropdownMenu
 
 [*.{yml,yaml,json,toml,xml}]
 indent_size = 2

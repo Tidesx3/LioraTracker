@@ -17,15 +17,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -48,8 +44,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
+import app.liora.core.designsystem.component.LioraBottomSheet
+import app.liora.core.designsystem.component.LioraFilterChip
+import app.liora.core.designsystem.component.LioraFloatingButton
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraScaffold
+import app.liora.core.designsystem.component.LioraSnackbarHost
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.illustration.Illustration
@@ -132,7 +132,7 @@ internal fun PhotosScreen(
         },
         floatingActionButton = {
             val label = stringResource(Res.string.photos_add)
-            ExtendedFloatingActionButton(
+            LioraFloatingButton(
                 onClick = {
                     newPose = uiState.pose
                     choosingSource = true
@@ -143,7 +143,7 @@ internal fun PhotosScreen(
                 modifier = Modifier.semantics { contentDescription = label },
             )
         },
-        snackbarHost = { SnackbarHost(snackbar) },
+        snackbarHost = { LioraSnackbarHost(snackbar) },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
             if (uiState.adding > 0) LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -195,13 +195,13 @@ internal fun PoseFilter(
         modifier = modifier.horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        FilterChip(
+        LioraFilterChip(
             selected = pose == null,
             onClick = { onSelect(null) },
             label = { Text(stringResource(Res.string.photos_all)) },
         )
         PhotoPose.entries.forEach { option ->
-            FilterChip(
+            LioraFilterChip(
                 selected = pose == option,
                 onClick = { onSelect(option) },
                 label = { Text(stringResource(option.label)) },
@@ -295,7 +295,7 @@ private fun AddPhotoSheet(
     onChoose: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    LioraBottomSheet(onDismissRequest = onDismiss) {
         Column(Modifier.padding(bottom = 24.dp)) {
             Text(
                 text = stringResource(Res.string.photos_add_title),
@@ -310,7 +310,7 @@ private fun AddPhotoSheet(
             )
             Row(Modifier.padding(horizontal = 24.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 PhotoPose.entries.forEach { option ->
-                    FilterChip(
+                    LioraFilterChip(
                         selected = pose == option,
                         onClick = { onPose(option.takeUnless { it == pose }) },
                         label = { Text(stringResource(option.label)) },

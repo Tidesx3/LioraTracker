@@ -17,16 +17,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -43,8 +37,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.EmptyState
+import app.liora.core.designsystem.component.LioraBottomSheet
+import app.liora.core.designsystem.component.LioraDropdownMenu
+import app.liora.core.designsystem.component.LioraFilterChip
+import app.liora.core.designsystem.component.LioraFloatingButton
 import app.liora.core.designsystem.component.LioraIconButton
+import app.liora.core.designsystem.component.LioraOutlinedButton
 import app.liora.core.designsystem.component.LioraScaffold
+import app.liora.core.designsystem.component.LioraTextField
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.illustration.Illustration
@@ -145,7 +145,7 @@ private fun ExerciseLibraryContent(
         },
         floatingActionButton = {
             val label = stringResource(Res.string.exercises_new_custom)
-            ExtendedFloatingActionButton(
+            LioraFloatingButton(
                 onClick = { actions.onCreateExercise(null) },
                 icon = { Icon(painterResource(LioraIcons.Add), contentDescription = null) },
                 text = { Text(label) },
@@ -225,7 +225,7 @@ internal fun SearchField(
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    OutlinedTextField(
+    LioraTextField(
         value = query,
         onValueChange = onQueryChange,
         modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
@@ -267,7 +267,7 @@ private fun FilterRow(
             count = filters.equipment.size,
             onClick = { onOpenSheet(FilterSheet.Equipment) },
         )
-        FilterChip(
+        LioraFilterChip(
             selected = filters.customOnly,
             onClick = onToggleCustomOnly,
             label = { Text(stringResource(Res.string.exercises_filter_custom)) },
@@ -282,7 +282,7 @@ private fun DropdownChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    FilterChip(
+    LioraFilterChip(
         selected = count > 0,
         onClick = onClick,
         label = { Text(if (count > 0) "$label · $count" else label) },
@@ -332,7 +332,7 @@ internal fun NoResults(
         action =
             query.trim().takeIf { it.isNotEmpty() }?.let { name ->
                 {
-                    OutlinedButton(onClick = { onCreate(name) }) {
+                    LioraOutlinedButton(onClick = { onCreate(name) }) {
                         Text(stringResource(Res.string.exercises_create_named, name))
                     }
                 }
@@ -353,7 +353,7 @@ private fun OverflowMenu(
         onClick = { expanded = true },
         modifier = modifier,
     )
-    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+    LioraDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
         DropdownMenuItem(
             text = {
                 Text(
@@ -382,7 +382,7 @@ private fun <T> ChoiceSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss, modifier = modifier) {
+    LioraBottomSheet(onDismissRequest = onDismiss, modifier = modifier) {
         Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
@@ -393,7 +393,7 @@ private fun <T> ChoiceSheet(
             Spacer(Modifier.height(8.dp))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 options.forEach { option ->
-                    FilterChip(
+                    LioraFilterChip(
                         selected = option in selected,
                         onClick = { onToggle(option) },
                         label = { Text(stringResource(label(option))) },

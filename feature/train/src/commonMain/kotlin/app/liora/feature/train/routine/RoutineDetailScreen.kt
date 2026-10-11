@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +32,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.data.progression.ExerciseProgression
 import app.liora.core.designsystem.component.BackButton
+import app.liora.core.designsystem.component.LioraBottomBar
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.component.LioraCard
+import app.liora.core.designsystem.component.LioraDropdownMenu
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraScaffold
 import app.liora.core.designsystem.component.LioraTopAppBar
@@ -159,8 +160,8 @@ private fun RoutineDetailContent(
             )
         },
         bottomBar = {
-            Surface(color = MaterialTheme.colorScheme.surface) {
-                Button(
+            LioraBottomBar {
+                LioraButton(
                     onClick = onStart,
                     modifier =
                         Modifier
@@ -300,7 +301,7 @@ private fun DetailMenu(
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     LioraIconButton(LioraIcons.More, stringResource(Res.string.cd_more), { expanded = true }, modifier)
-    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+    LioraDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
         listOf(
             DetailMenuAction.Duplicate to Res.string.routine_duplicate,
             DetailMenuAction.Move to Res.string.routine_move,

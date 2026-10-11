@@ -13,9 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -29,8 +27,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import app.liora.core.designsystem.component.LioraFilterChip
 import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.component.LioraScaffold
+import app.liora.core.designsystem.component.LioraTextField
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
@@ -112,7 +112,7 @@ private fun EditorForm(
     val draft = state.draft
     LazyColumn(modifier = modifier.readableWidth(), contentPadding = contentPadding) {
         item {
-            OutlinedTextField(
+            LioraTextField(
                 value = draft.name,
                 onValueChange = actions.onNameChange,
                 label = { Text(stringResource(Res.string.editor_name)) },
@@ -154,7 +154,7 @@ private fun EditorForm(
         }
         item {
             SectionHeader(stringResource(Res.string.editor_notes))
-            OutlinedTextField(
+            LioraTextField(
                 value = draft.notes,
                 onValueChange = actions.onNotesChange,
                 placeholder = { Text(stringResource(Res.string.editor_notes_hint)) },
@@ -228,7 +228,7 @@ private fun <T> ChipGroup(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         options.forEach { option ->
-            FilterChip(
+            LioraFilterChip(
                 selected = isSelected(option),
                 onClick = { onClick(option) },
                 label = { Text(label(option)) },

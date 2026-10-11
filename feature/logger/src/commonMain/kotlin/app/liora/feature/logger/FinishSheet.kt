@@ -10,13 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.component.LioraBottomSheet
+import app.liora.core.designsystem.component.LioraButton
 import app.liora.core.designsystem.component.Stat
 import app.liora.core.designsystem.component.StatMotion
 import app.liora.core.designsystem.component.StatRow
@@ -80,7 +80,7 @@ internal fun FinishSheet(
     onDismiss: () -> Unit,
 ) {
     var updateRoutine by rememberSaveable { mutableStateOf(true) }
-    ModalBottomSheet(
+    LioraBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
@@ -256,7 +256,7 @@ private fun Buttons(
 ) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)) {
         TextButton(onClick = onDismiss) { Text(stringResource(Res.string.logger_discard_cancel)) }
-        Button(
+        LioraButton(
             onClick = onConfirm,
             modifier = Modifier.testTag(LoggerTags.FINISH_CONFIRM),
             colors =
@@ -266,7 +266,7 @@ private fun Buttons(
                         contentColor = MaterialTheme.colorScheme.onError,
                     )
                 } else {
-                    ButtonDefaults.buttonColors()
+                    null
                 },
         ) {
             Text(confirm)
