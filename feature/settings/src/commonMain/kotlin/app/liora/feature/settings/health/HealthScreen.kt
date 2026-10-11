@@ -11,7 +11,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -30,6 +29,7 @@ import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
+import app.liora.core.designsystem.component.LioraScaffold
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.layout.readableWidth
@@ -105,7 +105,7 @@ private fun HealthContent(
     modifier: Modifier = Modifier,
 ) {
     var confirmingTurnOff by rememberSaveable { mutableStateOf(false) }
-    Scaffold(
+    LioraScaffold(
         modifier = modifier,
         topBar = {
             LioraTopAppBar(

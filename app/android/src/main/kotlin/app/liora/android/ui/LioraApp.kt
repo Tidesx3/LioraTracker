@@ -7,6 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -51,7 +52,17 @@ import androidx.navigation3.ui.NavDisplay
 import app.liora.core.designsystem.component.ActiveWorkoutBar
 import app.liora.core.designsystem.component.ActiveWorkoutRailButton
 import app.liora.core.designsystem.component.LioraCardDefaults
+import app.liora.core.designsystem.component.LioraTab
+import app.liora.core.designsystem.component.LioraTabBar
+import app.liora.core.designsystem.component.LocalFloatingChromeInsets
+import app.liora.core.designsystem.glass.GlassBackdrop
+import app.liora.core.designsystem.glass.LocalGlassBackdrop
+import app.liora.core.designsystem.glass.aurora
+import app.liora.core.designsystem.glass.glassSource
+import app.liora.core.designsystem.glass.rememberGlassBackdrop
 import app.liora.core.designsystem.layout.currentWindowLayout
+import app.liora.core.designsystem.theme.LioraGlass
+import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.designsystem.util.workoutDisplayName
 import app.liora.core.model.ActiveWorkout
 import app.liora.core.navigation.EditWorkoutRoute
@@ -136,17 +147,25 @@ fun LioraApp(
     val showRail = layout.navigationRail && !fullWindow
     val showBottomChrome = !layout.navigationRail && navigator.currentRoute in TopLevelDestination.routes
     val listDetail = remember(layout.twoPane) { ListDetailSceneStrategy<NavKey>(layout.twoPane) }
+    val glass = LioraTheme.glass
+    // What the tabs and the workout bar bend, with Liquid Glass: the screens beneath them.
+    val backdrop = rememberGlassBackdrop()
 
-    Row(modifier.fillMaxSize()) {
+    Row(modifier.fillMaxSize().onAurora(glass)) {
         if (showRail) {
             NavigationSideRail(navigator = navigator, activeWorkout = activeWorkout)
         }
         Scaffold(
             modifier = Modifier.weight(1f),
+            containerColor = if (glass.enabled) Color.Transparent else MaterialTheme.colorScheme.background,
+            // Not from the container, which is see-through with Liquid Glass (list-detail placeholders use it).
+            contentColor = MaterialTheme.colorScheme.onBackground,
             contentWindowInsets = WindowInsets(0),
             bottomBar = {
                 if (showBottomChrome) {
-                    BottomChrome(navigator = navigator, activeWorkout = activeWorkout)
+                    CompositionLocalProvider(LocalGlassBackdrop provides backdrop) {
+                        BottomChrome(navigator = navigator, activeWorkout = activeWorkout)
+                    }
                 }
             },
         ) { padding ->
@@ -154,14 +173,17 @@ fun LioraApp(
             SharedTransitionLayout(
                 Modifier
                     .fillMaxSize()
-                    .padding(padding)
+                    .screens(glass, backdrop, padding)
                     .consumeWindowInsets(padding)
                     // The rail already keeps clear of the cutout and system bars on its side.
                     .consumeWindowInsets(
                         if (showRail) RailInsets.only(WindowInsetsSides.Start) else WindowInsets(0),
                     ),
             ) {
-                CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+                CompositionLocalProvider(
+                    LocalSharedTransitionScope provides this,
+                    LocalFloatingChromeInsets provides floatingChrome(glass, padding),
+                ) {
                     NavDisplay(
                         backStack = navigator.backStack,
                         onBack = navigator::goBack,
@@ -189,6 +211,24 @@ fun LioraApp(
     }
 }
 
+/** With Liquid Glass, the aurora behind everything, the rail included. */
+private fun Modifier.onAurora(glass: LioraGlass): Modifier = if (glass.enabled) aurora(glass) else this
+
+/**
+ * With Liquid Glass the screens reach beneath the chrome floating at the bottom, which bends them, and
+ * leave room for it themselves ([floatingChrome], through LioraScaffold); otherwise they end above it.
+ */
+private fun Modifier.screens(
+    glass: LioraGlass,
+    backdrop: GlassBackdrop,
+    padding: PaddingValues,
+): Modifier = if (glass.enabled) glassSource(backdrop) else padding(padding)
+
+private fun floatingChrome(
+    glass: LioraGlass,
+    padding: PaddingValues,
+): WindowInsets = if (glass.enabled) WindowInsets(bottom = padding.calculateBottomPadding()) else WindowInsets(0)
+
 /**
  * The live workout notification needs permission on Android 13 and up. It's asked for when it matters,
  * as the first workout starts, and once per app session at most.
@@ -209,7 +249,10 @@ private fun AskForNotificationsDuringWorkouts(workoutRunning: Boolean) {
     }
 }
 
-/** The tabs as a pill floating above the bottom edge, with the workout in progress above them. */
+/**
+ * The tabs as a pill floating above the bottom edge, with the workout in progress above them; with
+ * Liquid Glass, both of glass ([LioraTabBar]).
+ */
 @Composable
 private fun BottomChrome(
     navigator: Navigator,
@@ -223,6 +266,16 @@ private fun BottomChrome(
                 startedAt = activeWorkout.startedAt,
                 onClick = { navigator.navigate(LoggerRoute) },
             )
+        }
+        if (LioraTheme.glass.enabled) {
+            val destinations = TopLevelDestination.entries
+            LioraTabBar(
+                tabs = destinations.map { LioraTab(stringResource(it.label), it.icon) },
+                selectedIndex = destinations.indexOfFirst { it.route == navigator.topLevelRoute },
+                onSelect = { navigator.selectTopLevel(destinations[it].route) },
+                modifier = Modifier.padding(horizontal = 12.dp).testTag(ShellTags.NAVIGATION_BAR),
+            )
+            return@Column
         }
         Surface(
             modifier = Modifier.padding(horizontal = 12.dp),
@@ -261,7 +314,10 @@ private fun NavigationSideRail(
 ) {
     NavigationRail(
         modifier = modifier.testTag(ShellTags.NAVIGATION_RAIL),
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        // With Liquid Glass the rail sits on the aurora, like the screens beside it.
+        containerColor =
+            if (LioraTheme.glass.enabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         header =
             activeWorkout?.let { workout ->
                 {

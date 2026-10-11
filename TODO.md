@@ -4,6 +4,16 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
+- **Liquid Glass: check on the phone** (added 2026-10-11). The screenshots come from Robolectric, so the
+  phone has the last word, on the release build:
+  - Scroll the Train tab and History under the tabs: the glass follows the content as it moves (never a
+    still picture of it), bends it at the rim, and scrolling stays smooth.
+  - Pick tabs one after another: the drop flows over, stretching on the way, and settles.
+  - The top bars: content frosts over as it slides under the title and the status bar.
+  - Tick a set: the rest timer floats as violet glass over the end of the list, its ring running.
+  - Light and dark, Colors from the wallpaper, the inner screen (the rail on the aurora), and Liquid Glass
+    off (the solid look as before). Predictive back and a card growing into its workout.
+
 - **Routines from an AI: check on the phone** (added 2026-10-11). Ask the Claude or ChatGPT app for a routine
   (Train › the import button › Copy the format for your AI, pasted into the chat), then:
   - Share its answer to Liora: Liora is in the share sheet as "Import routines", and the review opens.

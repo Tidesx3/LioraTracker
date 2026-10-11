@@ -115,7 +115,16 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - Replace `@android:color/white` with `#FFFFFFFF`.
   - Expose it through `LioraIcons`.
 - **Colors:** use `MaterialTheme.colorScheme` for standard roles and `LioraTheme.colors` for set types, PRs and completion. The accent is violet (#5504CF; #A57BFF for text and buttons in dark). Numbers that change live (timers, weights) get `.tabularNumbers()`.
-- **Building blocks:** cards are `LioraCard`; rows of figures are `Stat`s in a `StatRow` (designsystem), never hand-made label/value columns; records are listed with `RecordsCard` (`core:ui`), with values from `RecordHighlights`; empty screens are an `EmptyState` with one of the `Illustration` scenes (designsystem, drawn in code in theme tints; a new one goes into `Scenes.kt` and shows up in `IllustrationsTest`). Avoid sentences that pack data together ("Bench: heaviest, best 1RM"): give each item a row or a chip. Rows of a list sit on one `LioraCard` with `LioraCardDefaults.listItemColors()`.
+- **Building blocks:** screens are a `LioraScaffold`, not Material's `Scaffold`; cards are `LioraCard`; rows of figures are `Stat`s in a `StatRow` (designsystem), never hand-made label/value columns; records are listed with `RecordsCard` (`core:ui`), with values from `RecordHighlights`; empty screens are an `EmptyState` with one of the `Illustration` scenes (designsystem, drawn in code in theme tints; a new one goes into `Scenes.kt` and shows up in `IllustrationsTest`). Avoid sentences that pack data together ("Bench: heaviest, best 1RM"): give each item a row or a chip. Rows of a list sit on one `LioraCard` with `LioraCardDefaults.listItemColors()`.
+- **Liquid Glass** (`designsystem/glass`, on by default; Settings › Appearance turns it off): glass
+  (`Modifier.glass`) blurs and bends a `GlassBackdrop` that `Modifier.glassSource` records from the content
+  beneath; cards are panes (`glassPane`) over the aurora (`Modifier.aurora`, glows fixed to the window). Tokens
+  are `LioraTheme.glass`; check `.enabled` and keep the solid look working.
+  - `LioraScaffold` makes a screen's content the backdrop of its bars (`LocalGlassBackdrop`) and adds room for
+    the tabs floating over it (`LocalFloatingChromeInsets`): lists pad their ends with the Scaffold's padding.
+  - Glass never sits inside its own backdrop's source (it would draw itself), and a source draws an opaque
+    background (the aurora) under its content, or the crisp content shows through the blur.
+  - Android 13+ bends the rim (AGSL, `GlassLens.android.kt`), 12 only blurs, older phones draw it nearly solid.
 - **Motion:** only drawing moves, so no tap waits for an animation; Compose already follows the system's "Remove animations". Figures that change live roll like an odometer (`Stat(motion = StatMotion.Roll)`, `RollingText`). Haptics go through `LioraHaptics` (designsystem), named by what happened (`setLogged`, `record`), never raw `HapticFeedbackType`s. Test motion with screenshots at fixed points, the test clock paused (see `LoggerFlowTest.tickingASetPopsTheCheckFillsTheRowAndRollsTheTotals`).
   - **Navigation motion:** screen transitions live in `app/android/.../ui/ScreenTransitions.kt` and follow `Navigator.lastMove`. A list item that opens a detail grows into it: put `rememberSharedContainer(SharedKeys.x(id))` on the item and on the detail's root (`core/navigation`). A screen that rises like a sheet takes `risingScreen()` as entry metadata. Celebrations use `ConfettiBurst` (designsystem).
 - **Charts:** use the wrappers in `designsystem` (`LineChart`); only they touch Vico. Progress values and records format through `valueText`/`axisText` in `core:ui`, so units and locales stay consistent.
@@ -125,6 +134,8 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - **CMP modules:** `src/commonTest` runs as Android host tests. Platform code is tested in `src/androidHostTest`.
   - **App-level UI tests:**
     - Use Robolectric with `@Config(sdk = [36], application = TestLioraApplication::class)`. That app uses an in-memory DB on the framework SQLite driver, because bundled SQLite only ships Android binaries.
+    - Tests that launch `MainActivity` get Liquid Glass (the default setting); `LioraTheme(...)` without
+      `glass = true` is the solid look. `LiquidGlassTest` covers glass on its own.
     - `stopKoin()` in `@After`.
     - The test app starts past the first-launch walkthrough; a test that wants it calls
       `WalkthroughRepository.showAgain()` (see `WalkthroughFlowTest`).
@@ -132,7 +143,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
     - Screens that depend on "now" (Progress, stalls) get a fixed clock: override Koin's `Clock` with `loadKoinModules` before anything uses it (see `ProgressFlowTest`), so screenshots don't change from day to day.
 - **Translations:** `verifyTranslations` (part of `check`) fails when a `values/` string has no `values-de/` counterpart, or when a German string is stale. `translatable="false"` opts a string out.
 - **Personal data:** `sample/` and `samples/` hold the user's real exports (e.g. Hevy) and are gitignored, so they exist only on the dev machine. The repo is public: tests use synthetic fixtures only, and no real workout data goes into commits.
-- **Visual polish:** Phase 2 gives the app its character (playful design, motion); the look (Violet) is settled, see PLAN.md. Typeface is Sora, bundled in `designsystem` with its OFL licence.
+- **Visual polish:** Phase 2 gives the app its character (playful design, motion); the look (Violet, in Liquid Glass since 2026-10-11) is settled, see PLAN.md. Typeface is Sora, bundled in `designsystem` with its OFL licence.
 - **Foldables:** the Galaxy Z Fold 7 is the reference device. Its cover screen is about 411 dp wide (compact); the inner screen is about 984 × 1092 dp (expanded).
   - Layouts follow window size classes, never device checks. `currentWindowLayout()` (designsystem) holds the breakpoints: navigation rail from 600 dp, two panes from 840 dp.
   - Wide screens get a navigation rail and list-detail panes. Reading-heavy content is capped at about 600 dp with `Modifier.readableWidth()`.
@@ -157,6 +168,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - **Ktor requests:** inside `http.request { }`, a lambda parameter called `build` loses to the builder's own
   `build()`, and the request goes out unset. Name it something else and call it as `configure(this)`.
 - **Spotless after editing `.editorconfig`** (e.g. the compose-rules allowlists): a lint result can come back
-  from the build cache. Rerun the module's `spotlessKotlin --rerun --no-build-cache` once.
+  from the build cache, or lag one run behind even with a fresh daemon. Rerun the module's
+  `spotlessKotlin --rerun --no-build-cache`, and once more if the old allowlist still seems to apply.
 - **Navigation 3 metadata** is stored under each `NavMetadataKey`'s `toString()`, so keys override it with a namespaced name (see `ListDetail.kt`).
 - **Pinned versions:** `androidx.navigation3:navigation3-runtime` stays at 1.1.7 to match JB `navigation3-ui` 1.1.2, and `sqlite-bundled` stays at 2.6.2 to match Room 2.8.5. Lint's "newer version available" warnings on these two are expected.

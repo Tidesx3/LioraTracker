@@ -11,7 +11,6 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.LioraIconButton
+import app.liora.core.designsystem.component.LioraScaffold
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
@@ -68,7 +68,7 @@ internal fun LogMeasurementsScreen(
     LaunchedEffect(form.done) { if (form.done) currentOnDone() }
     var pickingDay by rememberSaveable { mutableStateOf(false) }
 
-    Scaffold(
+    LioraScaffold(
         modifier = modifier,
         topBar = {
             LioraTopAppBar(

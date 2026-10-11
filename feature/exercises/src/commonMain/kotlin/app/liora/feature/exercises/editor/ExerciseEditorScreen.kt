@@ -17,7 +17,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,6 +30,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.LioraIconButton
+import app.liora.core.designsystem.component.LioraScaffold
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
@@ -68,7 +68,7 @@ internal fun ExerciseEditorScreen(
     val currentOnSaveComplete by rememberUpdatedState(onSaveComplete)
     LaunchedEffect(uiState.savedId) { uiState.savedId?.let(currentOnSaveComplete) }
 
-    Scaffold(
+    LioraScaffold(
         modifier = modifier,
         topBar = {
             LioraTopAppBar(
@@ -83,7 +83,7 @@ internal fun ExerciseEditorScreen(
             )
         },
     ) { padding ->
-        if (uiState.loading) return@Scaffold
+        if (uiState.loading) return@LioraScaffold
         EditorForm(
             state = uiState,
             actions =

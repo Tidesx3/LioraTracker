@@ -90,6 +90,7 @@ internal object SettingsCodec {
     private const val LAST_TIME = "progression.last_time"
     private const val THEME = "appearance.theme"
     private const val DYNAMIC_COLOR = "appearance.dynamic_color"
+    private const val GLASS = "appearance.glass"
 
     private val weightUnits = mapOf(WeightUnit.Kilogram to "kg", WeightUnit.Pound to "lb")
     private val distanceUnits = mapOf(DistanceUnit.Kilometer to "km", DistanceUnit.Mile to "mi")
@@ -138,6 +139,7 @@ internal object SettingsCodec {
             LAST_TIME to lastTimes.getValue(settings.progression.lastTime),
             THEME to themes.getValue(settings.theme),
             DYNAMIC_COLOR to settings.dynamicColor.toString(),
+            GLASS to settings.glass.toString(),
         )
 
     fun decode(values: Map<String, String>): Settings {
@@ -158,6 +160,7 @@ internal object SettingsCodec {
             progression = decodeProgression(values, defaults.progression),
             theme = values[THEME]?.let { themes.keyFor(it) } ?: defaults.theme,
             dynamicColor = values[DYNAMIC_COLOR]?.toBooleanStrictOrNull() ?: defaults.dynamicColor,
+            glass = values[GLASS]?.toBooleanStrictOrNull() ?: defaults.glass,
         )
     }
 

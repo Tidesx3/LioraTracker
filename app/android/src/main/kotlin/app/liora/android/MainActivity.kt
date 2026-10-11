@@ -86,6 +86,7 @@ class MainActivity : ComponentActivity() {
             LioraTheme(
                 darkTheme = dark,
                 dynamicColor = settings.dynamicColor,
+                glass = settings.glass,
             ) {
                 CompositionLocalProvider(
                     LocalUnits provides settings.units,

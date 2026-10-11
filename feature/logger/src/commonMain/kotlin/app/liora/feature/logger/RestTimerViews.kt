@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -46,13 +47,19 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import app.liora.core.designsystem.component.RollingText
+import app.liora.core.designsystem.glass.GlassDefaults
+import app.liora.core.designsystem.glass.LocalGlassBackdrop
+import app.liora.core.designsystem.glass.glass
 import app.liora.core.designsystem.icon.LioraIcons
+import app.liora.core.designsystem.theme.LioraGlass
 import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.formatAsClock
@@ -140,14 +147,16 @@ internal fun RestTimerBar(
     onSkip: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val glass = LioraTheme.glass
     val container = MaterialTheme.colorScheme.primaryContainer
     // The violet on the pale container in light. In dark the container is the violet itself, so the
-    // line is a light violet: still the accent, and clear against it.
+    // line is a light violet: still the accent, and clear against it. On the accent's glass it takes
+    // the glass's own text color.
     val line =
-        if (container.luminance() > HALF) {
-            MaterialTheme.colorScheme.primary
-        } else {
-            lerp(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimaryContainer, LINE_LIGHTER)
+        when {
+            glass.enabled -> glass.onAccent
+            container.luminance() > HALF -> MaterialTheme.colorScheme.primary
+            else -> lerp(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimaryContainer, LINE_LIGHTER)
         }
     val pulse = rememberEndingPulse(progress.remaining)
     Surface(
@@ -159,11 +168,11 @@ internal fun RestTimerBar(
                     val swell = 1f + PILL_SWELL * pulse.value
                     scaleX = swell
                     scaleY = swell
-                },
+                }.then(if (glass.enabled) Modifier.accentGlass(glass) else Modifier),
         shape = CircleShape,
-        color = container,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        shadowElevation = FLOATING_ELEVATION.dp,
+        color = if (glass.enabled) Color.Transparent else container,
+        contentColor = if (glass.enabled) glass.onAccent else MaterialTheme.colorScheme.onPrimaryContainer,
+        shadowElevation = if (glass.enabled) 0.dp else FLOATING_ELEVATION.dp,
     ) {
         Row(
             modifier =
@@ -207,6 +216,12 @@ internal fun RestTimerBar(
         }
     }
 }
+
+/** The rest pill as the accent's glass, floating over the end of the list on a soft shadow. */
+@Composable
+private fun Modifier.accentGlass(glass: LioraGlass): Modifier =
+    dropShadow(CircleShape, Shadow(radius = 20.dp, color = glass.shadow, offset = DpOffset(0.dp, 6.dp)))
+        .glass(LocalGlassBackdrop.current, CircleShape, GlassDefaults.accent())
 
 /** [content] at its own width when that fits, and nothing otherwise, rather than wrapped or cut off. */
 @Composable

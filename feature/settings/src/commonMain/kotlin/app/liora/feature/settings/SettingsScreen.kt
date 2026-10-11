@@ -13,7 +13,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
@@ -36,6 +35,7 @@ import app.liora.core.data.sync.SyncState
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
+import app.liora.core.designsystem.component.LioraScaffold
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.layout.readableWidth
@@ -75,6 +75,8 @@ import app.liora.feature.settings.resources.dialog_cancel
 import app.liora.feature.settings.resources.dialog_done
 import app.liora.feature.settings.resources.dynamic_color
 import app.liora.feature.settings.resources.formula
+import app.liora.feature.settings.resources.glass
+import app.liora.feature.settings.resources.glass_body
 import app.liora.feature.settings.resources.gym
 import app.liora.feature.settings.resources.language
 import app.liora.feature.settings.resources.rest_hint
@@ -241,7 +243,7 @@ private fun SettingsContent(
         snackbar.showSnackbar(getString(message.text()))
         dataActions.onMessageShown()
     }
-    Scaffold(
+    LioraScaffold(
         modifier = modifier,
         topBar = {
             LioraTopAppBar(
@@ -251,7 +253,7 @@ private fun SettingsContent(
         },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
-        if (settings == null) return@Scaffold
+        if (settings == null) return@LioraScaffold
         LazyColumn(
             modifier = Modifier.readableWidth(),
             contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 32.dp),
@@ -334,6 +336,12 @@ private fun SettingsContent(
                         stringResource(Res.string.theme),
                         themeName(settings.theme),
                         onClick = { open = Choice.Theme },
+                    )
+                    SwitchRow(
+                        title = stringResource(Res.string.glass),
+                        description = stringResource(Res.string.glass_body),
+                        checked = settings.glass,
+                        onCheckedChange = { on -> onChange { it.copy(glass = on) } },
                     )
                     if (dynamicColorSupported) {
                         SwitchRow(

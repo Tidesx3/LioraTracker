@@ -344,6 +344,23 @@ As of 2026-10-11:
     backup for the person's units, gyms, own exercises, routines and recent e1RMs. The same as an MCP server for
     Claude Code, Codex, Gemini CLI, Cursor and Claude Desktop (`tools/routine/README.md`); a Claude Code skill
     (`.claude/skills/liora-routine`) for the workflow; `AGENTS.md` points other agents at it. CI runs its tests.
+- **On request (2026-10-11): Liquid Glass**, the look the app starts with, Violet kept; Settings › Appearance
+  switches back to the solid look. No schema change; one new setting (`appearance.glass`).
+  - **The glass** (`designsystem/glass`, our own, no library): `Modifier.glassSource` records the content
+    beneath into a `GlassBackdrop` (a `GraphicsLayer`), and `Modifier.glass` draws it blurred, its colors
+    lifted, and bent along the rim as by a lens (an AGSL shader on Android 13+; 12 only blurs; older phones get
+    nearly solid glass), then a tint, a glow inside the rim and the light catching it at the top left and,
+    softer, the bottom right. Tokens are `LioraTheme.glass` (`theme/LioraGlass.kt`).
+  - **The aurora:** three soft glows, violet, pink and blue (the wallpaper's colors with those on), behind every
+    screen, fixed to the window so panes and the rail share one. Cards are see-through panes over it
+    (`glassPane`), their shadow kept outside them.
+  - **Where it shows:** the tabs float as a pill of glass (`LioraTabBar`), the selected one in a drop that
+    flows to the next tab, its front leading and its back following; the workout bar and the rest timer are
+    the accent's glass, and screens reach beneath them (`LocalFloatingChromeInsets`), as the logger's list
+    does beneath the rest timer. Top bars have no color of their own: what scrolls under them frosts over and
+    fades out (`glassEdge`). Every screen is a `LioraScaffold`, which does this when glass is on.
+  - **Tests:** `LiquidGlassTest` (light and dark, cover and inner screen, the switch); flow tests that launch
+    `MainActivity` render glass, those that set their own `LioraTheme` the solid look.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.

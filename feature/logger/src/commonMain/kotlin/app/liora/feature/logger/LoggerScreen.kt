@@ -1,6 +1,7 @@
 package app.liora.feature.logger
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,14 +21,15 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -35,8 +37,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigationevent.NavigationEventInfo
@@ -45,15 +50,21 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.component.LioraIconButton
+import app.liora.core.designsystem.component.LioraScaffold
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.component.Stat
 import app.liora.core.designsystem.component.StatMotion
 import app.liora.core.designsystem.component.StatRow
+import app.liora.core.designsystem.glass.LocalGlassBackdrop
+import app.liora.core.designsystem.glass.aurora
+import app.liora.core.designsystem.glass.glassSource
+import app.liora.core.designsystem.glass.rememberGlassBackdrop
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.layout.currentWindowLayout
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.motion.rememberLioraHaptics
+import app.liora.core.designsystem.theme.LioraTheme
 import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.designsystem.util.rememberElapsedTime
@@ -268,7 +279,7 @@ private fun LoggerContent(
     actions: LoggerActions,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(
+    LioraScaffold(
         modifier = modifier,
         topBar = {
             val finished = state?.isFinished == true
@@ -310,7 +321,7 @@ private fun LoggerContent(
                 body = stringResource(Res.string.logger_no_workout_body),
                 modifier = Modifier.padding(padding),
             )
-            return@Scaffold
+            return@LioraScaffold
         }
         Column(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
             state.endedAt?.let { endedAt ->
@@ -346,7 +357,10 @@ private fun LoggerContent(
     }
 }
 
-/** Phones and the Fold's cover screen: the list, with the rest timer and the pad docked below it. */
+/**
+ * Phones and the Fold's cover screen: the list, with the rest timer and the pad docked below it. With
+ * Liquid Glass the rest timer floats over the end of the list instead, which scrolls on beneath it.
+ */
 @Composable
 private fun CompactLogger(
     state: LoggerUiState.Active,
@@ -354,10 +368,41 @@ private fun CompactLogger(
     list: WorkoutListPlace,
     modifier: Modifier = Modifier,
 ) {
+    val glass = LioraTheme.glass
     Column(modifier) {
-        WorkoutList(state, actions, list, Modifier.weight(1f))
-        rememberRestProgress(state.restTimer)?.let { rest ->
-            RestTimerBar(rest, onAdjust = actions.rest.onAdjust, onSkip = actions.rest.onSkip)
+        val rest = rememberRestProgress(state.restTimer)
+        if (glass.enabled) {
+            val backdrop = rememberGlassBackdrop()
+            var restHeight by remember { mutableIntStateOf(0) }
+            Box(Modifier.weight(1f)) {
+                // The aurora again, under the list: the glass bends both, as the screen shows them.
+                Box(Modifier.fillMaxSize().glassSource(backdrop).aurora(glass)) {
+                    WorkoutList(
+                        state,
+                        actions,
+                        list,
+                        Modifier.fillMaxSize(),
+                        endPadding = if (rest != null) with(LocalDensity.current) { restHeight.toDp() } else 0.dp,
+                    )
+                }
+                rest?.let {
+                    CompositionLocalProvider(LocalGlassBackdrop provides backdrop) {
+                        RestTimerBar(
+                            it,
+                            onAdjust = actions.rest.onAdjust,
+                            onSkip = actions.rest.onSkip,
+                            modifier =
+                                Modifier.align(Alignment.BottomCenter).onSizeChanged { size ->
+                                    restHeight =
+                                        size.height
+                                },
+                        )
+                    }
+                }
+            }
+        } else {
+            WorkoutList(state, actions, list, Modifier.weight(1f))
+            rest?.let { RestTimerBar(it, onAdjust = actions.rest.onAdjust, onSkip = actions.rest.onSkip) }
         }
         val edit = state.edit
         if (edit != null) {
@@ -406,6 +451,8 @@ internal fun WorkoutList(
     actions: LoggerActions,
     place: WorkoutListPlace,
     modifier: Modifier = Modifier,
+    /** Room at the end for what floats over it: the rest timer, with Liquid Glass. */
+    endPadding: Dp = 0.dp,
 ) {
     val numbers = rememberNumberFormatter()
     val listState = place.listState
@@ -413,7 +460,7 @@ internal fun WorkoutList(
     LazyColumn(
         state = listState,
         modifier = modifier.readableWidth(),
-        contentPadding = PaddingValues(vertical = 8.dp),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp + endPadding),
     ) {
         if (state.workout.exercises.isEmpty()) {
             item(key = "empty") {

@@ -79,6 +79,8 @@
   <string name="theme_system">As the phone</string>
   <string name="theme_light">Light</string>
   <string name="theme_dark">Dark</string>
+  <string name="glass">Liquid Glass</string>
+  <string name="glass_body">Bars and cards of glass that catch the light. Off for solid ones.</string>
   <string name="dynamic_color">Colors from the wallpaper</string>
   <string name="language">Language</string>
   <string name="language_system">As the phone</string>

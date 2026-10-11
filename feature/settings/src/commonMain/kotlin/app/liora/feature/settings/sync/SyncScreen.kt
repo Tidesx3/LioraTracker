@@ -13,7 +13,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -34,6 +33,7 @@ import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.EmptyState
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
+import app.liora.core.designsystem.component.LioraScaffold
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.layout.readableWidth
@@ -115,7 +115,7 @@ private fun SyncContent(
     modifier: Modifier = Modifier,
 ) {
     var confirmingDisconnect by rememberSaveable { mutableStateOf(false) }
-    Scaffold(
+    LioraScaffold(
         modifier = modifier,
         topBar = {
             LioraTopAppBar(
@@ -125,7 +125,7 @@ private fun SyncContent(
         },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
-        val sync = state.sync ?: return@Scaffold
+        val sync = state.sync ?: return@LioraScaffold
         val account = sync.account
         if (account == null) {
             EmptyState(

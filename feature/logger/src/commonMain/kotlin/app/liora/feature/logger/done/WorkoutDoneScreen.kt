@@ -16,7 +16,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraCardDefaults
+import app.liora.core.designsystem.component.LioraScaffold
 import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.component.Stat
 import app.liora.core.designsystem.component.StatMotion
@@ -101,7 +101,7 @@ private fun WorkoutDoneContent(
     onOpenExercise: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Scaffold(
+    LioraScaffold(
         modifier = modifier,
         bottomBar = {
             Surface(color = MaterialTheme.colorScheme.surface) {

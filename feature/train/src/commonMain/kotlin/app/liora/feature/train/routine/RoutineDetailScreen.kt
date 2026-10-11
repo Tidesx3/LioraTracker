@@ -19,7 +19,6 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +36,7 @@ import app.liora.core.data.progression.ExerciseProgression
 import app.liora.core.designsystem.component.BackButton
 import app.liora.core.designsystem.component.LioraCard
 import app.liora.core.designsystem.component.LioraIconButton
+import app.liora.core.designsystem.component.LioraScaffold
 import app.liora.core.designsystem.component.LioraTopAppBar
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.layout.readableWidth
@@ -144,7 +144,7 @@ private fun RoutineDetailContent(
     modifier: Modifier = Modifier,
 ) {
     val routine = state.routine
-    Scaffold(
+    LioraScaffold(
         // The card it was opened from grows into it.
         modifier = modifier.then(rememberSharedContainer(SharedKeys.routine(routine.id))),
         topBar = {

@@ -40,6 +40,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
@@ -51,6 +52,7 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.liora.core.designsystem.component.LioraCard
+import app.liora.core.designsystem.glass.aurora
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.illustration.LioraIllustration
@@ -185,7 +187,13 @@ private fun WalkthroughContent(
         isBackEnabled = pager.currentPage > 0,
         onBackCompleted = { goTo(pager.currentPage - 1) },
     )
-    Surface(modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    // With Liquid Glass, the first thing seen is the aurora.
+    val glass = LioraTheme.glass
+    Surface(
+        modifier.fillMaxSize().then(if (glass.enabled) Modifier.aurora(glass) else Modifier),
+        color = if (glass.enabled) Color.Transparent else MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onBackground,
+    ) {
         Column(Modifier.fillMaxSize().safeDrawingPadding()) {
             // Skip goes to the last page: what's there are choices, not tour.
             Box(

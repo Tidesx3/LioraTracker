@@ -6,7 +6,9 @@ GUI, and AI features on top.
 
 **Status:** Phases 1 (the offline MVP) and 2 (design and motion) are done: the app has its look, a vivid
 violet with the Sora typeface, floating cards and pills, small drawn scenes on empty screens, and a
-voice of its own in English and German. Logging moves: a ticked set's check pops and its row fills, the totals and the rest
+voice of its own in English and German. It wears Liquid Glass: the tabs, the workout bar and the
+rest timer float as glass that bends what scrolls beneath them, over soft glows of violet (the solid look is
+a switch away in Settings). Logging moves: a ticked set's check pops and its row fills, the totals and the rest
 countdown roll like an odometer, haptics mark sets and records, and a record bursts into confetti.
 Cards grow into the screens they open, back follows the finger, and the logger rises from the workout
 bar. The database, domain logic, exercise library with

@@ -26,6 +26,8 @@ data class Settings(
     val theme: ThemeMode = ThemeMode.System,
     /** Colors from the wallpaper, where the phone offers them (Android 12 and up). */
     val dynamicColor: Boolean = false,
+    /** Liquid Glass: bars that blur and bend what's beneath them, over soft glows. Off is the solid look. */
+    val glass: Boolean = true,
 ) {
     companion object {
         /** The stall windows to choose from: two to eight weeks. */
