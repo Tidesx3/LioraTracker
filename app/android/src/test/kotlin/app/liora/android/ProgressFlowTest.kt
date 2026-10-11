@@ -189,12 +189,19 @@ class ProgressFlowTest {
         composeRule.onNodeWithText(tab).performClick()
     }
 
-    /** Scrolls the overview until [text] shows; it may not be composed before. */
+    /**
+     * Scrolls the overview until [text] shows; it may not be composed before. Its sections load from Room on
+     * their own, so one further down may not be in the list yet: try again until it is.
+     */
     private fun scrollTo(
         text: String,
         substring: Boolean = false,
     ) {
-        composeRule.onNode(hasScrollToIndexAction()).performScrollToNode(hasText(text, substring = substring))
+        composeRule.waitUntil(TIMEOUT_MS) {
+            runCatching {
+                composeRule.onNode(hasScrollToIndexAction()).performScrollToNode(hasText(text, substring = substring))
+            }.isSuccess
+        }
     }
 
     private class Logged(
