@@ -59,6 +59,13 @@ class Navigator(
         topLevelRoute = route
     }
 
+    /** Switches to the tab [route] and back to its root, whatever was open on it. */
+    fun showTopLevel(route: NavKey) {
+        selectTopLevel(route)
+        val stack = stacks.getValue(route)
+        if (stack.size > 1) stack.removeRange(1, stack.size)
+    }
+
     /** Pushes [route] onto the current tab. A route already open elsewhere moves here instead of duplicating. */
     fun navigate(route: NavKey) {
         if (route in stacks) {

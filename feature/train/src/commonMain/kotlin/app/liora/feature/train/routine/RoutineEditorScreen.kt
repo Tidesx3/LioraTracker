@@ -366,7 +366,7 @@ private fun ReorderableCollectionItemScope.ExerciseEditorCard(
                             actions.onChange(planned.id) {
                                 copy(progression = if (progression == null) ProgressionRule.DoubleProgression else null)
                             }
-                        }.takeIf { trackingType in PROGRESSING },
+                        }.takeIf { ProgressionRule.DoubleProgression.fits(trackingType) },
                     actions = actions,
                 )
             }
@@ -498,9 +498,6 @@ private fun ProgressionLabel(
         }
     }
 }
-
-/** Exercises double progression fits: counted in weight and reps. */
-private val PROGRESSING = setOf(TrackingType.WeightReps, TrackingType.WeightedBodyweight)
 
 /** Sets progression counts: neither warm-ups nor drop sets. */
 private val SetType.progresses: Boolean get() = this != SetType.Warmup && this != SetType.Drop

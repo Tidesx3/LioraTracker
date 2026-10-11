@@ -4,6 +4,16 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
+- **Routines from an AI: check on the phone** (added 2026-10-11). Ask the Claude or ChatGPT app for a routine
+  (Train › the import button › Copy the format for your AI, pasted into the chat), then:
+  - Share its answer to Liora: Liora is in the share sheet as "Import routines", and the review opens.
+  - Copy the answer and tap Paste; Android says Liora read the clipboard.
+  - Make a file with the tool on the computer (`/liora-routine` in Claude Code), send it with Quick Share, and
+    open it from the notification or Files with Liora; also pick it with Open file, and from Google Drive.
+  - A broken one: Copy for the AI, paste it back into the chat, and the fixed file imports.
+  - Done opens the routine, or the Train tab for a program; the rotation is up next; start it.
+  - On the inner screen, and in German.
+
 - **Updates from GitHub: the rest of the device check** (added 2026-10-10). 0.4.0 → 0.4.1 worked in the
   release app (checked 2026-10-10: Android asked, installed it, data kept; Liora is now its own installer).
   - The next release (0.4.2 on): Liora should update without Android's dialog (Android 12 and later).

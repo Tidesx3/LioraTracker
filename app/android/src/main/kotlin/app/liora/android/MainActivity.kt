@@ -17,6 +17,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import app.liora.android.di.ProcessScope
 import app.liora.android.health.HealthConnectScreensFactory
+import app.liora.android.importing.SharedRoutines
 import app.liora.android.sync.CloudConsentFactory
 import app.liora.android.ui.LioraApp
 import app.liora.android.widget.WidgetIntents
@@ -40,6 +41,9 @@ import org.koin.android.ext.android.inject
 class MainActivity : ComponentActivity() {
     /** Set when the workout notification was tapped; the app shell then opens the logger. */
     private var openLogger by mutableStateOf(false)
+
+    /** Set when routines were shared to Liora or opened with it: where they are now, for the import screen. */
+    private var openRoutineImport by mutableStateOf<String?>(null)
 
     private val settingsRepository: SettingsRepository by inject()
 
@@ -92,6 +96,8 @@ class MainActivity : ComponentActivity() {
                         showWalkthrough = walkthrough,
                         openLogger = openLogger,
                         onOpenLoggerHandle = { openLogger = false },
+                        openRoutineImport = openRoutineImport,
+                        onOpenRoutineImportHandle = { openRoutineImport = null },
                     )
                 }
             }
@@ -103,8 +109,17 @@ class MainActivity : ComponentActivity() {
         handle(intent)
     }
 
-    /** What the workout notification and the widget ask for: the logger, or a workout started first. */
+    /**
+     * What the workout notification and the widget ask for: the logger, or a workout started first. And
+     * routines shared to Liora or opened with it, to import.
+     */
     private fun handle(intent: Intent?) {
+        val shared = get<SharedRoutines>()
+        if (intent != null && shared.isFor(intent)) {
+            // Read at once, while Liora may still read what it was handed.
+            lifecycleScope.launch { shared.receive(intent)?.let { openRoutineImport = it } }
+            return
+        }
         when (intent?.action) {
             WorkoutNotifications.ACTION_OPEN_LOGGER -> {
                 openLogger = true

@@ -60,6 +60,7 @@ import app.liora.core.navigation.ListDetailSceneStrategy
 import app.liora.core.navigation.LocalSharedTransitionScope
 import app.liora.core.navigation.LoggerRoute
 import app.liora.core.navigation.Navigator
+import app.liora.core.navigation.RoutineImportRoute
 import app.liora.core.navigation.WorkoutDoneRoute
 import app.liora.feature.body.bodyEntries
 import app.liora.feature.exercises.exercisesEntries
@@ -89,6 +90,9 @@ fun LioraApp(
     showWalkthrough: Boolean = false,
     openLogger: Boolean = false,
     onOpenLoggerHandle: () -> Unit = {},
+    /** Routines shared to Liora or opened with it, where they are now; the import screen opens on them. */
+    openRoutineImport: String? = null,
+    onOpenRoutineImportHandle: () -> Unit = {},
     viewModel: LioraAppViewModel = koinViewModel(),
 ) {
     val navigator = viewModel.navigator
@@ -99,6 +103,13 @@ fun LioraApp(
         if (openLogger) {
             navigator.navigate(LoggerRoute)
             currentOnOpenLoggerHandle()
+        }
+    }
+    val currentOnOpenRoutineImportHandle by rememberUpdatedState(onOpenRoutineImportHandle)
+    LaunchedEffect(openRoutineImport) {
+        if (openRoutineImport != null) {
+            navigator.navigate(RoutineImportRoute(openRoutineImport))
+            currentOnOpenRoutineImportHandle()
         }
     }
     AskForNotificationsDuringWorkouts(workoutRunning = activeWorkout != null)

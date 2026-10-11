@@ -80,6 +80,16 @@ data class ImportRoute(
     val source: String,
 ) : NavKey
 
+/**
+ * Routines in Liora's routine file format (docs/routine-format.md), usually written by an AI, shown before
+ * they're added: what the file holds and which exercise each name becomes. [source] is the file to read,
+ * from the file picker or shared to Liora; without one, the screen offers to open or paste one.
+ */
+@Serializable
+data class RoutineImportRoute(
+    val source: String? = null,
+) : NavKey
+
 /** The gyms set up, and which one weights round to. */
 @Serializable
 data object GymsRoute : NavKey

@@ -63,6 +63,7 @@ sealed interface ImportUiState {
 
 /** An exercise as the file names it, and where its sets go. */
 data class ImportExerciseRow(
+    /** As the file names it, which is also how a choice for it is kept. */
     val name: String,
     val sets: Int,
     val choice: ExerciseChoice,
@@ -72,6 +73,10 @@ data class ImportExerciseRow(
     val closest: Exercise?,
     /** Whether the exercise used has a column for everything logged; a new one always does. */
     val fits: Boolean,
+    /** What the row shows: the name, or the exercise's own for a file that names it by id. */
+    val title: String = name,
+    /** The file names the exercise by id, so there's nothing to choose. */
+    val fixed: Boolean = false,
 )
 
 /**

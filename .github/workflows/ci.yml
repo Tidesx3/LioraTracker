@@ -23,6 +23,9 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v6
 
+      # The routine tool for AIs (tools/routine): no dependencies, the runner's Node is enough.
+      - run: node --test tools/routine/test/routine.test.mjs
+
       # Unit + Robolectric tests, Spotless, detekt, Android Lint, and a debug APK.
       - run: ./gradlew check :app:android:assembleDebug
 

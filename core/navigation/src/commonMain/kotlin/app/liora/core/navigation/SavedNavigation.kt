@@ -32,6 +32,7 @@ private val routes =
             subclass(SyncRoute::class)
             subclass(HealthConnectRoute::class)
             subclass(ImportRoute::class)
+            subclass(RoutineImportRoute::class)
             subclass(GymsRoute::class)
             subclass(GymEditorRoute::class)
             subclass(ExerciseDetailRoute::class)

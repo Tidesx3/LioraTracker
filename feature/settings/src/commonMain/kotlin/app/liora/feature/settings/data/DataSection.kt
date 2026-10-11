@@ -63,6 +63,8 @@ import app.liora.feature.settings.resources.restore_keeps
 import app.liora.feature.settings.resources.restore_made
 import app.liora.feature.settings.resources.restore_question
 import app.liora.feature.settings.resources.restore_title
+import app.liora.feature.settings.resources.routine_import_row_body
+import app.liora.feature.settings.resources.routine_import_row_title
 import app.liora.feature.settings.resources.section_data
 import app.liora.feature.settings.resources.sync_row_title
 import app.liora.feature.settings.resources.working_backup
@@ -79,10 +81,12 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /** What the Data section's rows and the restore dialog do. */
+@Suppress("LongParameterList") // one per row and restore step of the section
 internal class DataActions(
     val onBackUp: () -> Unit,
     val onRestore: () -> Unit,
     val onImport: () -> Unit,
+    val onImportRoutines: () -> Unit,
     val onExportCsv: (CsvContent) -> Unit,
     val onConfirmRestore: () -> Unit,
     val onCancelRestore: () -> Unit,
@@ -162,6 +166,14 @@ internal fun DataSection(
             busyText = "",
             enabled = working == null,
             onClick = actions.onImport,
+        )
+        DataRow(
+            title = stringResource(Res.string.routine_import_row_title),
+            body = stringResource(Res.string.routine_import_row_body),
+            busy = false,
+            busyText = "",
+            enabled = working == null,
+            onClick = actions.onImportRoutines,
         )
         DataRow(
             title = stringResource(Res.string.csv_title),

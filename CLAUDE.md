@@ -21,6 +21,8 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - `./gradlew :app:android:recordRoborazziDebug`: re-renders screenshots to `app/android/src/test/screenshots/`. Read the PNGs to review UI changes.
 - `java tools/icons/MakeIcons.java logo.png app/android/src/main/res build/icon-preview.png`: rebuilds the launcher and notification icons from `logo.png` (light artwork on black) and writes a preview sheet to check them by eye.
 - `java tools/sound/MakeSounds.java app/android/src/main/res/raw build/sound-preview.png`: rebuilds the end-of-rest sounds (synthesized, no samples) and writes their waveforms to check for clipping and clicks.
+- `node tools/routine/liora-routine.mjs <format|search|show|check|profile|mcp>`: the routine tool for AIs (tools/routine/README.md); `node --test tools/routine/test/routine.test.mjs` tests it (CI runs it too).
+- **Making a routine for the user** (not changing code): use the `liora-routine` skill (`.claude/skills/liora-routine`).
 
 ## Architecture rules
 
@@ -78,6 +80,15 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - **Imports:** `core/domain/importing` reads Hevy and Strong CSVs and matches their exercise names
   (`ExerciseMatcher`); `ImportRepository` writes them. A name is never merged into a different exercise
   silently: anything not the same words becomes a custom variation. Tests use synthetic files in the real layouts.
+- **Routine files:** routines an AI writes, in the public, versioned format of `docs/routine-format.md`
+  (`liora-routine`, version 1; new fields optional, like the backup's). `RoutineFileReader` (`core/data/importing`)
+  reads it and reports problems with where they are; `RoutineImportRepository` matches names with `ExerciseMatcher`
+  and writes. Three things follow the reader and must change with it:
+  - `tools/routine` ports the reader and the matcher to Node, so `check` says what the app will do.
+  - The doc's JSON examples are imported by `RoutineImportFlowTest` (real catalog) and the tool's tests, so the
+    doc, the tool and the app agree. Renaming a catalog exercise the examples use breaks them on purpose.
+  - The app carries the doc (`feature/settings/.../composeResources/files/routine-format.md`) for "Copy the
+    format for your AI": copy it over after editing the doc (a test checks they're equal).
 - **Schema:** Room schemas are exported to `core/database/schemas/` and committed. Schema v1 is live on devices, so every change needs a version bump plus a migration (or `AutoMigration`) and a migration test.
 - **Writes must outlive the screen:** don't pop a screen right after launching a write in its `viewModelScope`. Leaving the screen clears the ViewModel and cancels the write. Close in reaction to the new data instead (see `LoggerScreen`).
 

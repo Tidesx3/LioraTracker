@@ -113,6 +113,7 @@ internal fun SettingsScreen(
     onOpenSync: () -> Unit,
     onOpenHealth: () -> Unit,
     onImport: (source: String) -> Unit,
+    onImportRoutines: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
@@ -169,6 +170,7 @@ internal fun SettingsScreen(
                 onBackUp = { backupSaver.save(backupName) },
                 onRestore = backupOpener::open,
                 onImport = importOpener::open,
+                onImportRoutines = onImportRoutines,
                 onExportCsv = { content ->
                     csvContent = content
                     csvSaver.save(csvNames.getValue(content))

@@ -21,6 +21,8 @@ import app.liora.core.data.health.HealthRepository
 import app.liora.core.data.health.OfflineHealthRepository
 import app.liora.core.data.importing.ImportRepository
 import app.liora.core.data.importing.OfflineImportRepository
+import app.liora.core.data.importing.OfflineRoutineImportRepository
+import app.liora.core.data.importing.RoutineImportRepository
 import app.liora.core.data.progression.OfflineProgressionRepository
 import app.liora.core.data.progression.ProgressionRepository
 import app.liora.core.data.routine.OfflineRotationRepository
@@ -97,6 +99,7 @@ val dataModule =
         singleOf(::OfflineHealthRepository) bind HealthRepository::class
         singleOf(::OfflineCsvExport) bind CsvExport::class
         singleOf(::OfflineImportRepository) bind ImportRepository::class
+        singleOf(::OfflineRoutineImportRepository) bind RoutineImportRepository::class
         // The workout in progress has one set logger, shared by the logger and the notification.
         single<SetLogger> { get<ActiveWorkoutRepository>().sets }
         singleOf(::LocalRestTimerRepository) bind RestTimerRepository::class

@@ -48,6 +48,20 @@ class NavigatorTest {
     }
 
     @Test
+    fun showingATabOpensItAtItsRoot() {
+        navigator.openFromList(TrainRoute, RoutineDetailRoute("push"))
+        navigator.selectTopLevel(ExercisesRoute)
+        navigator.navigate(RoutineImportRoute())
+
+        navigator.close(RoutineImportRoute())
+        navigator.showTopLevel(TrainRoute)
+
+        assertEquals(listOf(TrainRoute), navigator.backStack)
+        navigator.selectTopLevel(ExercisesRoute)
+        assertEquals(ExercisesRoute, navigator.currentRoute)
+    }
+
+    @Test
     fun closingAListClosesWhatItOpened() {
         navigator.navigate(BodyRoute)
         navigator.openFromList(BodyRoute, MeasurementDetailRoute("waist"))

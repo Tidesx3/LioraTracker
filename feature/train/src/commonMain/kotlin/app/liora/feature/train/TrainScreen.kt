@@ -59,6 +59,7 @@ import app.liora.core.navigation.rememberSharedContainer
 import app.liora.core.ui.UpdateCard
 import app.liora.core.ui.currentLanguage
 import app.liora.feature.train.resources.Res
+import app.liora.feature.train.resources.cd_import_routines
 import app.liora.feature.train.resources.cd_more
 import app.liora.feature.train.resources.cd_rotation
 import app.liora.feature.train.resources.cd_settings
@@ -101,6 +102,7 @@ internal class TrainNavigationActions(
     val onOpenRoutine: (routineId: String) -> Unit,
     val onNewRoutine: (folderId: String?) -> Unit,
     val onEditRoutine: (routineId: String) -> Unit,
+    val onImportRoutines: () -> Unit,
 )
 
 @Composable
@@ -126,6 +128,7 @@ internal fun TrainScreen(
                 },
                 onResumeWorkout = navigation.onOpenLogger,
                 onNewRoutine = navigation.onNewRoutine,
+                onImportRoutines = navigation.onImportRoutines,
                 onShowDialog = viewModel::showDialog,
                 onOpenSettings = navigation.onOpenSettings,
                 onSetRotation = viewModel::setRotation,
@@ -163,10 +166,12 @@ internal fun TrainScreen(
     )
 }
 
+@Suppress("LongParameterList") // one per thing the Train tab offers
 private class TrainActions(
     val onStartWorkout: () -> Unit,
     val onResumeWorkout: () -> Unit,
     val onNewRoutine: (folderId: String?) -> Unit,
+    val onImportRoutines: () -> Unit,
     val onShowDialog: (RoutineDialog) -> Unit,
     val onOpenSettings: () -> Unit,
     val onSetRotation: (folderId: String, rotation: Boolean) -> Unit,
@@ -197,7 +202,15 @@ private fun TrainContent(
         topBar = {
             LioraTopAppBar(
                 title = stringResource(Res.string.train_title),
-                actions = { SettingsButton(needsYou = uiState.settingsNeedYou, onClick = actions.onOpenSettings) },
+                actions = {
+                    // Routines an AI wrote, imported.
+                    LioraIconButton(
+                        LioraIcons.Download,
+                        stringResource(Res.string.cd_import_routines),
+                        actions.onImportRoutines,
+                    )
+                    SettingsButton(needsYou = uiState.settingsNeedYou, onClick = actions.onOpenSettings)
+                },
             )
         },
     ) { padding ->

@@ -3,6 +3,7 @@ package app.liora.android.di
 import android.content.Context
 import app.liora.android.backup.AndroidExportFiles
 import app.liora.android.health.HealthTriggers
+import app.liora.android.importing.SharedRoutines
 import app.liora.android.photos.AndroidPhotoStorage
 import app.liora.android.sync.SyncTriggers
 import app.liora.android.ui.LioraAppViewModel
@@ -42,6 +43,7 @@ val appModule =
         single { WidgetStates(get(), get(), get(), get(), get(), get()) }
         single { WidgetUpdater(androidContext(), get()) }
         single { UpdateTriggers(get()) }
+        single { SharedRoutines(androidContext()) }
     }
 
 /** The catalog built by `tools/seed/build-seed.mjs`, shipped in `assets/seed/`. */

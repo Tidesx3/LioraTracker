@@ -56,6 +56,20 @@
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
+      <!-- Routines an AI wrote (docs/routine-format.md, importing/SharedRoutines.kt): its answer shared from a
+           chat app, or a routine file shared or opened with Liora. -->
+      <intent-filter android:label="@string/share_routines">
+        <action android:name="android.intent.action.SEND" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="text/plain" />
+        <data android:mimeType="application/json" />
+      </intent-filter>
+      <intent-filter android:label="@string/share_routines">
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:scheme="content" />
+        <data android:mimeType="application/json" />
+      </intent-filter>
     </activity>
 
     <!-- Health Connect shows Liora's privacy policy from its permission screens: up to Android 13

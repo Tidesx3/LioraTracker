@@ -98,11 +98,13 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
+/** [misfit] says that values were left out of an exercise that has no column for them. */
 internal fun LazyListScope.exerciseSection(
     key: String,
     title: StringResource,
     rows: List<ImportExerciseRow>,
     importing: Boolean,
+    misfit: StringResource = Res.string.import_misfit,
     onOpen: (String) -> Unit,
 ) {
     if (rows.isEmpty()) return
@@ -112,7 +114,9 @@ internal fun LazyListScope.exerciseSection(
         LioraCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
             Column(Modifier.padding(vertical = 4.dp)) {
                 rows.forEach { row ->
-                    key(row.name) { ExerciseRow(row, enabled = !importing, onClick = { onOpen(row.name) }) }
+                    key(row.name) {
+                        ExerciseRow(row, misfit, enabled = !importing && !row.fixed, onClick = { onOpen(row.name) })
+                    }
                 }
             }
         }
@@ -122,17 +126,18 @@ internal fun LazyListScope.exerciseSection(
 @Composable
 private fun ExerciseRow(
     row: ImportExerciseRow,
+    misfit: StringResource,
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ListItem(
-        headlineContent = { Text(row.name) },
+        headlineContent = { Text(row.title) },
         supportingContent = {
             Column {
                 Text(destination(row))
                 if (!row.fits) {
-                    Text(stringResource(Res.string.import_misfit), color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(misfit), color = MaterialTheme.colorScheme.error)
                 }
             }
         },
@@ -176,12 +181,14 @@ internal fun ExerciseChoiceDialog(
     onChoose: (ExerciseChoice) -> Unit,
     onPick: () -> Unit,
     onDismiss: () -> Unit,
+    /** Under "Use …": what using an exercise here means for what the file holds. */
+    useBody: StringResource = Res.string.import_choice_use_body,
 ) {
     val closest = row.closest
     val picked = (row.choice as? ExerciseChoice.Existing)?.takeIf { it.exerciseId != closest?.id }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(row.name) },
+        title = { Text(row.title) },
         text = {
             Column(Modifier.selectableGroup()) {
                 ChoiceRow(
@@ -193,7 +200,7 @@ internal fun ExerciseChoiceDialog(
                 if (closest != null) {
                     ChoiceRow(
                         title = stringResource(Res.string.import_choice_use, closest.name),
-                        body = stringResource(Res.string.import_choice_use_body),
+                        body = stringResource(useBody),
                         selected = row.choice == ExerciseChoice.Existing(closest.id),
                         onClick = { onChoose(ExerciseChoice.Existing(closest.id)) },
                     )
@@ -202,7 +209,7 @@ internal fun ExerciseChoiceDialog(
                 if (picked != null && target != null) {
                     ChoiceRow(
                         title = stringResource(Res.string.import_choice_use, target.name),
-                        body = stringResource(Res.string.import_choice_use_body),
+                        body = stringResource(useBody),
                         selected = true,
                         onClick = { onChoose(picked) },
                     )

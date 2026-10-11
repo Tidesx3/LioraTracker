@@ -16,6 +16,7 @@ import app.liora.core.navigation.NavigationResultEffect
 import app.liora.core.navigation.Navigator
 import app.liora.core.navigation.RoutineDetailRoute
 import app.liora.core.navigation.RoutineEditorRoute
+import app.liora.core.navigation.RoutineImportRoute
 import app.liora.core.navigation.SettingsRoute
 import app.liora.core.navigation.TrainRoute
 import app.liora.feature.train.resources.Res
@@ -61,6 +62,7 @@ fun EntryProviderScope<NavKey>.trainEntries(navigator: Navigator) {
                         navigator.openFromList(TrainRoute, RoutineEditorRoute(folderId = folderId))
                     },
                     onEditRoutine = { navigator.openFromList(TrainRoute, RoutineEditorRoute(routineId = it)) },
+                    onImportRoutines = { navigator.navigate(RoutineImportRoute()) },
                 ),
         )
     }

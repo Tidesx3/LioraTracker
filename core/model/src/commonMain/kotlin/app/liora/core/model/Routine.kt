@@ -49,6 +49,9 @@ enum class ProgressionRule(
     DoubleProgression("double"),
     ;
 
+    /** Whether it can move an exercise tracked as [type] on: one counted in weight and reps. */
+    fun fits(type: TrackingType): Boolean = type == TrackingType.WeightReps || type == TrackingType.WeightedBodyweight
+
     companion object {
         fun fromKey(key: String?): ProgressionRule? = entries.firstOrNull { it.key == key }
     }

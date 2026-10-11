@@ -34,8 +34,9 @@ starts a step heavier once the sets reach the top of their rep ranges, and says 
 tunes how). A folder of routines can be a rotation, and the Train tab says which one is next, as does a
 home-screen widget, which follows the workout while it runs. On Android 16 the workout is a Live Update: the
 set and the rest in the status bar and on the lock screen. And the release app updates itself from this repo's
-GitHub Releases, saying what's new first. Phase 4 is done. Details and progress are in
-[docs/PLAN.md](docs/PLAN.md).
+GitHub Releases, saying what's new first. Phase 4 is done. Any AI can write routines for Liora: a program in a
+rotation, supersets, progression, exercises of your own, as a file Liora imports after showing what's in it
+(see [Routines from an AI](#routines-from-an-ai)). Details and progress are in [docs/PLAN.md](docs/PLAN.md).
 
 ## Principles
 
@@ -103,6 +104,19 @@ node tools/release/release.mjs             # tags v<version> and publishes liora
 It runs `check`, makes sure the APK is `app.liora` at that version and signed with the release key, then
 tags and publishes with `gh`. Only the release build updates itself; debug builds never look.
 
+## Routines from an AI
+
+Ask any AI for a routine, and Liora imports it: Train › the import button, Settings › Your data › Import
+routines, or share the AI's answer (or open its file) with Liora. The file format is public and made for AIs to
+write: [docs/routine-format.md](docs/routine-format.md). Everything the routine editor does fits in it, along with
+new exercises and variations of your own.
+
+For AI agents on a computer, [tools/routine](tools/routine/README.md) searches Liora's exercise catalog, checks a
+file exactly as Liora will read it, and reads a Liora backup so plans fit your numbers. It's a command line and an
+MCP server, so it works with Claude Code, Codex, Gemini CLI, Cursor, Claude Desktop and others. Claude Code also
+has a skill for it in this repository: `/liora-routine 3-day full body`. In an AI chat on the phone, the import
+screen copies the format for you to paste into the chat.
+
 ## Layout
 
 ```
@@ -118,7 +132,7 @@ core/ui            Composables that know the domain: units, labels, records, the
 feature/*          One module per app area: train, logger, history, exercises, progress, body, settings
 sync/gdrive        Sync through the user's Google Drive
 integration/*      Health Connect, and Liora's releases on GitHub
-tools/             Exercise catalog, icons, rest sounds, and publishing releases
+tools/             Exercise catalog, icons, rest sounds, publishing releases, and the routine tool for AIs
 build-logic        Gradle convention plugins (liora.kmp.library, liora.cmp.feature, ...)
 ```
 

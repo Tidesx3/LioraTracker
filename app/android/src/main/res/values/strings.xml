@@ -6,6 +6,8 @@
   <string name="tab_progress">Progress</string>
   <string name="tab_exercises">Exercises</string>
 
+  <string name="share_routines">Import routines</string>
+
   <string name="notif_channel_workout">Workout in progress</string>
   <string name="notif_channel_workout_desc">The workout you’re logging: the next set and the rest countdown.</string>
   <string name="notif_channel_rest">Rest over</string>

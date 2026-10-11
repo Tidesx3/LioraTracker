@@ -249,6 +249,65 @@
     <item quantity="other">%1$d new exercises</item>
   </plurals>
   <string name="import_done">Done</string>
+  <!-- Routines from a routine file, which an AI writes (docs/routine-format.md) -->
+  <string name="routine_import_row_title">Import routines</string>
+  <string name="routine_import_row_body">Routines an AI wrote for you, from a file or pasted</string>
+  <string name="routine_import_title">Import routines</string>
+  <string name="routine_import_start_title">Routines from an AI</string>
+  <string name="routine_import_start_body">Ask Claude, ChatGPT or any other AI for a routine in Liora’s format. Then open the file it made, share its answer to Liora, or copy it and paste it here.</string>
+  <string name="routine_import_open">Open file</string>
+  <string name="routine_import_paste">Paste</string>
+  <string name="routine_import_copy_format">Copy the format for your AI</string>
+  <string name="routine_import_copy_format_body">Paste it into the chat with what you’d like, and the AI knows how to write it for Liora.</string>
+  <string name="routine_import_format_copied">Copied. Paste it into the chat along with what you’re after.</string>
+  <string name="routine_import_format_label">Liora routine format</string>
+  <string name="routine_import_invalid_title">Liora can’t import this yet</string>
+  <string name="routine_import_invalid_body">Hand these back to the AI that wrote it, and ask for the file again.</string>
+  <string name="routine_import_copy_problems">Copy for the AI</string>
+  <string name="routine_import_problems_copied">Copied</string>
+  <string name="routine_import_problems_label">Problems in a Liora routine file</string>
+  <string name="routine_import_start_over">Try another</string>
+  <string name="routine_import_new_folder">New folder</string>
+  <string name="routine_import_new_rotation">New rotation: the routines take turns</string>
+  <plurals name="routine_import_routines">
+    <item quantity="one">%1$d routine</item>
+    <item quantity="other">%1$d routines</item>
+  </plurals>
+  <plurals name="routine_import_exercises">
+    <item quantity="one">%1$d exercise</item>
+    <item quantity="other">%1$d exercises</item>
+  </plurals>
+  <string name="routine_import_hint">Names Liora knows go straight to that exercise. The others become exercises of your own. Tap one to change it.</string>
+  <string name="routine_import_misfit">Not every target fits this exercise. The others are left out.</string>
+  <string name="routine_import_use_body">The routine uses it</string>
+  <string name="routine_import_section_routines">Routines</string>
+  <string name="routine_import_section_notes">Worth knowing</string>
+  <plurals name="routine_import_confirm">
+    <item quantity="one">Add routine</item>
+    <item quantity="other">Add %1$d routines</item>
+  </plurals>
+  <string name="routine_import_confirm_exercises">Add exercises</string>
+  <string name="routine_import_working">Adding…</string>
+  <string name="routine_import_done_title">Fresh plans on the board</string>
+  <plurals name="routine_import_done_routines">
+    <item quantity="one">%1$d routine is waiting on the Train tab</item>
+    <item quantity="other">%1$d routines are waiting on the Train tab</item>
+  </plurals>
+  <string name="routine_import_done">Show me</string>
+  <string name="routine_problem_file">The file</string>
+  <string name="routine_problem_set">Set %1$d</string>
+  <string name="routine_problem_not_json">There’s no routine in this. Ask the AI for the file itself, or for its JSON in one code block.</string>
+  <string name="routine_problem_not_a_routine_file">This isn’t a Liora routine file.</string>
+  <string name="routine_problem_newer_version">This file is for a newer Liora (format version %1$s). Update Liora, or ask for version 1.</string>
+  <string name="routine_problem_missing">%1$s is missing</string>
+  <string name="routine_problem_invalid">%1$s: Liora can’t read “%2$s” here</string>
+  <string name="routine_problem_invalid_value">Liora can’t read “%1$s” here</string>
+  <string name="routine_problem_no_weight_unit">%1$s: “%2$s” needs a unit. Give the file a weightUnit (kg or lb), or write the unit with it, like “80 kg”.</string>
+  <string name="routine_problem_duplicate">Two exercises in the file are called %1$s</string>
+  <string name="routine_problem_unknown_field">Liora doesn’t use %1$s, so it’s left out</string>
+  <string name="routine_problem_superset_apart">Superset %1$s isn’t side by side, so each part is a superset of its own</string>
+  <string name="routine_problem_progression_ranges">Progression needs a rep range like 8–12 on every working set</string>
+  <string name="routine_problem_base_not_found">%1$s isn’t an exercise here, so this one stands on its own</string>
   <!-- Sync -->
   <string name="sync_row_title">Sync with Google Drive</string>
   <string name="sync_row_off">Off</string>

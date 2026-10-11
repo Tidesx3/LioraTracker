@@ -99,33 +99,7 @@ internal class OfflineRoutineRepository(
 
     override suspend fun save(routine: Routine) {
         require(routine.isValid) { "A routine needs a name" }
-        transactions.inTransaction {
-            val existing = routineDao.getRoutine(routine.id)?.takeIf { it.sync.deletedAt == null }
-            val row =
-                RoutineEntity(
-                    id = routine.id,
-                    folderId = routine.folderId,
-                    name = routine.name.trim(),
-                    notes = routine.notes?.trim()?.ifEmpty { null },
-                    position = existing?.position ?: (routineDao.maxRoutinePosition() + 1),
-                    sync = existing?.sync ?: NO_SYNC,
-                )
-            stamped(listOf(row), listOfNotNull(existing)) { entity, sync -> entity.copy(sync = sync) }
-                .forEach { routineDao.upsertRoutine(it) }
-
-            // Read both before writing: once an exercise is tombstoned, its sets no longer show up.
-            val storedExercises = routineDao.exercisesOf(routine.id)
-            val storedSets = routineDao.setsOf(routine.id)
-            val exerciseRows = routine.exercises.mapIndexed { index, exercise -> exercise.toEntity(routine.id, index) }
-            val setRows =
-                routine.exercises.flatMap { exercise ->
-                    exercise.sets.mapIndexed { index, set -> set.toEntity(exercise.id, index) }
-                }
-            routineDao.upsertExercises(
-                stamped(exerciseRows, storedExercises) { entity, sync -> entity.copy(sync = sync) },
-            )
-            routineDao.upsertSets(stamped(setRows, storedSets) { entity, sync -> entity.copy(sync = sync) })
-        }
+        transactions.inTransaction { writeRoutine(routineDao, stamper, routine) }
     }
 
     override suspend fun duplicate(
@@ -178,16 +152,7 @@ internal class OfflineRoutineRepository(
     override suspend fun createFolder(name: String): String {
         require(name.isNotBlank()) { "A folder needs a name" }
         val id = ids.newId()
-        transactions.inTransaction {
-            routineDao.upsertFolder(
-                RoutineFolderEntity(
-                    id = id,
-                    name = name.trim(),
-                    position = routineDao.maxFolderPosition() + 1,
-                    sync = stamper.newRow(),
-                ),
-            )
-        }
+        transactions.inTransaction { writeNewFolder(routineDao, stamper, id, name) }
         return id
     }
 
@@ -225,31 +190,87 @@ internal class OfflineRoutineRepository(
             routineDao.upsertFolder(folder.copy(sync = stamper.tombstone(folder.sync)))
         }
     }
+}
 
-    /**
-     * The writes that turn the [stored] rows into [rows]: new rows get a fresh sync stamp, changed ones
-     * a touched stamp, and stored rows missing from [rows] become tombstones. Unchanged rows are left
-     * out, so they are neither rewritten nor synced again.
-     */
-    private suspend inline fun <E : SyncedRow> stamped(
-        rows: List<E>,
-        stored: List<E>,
-        withSync: (E, SyncMetadata) -> E,
-    ): List<E> {
-        val storedById = stored.associateBy { it.id }
-        val keptIds = rows.map { it.id }.toSet()
-        val upserts =
-            rows.mapNotNull { row ->
-                val previous = storedById[row.id]
-                when {
-                    previous == null -> withSync(row, stamper.newRow())
-                    withSync(row, previous.sync) == previous -> null
-                    else -> withSync(row, stamper.touch(previous.sync))
-                }
+/**
+ * Creates or updates [routine] with its exercises and sets (see [RoutineRepository.save]). Call it inside a
+ * transaction.
+ */
+internal suspend fun writeRoutine(
+    routineDao: RoutineDao,
+    stamper: SyncStamper,
+    routine: Routine,
+) {
+    val existing = routineDao.getRoutine(routine.id)?.takeIf { it.sync.deletedAt == null }
+    val row =
+        RoutineEntity(
+            id = routine.id,
+            folderId = routine.folderId,
+            name = routine.name.trim(),
+            notes = routine.notes?.trim()?.ifEmpty { null },
+            position = existing?.position ?: (routineDao.maxRoutinePosition() + 1),
+            sync = existing?.sync ?: NO_SYNC,
+        )
+    stamped(stamper, listOf(row), listOfNotNull(existing)) { entity, sync -> entity.copy(sync = sync) }
+        .forEach { routineDao.upsertRoutine(it) }
+
+    // Read both before writing: once an exercise is tombstoned, its sets no longer show up.
+    val storedExercises = routineDao.exercisesOf(routine.id)
+    val storedSets = routineDao.setsOf(routine.id)
+    val exerciseRows = routine.exercises.mapIndexed { index, exercise -> exercise.toEntity(routine.id, index) }
+    val setRows =
+        routine.exercises.flatMap { exercise ->
+            exercise.sets.mapIndexed { index, set -> set.toEntity(exercise.id, index) }
+        }
+    routineDao.upsertExercises(
+        stamped(stamper, exerciseRows, storedExercises) { entity, sync -> entity.copy(sync = sync) },
+    )
+    routineDao.upsertSets(stamped(stamper, setRows, storedSets) { entity, sync -> entity.copy(sync = sync) })
+}
+
+/** Writes a new folder [id], placed last. Call it inside a transaction. */
+internal suspend fun writeNewFolder(
+    routineDao: RoutineDao,
+    stamper: SyncStamper,
+    id: String,
+    name: String,
+    rotation: Boolean = false,
+) {
+    routineDao.upsertFolder(
+        RoutineFolderEntity(
+            id = id,
+            name = name.trim(),
+            position = routineDao.maxFolderPosition() + 1,
+            rotation = rotation,
+            sync = stamper.newRow(),
+        ),
+    )
+}
+
+/**
+ * The writes that turn the [stored] rows into [rows]: new rows get a fresh sync stamp, changed ones
+ * a touched stamp, and stored rows missing from [rows] become tombstones. Unchanged rows are left
+ * out, so they are neither rewritten nor synced again.
+ */
+private suspend inline fun <E : SyncedRow> stamped(
+    stamper: SyncStamper,
+    rows: List<E>,
+    stored: List<E>,
+    withSync: (E, SyncMetadata) -> E,
+): List<E> {
+    val storedById = stored.associateBy { it.id }
+    val keptIds = rows.map { it.id }.toSet()
+    val upserts =
+        rows.mapNotNull { row ->
+            val previous = storedById[row.id]
+            when {
+                previous == null -> withSync(row, stamper.newRow())
+                withSync(row, previous.sync) == previous -> null
+                else -> withSync(row, stamper.touch(previous.sync))
             }
-        val tombstones = stored.filter { it.id !in keptIds }.map { withSync(it, stamper.tombstone(it.sync)) }
-        return upserts + tombstones
-    }
+        }
+    val tombstones = stored.filter { it.id !in keptIds }.map { withSync(it, stamper.tombstone(it.sync)) }
+    return upserts + tombstones
 }
 
 /** Placeholder until [OfflineRoutineRepository.stamped] assigns the real stamp. */

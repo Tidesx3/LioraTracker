@@ -5,7 +5,7 @@ Check it when a milestone or phase starts, and keep **Progress** below current w
 
 ## Progress
 
-As of 2026-10-09:
+As of 2026-10-11:
 
 - **Phase 0** is done.
 - **Phase 1**, milestones 1–5 are done: database and seed, domain, exercises and foldables, routines, and the logger
@@ -321,6 +321,29 @@ As of 2026-10-09:
   - **The notification's −15 s and +15 s click** (`WorkoutHaptics`), as a notification vibration: Android drops
     touch vibrations from an app in the background, and silent mode turns it off.
   - **CSV export of body measurements**, alone or with the workouts in one file (see 9d).
+- **On request (2026-10-11): routines from any AI.** No schema change. An early, local slice of Phase 6's
+  "program generation": the AI runs wherever the person already uses one, and Liora imports what it writes.
+  - **The format** (`docs/routine-format.md`, `liora-routine` version 1, public): one routine or a program in a
+    new folder or rotation, with every choice the routine editor has (supersets by label, rest, set types,
+    weight, rep ranges, time, distance, RPE, double progression, notes) and custom exercises, new or a variation
+    of a catalog one (tracking, equipment, muscles, note, a machine's load step). Exercises are named, not
+    id'd; values come as people write them ("80 kg", "8-12", "1:30", "5 km"). Bare weights need `weightUnit`.
+  - **Reading** (`RoutineFileReader` in `core/data/importing`): finds the JSON in an AI's reply, takes comments
+    and trailing commas, and reports every problem with where it is (`RoutineFileProblem`, errors and warnings).
+    **Matching and writing** (`RoutineImportRepository`): names through the Hevy import's `ExerciseMatcher`,
+    except that a planned target an exercise has no column for is left out rather than making a second one; a
+    custom exercise of a name the person has is theirs, so importing twice doesn't duplicate; one transaction
+    writes the new exercises, notes (only where the exercise has none), the folder and the routines.
+  - **The app:** Train's import button (and Settings › Your data › Import routines) opens `RoutineImportRoute`
+    (`feature/settings/importing`): open a file, paste, or copy the format for an AI chat (the app carries a copy
+    of the doc; a test keeps them equal). The review is the Hevy import's, with the routines and what's worth
+    knowing; problems list where each is, with a copy for the AI. Liora is a share target for text and an "Open
+    with" for JSON (`SharedRoutines`, copied into the cache at once). Done opens the routine, or the Train tab.
+  - **The tool** (`tools/routine/liora-routine.mjs`, Node, no dependencies): search the catalog, `check` a file
+    as Liora reads it (a port of the reader and matcher; their tests share the doc's examples), and read a
+    backup for the person's units, gyms, own exercises, routines and recent e1RMs. The same as an MCP server for
+    Claude Code, Codex, Gemini CLI, Cursor and Claude Desktop (`tools/routine/README.md`); a Claude Code skill
+    (`.claude/skills/liora-routine`) for the workflow; `AGENTS.md` points other agents at it. CI runs its tests.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.

@@ -19,6 +19,7 @@
   <string name="cd_settings">Einstellungen</string>
   <string name="cd_settings_attention">Die Synchronisierung braucht dich</string>
   <string name="cd_more">Weitere Optionen</string>
+  <string name="cd_import_routines">Routinen importieren</string>
   <string name="cd_edit">Bearbeiten</string>
   <string name="cd_close">Schließen</string>
   <string name="cd_reorder">Zum Verschieben ziehen</string>

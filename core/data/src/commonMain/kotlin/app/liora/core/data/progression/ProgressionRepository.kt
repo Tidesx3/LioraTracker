@@ -17,7 +17,6 @@ import app.liora.core.model.LoggedSet
 import app.liora.core.model.Mass
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineExercise
-import app.liora.core.model.TrackingType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -86,7 +85,7 @@ internal class OfflineProgressionRepository(
         preferences: Settings,
     ): ExerciseProgression? {
         val entity = exerciseDao.get(exercise.exerciseId) ?: return null
-        if (entity.trackingType !in PROGRESSING) return null
+        if (exercise.progression?.fits(entity.trackingType) != true) return null
         val ownStep = exerciseDao.getSettings(exercise.exerciseId)?.takeIf { it.sync.deletedAt == null }?.loadStepKg
         val step = { from: Mass, up: Boolean ->
             LoadRounding.step(from, up, entity.equipment, gym, ownStep?.let(::Mass))
@@ -133,6 +132,5 @@ internal class OfflineProgressionRepository(
         /** Two: the last session decides, and the one before tells a bad day from a trend. */
         const val SESSIONS = 2
         val RECENT = 42.days
-        val PROGRESSING = setOf(TrackingType.WeightReps, TrackingType.WeightedBodyweight)
     }
 }

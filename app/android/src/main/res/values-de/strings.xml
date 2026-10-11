@@ -5,6 +5,8 @@
   <string name="tab_progress">Fortschritt</string>
   <string name="tab_exercises">Übungen</string>
 
+  <string name="share_routines">Routinen importieren</string>
+
   <string name="notif_channel_workout">Laufendes Training</string>
   <string name="notif_channel_workout_desc">Das Training, das du gerade loggst: der nächste Satz und der Pausen-Countdown.</string>
   <string name="notif_channel_rest">Pause vorbei</string>
