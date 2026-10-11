@@ -4,6 +4,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -18,8 +19,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import app.liora.android.ui.ShellTags
 import app.liora.core.data.AppStartup
 import app.liora.core.data.routine.RoutineRepository
@@ -139,6 +142,33 @@ class LiquidGlassTest {
         val button = composeRule.onNodeWithContentDescription("Custom exercise").getUnclippedBoundsInRoot()
         val tabs = composeRule.onNodeWithTag(ShellTags.NAVIGATION_BAR).getUnclippedBoundsInRoot()
         assertTrue("the button ends at ${button.bottom}, the tabs start at ${tabs.top}", button.bottom <= tabs.top)
+    }
+
+    @Test
+    @Config(qualifiers = COVER_DARK)
+    fun theLastRoutinesStartClearsTheTabs() {
+        launch()
+        waitForText("Legs")
+        assertLastStartClearsTheTabs()
+        // A workout running adds its bar above the tabs.
+        composeRule.onNode(hasScrollToIndexAction()).performScrollToIndex(0)
+        composeRule.onNodeWithText("Start empty workout").performClick()
+        waitForText("Finish")
+        composeRule.onNodeWithContentDescription("Minimize workout").performClick()
+        waitForText("Resume workout")
+        assertLastStartClearsTheTabs()
+    }
+
+    private fun assertLastStartClearsTheTabs() {
+        val list = composeRule.onNode(hasScrollToIndexAction())
+        list.performScrollToNode(hasText("Lower"))
+        repeat(SWIPES) { list.performTouchInput { swipeUp() } }
+        composeRule.waitForIdle()
+        val tabs = composeRule.onNodeWithTag(ShellTags.NAVIGATION_BAR).getUnclippedBoundsInRoot()
+        val starts = composeRule.onAllNodesWithText("Start", substring = false).fetchSemanticsNodes()
+        val last = starts.maxOf { it.boundsInRoot.bottom }
+        val tabsTop = with(composeRule.density) { tabs.top.toPx() }
+        assertTrue("the last Start ends at $last px, the tabs start at $tabsTop px", last <= tabsTop)
     }
 
     @Test
@@ -286,6 +316,7 @@ class LiquidGlassTest {
         const val ZONE = "Europe/Vienna"
 
         // Where each tab's middle is across the bar, of four.
+        const val SWIPES = 4
         const val TRAIN = 0.125f
         const val HISTORY = 0.375f
         const val PROGRESS = 0.625f

@@ -125,8 +125,9 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   beneath; cards are panes (`glassPane`) over the aurora (`Modifier.aurora`, glows fixed to the window). Tokens
   are `LioraTheme.glass`; check `.enabled` and keep the solid look working.
   - `LioraScaffold` makes a screen's content the backdrop of its bars (`LocalGlassBackdrop`) and adds room for
-    the tabs floating over it (`LocalFloatingChromeInsets`): lists pad their ends with the Scaffold's padding,
-    and it lifts the floating button over the tabs itself.
+    the tabs floating over it (`LocalFloatingChromeInsets`) to the content's padding, not its insets (the shell
+    has consumed that room, so Material would drop it): lists pad their ends with the Scaffold's padding, and
+    it lifts the floating button over the tabs itself.
   - `LioraTopAppBar` puts the navigation icon on a glass circle and the actions in one glass capsule; a filled
     main action (the logger's Finish) goes in `primaryAction`, outside it.
   - One language: what floats is glass that bends (tabs, bars, `LioraButton` in a bar, the floating button,

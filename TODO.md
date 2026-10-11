@@ -10,7 +10,8 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
     still picture of it), bends it at the rim, and scrolling stays smooth.
   - Pick tabs one after another: the drop flows over, stretching on the way, and settles. Drag along the
     bar: the drop lifts and follows the finger with a tick over each tab, and letting go switches there.
-  - The Exercises tab's Custom exercise button sits above the tabs.
+  - The Exercises tab's Custom exercise button sits above the tabs, and every tab's list scrolls far enough
+    that its last item (Train's last Start, Progress' last best) clears them, with a workout running too.
   - Top bars: the back arrow on a glass circle, the other buttons in a glass capsule (Save in the editors);
     the logger's Finish is violet glass beside them.
   - Buttons, chips, fields and the pad's keys look like one family; the main buttons (Start empty workout,

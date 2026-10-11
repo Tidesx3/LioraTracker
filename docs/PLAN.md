@@ -374,6 +374,9 @@ As of 2026-10-11:
     what's beneath); buttons, chips, fields and the pad's keys on the page are panes with the rim light
     (`glassRimBrush`, a border Material takes); dialogs, sheets and menus are solid panels with the rim. The
     detail screens' bottom bars lose their strip, their button floating. With glass off, all as before.
+  - **Fixed after 0.4.7:** the tabs' lists ended behind the tabs (Train's last Start, Progress' last best): the
+    shell consumes the room the tabs take, so Material left it out of the insets `LioraScaffold` added it to.
+    It goes into the content's padding instead (`LiquidGlassTest.theLastRoutinesStartClearsTheTabs`).
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.

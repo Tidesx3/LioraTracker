@@ -4,8 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FabPosition
@@ -18,6 +19,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import app.liora.core.designsystem.glass.LocalGlassBackdrop
 import app.liora.core.designsystem.glass.aurora
 import app.liora.core.designsystem.glass.glassSource
@@ -43,31 +47,29 @@ fun LioraScaffold(
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
     content: @Composable (PaddingValues) -> Unit,
 ) {
-    val floating = LocalFloatingChromeInsets.current
-    val insets = contentWindowInsets.add(floating)
+    // The app shell has consumed the room the floating chrome takes, so as insets Material would leave it
+    // out again: it goes into the content's padding, and under the floating button, here instead.
+    val chrome = LocalFloatingChromeInsets.current.asPaddingValues().calculateBottomPadding()
     val glass = LioraTheme.glass
-    if (!glass.enabled) {
-        Scaffold(
-            modifier = modifier,
-            topBar = topBar,
-            bottomBar = bottomBar,
-            snackbarHost = snackbarHost,
-            floatingActionButton = floatingActionButton,
-            floatingActionButtonPosition = floatingActionButtonPosition,
-            containerColor = containerColor,
-            contentColor = contentColor,
-            contentWindowInsets = insets,
-            content = content,
-        )
-        return
-    }
-    val backdrop = rememberGlassBackdrop()
-    // The screen's own color, if it asks for one; the aurora otherwise.
+    // What the bars bend, with glass: the content, on the aurora unless the screen asks for its own color.
+    val backdrop = if (glass.enabled) rememberGlassBackdrop() else null
     val background =
-        if (containerColor == MaterialTheme.colorScheme.background) {
-            Modifier.aurora(glass)
-        } else {
-            Modifier.background(containerColor)
+        when {
+            backdrop == null -> {
+                Modifier
+            }
+
+            containerColor == MaterialTheme.colorScheme.background -> {
+                Modifier
+                    .fillMaxSize()
+                    .glassSource(
+                        backdrop,
+                    ).aurora(glass)
+            }
+
+            else -> {
+                Modifier.fillMaxSize().glassSource(backdrop).background(containerColor)
+            }
         }
     Scaffold(
         modifier = modifier,
@@ -75,26 +77,37 @@ fun LioraScaffold(
         bottomBar = { CompositionLocalProvider(LocalGlassBackdrop provides backdrop, content = bottomBar) },
         snackbarHost = { CompositionLocalProvider(LocalGlassBackdrop provides backdrop, content = snackbarHost) },
         floatingActionButton = {
-            // Material places it by the window's edge, not the content's insets: lift it over the tabs.
-            Box(Modifier.padding(bottom = floating.asPaddingValues().calculateBottomPadding())) {
+            Box(Modifier.padding(bottom = chrome)) {
                 CompositionLocalProvider(LocalGlassBackdrop provides backdrop, content = floatingActionButton)
             }
         },
         floatingActionButtonPosition = floatingActionButtonPosition,
-        containerColor = Color.Transparent,
+        containerColor = if (glass.enabled) Color.Transparent else containerColor,
         contentColor = contentColor,
-        contentWindowInsets = insets,
+        contentWindowInsets = contentWindowInsets,
     ) { padding ->
-        Box(Modifier.fillMaxSize().glassSource(backdrop).then(background)) {
+        Box(background) {
             // Glass inside the content can't bend the content it's part of.
-            CompositionLocalProvider(LocalGlassBackdrop provides null) { content(padding) }
+            CompositionLocalProvider(LocalGlassBackdrop provides null) { content(padding.plusBottom(chrome)) }
         }
     }
 }
 
+@Composable
+private fun PaddingValues.plusBottom(extra: Dp): PaddingValues {
+    if (extra == 0.dp) return this
+    val direction = LocalLayoutDirection.current
+    return PaddingValues(
+        start = calculateStartPadding(direction),
+        top = calculateTopPadding(),
+        end = calculateEndPadding(direction),
+        bottom = calculateBottomPadding() + extra,
+    )
+}
+
 /**
  * The room the navigation floating over the bottom of the screen takes (the tabs and the workout in
- * progress, with Liquid Glass), which [LioraScaffold] adds to its content's insets. The app shell
+ * progress, with Liquid Glass), which [LioraScaffold] adds to its content's padding. The app shell
  * provides it; it's zero where nothing floats there.
  */
 val LocalFloatingChromeInsets = compositionLocalOf { WindowInsets(0) }
