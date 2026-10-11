@@ -119,6 +119,8 @@ class ProgressFlowTest {
     fun innerScreen_anExerciseOpensBesideTheOverview() {
         openProgress()
         waitForText("Pick an exercise")
+        // The placeholder shows at once; the overview beside it arrives from Room a moment later.
+        waitForText("6 weeks")
         scrollTo(BENCH)
         composeRule.onNodeWithText(BENCH).performClick()
         waitForText("No new best since")
