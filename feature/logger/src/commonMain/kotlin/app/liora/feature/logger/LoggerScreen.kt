@@ -303,6 +303,10 @@ private fun LoggerContent(
                             stringResource(Res.string.cd_rename),
                             { actions.onShowDialog(LoggerDialog.Rename) },
                         )
+                    }
+                },
+                primaryAction = {
+                    if (state != null) {
                         Button(
                             onClick = { if (finished) actions.onDone() else actions.onShowDialog(LoggerDialog.Finish) },
                             modifier = Modifier.padding(end = 8.dp).testTag(LoggerTags.FINISH),

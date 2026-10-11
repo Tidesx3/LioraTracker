@@ -4,12 +4,15 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.withInfiniteAnimationFrameMillis
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -19,12 +22,14 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.FloatState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -34,6 +39,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Rect
@@ -50,6 +56,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.DpOffset
@@ -58,6 +65,7 @@ import app.liora.core.designsystem.component.RollingText
 import app.liora.core.designsystem.glass.GlassDefaults
 import app.liora.core.designsystem.glass.LocalGlassBackdrop
 import app.liora.core.designsystem.glass.glass
+import app.liora.core.designsystem.glass.glassPane
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.theme.LioraGlass
 import app.liora.core.designsystem.theme.LioraTheme
@@ -217,12 +225,6 @@ internal fun RestTimerBar(
     }
 }
 
-/** The rest pill as the accent's glass, floating over the end of the list on a soft shadow. */
-@Composable
-private fun Modifier.accentGlass(glass: LioraGlass): Modifier =
-    dropShadow(CircleShape, Shadow(radius = 20.dp, color = glass.shadow, offset = DpOffset(0.dp, 6.dp)))
-        .glass(LocalGlassBackdrop.current, CircleShape, GlassDefaults.accent())
-
 /** [content] at its own width when that fits, and nothing otherwise, rather than wrapped or cut off. */
 @Composable
 private fun WholeOrNothing(
@@ -269,7 +271,10 @@ private fun DrawScope.drawPillProgress(
     drawPath(left, color, style = Stroke(width, cap = StrokeCap.Round, join = StrokeJoin.Round))
 }
 
-/** The rest countdown on wide screens and in tabletop posture: a big ring, readable from the bench. */
+/**
+ * The rest countdown on wide screens and in tabletop posture: a big ring, readable from the bench. With
+ * Liquid Glass the ring runs inside a disc of glass, and its buttons are pills of glass, Skip the accent's.
+ */
 @Composable
 internal fun RestTimerRing(
     progress: RestProgress,
@@ -277,6 +282,7 @@ internal fun RestTimerRing(
     onSkip: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val glass = LioraTheme.glass
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -284,18 +290,25 @@ internal fun RestTimerRing(
     ) {
         val pulse = rememberEndingPulse(progress.remaining)
         Box(
-            Modifier.size(RING_SIZE).graphicsLayer {
-                val swell = 1f + RING_SWELL * pulse.value
-                scaleX = swell
-                scaleY = swell
-            },
+            Modifier
+                .size(RING_SIZE)
+                .graphicsLayer {
+                    val swell = 1f + RING_SWELL * pulse.value
+                    scaleX = swell
+                    scaleY = swell
+                }.then(if (glass.enabled) Modifier.glassDisc(glass) else Modifier),
             contentAlignment = Alignment.Center,
         ) {
             CircularProgressIndicator(
                 progress = { progress.fraction },
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().then(if (glass.enabled) Modifier.padding(RING_INSET) else Modifier),
                 strokeWidth = 10.dp,
-                trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                trackColor =
+                    if (glass.enabled) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = GLASS_TRACK_ALPHA)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerHighest
+                    },
                 strokeCap = StrokeCap.Round,
                 gapSize = 0.dp,
             )
@@ -315,14 +328,26 @@ internal fun RestTimerRing(
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = { onAdjust(-ADJUST_SECONDS) }) { Text(stringResource(Res.string.rest_minus)) }
-            OutlinedButton(onClick = { onAdjust(ADJUST_SECONDS) }) { Text(stringResource(Res.string.rest_plus)) }
-            FilledTonalButton(onClick = onSkip) {
-                Icon(painterResource(LioraIcons.Skip), contentDescription = null, modifier = Modifier.size(18.dp))
-                Text(stringResource(Res.string.rest_skip), modifier = Modifier.padding(start = 4.dp))
+            if (glass.enabled) {
+                GlassPill(
+                    glass,
+                    onClick = { onAdjust(-ADJUST_SECONDS) },
+                ) { Text(stringResource(Res.string.rest_minus)) }
+                GlassPill(glass, onClick = { onAdjust(ADJUST_SECONDS) }) { Text(stringResource(Res.string.rest_plus)) }
+                GlassPill(glass, onClick = onSkip, accent = true) { SkipLabel() }
+            } else {
+                OutlinedButton(onClick = { onAdjust(-ADJUST_SECONDS) }) { Text(stringResource(Res.string.rest_minus)) }
+                OutlinedButton(onClick = { onAdjust(ADJUST_SECONDS) }) { Text(stringResource(Res.string.rest_plus)) }
+                FilledTonalButton(onClick = onSkip) { SkipLabel() }
             }
         }
     }
+}
+
+@Composable
+private fun RowScope.SkipLabel() {
+    Icon(painterResource(LioraIcons.Skip), contentDescription = null, modifier = Modifier.size(18.dp))
+    Text(stringResource(Res.string.rest_skip), modifier = Modifier.padding(start = 4.dp))
 }
 
 /**
@@ -342,6 +367,10 @@ private fun rememberEndingPulse(remaining: Duration): State<Float> {
 
 private val TICK = 200.milliseconds
 private val RING_SIZE = 200.dp
+
+/** With Liquid Glass, the room between the ring and the disc's rim. */
+private val RING_INSET = 14.dp
+private const val GLASS_TRACK_ALPHA = 0.16f
 private const val ADJUST_SECONDS = 15
 
 /** The last seconds pulse; earlier ones just count down. */

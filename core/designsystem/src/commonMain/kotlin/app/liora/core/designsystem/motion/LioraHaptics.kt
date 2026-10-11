@@ -27,6 +27,9 @@ class LioraHaptics internal constructor(
     /** A set that couldn't be ticked off, as a value is missing. */
     fun rejected() = feedback.performHapticFeedback(HapticFeedbackType.Reject)
 
+    /** The tab bar's drop, dragged by the finger, comes over another tab: a light tick. */
+    fun tabCrossed() = feedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
+
     /** A personal record: a heavier double beat, after the set's own tick. */
     fun record() {
         scope.launch {

@@ -1,18 +1,26 @@
 package app.liora.android
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasScrollToNodeAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTouchInput
+import app.liora.android.ui.ShellTags
 import app.liora.core.data.AppStartup
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.settings.SettingsRepository
@@ -24,12 +32,14 @@ import app.liora.core.model.RepRange
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineExercise
 import app.liora.core.model.RoutineSet
+import app.liora.feature.logger.LoggerTags
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -93,6 +103,53 @@ class LiquidGlassTest {
         waitForText("August 2026")
         composeRule.onNode(hasText("History") and isSelectable()).assertIsSelected()
         composeRule.onRoot().captureRoboImage("src/test/screenshots/glass_history_dark.png")
+    }
+
+    @Test
+    @Config(qualifiers = COVER_DARK)
+    fun dragAlongTheTabsToSwitch() {
+        launch()
+        waitForText("Legs")
+        val tabs = composeRule.onNodeWithTag(ShellTags.NAVIGATION_BAR)
+        // From Train, the drop is dragged over History to Progress: it lifts and follows the finger.
+        tabs.performTouchInput {
+            down(Offset(width * TRAIN, centerY))
+            moveTo(Offset(width * HISTORY, centerY))
+            moveTo(Offset(width * PROGRESS, centerY))
+        }
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/glass_tabs_drag_dark.png")
+        // Still on Train until the finger lets go.
+        composeRule.onNode(hasText("Train") and isSelectable()).assertIsSelected()
+        tabs.performTouchInput { up() }
+        composeRule.waitUntil(TIMEOUT_MS) {
+            composeRule
+                .onAllNodes(hasText("Progress") and isSelectable() and isSelected())
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+    }
+
+    @Test
+    @Config(qualifiers = COVER_DARK)
+    fun aScreensFloatingButtonStaysClearOfTheTabs() {
+        launch()
+        composeRule.onNodeWithText("Exercises").performClick()
+        waitForText("Search exercises")
+        val button = composeRule.onNodeWithContentDescription("Custom exercise").getUnclippedBoundsInRoot()
+        val tabs = composeRule.onNodeWithTag(ShellTags.NAVIGATION_BAR).getUnclippedBoundsInRoot()
+        assertTrue("the button ends at ${button.bottom}, the tabs start at ${tabs.top}", button.bottom <= tabs.top)
+    }
+
+    @Test
+    @Config(qualifiers = INNER_DARK)
+    fun innerScreen_theRestRingIsADiscOfGlass() {
+        launch()
+        waitForText("Legs")
+        composeRule.onAllNodesWithText("Start").onFirst().performClick()
+        waitForText("Finish")
+        composeRule.onNode(hasText("Log set") and !hasAnyAncestor(hasTestTag(LoggerTags.PAD))).performClick()
+        waitForText("Skip")
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/glass_inner_logger_resting_dark.png")
     }
 
     @Test
@@ -212,6 +269,11 @@ class LiquidGlassTest {
         const val COVER_LIGHT = "w411dp-h960dp-notnight-xxhdpi"
         const val INNER_DARK = "w984dp-h1092dp-night-xhdpi"
         const val ZONE = "Europe/Vienna"
+
+        // Where each tab's middle is across the bar, of four.
+        const val TRAIN = 0.125f
+        const val HISTORY = 0.375f
+        const val PROGRESS = 0.625f
         const val TIMEOUT_MS = 10_000L
         val SET_MINUTES = 3.minutes
 

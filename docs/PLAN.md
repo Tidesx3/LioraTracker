@@ -361,6 +361,13 @@ As of 2026-10-11:
     fades out (`glassEdge`). Every screen is a `LioraScaffold`, which does this when glass is on.
   - **Tests:** `LiquidGlassTest` (light and dark, cover and inner screen, the switch); flow tests that launch
     `MainActivity` render glass, those that set their own `LioraTheme` the solid look.
+  - **After 0.4.5, on request:** the tab bar's drop can be dragged: it lifts and follows the finger, magnifying
+    the tab under it with a tick (`LioraHaptics.tabCrossed`), and letting go picks that tab. Top bars put
+    their buttons on glass, the navigation icon on a circle and the actions in one capsule, the logger's
+    Finish outside it (`LioraTopAppBar(primaryAction)`). The rest ring on the inner screen and in tabletop
+    runs inside a disc of glass, its buttons glass pills. Fixed: a screen's floating button (the Exercises
+    tab's Custom exercise) hid behind the tabs, as Material places it by the window's edge;
+    `LioraScaffold` lifts it.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.

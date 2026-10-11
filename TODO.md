@@ -8,9 +8,14 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
   phone has the last word, on the release build:
   - Scroll the Train tab and History under the tabs: the glass follows the content as it moves (never a
     still picture of it), bends it at the rim, and scrolling stays smooth.
-  - Pick tabs one after another: the drop flows over, stretching on the way, and settles.
+  - Pick tabs one after another: the drop flows over, stretching on the way, and settles. Drag along the
+    bar: the drop lifts and follows the finger with a tick over each tab, and letting go switches there.
+  - The Exercises tab's Custom exercise button sits above the tabs.
+  - Top bars: the back arrow on a glass circle, the other buttons in a glass capsule (Save in the editors);
+    the logger's Finish stays violet beside them.
   - The top bars: content frosts over as it slides under the title and the status bar.
-  - Tick a set: the rest timer floats as violet glass over the end of the list, its ring running.
+  - Tick a set: the rest timer floats as violet glass over the end of the list, its ring running. On the
+    inner screen and in tabletop, the ring runs in a glass disc, with glass pills for −15 s, +15 s and Skip.
   - Light and dark, Colors from the wallpaper, the inner screen (the rail on the aurora), and Liquid Glass
     off (the solid look as before). Predictive back and a card growing into its workout.
 

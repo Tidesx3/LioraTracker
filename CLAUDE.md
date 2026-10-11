@@ -121,7 +121,10 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   beneath; cards are panes (`glassPane`) over the aurora (`Modifier.aurora`, glows fixed to the window). Tokens
   are `LioraTheme.glass`; check `.enabled` and keep the solid look working.
   - `LioraScaffold` makes a screen's content the backdrop of its bars (`LocalGlassBackdrop`) and adds room for
-    the tabs floating over it (`LocalFloatingChromeInsets`): lists pad their ends with the Scaffold's padding.
+    the tabs floating over it (`LocalFloatingChromeInsets`): lists pad their ends with the Scaffold's padding,
+    and it lifts the floating button over the tabs itself.
+  - `LioraTopAppBar` puts the navigation icon on a glass circle and the actions in one glass capsule; a filled
+    main action (the logger's Finish) goes in `primaryAction`, outside it.
   - Glass never sits inside its own backdrop's source (it would draw itself), and a source draws an opaque
     background (the aurora) under its content, or the crisp content shows through the blur.
   - Android 13+ bends the rim (AGSL, `GlassLens.android.kt`), 12 only blurs, older phones draw it nearly solid.

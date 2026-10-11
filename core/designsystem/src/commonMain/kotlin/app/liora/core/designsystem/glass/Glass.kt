@@ -66,6 +66,11 @@ object GlassDefaults {
     fun regular(): GlassStyle =
         with(LioraTheme.glass) { GlassStyle(tint = tint, solidTint = solidTint, rim = rim, underlay = base) }
 
+    /** For the buttons in a top bar: small, so they bend less, over content the bar frosts around them. */
+    @Composable
+    @ReadOnlyComposable
+    fun bar(): GlassStyle = regular().copy(blur = BAR_BLUR.dp, bend = BAR_BEND.dp, depth = BAR_DEPTH.dp)
+
     /** The accent's glass, for what's live: the workout in progress, the rest timer. */
     @Composable
     @ReadOnlyComposable
@@ -80,6 +85,9 @@ object GlassDefaults {
             )
         }
 
+    private const val BAR_BLUR = 12
+    private const val BAR_BEND = 16
+    private const val BAR_DEPTH = 10
     private const val SOLID_ACCENT = 0.96f
     private const val ACCENT_RIM = 0.7f
 }
@@ -165,6 +173,11 @@ private class GlassNode(
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) = invalidateDraw()
 
     override fun ContentDrawScope.draw() {
+        // Nothing in it, such as a top bar with no actions: no glass either.
+        if (size.minDimension <= 0f) {
+            drawContent()
+            return
+        }
         val outline = shape.createOutline(size, layoutDirection, this)
         path.rewind()
         path.addOutline(outline)

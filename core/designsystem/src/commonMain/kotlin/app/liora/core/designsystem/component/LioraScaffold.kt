@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -41,7 +43,8 @@ fun LioraScaffold(
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
     content: @Composable (PaddingValues) -> Unit,
 ) {
-    val insets = contentWindowInsets.add(LocalFloatingChromeInsets.current)
+    val floating = LocalFloatingChromeInsets.current
+    val insets = contentWindowInsets.add(floating)
     val glass = LioraTheme.glass
     if (!glass.enabled) {
         Scaffold(
@@ -72,7 +75,10 @@ fun LioraScaffold(
         bottomBar = { CompositionLocalProvider(LocalGlassBackdrop provides backdrop, content = bottomBar) },
         snackbarHost = snackbarHost,
         floatingActionButton = {
-            CompositionLocalProvider(LocalGlassBackdrop provides backdrop, content = floatingActionButton)
+            // Material places it by the window's edge, not the content's insets: lift it over the tabs.
+            Box(Modifier.padding(bottom = floating.asPaddingValues().calculateBottomPadding())) {
+                CompositionLocalProvider(LocalGlassBackdrop provides backdrop, content = floatingActionButton)
+            }
         },
         floatingActionButtonPosition = floatingActionButtonPosition,
         containerColor = Color.Transparent,
