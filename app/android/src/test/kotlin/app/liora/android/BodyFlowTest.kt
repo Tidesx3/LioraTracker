@@ -119,6 +119,8 @@ class BodyFlowTest {
         seedHistory()
         openBody()
         waitForText("Pick a measurement")
+        // The placeholder beside it shows before the measurements have loaded.
+        waitForText("Waist")
         composeRule.onNodeWithText("Waist").performClick()
         waitForText("3 entries")
         composeRule.onNode(isSelected() and hasText("Waist")).assertIsDisplayed()

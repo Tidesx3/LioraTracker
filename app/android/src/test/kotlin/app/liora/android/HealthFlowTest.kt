@@ -1,5 +1,6 @@
 package app.liora.android
 
+import android.os.Looper
 import androidx.compose.ui.test.hasScrollToKeyAction
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -25,6 +26,7 @@ import org.koin.core.context.GlobalContext
 import org.koin.core.context.stopKoin
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import kotlin.time.Instant
@@ -59,8 +61,12 @@ class HealthFlowTest {
         waitForText("Saved to Health Connect")
         composeRule.onNodeWithText("Brought in from Health Connect").assertExists()
         composeRule.onRoot().captureRoboImage("src/test/screenshots/health_on_dark.png")
-        // Setting it up traded with Health Connect right away; what came in is HealthRepositoryTest's.
-        composeRule.waitUntil(TIMEOUT_MS) { store.readings.isEmpty() }
+        // Setting it up traded with Health Connect right away; what came in is HealthRepositoryTest's. The
+        // trade resumes on the main looper, which only waits on the screen run, so run it here.
+        composeRule.waitUntil(TIMEOUT_MS) {
+            shadowOf(Looper.getMainLooper()).idle()
+            store.readings.isEmpty()
+        }
 
         composeRule.onNodeWithText("Turn off").performClick()
         waitForText("Turn off Health Connect?")
