@@ -19,6 +19,8 @@
   <string name="rpe">RPE column</string>
   <string name="rpe_body">Rate how hard each set was, from 1 to 10</string>
   <string name="race_last_time">Race last time</string>
+  <string name="weekly_goal">Weekly goal</string>
+  <string name="weekly_goal_none">None yet: any week you train counts</string>
   <string name="race_last_time_body">Each set shows whether it beat last time’s, and a scoreboard keeps count</string>
 
   <string name="section_units">Units</string>

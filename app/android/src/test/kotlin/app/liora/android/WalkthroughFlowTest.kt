@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToKeyAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -97,6 +98,9 @@ class WalkthroughFlowTest {
 
         composeRule.onNodeWithText("Next").performClick()
         waitForText("Watch it add up")
+        // The weekly goal: three days, as suggested.
+        composeRule.onNode(hasText("3") and isSelectable()).performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasText("3") and isSelected()) }
         composeRule.onRoot().captureRoboImage("src/test/screenshots/walkthrough_progress_dark.png")
         composeRule.onNodeWithText("Next").performClick()
         waitForText("Keep it safe")
@@ -106,6 +110,16 @@ class WalkthroughFlowTest {
         composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasContentDescription("Settings")) }
         composeRule.onAllNodesWithText("Keep it safe").assertCountEquals(0)
         assertFalse(runBlocking { walkthrough.pending.first() })
+        assertEquals(
+            3,
+            runBlocking {
+                GlobalContext
+                    .get()
+                    .get<SettingsRepository>()
+                    .current()
+                    .weeklyGoals.current
+            },
+        )
 
         // And it stays done.
         controller.recreate()

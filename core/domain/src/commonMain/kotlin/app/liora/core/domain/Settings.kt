@@ -20,6 +20,8 @@ data class Settings(
      * and the summary. On for the push it gives; off for those who'd rather train without a score.
      */
     val raceLastTime: Boolean = true,
+    /** Training days a week to aim for, each with the week it starts from; the streak counts weeks that reach it. */
+    val weeklyGoals: WeeklyGoals = WeeklyGoals(),
     val units: Units = Units(),
     val oneRepMaxFormula: OneRepMaxFormula = OneRepMaxFormula.Epley,
     /** How long a lift can go without a new best before it counts as stalled. */

@@ -24,6 +24,8 @@
   <string name="col_reps">Reps</string>
 
   <string name="progress_title">Watch it add up</string>
+  <string name="progress_goal">How many days a week?</string>
+  <string name="progress_goal_hint">%1$d is a good start. Every week you reach it adds to your streak, and a week off now and then doesn’t end it. Settings changes it any time.</string>
   <string name="progress_body">Records the moment you set them, a chart for every lift, a streak that counts weeks, and a report each month.</string>
 
   <string name="data_title">Keep it safe</string>

@@ -39,6 +39,7 @@ import app.liora.feature.logger.LoggerTags
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.github.takahirom.roborazzi.captureScreenRoboImage
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -49,6 +50,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.GlobalContext
+import org.koin.core.context.loadKoinModules
 import org.koin.core.context.stopKoin
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
@@ -75,6 +77,8 @@ class LiquidGlassTest {
     @Before
     fun seed() {
         java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone(ZONE))
+        // The Train tab's week as of the Thursday after the last workout, whatever day the test runs.
+        loadKoinModules(WeekAsOf.module(LocalDate(2026, 8, 13)))
         runBlocking {
             koin.get<AppStartup>().run()
             val routines = koin.get<RoutineRepository>()
@@ -255,7 +259,7 @@ class LiquidGlassTest {
         launch()
         waitForText("Legs")
         composeRule.onNodeWithContentDescription("Settings").performClick()
-        waitForText("Epley")
+        waitForText("Rest between sets")
         composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Liquid Glass"))
         composeRule.onRoot().captureRoboImage("src/test/screenshots/glass_settings_dark.png")
         runBlocking { koin.get<SettingsRepository>().update { it.copy(glass = false) } }

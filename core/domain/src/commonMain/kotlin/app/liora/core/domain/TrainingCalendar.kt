@@ -13,7 +13,7 @@ import kotlin.time.Instant
 
 /**
  * Calendar days, weeks and months for history and progress: which days were trained, a month laid out
- * in weeks, the recent weeks and how many of them in a row had training.
+ * in weeks, and the recent weeks. Streaks are [WeekStreaks].
  */
 object TrainingCalendar {
     /** The day [instant] falls on where the user is: a workout at 23:30 counts for that evening. */
@@ -56,27 +56,6 @@ object TrainingCalendar {
     ): List<List<LocalDate>> {
         val first = weekStart(today, firstDayOfWeek).minus((count - 1) * DAYS_PER_WEEK, DAY)
         return List(count) { week -> List(DAYS_PER_WEEK) { day -> first.plus(week * DAYS_PER_WEEK + day, DAY) } }
-    }
-
-    /**
-     * Weeks in a row with a workout, counting back from [today]'s. Lifting runs in weeks, not days: rest
-     * days don't break a streak, a week without training does. The current week adds to the streak once
-     * trained, but doesn't end it before it's over.
-     */
-    fun weekStreak(
-        trainingDays: Set<LocalDate>,
-        today: LocalDate,
-        firstDayOfWeek: DayOfWeek,
-    ): Int {
-        val trained = trainingDays.map { weekStart(it, firstDayOfWeek) }.toSet()
-        var week = weekStart(today, firstDayOfWeek)
-        if (week !in trained) week = week.minus(DAYS_PER_WEEK, DAY)
-        var streak = 0
-        while (week in trained) {
-            streak++
-            week = week.minus(DAYS_PER_WEEK, DAY)
-        }
-        return streak
     }
 
     private const val DAYS_PER_WEEK = 7

@@ -39,6 +39,7 @@
     <item quantity="one">%1$d set done</item>
     <item quantity="other">%1$d sets done</item>
   </plurals>
+  <string name="widget_week">%1$d of %2$d this week</string>
   <plurals name="widget_streak">
     <item quantity="one">%1$d week in a row</item>
     <item quantity="other">%1$d weeks in a row</item>

@@ -36,7 +36,9 @@ starts a step heavier once the sets reach the top of their rep ranges, and says 
 tunes how). The logger marks each set that reaches the top of its range and celebrates the step the moment
 it's earned, and the summary lists the steps up, along with exercises without progression that are ready for
 more weight. Every workout races the last one: each set done shows whether it beat last time's, and a
-scoreboard keeps count, on the summary too (Settings › Workout turns it off). A folder of routines can be a rotation, and the Train tab says which one is next, as does a
+scoreboard keeps count, on the summary too (Settings › Workout turns it off). A weekly goal of training days
+heads the Train tab, a ring filling as the week goes; the streak counts weeks that reach it, and every six of
+them earn a rest week, so a week off now and then doesn't end it. A folder of routines can be a rotation, and the Train tab says which one is next, as does a
 home-screen widget, which follows the workout while it runs. On Android 16 the workout is a Live Update: the
 set and the rest in the status bar and on the lock screen. And the release app updates itself from this repo's
 GitHub Releases, saying what's new first. Phase 4 is done. Any AI can write routines for Liora: a program in a

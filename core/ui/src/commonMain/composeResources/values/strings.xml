@@ -156,4 +156,34 @@
   <string name="update_failed_not_genuine">The download didn’t check out, so it wasn’t installed.</string>
   <string name="update_failed_not_installed">Android didn’t install it.</string>
   <string name="update_retry">Try again</string>
+  <string name="week_this_week">This week</string>
+  <string name="week_goal_reached">Week goal reached!</string>
+  <plurals name="week_more_to_go">
+    <item quantity="one">%1$d more day to go this week</item>
+    <item quantity="other">%1$d more days to go this week</item>
+  </plurals>
+  <plurals name="week_streak">
+    <item quantity="one">%1$d week in a row</item>
+    <item quantity="other">%1$d weeks in a row</item>
+  </plurals>
+  <plurals name="week_rest_weeks">
+    <item quantity="one">%1$d rest week in hand</item>
+    <item quantity="other">%1$d rest weeks in hand</item>
+  </plurals>
+  <string name="week_rest_earned">You earned a rest week</string>
+  <string name="week_rested">Last week was a rest week, so your streak goes on</string>
+  <string name="week_fresh_start">A fresh streak starts this week</string>
+  <string name="week_set_goal">Set a weekly goal</string>
+  <plurals name="week_described">
+    <item quantity="one">%1$d of %2$d training day this week</item>
+    <item quantity="other">%1$d of %2$d training days this week</item>
+  </plurals>
+  <string name="week_goal_title">Weekly goal</string>
+  <string name="week_goal_note">How many days a week do you want to train? Every %1$d weeks you reach it earn a rest week, so a week off now and then doesn’t end your streak.</string>
+  <plurals name="week_days_a_week">
+    <item quantity="one">%1$d day a week</item>
+    <item quantity="other">%1$d days a week</item>
+  </plurals>
+  <string name="week_any">Any week you train counts</string>
+  <string name="dialog_cancel">Cancel</string>
 </resources>

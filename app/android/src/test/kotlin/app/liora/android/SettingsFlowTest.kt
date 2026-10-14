@@ -66,9 +66,10 @@ class SettingsFlowTest {
     @Config(qualifiers = COVER)
     fun choicesAreSavedAndShown() {
         openSettings()
-        composeRule.onNodeWithText("Epley").assertIsDisplayed()
+        composeRule.onNodeWithText("Rest between sets").assertIsDisplayed()
         composeRule.onRoot().captureRoboImage("src/test/screenshots/settings_dark.png")
 
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Estimated 1RM"))
         composeRule.onNodeWithText("Estimated 1RM").performClick()
         composeRule.onNodeWithText("Brzycki").performClick()
         waitForText("Brzycki")
@@ -160,7 +161,8 @@ class SettingsFlowTest {
         Robolectric.buildActivity(MainActivity::class.java).setup()
         composeRule.waitForIdle()
         composeRule.onNodeWithContentDescription(label).performClick()
-        waitForText("Epley")
+        // The Workout section's switches, at the top in any language.
+        composeRule.waitUntil(TIMEOUT_MS) { composeRule.onAllNodes(isToggleable()).fetchSemanticsNodes().isNotEmpty() }
     }
 
     /** Waits until the switch in the row titled [title] is [on], as the setting is saved. */

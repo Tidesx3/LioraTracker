@@ -8,7 +8,9 @@ import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.sync.SyncRepository
 import app.liora.core.data.update.UpdateRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
+import app.liora.core.data.workout.WeekProgressRepository
 import app.liora.core.domain.RotationTurn
+import app.liora.core.domain.WeekProgress
 import app.liora.core.domain.update.UpdateState
 import app.liora.core.domain.update.release
 import app.liora.core.model.Routine
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DayOfWeek
 
 /** A routine as a card: its exercises reduced to names. */
 data class RoutineCardState(
@@ -53,6 +56,8 @@ data class TrainUiState(
     /** What's next in each rotation, the one trained most recently first. */
     val turns: List<RotationTurn> = emptyList(),
     val updateState: UpdateState = UpdateState.Off,
+    /** This week against the weekly goal, and the streak; null until worked out. */
+    val week: WeekProgress? = null,
 ) {
     /** A newer Liora for the top of the tab: until it's installed, unless Not now was tapped on it. */
     val update: UpdateState? get() =
@@ -80,8 +85,19 @@ class TrainViewModel(
     sync: SyncRepository,
     rotations: RotationRepository,
     private val updates: UpdateRepository,
+    private val weeks: WeekProgressRepository,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
+
+    /** Where the locale starts its weeks. */
+    private val firstDayOfWeek = MutableStateFlow<DayOfWeek?>(null)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val week: Flow<WeekProgress?> =
+        firstDayOfWeek
+            .filterNotNull()
+            .flatMapLatest { weeks.progress(it) }
+            .onStart<WeekProgress?> { emit(null) }
     private val dialog = MutableStateFlow<RoutineDialog?>(null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -114,10 +130,22 @@ class TrainViewModel(
             state.copy(turns = turns)
         }.combine(updates.state) { state, update ->
             state.copy(updateState = update)
+        }.combine(week) { state, progress ->
+            state.copy(week = progress)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TrainUiState())
 
     fun setLanguage(value: String) {
         language.value = value
+    }
+
+    fun setFirstDayOfWeek(value: DayOfWeek) {
+        firstDayOfWeek.value = value
+    }
+
+    /** Aims for [days] training days a week from this week on. */
+    fun setGoal(days: Int) {
+        val firstDay = firstDayOfWeek.value ?: return
+        viewModelScope.launch { weeks.setGoal(days, firstDay) }
     }
 
     fun startEmptyWorkout() {

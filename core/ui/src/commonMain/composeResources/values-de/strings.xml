@@ -156,4 +156,34 @@
   <string name="update_failed_not_genuine">Der Download war nicht in Ordnung, deshalb wurde nichts installiert.</string>
   <string name="update_failed_not_installed">Android hat es nicht installiert.</string>
   <string name="update_retry">Noch mal versuchen</string>
+  <string name="week_this_week">Diese Woche</string>
+  <string name="week_goal_reached">Wochenziel erreicht!</string>
+  <plurals name="week_more_to_go">
+    <item quantity="one">Noch %1$d Tag diese Woche</item>
+    <item quantity="other">Noch %1$d Tage diese Woche</item>
+  </plurals>
+  <plurals name="week_streak">
+    <item quantity="one">%1$d Woche in Folge</item>
+    <item quantity="other">%1$d Wochen in Folge</item>
+  </plurals>
+  <plurals name="week_rest_weeks">
+    <item quantity="one">%1$d Ruhewoche in Reserve</item>
+    <item quantity="other">%1$d Ruhewochen in Reserve</item>
+  </plurals>
+  <string name="week_rest_earned">Du hast dir eine Ruhewoche verdient</string>
+  <string name="week_rested">Letzte Woche war eine Ruhewoche, deine Serie geht weiter</string>
+  <string name="week_fresh_start">Diese Woche beginnt eine neue Serie</string>
+  <string name="week_set_goal">Wochenziel festlegen</string>
+  <plurals name="week_described">
+    <item quantity="one">%1$d von %2$d Trainingstag diese Woche</item>
+    <item quantity="other">%1$d von %2$d Trainingstagen diese Woche</item>
+  </plurals>
+  <string name="week_goal_title">Wochenziel</string>
+  <string name="week_goal_note">An wie vielen Tagen pro Woche willst du trainieren? Alle %1$d Wochen, in denen du es erreichst, bringen dir eine Ruhewoche, damit eine freie Woche zwischendurch deine Serie nicht beendet.</string>
+  <plurals name="week_days_a_week">
+    <item quantity="one">%1$d Tag pro Woche</item>
+    <item quantity="other">%1$d Tage pro Woche</item>
+  </plurals>
+  <string name="week_any">Jede Woche mit Training zählt</string>
+  <string name="dialog_cancel">Abbrechen</string>
 </resources>

@@ -68,4 +68,9 @@
     <item quantity="one">%1$d personal record</item>
     <item quantity="other">%1$d personal records</item>
   </plurals>
+  <plurals name="progress_rest_weeks">
+    <item quantity="one">%1$d rest week in hand: a lighter week won’t end the streak</item>
+    <item quantity="other">%1$d rest weeks in hand: a lighter week won’t end the streak</item>
+  </plurals>
+  <string name="progress_rest_week">Rest week</string>
 </resources>

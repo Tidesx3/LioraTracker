@@ -4,6 +4,17 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
+- **Weekly goal: check on the phone** (added 2026-10-14). Pick a goal on the Train tab's card (or Settings ›
+  Workout › Weekly goal):
+  - The ring fills with each training day, emerald once the goal is reached; the day's bead appears as a
+    workout is finished, today is outlined, and the days to come are faint.
+  - Two workouts on one day count once. The summary says how many days are left, or that the goal is reached.
+  - Over the weeks: after six weeks reached, "1 rest week in hand" on the Progress tab; a week short the week
+    after shows "Last week was a rest week" on the card, and the grid tints it.
+  - The widget shows "3 of 4 this week" above the streak. In German, where weeks start on Monday.
+  - A fresh install: the walkthrough's Progress page asks for the goal, and nothing shows on the Train tab
+    before a goal or a first workout.
+
 - **Racing last time: check on the phone** (added 2026-10-14). Start a routine you've done before:
   - The pill under the totals says how many sets there are to beat, then keeps score as you tick ("Last time
     ▲ 1 of 3 │ +80 kg"); the figures roll and the list doesn't jump at the first tick.

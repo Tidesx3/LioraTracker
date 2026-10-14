@@ -61,4 +61,9 @@
     <item quantity="one">%1$d persönlicher Rekord</item>
     <item quantity="other">%1$d persönliche Rekorde</item>
   </plurals>
+  <plurals name="progress_rest_weeks">
+    <item quantity="one">%1$d Ruhewoche in Reserve: Eine ruhigere Woche beendet die Serie nicht</item>
+    <item quantity="other">%1$d Ruhewochen in Reserve: Eine ruhigere Woche beendet die Serie nicht</item>
+  </plurals>
+  <string name="progress_rest_week">Ruhewoche</string>
 </resources>

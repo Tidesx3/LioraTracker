@@ -137,7 +137,7 @@ class UpdateFlowTest {
 
     private fun openAbout() {
         composeRule.onNodeWithContentDescription("Settings").performClick()
-        waitForText("Epley")
+        waitForText("Rest between sets")
         composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Look for updates"))
     }
 

@@ -58,6 +58,9 @@ import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.illustration.LioraIllustration
 import app.liora.core.designsystem.layout.currentWindowLayout
 import app.liora.core.designsystem.theme.LioraTheme
+import app.liora.core.designsystem.util.rememberDateFormatter
+import app.liora.core.designsystem.util.rememberNumberFormatter
+import app.liora.core.domain.WeeklyGoals
 import app.liora.core.model.WeightUnit
 import app.liora.core.ui.CloudConnection
 import app.liora.core.ui.LocalCloudConsent
@@ -76,6 +79,8 @@ import app.liora.feature.walkthrough.resources.logging_body
 import app.liora.feature.walkthrough.resources.logging_title
 import app.liora.feature.walkthrough.resources.next
 import app.liora.feature.walkthrough.resources.progress_body
+import app.liora.feature.walkthrough.resources.progress_goal
+import app.liora.feature.walkthrough.resources.progress_goal_hint
 import app.liora.feature.walkthrough.resources.progress_title
 import app.liora.feature.walkthrough.resources.routines_body
 import app.liora.feature.walkthrough.resources.routines_title
@@ -103,6 +108,7 @@ fun WalkthroughScreen(
     modifier: Modifier = Modifier,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val firstDayOfWeek = rememberDateFormatter().firstDayOfWeek
     val consent = LocalCloudConsent.current
     val scope = rememberCoroutineScope()
     var connecting by remember { mutableStateOf(false) }
@@ -118,6 +124,7 @@ fun WalkthroughScreen(
         actions =
             WalkthroughActions(
                 onWeightUnit = viewModel::chooseWeightUnit,
+                onWeeklyGoal = { days -> viewModel.chooseWeeklyGoal(days, firstDayOfWeek) },
                 onConnect = {
                     scope.launch {
                         connecting = true
@@ -151,6 +158,7 @@ private data class Connection(
 
 private class WalkthroughActions(
     val onWeightUnit: (WeightUnit) -> Unit,
+    val onWeeklyGoal: (days: Int) -> Unit,
     val onConnect: () -> Unit,
     val onImport: () -> Unit,
     val onFinish: () -> Unit,
@@ -300,7 +308,11 @@ private fun PageText(
                 DataOffer(state.syncAccount, connection, actions, alignment, align)
             }
 
-            Page.Routines, Page.Progress -> {
+            Page.Progress -> {
+                GoalChoice(state.weeklyGoal, actions.onWeeklyGoal, alignment, align)
+            }
+
+            Page.Routines -> {
                 Unit
             }
         }
@@ -341,6 +353,46 @@ private fun UnitChoice(
         }
         Text(
             text = stringResource(Res.string.welcome_units_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = align,
+        )
+    }
+}
+
+/**
+ * The weekly goal, on the page about the streak: how many days a week. Nothing is chosen until tapped; the
+ * hint suggests a start, and that Settings changes it.
+ */
+@Composable
+private fun GoalChoice(
+    selected: Int?,
+    onChoose: (Int) -> Unit,
+    alignment: Alignment.Horizontal,
+    align: TextAlign,
+) {
+    Column(
+        Modifier.padding(top = 8.dp),
+        horizontalAlignment = alignment,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(stringResource(Res.string.progress_goal), style = MaterialTheme.typography.titleMedium)
+        val choices = WeeklyGoals.CHOICES.toList()
+        SingleChoiceSegmentedButtonRow {
+            choices.forEachIndexed { index, days ->
+                LioraSegmentedButton(
+                    selected = days == selected,
+                    onClick = { onChoose(days) },
+                    shape = SegmentedButtonDefaults.itemShape(index, choices.size),
+                    // Seven narrow segments: the chosen one shows by its color alone.
+                    icon = {},
+                ) {
+                    Text(rememberNumberFormatter().format(days))
+                }
+            }
+        }
+        Text(
+            text = stringResource(Res.string.progress_goal_hint, WeeklyGoals.SUGGESTED),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = align,

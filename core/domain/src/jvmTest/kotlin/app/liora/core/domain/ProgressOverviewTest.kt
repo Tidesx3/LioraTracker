@@ -41,11 +41,11 @@ class ProgressOverviewTest {
         val threeWeeks =
             setOf(LocalDate(2026, 9, 8), LocalDate(2026, 9, 17), LocalDate(2026, 9, 21), LocalDate(2026, 9, 24))
         // Not trained yet this week: the streak still stands.
-        assertEquals(3, TrainingCalendar.weekStreak(threeWeeks, today, DayOfWeek.MONDAY))
-        assertEquals(4, TrainingCalendar.weekStreak(threeWeeks + today, today, DayOfWeek.MONDAY))
+        assertEquals(3, WeekStreaks.of(threeWeeks, WeeklyGoals(), today, DayOfWeek.MONDAY).streak)
+        assertEquals(4, WeekStreaks.of(threeWeeks + today, WeeklyGoals(), today, DayOfWeek.MONDAY).streak)
         // A week off ends it.
-        assertEquals(0, TrainingCalendar.weekStreak(setOf(LocalDate(2026, 9, 17)), today, DayOfWeek.MONDAY))
-        assertEquals(0, TrainingCalendar.weekStreak(emptySet(), today, DayOfWeek.MONDAY))
+        assertEquals(0, WeekStreaks.of(setOf(LocalDate(2026, 9, 17)), WeeklyGoals(), today, DayOfWeek.MONDAY).streak)
+        assertEquals(0, WeekStreaks.of(emptySet(), WeeklyGoals(), today, DayOfWeek.MONDAY).streak)
     }
 
     @Test

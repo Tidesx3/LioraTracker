@@ -4,8 +4,7 @@ import app.liora.core.data.routine.RotationRepository
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.RestTimerRepository
-import app.liora.core.data.workout.WorkoutHistoryRepository
-import app.liora.core.domain.TrainingCalendar
+import app.liora.core.data.workout.WeekProgressRepository
 import app.liora.core.model.RestTimer
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -40,13 +39,21 @@ sealed interface WidgetState {
         val routineId: String,
         val routineName: String,
         val streakWeeks: Int,
+        val week: WidgetWeek? = null,
     ) : WidgetState
 
     /** No rotation: an empty workout to start. */
     data class QuickStart(
         val streakWeeks: Int,
+        val week: WidgetWeek? = null,
     ) : WidgetState
 }
+
+/** This week against the weekly goal: [done] training days of [goal]. Only once a goal is chosen. */
+data class WidgetWeek(
+    val done: Int,
+    val goal: Int,
+)
 
 /** The widget's state from the repositories: the workout running, else the rotations, and the streak. */
 class WidgetStates(
@@ -54,7 +61,7 @@ class WidgetStates(
     private val restTimer: RestTimerRepository,
     private val rotations: RotationRepository,
     private val routines: RoutineRepository,
-    private val history: WorkoutHistoryRepository,
+    private val weeks: WeekProgressRepository,
     private val clock: Clock,
 ) {
     /** The rest running, and null the moment it runs out, which changes nothing stored. */
@@ -78,9 +85,8 @@ class WidgetStates(
             workouts.activeWorkout,
             restRunning,
             combine(rotations.turns, routines.folders, routines.routines, ::Triple),
-            history.trainingStarts,
-        ) { active, rest, (turns, folders, all), starts ->
-            val now = clock.now()
+            weeks.progress(firstDayOfWeek()),
+        ) { active, rest, (turns, folders, all), progress ->
             if (active != null) {
                 return@combine WidgetState.Training(
                     name = active.name,
@@ -89,28 +95,19 @@ class WidgetStates(
                     restEndsAt = rest?.endsAt,
                 )
             }
-            val streak = streakWeeks(starts, now)
+            val streak = progress.streak
+            val week = WidgetWeek(progress.done, progress.goal).takeIf { progress.goalSet }
             val turn = turns.firstOrNull()
             val folder = turn?.let { folders.firstOrNull { it.id == turn.folderId } }
             val routine = turn?.let { all.firstOrNull { it.id == turn.nextRoutineId } }
             if (folder != null && routine != null) {
-                WidgetState.NextUp(folder.name, routine.id, routine.name, streak)
+                WidgetState.NextUp(folder.name, routine.id, routine.name, streak, week)
             } else {
-                WidgetState.QuickStart(streak)
+                WidgetState.QuickStart(streak, week)
             }
         }.distinctUntilChanged()
 
     suspend fun current(): WidgetState = changes.first()
-
-    /** Weeks in a row with a workout, as the Progress tab counts them. */
-    private fun streakWeeks(
-        starts: List<Instant>,
-        now: Instant,
-    ): Int {
-        val zone = TimeZone.currentSystemDefault()
-        val days = starts.map { it.toLocalDateTime(zone).date }.toSet()
-        return TrainingCalendar.weekStreak(days, now.toLocalDateTime(zone).date, firstDayOfWeek())
-    }
 
     private fun firstDayOfWeek(): DayOfWeek = WeekFields.of(Locale.getDefault()).firstDayOfWeek.toKotlinDayOfWeek()
 }

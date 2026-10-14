@@ -10,6 +10,8 @@ import app.liora.core.domain.MuscleTargets
 import app.liora.core.domain.RecordsBoard
 import app.liora.core.domain.Settings
 import app.liora.core.domain.TrainingCalendar
+import app.liora.core.domain.WeekResult
+import app.liora.core.domain.WeekStreaks
 import app.liora.core.domain.setsPerMuscle
 import app.liora.core.model.Exercise
 import app.liora.core.model.FinishedWorkout
@@ -44,8 +46,12 @@ sealed interface ProgressUiState {
 
     data class Loaded(
         val today: LocalDate,
-        /** Weeks in a row with training. */
+        /** Weeks in a row that reached the weekly goal; rest weeks keep it going. */
         val streakWeeks: Int,
+        /** Rest weeks in hand. */
+        val restWeeks: Int = 0,
+        /** The weeks a rest week covered, by their first day, for the consistency grid. */
+        val restedWeeks: Set<LocalDate> = emptySet(),
         val workoutsThisWeek: Int,
         val setsThisWeek: Int,
         /** Every day with a finished workout, for the consistency grid. */
@@ -144,9 +150,12 @@ class ProgressViewModel(
         }
         val current = inWeek(thisWeek)
         val trainingDays = workouts.map(dayOf).toSet()
+        val week = WeekStreaks.of(trainingDays, chosen.weeklyGoals, today, firstDay)
         return ProgressUiState.Loaded(
             today = today,
-            streakWeeks = TrainingCalendar.weekStreak(trainingDays, today, firstDay),
+            streakWeeks = week.streak,
+            restWeeks = week.restWeeks,
+            restedWeeks = week.weeks.filterValues { it == WeekResult.Rested }.keys,
             workoutsThisWeek = current.size,
             setsThisWeek =
                 current.sumOf { workout ->

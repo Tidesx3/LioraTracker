@@ -21,6 +21,7 @@ import app.liora.core.model.RoutineSet
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.LocalDate
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -28,6 +29,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.GlobalContext
+import org.koin.core.context.loadKoinModules
 import org.koin.core.context.stopKoin
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
@@ -50,6 +52,8 @@ class RotationFlowTest {
     @Before
     fun seed() =
         runBlocking {
+            // A week before any of this test's training, so the Train tab has no week card on any day it runs.
+            loadKoinModules(WeekAsOf.module(LocalDate(2026, 1, 1)))
             koin.get<AppStartup>().run()
             val folder = routines.createFolder(PPL)
             listOf(

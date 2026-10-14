@@ -19,6 +19,8 @@
   <string name="rpe">RPE-Spalte</string>
   <string name="rpe_body">Wie schwer jeder Satz war, von 1 bis 10</string>
   <string name="race_last_time">Gegen das letzte Mal antreten</string>
+  <string name="weekly_goal">Wochenziel</string>
+  <string name="weekly_goal_none">Noch keins: jede Woche mit Training zählt</string>
   <string name="race_last_time_body">Jeder Satz zeigt, ob er das letzte Mal schlägt, und ein Spielstand zählt mit</string>
 
   <string name="section_units">Einheiten</string>

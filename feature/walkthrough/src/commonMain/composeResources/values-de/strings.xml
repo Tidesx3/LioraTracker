@@ -24,6 +24,8 @@
   <string name="col_reps">Wdh.</string>
 
   <string name="progress_title">Da kommt was zusammen</string>
+  <string name="progress_goal">An wie vielen Tagen pro Woche?</string>
+  <string name="progress_goal_hint">%1$d sind ein guter Anfang. Jede Woche, in der du es schaffst, verlängert deine Serie, und eine freie Woche zwischendurch beendet sie nicht. In den Einstellungen änderst du es jederzeit.</string>
   <string name="progress_body">Rekorde, sobald du sie aufstellst, ein Verlauf für jede Übung, eine Serie, die Wochen zählt, und jeden Monat ein Bericht.</string>
 
   <string name="data_title">Sicher ist sicher</string>

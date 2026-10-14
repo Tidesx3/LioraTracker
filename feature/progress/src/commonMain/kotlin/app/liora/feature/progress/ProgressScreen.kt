@@ -42,6 +42,7 @@ import app.liora.feature.progress.resources.progress_empty_body
 import app.liora.feature.progress.resources.progress_empty_title
 import app.liora.feature.progress.resources.progress_muscles
 import app.liora.feature.progress.resources.progress_records
+import app.liora.feature.progress.resources.progress_rest_weeks
 import app.liora.feature.progress.resources.progress_sets_this_week
 import app.liora.feature.progress.resources.progress_streak
 import app.liora.feature.progress.resources.progress_streak_weeks
@@ -139,7 +140,12 @@ private fun ProgressContent(
                     ) { BodyLink(navigation.onOpenBody, Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) }
                     item(key = "consistency") {
                         SectionHeader(stringResource(Res.string.progress_consistency))
-                        ConsistencyGrid(state.trainingDays, state.today, Modifier.padding(horizontal = 20.dp))
+                        ConsistencyGrid(
+                            state.trainingDays,
+                            state.today,
+                            Modifier.padding(horizontal = 20.dp),
+                            state.restedWeeks,
+                        )
                     }
                     item(key = "muscles") {
                         SectionHeader(stringResource(Res.string.progress_muscles))
@@ -180,22 +186,32 @@ private fun Summary(
 ) {
     val numbers = rememberNumberFormatter()
     // Equal thirds; the figures stay on one line, and a longer German label wraps below them.
-    StatRow(modifier) {
-        Stat(
-            pluralStringResource(Res.plurals.progress_streak_weeks, state.streakWeeks, state.streakWeeks),
-            stringResource(Res.string.progress_streak),
-            Modifier.weight(1f),
-        )
-        Stat(
-            pluralStringResource(Res.plurals.progress_workouts, state.workoutsThisWeek, state.workoutsThisWeek),
-            stringResource(Res.string.progress_this_week),
-            Modifier.weight(1f),
-        )
-        Stat(
-            numbers.format(state.setsThisWeek),
-            stringResource(Res.string.progress_sets_this_week),
-            Modifier.weight(1f),
-        )
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        StatRow {
+            Stat(
+                pluralStringResource(Res.plurals.progress_streak_weeks, state.streakWeeks, state.streakWeeks),
+                stringResource(Res.string.progress_streak),
+                Modifier.weight(1f),
+            )
+            Stat(
+                pluralStringResource(Res.plurals.progress_workouts, state.workoutsThisWeek, state.workoutsThisWeek),
+                stringResource(Res.string.progress_this_week),
+                Modifier.weight(1f),
+            )
+            Stat(
+                numbers.format(state.setsThisWeek),
+                stringResource(Res.string.progress_sets_this_week),
+                Modifier.weight(1f),
+            )
+        }
+        // What keeps the streak through a week off.
+        if (state.restWeeks > 0) {
+            Text(
+                text = pluralStringResource(Res.plurals.progress_rest_weeks, state.restWeeks, state.restWeeks),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 

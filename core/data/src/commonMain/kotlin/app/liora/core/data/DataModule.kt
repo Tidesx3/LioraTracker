@@ -45,12 +45,15 @@ import app.liora.core.data.walkthrough.WalkthroughRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.LocalRestTimerRepository
 import app.liora.core.data.workout.OfflineActiveWorkoutRepository
+import app.liora.core.data.workout.OfflineWeekProgressRepository
 import app.liora.core.data.workout.OfflineWorkoutHistoryRepository
 import app.liora.core.data.workout.RestTimerRepository
 import app.liora.core.data.workout.SetLogger
+import app.liora.core.data.workout.WeekProgressRepository
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.database.dao.LocalMetaDao
 import app.liora.core.database.databaseModule
+import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -90,6 +93,8 @@ val dataModule =
             }
         }
         singleOf(::OfflineWorkoutHistoryRepository) bind WorkoutHistoryRepository::class
+        // Holds nothing but the clock: one each, so a clock swapped after start-up (tests) reaches every screen.
+        factoryOf(::OfflineWeekProgressRepository) bind WeekProgressRepository::class
         singleOf(::OfflineBodyRepository) bind BodyRepository::class
         singleOf(::OfflineProgressPhotoRepository) bind ProgressPhotoRepository::class
         singleOf(::SyncedTables)

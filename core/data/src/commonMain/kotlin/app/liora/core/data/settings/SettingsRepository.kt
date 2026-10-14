@@ -5,6 +5,7 @@ import app.liora.core.database.TransactionRunner
 import app.liora.core.database.dao.PreferenceDao
 import app.liora.core.database.model.PreferenceEntity
 import app.liora.core.domain.BelowRange
+import app.liora.core.domain.GoalChange
 import app.liora.core.domain.LastTime
 import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.ProgressionSettings
@@ -14,6 +15,7 @@ import app.liora.core.domain.RestSound
 import app.liora.core.domain.Settings
 import app.liora.core.domain.StepUpWhen
 import app.liora.core.domain.ThemeMode
+import app.liora.core.domain.WeeklyGoals
 import app.liora.core.model.DistanceUnit
 import app.liora.core.model.LengthUnit
 import app.liora.core.model.Units
@@ -21,6 +23,7 @@ import app.liora.core.model.WeightUnit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.datetime.LocalDate
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.seconds
 
@@ -79,6 +82,7 @@ internal object SettingsCodec {
     private const val REST_SOUND = "rest.sound"
     private const val RPE = "logger.rpe"
     private const val RACE = "logger.race_last_time"
+    private const val WEEKLY_GOALS = "goals.weekly"
     private const val WEIGHT_UNIT = "units.weight"
     private const val DISTANCE_UNIT = "units.distance"
     private const val BODY_LENGTH_UNIT = "units.body_length"
@@ -129,6 +133,7 @@ internal object SettingsCodec {
             REST_SOUND to restSounds.getValue(settings.restSound),
             RPE to settings.rpe.toString(),
             RACE to settings.raceLastTime.toString(),
+            WEEKLY_GOALS to encodeGoals(settings.weeklyGoals),
             WEIGHT_UNIT to weightUnits.getValue(settings.units.weight),
             DISTANCE_UNIT to distanceUnits.getValue(settings.units.distance),
             BODY_LENGTH_UNIT to bodyLengthUnits.getValue(settings.units.bodyLength),
@@ -156,6 +161,7 @@ internal object SettingsCodec {
             restSound = values[REST_SOUND]?.let { restSounds.keyFor(it) } ?: defaults.restSound,
             rpe = values.flag(RPE, defaults.rpe),
             raceLastTime = values.flag(RACE, defaults.raceLastTime),
+            weeklyGoals = values[WEEKLY_GOALS]?.let(::decodeGoals) ?: defaults.weeklyGoals,
             units = decodeUnits(values, defaults.units),
             oneRepMaxFormula = values[FORMULA]?.let { formulas.keyFor(it) } ?: defaults.oneRepMaxFormula,
             stallWindow = values[STALL_WINDOW]?.toIntOrNull()?.takeIf { it > 0 }?.days ?: defaults.stallWindow,
@@ -187,6 +193,21 @@ internal object SettingsCodec {
     )
 
     private fun <K> Map<K, String>.keyFor(value: String): K? = entries.firstOrNull { it.value == value }?.key
+
+    /** Each goal with the week it starts from, oldest first: "2026-10-12:4,2026-11-02:3". */
+    private fun encodeGoals(goals: WeeklyGoals): String = goals.changes.joinToString(",") { "${it.from}:${it.days}" }
+
+    /** What [encodeGoals] wrote; a change it can't read is left out rather than losing the rest. */
+    private fun decodeGoals(value: String): WeeklyGoals =
+        WeeklyGoals(
+            value
+                .split(',')
+                .mapNotNull { change ->
+                    val from = runCatching { LocalDate.parse(change.substringBefore(':')) }.getOrNull()
+                    val days = change.substringAfter(':', "").toIntOrNull()?.takeIf { it in WeeklyGoals.CHOICES }
+                    if (from != null && days != null) GoalChange(from, days) else null
+                }.sortedBy { it.from },
+        )
 
     /** A switch's row: "true" or "false", or [default] when there's none or it's something else. */
     private fun Map<String, String>.flag(

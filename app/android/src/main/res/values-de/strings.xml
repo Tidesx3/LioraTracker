@@ -36,6 +36,7 @@
     <item quantity="other">%1$d Sätze geschafft</item>
   </plurals>
   <!-- "in Folge" is right here; lint takes it for "infolge". -->
+  <string name="widget_week">%1$d von %2$d diese Woche</string>
   <plurals name="widget_streak" tools:ignore="Typos">
     <item quantity="one">%1$d Woche in Folge</item>
     <item quantity="other">%1$d Wochen in Folge</item>

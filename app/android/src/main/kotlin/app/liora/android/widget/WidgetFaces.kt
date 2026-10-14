@@ -93,7 +93,7 @@ internal fun NextUpFace(
         )
         Text(state.routineName, style = titleStyle(), maxLines = 1)
         Spacer(GlanceModifier.height(8.dp))
-        StartRow(context.getString(R.string.widget_start), start, state.streakWeeks)
+        StartRow(context.getString(R.string.widget_start), start, state.streakWeeks, state.week)
     }
 }
 
@@ -113,7 +113,7 @@ internal fun QuickStartFace(
         Text(context.getString(R.string.widget_quick_start), style = titleStyle(), maxLines = 1)
         Text(context.getString(R.string.widget_quick_start_body), style = labelStyle(), maxLines = 1)
         Spacer(GlanceModifier.height(8.dp))
-        StartRow(context.getString(R.string.widget_start_empty), start, state.streakWeeks)
+        StartRow(context.getString(R.string.widget_start_empty), start, state.streakWeeks, state.week)
     }
 }
 
@@ -136,23 +136,35 @@ private fun SmallFace(
     }
 }
 
-/** The start button, and beside it the weekly streak when there is one. */
+/** The start button, and beside it this week against the goal, once there is one, and the weekly streak. */
 @Composable
 private fun StartRow(
     label: String,
     start: androidx.glance.action.Action,
     streakWeeks: Int,
+    week: WidgetWeek?,
 ) {
     val context = LocalContext.current
     Row(GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         FilledButton(text = label, onClick = start, icon = ImageProvider(R.drawable.ic_widget_play), maxLines = 1)
-        if (streakWeeks > 0) {
+        if (week != null || streakWeeks > 0) {
             Spacer(GlanceModifier.width(12.dp))
-            Text(
-                context.resources.getQuantityString(R.plurals.widget_streak, streakWeeks, streakWeeks),
-                style = labelStyle(),
-                maxLines = 2,
-            )
+            Column {
+                week?.let {
+                    Text(
+                        context.getString(R.string.widget_week, it.done, it.goal),
+                        style = labelStyle(accent = it.done >= it.goal),
+                        maxLines = 1,
+                    )
+                }
+                if (streakWeeks > 0) {
+                    Text(
+                        context.resources.getQuantityString(R.plurals.widget_streak, streakWeeks, streakWeeks),
+                        style = labelStyle(),
+                        maxLines = if (week == null) 2 else 1,
+                    )
+                }
+            }
         }
     }
 }

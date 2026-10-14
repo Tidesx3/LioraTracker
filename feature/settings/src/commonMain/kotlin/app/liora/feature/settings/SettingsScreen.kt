@@ -41,12 +41,14 @@ import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.layout.readableWidth
 import app.liora.core.designsystem.theme.dynamicColorSupported
 import app.liora.core.designsystem.util.formatAsClock
+import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.core.designsystem.util.workoutDisplayName
 import app.liora.core.domain.CsvContent
 import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.RestSound
 import app.liora.core.domain.Settings
 import app.liora.core.domain.ThemeMode
+import app.liora.core.domain.TrainingCalendar
 import app.liora.core.model.DistanceUnit
 import app.liora.core.model.GymProfile
 import app.liora.core.model.Units
@@ -55,10 +57,12 @@ import app.liora.core.ui.AppLanguage
 import app.liora.core.ui.AppLanguages
 import app.liora.core.ui.RestTimePicker
 import app.liora.core.ui.UpdateDetails
+import app.liora.core.ui.WeeklyGoalDialog
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.rememberAppLanguage
 import app.liora.core.ui.rememberFileOpener
 import app.liora.core.ui.rememberFileSaver
+import app.liora.core.ui.weeklyGoalLabel
 import app.liora.feature.settings.data.DataActions
 import app.liora.feature.settings.data.DataSection
 import app.liora.feature.settings.data.DataUiState
@@ -101,6 +105,8 @@ import app.liora.feature.settings.resources.unit_distance
 import app.liora.feature.settings.resources.unit_weight
 import app.liora.feature.settings.resources.walkthrough_body
 import app.liora.feature.settings.resources.walkthrough_title
+import app.liora.feature.settings.resources.weekly_goal
+import app.liora.feature.settings.resources.weekly_goal_none
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
@@ -203,6 +209,7 @@ internal enum class Choice {
     RestWorking,
     RestWarmup,
     RestSound,
+    WeeklyGoal,
     Weight,
     Distance,
     BodyLength,
@@ -294,6 +301,15 @@ private fun SettingsContent(
                         description = stringResource(Res.string.race_last_time_body),
                         checked = settings.raceLastTime,
                         onCheckedChange = { on -> onChange { it.copy(raceLastTime = on) } },
+                    )
+                    SettingRow(
+                        stringResource(Res.string.weekly_goal),
+                        if (settings.weeklyGoals.isSet) {
+                            weeklyGoalLabel(settings.weeklyGoals.current)
+                        } else {
+                            stringResource(Res.string.weekly_goal_none)
+                        },
+                        onClick = { open = Choice.WeeklyGoal },
                     )
                     SettingRow(
                         stringResource(Res.string.gym),
@@ -399,7 +415,9 @@ private fun SettingsContent(
         }
     }
     if (settings != null) {
-        ChoiceDialogs(open, settings, onChange, onPreviewSound, language, onClose = { open = null })
+        // A goal holds from the week it's chosen in, as the locale starts weeks.
+        val thisWeek = TrainingCalendar.weekStart(today, rememberDateFormatter().firstDayOfWeek)
+        ChoiceDialogs(open, settings, thisWeek, onChange, onPreviewSound, language, onClose = { open = null })
     }
     data.pending?.let { summary ->
         RestoreDialog(summary, onRestore = dataActions.onConfirmRestore, onDismiss = dataActions.onCancelRestore)
@@ -410,6 +428,7 @@ private fun SettingsContent(
 private fun ChoiceDialogs(
     open: Choice?,
     settings: Settings,
+    thisWeek: LocalDate,
     onChange: (SettingsChange) -> Unit,
     onPreviewSound: (RestSound) -> Unit,
     language: AppLanguage,
@@ -457,37 +476,16 @@ private fun ChoiceDialogs(
             )
         }
 
-        Choice.Weight -> {
-            ChoiceDialog(
-                title = stringResource(Res.string.unit_weight),
-                options = WeightUnit.entries,
-                selected = settings.units.weight,
-                label = { weightUnitName(it) },
-                onChoose = { unit -> choose { it.copy(units = it.units.copy(weight = unit)) } },
+        Choice.WeeklyGoal -> {
+            WeeklyGoalDialog(
+                current = settings.weeklyGoals.takeIf { it.isSet }?.current,
+                onChoose = { days -> choose { it.copy(weeklyGoals = it.weeklyGoals.withGoal(days, thisWeek)) } },
                 onDismiss = onClose,
             )
         }
 
-        Choice.Distance -> {
-            ChoiceDialog(
-                title = stringResource(Res.string.unit_distance),
-                options = DistanceUnit.entries,
-                selected = settings.units.distance,
-                label = { distanceUnitName(it) },
-                onChoose = { unit -> choose { it.copy(units = it.units.copy(distance = unit)) } },
-                onDismiss = onClose,
-            )
-        }
-
-        Choice.BodyLength -> {
-            ChoiceDialog(
-                title = stringResource(Res.string.unit_body_length),
-                options = Units.BODY_LENGTHS,
-                selected = settings.units.bodyLength,
-                label = { bodyLengthUnitName(it) },
-                onChoose = { unit -> choose { it.copy(units = it.units.copy(bodyLength = unit)) } },
-                onDismiss = onClose,
-            )
+        Choice.Weight, Choice.Distance, Choice.BodyLength -> {
+            UnitChoiceDialog(open, settings, choose, onClose)
         }
 
         Choice.Formula, Choice.StallWindow -> {
@@ -520,6 +518,50 @@ private fun ChoiceDialogs(
                     onClose()
                     language.choose(it)
                 },
+                onDismiss = onClose,
+            )
+        }
+    }
+}
+
+/** Which unit weights, distances or body measurements show in. */
+@Composable
+private fun UnitChoiceDialog(
+    open: Choice,
+    settings: Settings,
+    choose: (SettingsChange) -> Unit,
+    onClose: () -> Unit,
+) {
+    when (open) {
+        Choice.Weight -> {
+            ChoiceDialog(
+                title = stringResource(Res.string.unit_weight),
+                options = WeightUnit.entries,
+                selected = settings.units.weight,
+                label = { weightUnitName(it) },
+                onChoose = { unit -> choose { it.copy(units = it.units.copy(weight = unit)) } },
+                onDismiss = onClose,
+            )
+        }
+
+        Choice.Distance -> {
+            ChoiceDialog(
+                title = stringResource(Res.string.unit_distance),
+                options = DistanceUnit.entries,
+                selected = settings.units.distance,
+                label = { distanceUnitName(it) },
+                onChoose = { unit -> choose { it.copy(units = it.units.copy(distance = unit)) } },
+                onDismiss = onClose,
+            )
+        }
+
+        else -> {
+            ChoiceDialog(
+                title = stringResource(Res.string.unit_body_length),
+                options = Units.BODY_LENGTHS,
+                selected = settings.units.bodyLength,
+                label = { bodyLengthUnitName(it) },
+                onChoose = { unit -> choose { it.copy(units = it.units.copy(bodyLength = unit)) } },
                 onDismiss = onClose,
             )
         }

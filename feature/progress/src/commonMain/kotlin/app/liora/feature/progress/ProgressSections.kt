@@ -64,6 +64,7 @@ import app.liora.feature.progress.resources.progress_legend_moderate
 import app.liora.feature.progress.resources.progress_legend_none
 import app.liora.feature.progress.resources.progress_metric_date
 import app.liora.feature.progress.resources.progress_no_sets
+import app.liora.feature.progress.resources.progress_rest_week
 import app.liora.feature.progress.resources.progress_sets_count
 import app.liora.feature.progress.resources.progress_show_all
 import app.liora.feature.progress.resources.progress_stalled
@@ -78,18 +79,21 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The last [WEEKS] weeks, a column each, a square per day: filled where there was training. Reads like
- * a habit tracker: gaps stand out at once.
+ * a habit tracker: gaps stand out at once. A week a rest week covered ([restedWeeks], by first day) is
+ * softly tinted, as it kept the streak.
  */
 @Composable
 internal fun ConsistencyGrid(
     trainingDays: Set<LocalDate>,
     today: LocalDate,
     modifier: Modifier = Modifier,
+    restedWeeks: Set<LocalDate> = emptySet(),
 ) {
     val dates = rememberDateFormatter()
     val weeks = TrainingCalendar.recentWeeks(today, dates.firstDayOfWeek, WEEKS)
     val trained = MaterialTheme.colorScheme.primary
     val rest = MaterialTheme.colorScheme.surfaceContainerHigh
+    val rested = trained.copy(alpha = RESTED_ALPHA)
     val todayOutline = MaterialTheme.colorScheme.outline
     Column(modifier.testTag(ProgressTags.CONSISTENCY), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         // Drawn rather than laid out: equal columns round to whole pixels unevenly, and squares in the
@@ -108,6 +112,7 @@ internal fun ConsistencyGrid(
                         when {
                             day > today -> Unit
                             day in trainingDays -> drawRoundRect(trained, topLeft, square, corner)
+                            week.first() in restedWeeks -> drawRoundRect(rested, topLeft, square, corner)
                             else -> drawRoundRect(rest, topLeft, square, corner)
                         }
                         if (day == today) {
@@ -117,16 +122,28 @@ internal fun ConsistencyGrid(
                 }
             }
         }
-        Text(
-            text =
-                stringResource(
-                    Res.string.progress_date_range,
-                    dates.shortDate(weeks.first().first()),
-                    dates.shortDate(today),
-                ),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text =
+                    stringResource(
+                        Res.string.progress_date_range,
+                        dates.shortDate(weeks.first().first()),
+                        dates.shortDate(today),
+                    ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            if (weeks.any { it.first() in restedWeeks }) {
+                Box(Modifier.size(LEGEND_SQUARE).background(rested, RoundedCornerShape(CELL_CORNER)))
+                Text(
+                    text = stringResource(Res.string.progress_rest_week),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 6.dp),
+                )
+            }
+        }
     }
 }
 
@@ -375,6 +392,10 @@ private const val DAYS_PER_WEEK = 7
 private const val BOARD_ROWS = 8
 private val CELL_GAP = 3.dp
 private val CELL_CORNER = 4.dp
+private val LEGEND_SQUARE = 10.dp
+
+/** A rested week: the accent, faint, as it kept the streak without training. */
+private const val RESTED_ALPHA = 0.28f
 private val TODAY_OUTLINE = 1.5.dp
 private val ArrowSize = 48.dp
 private val MuscleNameWidth = 112.dp

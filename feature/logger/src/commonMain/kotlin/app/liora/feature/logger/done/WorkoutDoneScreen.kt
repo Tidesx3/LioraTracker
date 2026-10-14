@@ -56,6 +56,7 @@ import app.liora.core.model.LoggedSet
 import app.liora.core.model.RepRange
 import app.liora.core.ui.ExerciseThumbnail
 import app.liora.core.ui.RecordsCard
+import app.liora.core.ui.WeekCard
 import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.durationLabel
 import app.liora.core.ui.setSummary
@@ -103,6 +104,8 @@ internal fun WorkoutDoneScreen(
 ) {
     val language = currentLanguage()
     LaunchedEffect(language) { viewModel.setLanguage(language) }
+    val firstDayOfWeek = rememberDateFormatter().firstDayOfWeek
+    LaunchedEffect(firstDayOfWeek) { viewModel.setFirstDayOfWeek(firstDayOfWeek) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     // Deleted meanwhile, on another device say: there is nothing left to sum up.
     val currentOnClose by rememberUpdatedState(onClose)
@@ -144,7 +147,17 @@ private fun WorkoutDoneContent(
                 PaddingValues(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding() + 16.dp),
         ) {
             item(key = "hero") { Hero(state.number, Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) }
-            item(key = "summary") { Summary(state, Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) }
+            item(key = "summary") {
+                Summary(state, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                // In the same item, so the week arriving a moment later doesn't push the list about.
+                state.week?.takeUnless { it.isBlank }?.let { week ->
+                    WeekCard(
+                        week,
+                        afterWorkout = true,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                }
+            }
             if (state.steps.isNotEmpty() || state.readyForMore.isNotEmpty()) {
                 item(key = "steps") {
                     StepsCard(state.steps, state.readyForMore, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))

@@ -7,6 +7,7 @@ import app.liora.core.data.progression.ProgressionRepository
 import app.liora.core.data.progression.StepsEarned
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.settings.SettingsRepository
+import app.liora.core.data.workout.WeekProgressRepository
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.domain.AgainstLastTime
 import app.liora.core.domain.Earned
@@ -16,6 +17,7 @@ import app.liora.core.domain.LastTimeComparison
 import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.RecordHighlights
 import app.liora.core.domain.RecordKey
+import app.liora.core.domain.WeekProgress
 import app.liora.core.domain.volumeOf
 import app.liora.core.model.Exercise
 import app.liora.core.model.FinishedWorkout
@@ -25,6 +27,7 @@ import app.liora.core.model.WorkoutExercise
 import app.liora.core.ui.RecordsCardEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,7 +38,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.datetime.DayOfWeek
 
 sealed interface WorkoutDoneUiState {
     data object Loading : WorkoutDoneUiState
@@ -56,6 +61,8 @@ sealed interface WorkoutDoneUiState {
         val earned: StepsEarned = StepsEarned(),
         /** The session before it of each of its exercises: its completed sets, by exercise id. */
         val previous: Map<String, List<LoggedSet>> = emptyMap(),
+        /** This week against the weekly goal, with this workout; null until worked out. */
+        val week: WeekProgress? = null,
     ) : WorkoutDoneUiState {
         val sets: Int = workout.exercises.sumOf { exercise -> exercise.sets.count { it.isCompleted } }
 
@@ -139,8 +146,20 @@ class WorkoutDoneViewModel(
     settings: SettingsRepository,
     routines: RoutineRepository,
     progression: ProgressionRepository,
+    weeks: WeekProgressRepository,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
+
+    /** Where the locale starts its weeks. */
+    private val firstDayOfWeek = MutableStateFlow<DayOfWeek?>(null)
+
+    /** This week against the goal; null until the locale's week is known, so the summary doesn't wait. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val week: Flow<WeekProgress?> =
+        firstDayOfWeek
+            .filterNotNull()
+            .flatMapLatest { weeks.progress(it) }
+            .onStart<WeekProgress?> { emit(null) }
 
     // Waited for, unlike elsewhere: without them a record could show for a moment under the wrong measure,
     // and the burst would go off for it.
@@ -195,6 +214,8 @@ class WorkoutDoneViewModel(
                 // Without racing last time (Settings › Workout), nothing to race against.
                 previous = if (chosen.raceLastTime) lastTime else emptyMap(),
             )
+        }.combine(week) { state, progress ->
+            if (state is WorkoutDoneUiState.Loaded) state.copy(week = progress) else state
         }
             // Records are measured against the whole history; keep that off the main thread.
             .flowOn(Dispatchers.Default)
@@ -202,5 +223,9 @@ class WorkoutDoneViewModel(
 
     fun setLanguage(value: String) {
         language.value = value
+    }
+
+    fun setFirstDayOfWeek(value: DayOfWeek) {
+        firstDayOfWeek.value = value
     }
 }

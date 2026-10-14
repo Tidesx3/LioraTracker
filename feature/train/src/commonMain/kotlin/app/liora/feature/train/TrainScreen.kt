@@ -31,6 +31,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -51,12 +52,15 @@ import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.layout.readableWidth
+import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.core.model.RoutineFolder
 import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
 import app.liora.core.navigation.SharedKeys
 import app.liora.core.navigation.rememberSharedContainer
 import app.liora.core.ui.UpdateCard
+import app.liora.core.ui.WeekCard
+import app.liora.core.ui.WeeklyGoalDialog
 import app.liora.core.ui.currentLanguage
 import app.liora.feature.train.resources.Res
 import app.liora.feature.train.resources.cd_import_routines
@@ -114,6 +118,8 @@ internal fun TrainScreen(
 ) {
     val language = currentLanguage()
     LaunchedEffect(language) { viewModel.setLanguage(language) }
+    val firstDayOfWeek = rememberDateFormatter().firstDayOfWeek
+    LaunchedEffect(firstDayOfWeek) { viewModel.setFirstDayOfWeek(firstDayOfWeek) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     TrainContent(
@@ -132,6 +138,7 @@ internal fun TrainScreen(
                 onShowDialog = viewModel::showDialog,
                 onOpenSettings = navigation.onOpenSettings,
                 onSetRotation = viewModel::setRotation,
+                onSetGoal = viewModel::setGoal,
                 routine =
                     RoutineCardActions(
                         onOpen = navigation.onOpenRoutine,
@@ -175,6 +182,7 @@ private class TrainActions(
     val onShowDialog: (RoutineDialog) -> Unit,
     val onOpenSettings: () -> Unit,
     val onSetRotation: (folderId: String, rotation: Boolean) -> Unit,
+    val onSetGoal: (days: Int) -> Unit,
     val routine: RoutineCardActions,
 )
 
@@ -197,6 +205,17 @@ private fun TrainContent(
     onDismissUpdate: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var choosingGoal by rememberSaveable { mutableStateOf(false) }
+    if (choosingGoal) {
+        WeeklyGoalDialog(
+            current = uiState.week?.takeIf { it.goalSet }?.goal,
+            onChoose = { days ->
+                choosingGoal = false
+                actions.onSetGoal(days)
+            },
+            onDismiss = { choosingGoal = false },
+        )
+    }
     LioraScaffold(
         modifier = modifier,
         topBar = {
@@ -233,6 +252,14 @@ private fun TrainContent(
                         onInstall = onInstallUpdate,
                         onDismiss = onDismissUpdate,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                }
+                // The week so far against the goal; a tap changes the goal. Not before there's a goal or training.
+                uiState.week?.takeUnless { it.isBlank }?.let { week ->
+                    WeekCard(
+                        week = week,
+                        onClick = { choosingGoal = true },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).testTag(TrainTags.WEEK),
                     )
                 }
                 uiState.nextUp?.let { (folder, card) ->
@@ -550,4 +577,10 @@ private fun SettingsButton(
             Icon(painterResource(LioraIcons.Settings), contentDescription = stringResource(Res.string.cd_settings))
         }
     }
+}
+
+/** Test tags for the Train tab. */
+object TrainTags {
+    /** The week's card: the goal, the days trained and the streak. */
+    const val WEEK = "train.week"
 }

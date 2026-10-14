@@ -35,6 +35,7 @@ import app.liora.feature.logger.done.WorkoutDoneTags
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.LocalDate
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -42,6 +43,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.GlobalContext
+import org.koin.core.context.loadKoinModules
 import org.koin.core.context.stopKoin
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
@@ -67,6 +69,8 @@ class ProgressionFlowTest {
     @Before
     fun seed() =
         runBlocking {
+            // The week as of the fixed day the summaries are moved to (SHOWN_DAY), whatever day the test runs.
+            loadKoinModules(WeekAsOf.module(LocalDate(2026, 10, 1)))
             koin.get<AppStartup>().run()
             val routines = koin.get<RoutineRepository>()
             routines.save(

@@ -163,6 +163,8 @@ fun SingleChoiceSegmentedButtonRowScope.LioraSegmentedButton(
     shape: Shape,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    /** Material's check on the chosen one; empty where the segments are too narrow for it. */
+    icon: @Composable () -> Unit = { SegmentedButtonDefaults.Icon(selected) },
     label: @Composable () -> Unit,
 ) {
     val glass = LioraTheme.glass
@@ -172,6 +174,7 @@ fun SingleChoiceSegmentedButtonRowScope.LioraSegmentedButton(
         shape = shape,
         modifier = modifier,
         enabled = enabled,
+        icon = icon,
         colors =
             if (glass.enabled) {
                 SegmentedButtonDefaults.colors(

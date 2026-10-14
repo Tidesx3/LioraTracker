@@ -439,17 +439,31 @@ As of 2026-10-14:
     - **Tests:** the rule for each tracking type and the workout's sums (`LastTimeComparisonTest`), the logger
       (`LoggerFlowTest.racingLastTimeScoresEachSetDone`) and the summary in English and German
       (`WorkoutDoneFlowTest`).
-  - **Part 3, a weekly goal and rest weeks:**
-    - **The goal:** training days a week (days, so splitting off a cardio workout doesn't count twice). Its
-      preference row keeps the week each goal starts from, so a change never rewrites past weeks; before any
-      goal, one day a week counts, as today.
-    - **The streak:** `WeeklyGoal.streak` replaces `TrainingCalendar.weekStreak`, counting weeks in a row that met
-      the goal. Every 6 weeks met earn a rest week, at most 2 held; a missed week uses one, which keeps the
-      streak but doesn't add to it. It's worked out from history and never stored.
-    - **Where it shows:** a `WeekProgressRepository` feeds the Train tab's week card (in Next up's list item),
-      the Progress tab (the streak, and rested weeks in the consistency grid), the widget ("3/4") and the
-      summary ("Week goal reached"). The walkthrough asks for the goal (3 suggested); Settings › Workout changes
-      it.
+  - **Part 3, a weekly goal and rest weeks (done):**
+    - **The goal:** training days a week (days, so splitting off a cardio workout doesn't count twice), 1 to 7.
+      `WeeklyGoals` keeps each goal with the week it starts from (`GoalChange`), so a change never rewrites past
+      weeks; before any goal, one day a week counts, as the streak always had it. Stored as one synced
+      preference row (`goals.weekly`, "2026-10-12:4,…").
+    - **The streak:** `WeekStreaks.of` (`core/domain/WeeklyGoals.kt`) replaces `TrainingCalendar.weekStreak`,
+      counting weeks in a row that reached their goal; this week adds once reached and never ends it early.
+      Every 6 weeks reached earn a rest week, at most 2 held; a week short uses one, which keeps the streak but
+      doesn't add to it. `WeekProgress` also says how each past week went (`WeekResult`: met, rested, missed)
+      and whether this week earned a rest week. Worked out from history and never stored.
+    - **Where it shows:** `WeekProgressRepository` (`core/data`, a factory: it holds only the clock) feeds:
+      - the Train tab's week card, in Quick start's list item, once there's a goal or any training: a ring
+        filling toward the goal ("2/3", emerald once reached), a glass bead for each day trained with today
+        outlined, the streak, rest weeks in hand, and "last week was a rest week" after one. A tap opens the
+        goal picker (`WeekCard`, `WeeklyGoalDialog` in `core:ui`).
+      - the summary: the same card, worded for after a workout ("Week goal reached!", "1 more day to go this
+        week", "You earned a rest week").
+      - the Progress tab: the streak by the goal, rest weeks in hand under the stats, and rested weeks tinted in
+        the consistency grid.
+      - the widget: "3 of 4 this week" above the streak, once there's a goal.
+    - **Choosing it:** the walkthrough's Progress page asks how many days a week (3 suggested, nothing chosen
+      until tapped); Settings › Workout › Weekly goal and a tap on the Train tab's card change it.
+    - **Tests:** the streak, rest weeks, goal changes and days counted once (`WeekStreaksTest`), the goal from
+      this week on (`WeekProgressRepositoryTest`), the card, the picker, light, inner screen and German
+      (`WeeklyGoalFlowTest`, with a fixed clock), and the walkthrough's choice.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.
