@@ -12,6 +12,7 @@ import app.liora.android.widget.WidgetStates
 import app.liora.android.widget.WidgetUpdater
 import app.liora.android.workout.AndroidRestSoundPlayer
 import app.liora.android.workout.RestAlarmScheduler
+import app.liora.android.workout.WorkoutForeground
 import app.liora.android.workout.WorkoutNotifier
 import app.liora.core.data.backup.ExportFiles
 import app.liora.core.data.body.PhotoStorage
@@ -22,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -37,6 +39,7 @@ val appModule =
         single<ExportFiles> { AndroidExportFiles(androidContext()) }
         single { WorkoutNotifier(androidContext(), get(), get(), get(), get(), get()) }
         single { RestAlarmScheduler(androidContext(), get(), get()) }
+        single { WorkoutForeground(androidApplication(), get()) }
         single<RestSoundPlayer> { AndroidRestSoundPlayer(androidContext()) }
         single { SyncTriggers(get(), get()) }
         single { HealthTriggers(get(), get()) }

@@ -57,6 +57,10 @@ class WorkoutNotifier(
     private val posting = Mutex()
     private var lastPost: TimeMark? = null
 
+    /** The workout's notification as last posted; null while there's no workout. */
+    @Volatile
+    private var lastWorkout: Notification? = null
+
     private val statuses: Flow<WorkoutStatus?> =
         combine(
             workouts.activeWorkout,
@@ -89,6 +93,24 @@ class WorkoutNotifier(
     /** Shows the current state once, e.g. from a notification button or after a reboot. */
     suspend fun refresh() = show(statuses.first())
 
+    /**
+     * The workout's notification for [WorkoutService] to run under, right away: the one last posted, or until
+     * there is one, the workout's name for a moment.
+     */
+    val foregroundNotification: Notification
+        get() =
+            lastWorkout ?: NotificationCompat
+                .Builder(context, WorkoutNotifications.CHANNEL_WORKOUT)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setColor(accent())
+                .setOngoing(true)
+                .setSilent(true)
+                .setCategory(NotificationCompat.CATEGORY_WORKOUT)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setContentTitle(context.getString(R.string.notif_workout_default_title))
+                .setContentIntent(WorkoutNotifications.openLogger(context))
+                .build()
+
     /** The heads-up that rest is over, on its own channel with sound and vibration. */
     suspend fun alertRestOver() {
         val next = statuses.first()?.next
@@ -112,6 +134,7 @@ class WorkoutNotifier(
     private suspend fun show(status: WorkoutStatus?) {
         if (status == null) {
             posting.withLock {
+                lastWorkout = null
                 manager.cancel(WorkoutNotifications.ID_WORKOUT)
                 manager.cancel(WorkoutNotifications.ID_REST_OVER)
             }
@@ -130,12 +153,15 @@ class WorkoutNotifier(
         notification: () -> Notification,
     ) = posting.withLock {
         lastPost?.let { delay(MIN_POST_GAP - it.elapsedNow()) }
+        val built = notification()
+        // The workout's foreground service runs under it either way.
+        if (id == WorkoutNotifications.ID_WORKOUT) lastWorkout = built
         // Without the permission (Android 13+, denied or not asked yet) there is simply no notification.
         val allowed =
             Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
                 ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED
-        if (allowed) manager.notify(id, notification())
+        if (allowed) manager.notify(id, built)
         lastPost = TimeSource.Monotonic.markNow()
     }
 

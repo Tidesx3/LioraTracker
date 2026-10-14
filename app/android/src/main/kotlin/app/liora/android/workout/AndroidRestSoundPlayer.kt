@@ -21,6 +21,8 @@ import kotlin.time.Duration.Companion.seconds
  * With headphones in, it comes through them over the music. Without, it plays on the speaker, even with
  * the phone on vibrate, which mutes notification sounds. Music ducks for the moment where Android
  * allows it; since Android 15 that's only while Liora is on screen, and otherwise the sound plays over it.
+ * With the screen off it plays only thanks to the workout's foreground service ([WorkoutForeground]): since
+ * Android 17, Android mutes an app in the background without one, and says nothing.
  */
 class AndroidRestSoundPlayer(
     private val context: Context,

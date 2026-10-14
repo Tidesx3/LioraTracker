@@ -36,6 +36,10 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
   - **List-detail:** tag a list entry with `metadata = ListDetail.listPane { placeholder }` and what it opens with `ListDetail.detailPane()`. Open items with `navigator.openFromList(listRoute, route)`, so the detail pane shows one item and back returns to the list. `LocalPaneRole` tells a screen whether it sits beside its list (no back arrow, highlight the selection).
   - **Results across features:** a screen that hands a value back (e.g. `ExercisePickerRoute`) takes a request key in its route and closes with `navigator.goBackWithResult(key, value)`. The caller's entry collects it with `NavigationResultEffect(navigator.results, key)`, which also delivers a result that arrived while the caller was off screen.
 - **The workout in progress:** `ActiveWorkoutRepository` (start, finish), `WorkoutEditor` (exercises) and `SetLogger` (sets, ticking off) in `core/data` serve both the logger and the live workout notification in `app/android/.../workout/`. Both read the same Room state, so they never disagree. The logging rules (next set, superset rounds, rest, placeholders) live in `core/domain/WorkoutProgress.kt`.
+  - **Sound off screen:** since Android 17 an app in the background plays sound only from a foreground service it
+    started while on screen; otherwise it's muted silently. A workout therefore runs in `WorkoutService` under its
+    own notification, started by `WorkoutForeground` only while Liora is on screen, and it ends itself with the
+    workout (stopping it before `startForeground` would crash the app).
   - **Progression:** a routine's exercise can have a rule (`ProgressionRule`; the engine is `Progression` in `core/domain`). `ProgressionRepository` works out the targets from the exercise's last sessions in that routine; starting the routine fills them into the planned sets (weight, and `aimReps`, the placeholder before last time's). The reasons are worked out again where they're shown (`ProgressionNote` in `core:ui`) and never stored.
   - **Past workouts** are corrected with the same tools: `WorkoutHistoryRepository.edit(id)` returns a `FinishedWorkoutSession` (a `WorkoutSession`, like `ActiveWorkoutRepository`) with its own editor and set logger. The logger screen runs on either (`LoggerViewModel` with or without a finished workout's id). A finished workout never starts rest or touches the running timer, and "last time" is the session before it.
 - **Pure core modules** (model, common, domain, database, data) use `liora.kmp.library` (Android and JVM targets). They must stay Android-free so the Ktor server can reuse them.
@@ -179,6 +183,10 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 
 - **AGP 9 KMP plugin:** the `kotlin { android { } }` DSL is reached from convention code through the `lioraAndroid {}` helper, since KGP's `androidTarget` is a different, legacy API.
 - **Robolectric:** needs `--add-opens=java.base/jdk.internal.access=ALL-UNNAMED` on JDK 17+. It is already set in `configureHostTests()`.
+  - `composeRule.waitUntil` runs the main looper only through node lookups: a condition on other state (a fake
+    store, a service) idles it itself, `shadowOf(Looper.getMainLooper()).idle()`, or work resuming on Main never
+    comes (see `HealthFlowTest`). With `MainActivity` up, that needs the compose rule: without its clock,
+    idling never ends, as the aurora animates forever.
   - Don't poll a repository with `runBlocking` inside `composeRule.waitUntil`. It blocks the main thread, so a ViewModel write that resumes on Main between its steps never finishes. Wait for what the screen shows, then read the repository once.
   - A text field inside a dialog (the logger's rename, history's save as routine) keeps Compose from ever going idle, even with the test clock paused. Don't open those dialogs in UI tests; cover the write in `core/data` tests and check the dialog on a device.
   - Material's date picker dialog fills in a moment after it opens: `waitUntil` its content appears. Each day's semantic text is the full date ("Monday, August 10, 2026"), not the day number.

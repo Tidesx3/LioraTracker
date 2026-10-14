@@ -14,6 +14,7 @@ import app.liora.android.update.AppUpdater
 import app.liora.android.update.UpdateTriggers
 import app.liora.android.widget.WidgetUpdater
 import app.liora.android.workout.RestAlarmScheduler
+import app.liora.android.workout.WorkoutForeground
 import app.liora.android.workout.WorkoutNotifications
 import app.liora.android.workout.WorkoutNotifier
 import app.liora.core.data.AppStartup
@@ -72,6 +73,7 @@ open class LioraApplication : Application() {
         WorkoutNotifications.createChannels(this)
         get<WorkoutNotifier>().start(processScope)
         get<RestAlarmScheduler>().start(processScope)
+        get<WorkoutForeground>().start(processScope)
         get<SyncTriggers>().start(processScope)
         get<HealthTriggers>().start(processScope)
         get<WidgetUpdater>().start(processScope)

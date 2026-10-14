@@ -16,6 +16,10 @@
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
   <!-- The click when the notification's −15 s and +15 s change the rest (workout/WorkoutHaptics.kt). -->
   <uses-permission android:name="android.permission.VIBRATE" />
+  <!-- A workout runs in a foreground service (workout/WorkoutForeground.kt): since Android 17, that's the only
+       way the end of a rest may play its sound with the screen off. -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
   <!-- Updates from GitHub (update/AppUpdater.kt): Liora installs a newer release of itself when the user says
        so. Android asks once to allow it, then confirms each install, or not at all once Liora installed itself. -->
@@ -127,6 +131,14 @@
     <receiver
       android:name=".workout.RestAlarmReceiver"
       android:exported="false" />
+    <service
+      android:name=".workout.WorkoutService"
+      android:exported="false"
+      android:foregroundServiceType="specialUse">
+      <property
+        android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+        android:value="Workout in progress: a rest timer that plays a sound when the rest is over" />
+    </service>
     <receiver
       android:name=".workout.WorkoutRestoreReceiver"
       android:exported="false">
