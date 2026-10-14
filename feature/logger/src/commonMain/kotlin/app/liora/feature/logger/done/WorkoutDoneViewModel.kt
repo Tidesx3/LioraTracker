@@ -192,7 +192,8 @@ class WorkoutDoneViewModel(
                 number = workouts.count { it.startedAt <= workout.startedAt },
                 formula = chosen.oneRepMaxFormula,
                 earned = steps,
-                previous = lastTime,
+                // Without racing last time (Settings › Workout), nothing to race against.
+                previous = if (chosen.raceLastTime) lastTime else emptyMap(),
             )
         }
             // Records are measured against the whole history; keep that off the main thread.

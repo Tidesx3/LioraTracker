@@ -116,6 +116,8 @@ sealed interface LoggerUiState {
         val units: Units = Units(),
         /** Whether sets get an RPE column. */
         val rpe: Boolean = false,
+        /** Whether the logger races last time (Settings › Workout): the score, and each set's mark. */
+        val raceLastTime: Boolean = true,
         /** The gym weights round to: ± steps, plates on the bar, warm-ups. */
         val gym: GymProfile = GymProfiles.standard(WeightUnit.Kilogram),
         /** Every gym set up, to switch between. */
@@ -164,7 +166,12 @@ sealed interface LoggerUiState {
                 }.associate { it.key to it.value }
 
         /** Today against last time, set by set as the Previous column pairs them: the sets done so far. */
-        val race: AgainstLastTime = LastTimeComparison.of(workout.exercises, previous, ::trackingTypeOf, formula)
+        val race: AgainstLastTime =
+            if (raceLastTime) {
+                LastTimeComparison.of(workout.exercises, previous, ::trackingTypeOf, formula)
+            } else {
+                AgainstLastTime()
+            }
 
         /** What finishing now would keep, and what it would change. */
         fun finishSummary(): FinishSummary {
@@ -444,6 +451,7 @@ class LoggerViewModel(
                     formula = context.settings.oneRepMaxFormula,
                     units = context.settings.units,
                     rpe = context.settings.rpe,
+                    raceLastTime = context.settings.raceLastTime,
                     gym = context.gym,
                     gyms = context.gyms,
                     // A cell whose set was removed meanwhile is no longer being edited.

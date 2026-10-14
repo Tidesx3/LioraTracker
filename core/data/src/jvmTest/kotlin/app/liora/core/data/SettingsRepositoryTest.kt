@@ -101,6 +101,16 @@ class SettingsRepositoryTest {
         }
 
     @Test
+    fun racingLastTimeIsOnUntilTurnedOff() =
+        runTest {
+            assertEquals(true, settings.current().raceLastTime)
+
+            settings.update { it.copy(raceLastTime = false) }
+            assertEquals(false, settings.settings.first().raceLastTime)
+            assertEquals(mapOf("logger.race_last_time" to "false"), dao.all().associate { it.key to it.value })
+        }
+
+    @Test
     fun theRestSoundIsKept() =
         runTest {
             assertEquals(RestSound.Chime, settings.current().restSound)

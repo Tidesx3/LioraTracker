@@ -1,8 +1,11 @@
 package app.liora.android
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasScrollToKeyAction
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isOff
 import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
@@ -12,6 +15,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performScrollToNode
 import app.liora.core.data.AppStartup
 import app.liora.core.data.settings.SettingsRepository
@@ -26,6 +30,7 @@ import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -68,10 +73,14 @@ class SettingsFlowTest {
         composeRule.onNodeWithText("Brzycki").performClick()
         waitForText("Brzycki")
 
+        // Below the Workout section's switches on the cover screen.
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Stall alert after"))
         composeRule.onNodeWithText("Stall alert after").performClick()
         composeRule.onNodeWithText("4 weeks without a new best").performClick()
         waitForText("4 weeks without a new best")
 
+        // Back up to the Workout section, clear of the top bar.
+        composeRule.onNode(hasScrollToKeyAction()).performScrollToKey("workout")
         composeRule.onNodeWithText("Rest between sets").performClick()
         composeRule.onNodeWithText("2:30").performClick()
         waitForText("2:30")
@@ -117,14 +126,16 @@ class SettingsFlowTest {
         composeRule.onNodeWithText("Inches (in)").performClick()
         waitForText("Inches (in)")
         composeRule.onNodeWithText("RPE column").performClick()
-        composeRule.waitUntil(TIMEOUT_MS) {
-            composeRule.onAllNodes(isToggleable() and isOn()).fetchSemanticsNodes().isNotEmpty()
-        }
+        waitForSwitch("RPE column", on = true)
+        // Racing last time is on until turned off.
+        composeRule.onNodeWithText("Race last time").performClick()
+        waitForSwitch("Race last time", on = false)
         composeRule.onRoot().captureRoboImage("src/test/screenshots/settings_units_dark.png")
 
         val saved = runBlocking { settings.current() }
         assertEquals(Units(WeightUnit.Pound, DistanceUnit.Mile, LengthUnit.Inch), saved.units)
         assertTrue(saved.rpe)
+        assertFalse(saved.raceLastTime)
     }
 
     @Test
@@ -140,6 +151,7 @@ class SettingsFlowTest {
     fun german() {
         openSettings("Einstellungen")
         waitForText("Pause zwischen Sätzen")
+        composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("3 Wochen ohne neue Bestleistung"))
         composeRule.onNodeWithText("3 Wochen ohne neue Bestleistung").assertIsDisplayed()
         composeRule.onRoot().captureRoboImage("src/test/screenshots/de_settings_dark.png")
     }
@@ -149,6 +161,19 @@ class SettingsFlowTest {
         composeRule.waitForIdle()
         composeRule.onNodeWithContentDescription(label).performClick()
         waitForText("Epley")
+    }
+
+    /** Waits until the switch in the row titled [title] is [on], as the setting is saved. */
+    private fun waitForSwitch(
+        title: String,
+        on: Boolean,
+    ) = composeRule.waitUntil(TIMEOUT_MS) {
+        val state = if (on) isOn() else isOff()
+        composeRule
+            .onAllNodes(
+                isToggleable() and state and hasAnyAncestor(hasText(title)),
+            ).fetchSemanticsNodes()
+            .isNotEmpty()
     }
 
     // Room emits on a background dispatcher that Compose's idling doesn't track, so wait explicitly.

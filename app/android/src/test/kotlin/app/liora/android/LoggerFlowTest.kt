@@ -136,6 +136,28 @@ class LoggerFlowTest {
 
     @Test
     @Config(qualifiers = COVER)
+    fun withRacingOffNothingKeepsScore() {
+        runBlocking { GlobalContext.get().get<SettingsRepository>().update { it.copy(raceLastTime = false) } }
+        logLastSession()
+        launch()
+        waitForText("Start")
+        composeRule.onNodeWithText("Start").performClick()
+        waitForText("Finish")
+
+        runBlocking {
+            val sets = GlobalContext.get().get<SetLogger>()
+            val first = currentSets().first()
+            sets.updateSet(first.id) { copy(reps = 11) }
+            sets.completeSet(first.id)
+        }
+        composeRule.waitUntil(TIMEOUT_MS) { loggedSets() == 1 }
+        // A rep more than last time, and neither the score nor the set's mark says so.
+        composeRule.onAllNodesWithContentDescription("1 of 3 sets ahead of last time, +80 kg").assertCountEquals(0)
+        composeRule.onAllNodesWithContentDescription("Ahead of last time").assertCountEquals(0)
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
     fun tickingASetPopsTheCheckFillsTheRowAndRollsTheTotals() {
         logLastSession()
         launch()

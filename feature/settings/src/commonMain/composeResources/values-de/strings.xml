@@ -18,6 +18,8 @@
   <string name="rest_sound_off_body">Nur die Vibration</string>
   <string name="rpe">RPE-Spalte</string>
   <string name="rpe_body">Wie schwer jeder Satz war, von 1 bis 10</string>
+  <string name="race_last_time">Gegen das letzte Mal antreten</string>
+  <string name="race_last_time_body">Jeder Satz zeigt, ob er das letzte Mal schlägt, und ein Spielstand zählt mit</string>
 
   <string name="section_units">Einheiten</string>
   <string name="unit_weight">Gewicht</string>

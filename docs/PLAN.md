@@ -433,6 +433,9 @@ As of 2026-10-14:
       in like the check. Ahead is emerald like a set done; level and behind stay grey, never red.
     - **In the summary:** the same pill in the totals card, against each exercise's session before the workout
       (`WorkoutHistoryRepository.edit(id).previousSets`, the logger's own query).
+    - **A switch** (on request, as a score can feel like pressure): Settings › Workout › Race last time, on by
+      default (`Settings.raceLastTime`, the synced preference `logger.race_last_time`). Off, the logger and the
+      summary show neither the pill nor the marks.
     - **Tests:** the rule for each tracking type and the workout's sums (`LastTimeComparisonTest`), the logger
       (`LoggerFlowTest.racingLastTimeScoresEachSetDone`) and the summary in English and German
       (`WorkoutDoneFlowTest`).

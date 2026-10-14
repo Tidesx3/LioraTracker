@@ -11,6 +11,7 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
     column on, the mark should still show and the values shorten instead.
   - A lighter day: grey, never alarming. The summary's totals card shows the same score for the workout.
   - In German, and on the inner screen and in tabletop, where the header has more room.
+  - Settings › Workout › Race last time off: the pill and the marks go, in the logger and on the summary.
 
 - **A step earned: check on the phone** (added 2026-10-14). Start a routine with double progression and do
   every set at the top of its range:

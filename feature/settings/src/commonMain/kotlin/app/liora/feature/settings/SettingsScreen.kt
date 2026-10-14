@@ -79,6 +79,8 @@ import app.liora.feature.settings.resources.glass
 import app.liora.feature.settings.resources.glass_body
 import app.liora.feature.settings.resources.gym
 import app.liora.feature.settings.resources.language
+import app.liora.feature.settings.resources.race_last_time
+import app.liora.feature.settings.resources.race_last_time_body
 import app.liora.feature.settings.resources.rest_hint
 import app.liora.feature.settings.resources.rest_sound
 import app.liora.feature.settings.resources.rest_sound_hint
@@ -286,6 +288,12 @@ private fun SettingsContent(
                         description = stringResource(Res.string.rpe_body),
                         checked = settings.rpe,
                         onCheckedChange = { on -> onChange { it.copy(rpe = on) } },
+                    )
+                    SwitchRow(
+                        title = stringResource(Res.string.race_last_time),
+                        description = stringResource(Res.string.race_last_time_body),
+                        checked = settings.raceLastTime,
+                        onCheckedChange = { on -> onChange { it.copy(raceLastTime = on) } },
                     )
                     SettingRow(
                         stringResource(Res.string.gym),

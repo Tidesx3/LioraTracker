@@ -78,6 +78,7 @@ internal object SettingsCodec {
     private const val REST_WARMUP = "rest.warmup_sec"
     private const val REST_SOUND = "rest.sound"
     private const val RPE = "logger.rpe"
+    private const val RACE = "logger.race_last_time"
     private const val WEIGHT_UNIT = "units.weight"
     private const val DISTANCE_UNIT = "units.distance"
     private const val BODY_LENGTH_UNIT = "units.body_length"
@@ -127,6 +128,7 @@ internal object SettingsCodec {
                     .toString(),
             REST_SOUND to restSounds.getValue(settings.restSound),
             RPE to settings.rpe.toString(),
+            RACE to settings.raceLastTime.toString(),
             WEIGHT_UNIT to weightUnits.getValue(settings.units.weight),
             DISTANCE_UNIT to distanceUnits.getValue(settings.units.distance),
             BODY_LENGTH_UNIT to bodyLengthUnits.getValue(settings.units.bodyLength),
@@ -152,15 +154,16 @@ internal object SettingsCodec {
                     warmup = seconds(REST_WARMUP) ?: defaults.rest.warmup,
                 ),
             restSound = values[REST_SOUND]?.let { restSounds.keyFor(it) } ?: defaults.restSound,
-            rpe = values[RPE]?.toBooleanStrictOrNull() ?: defaults.rpe,
+            rpe = values.flag(RPE, defaults.rpe),
+            raceLastTime = values.flag(RACE, defaults.raceLastTime),
             units = decodeUnits(values, defaults.units),
             oneRepMaxFormula = values[FORMULA]?.let { formulas.keyFor(it) } ?: defaults.oneRepMaxFormula,
             stallWindow = values[STALL_WINDOW]?.toIntOrNull()?.takeIf { it > 0 }?.days ?: defaults.stallWindow,
             jumpLimitPercent = values[JUMP_LIMIT]?.toIntOrNull()?.takeIf { it > 0 } ?: defaults.jumpLimitPercent,
             progression = decodeProgression(values, defaults.progression),
             theme = values[THEME]?.let { themes.keyFor(it) } ?: defaults.theme,
-            dynamicColor = values[DYNAMIC_COLOR]?.toBooleanStrictOrNull() ?: defaults.dynamicColor,
-            glass = values[GLASS]?.toBooleanStrictOrNull() ?: defaults.glass,
+            dynamicColor = values.flag(DYNAMIC_COLOR, defaults.dynamicColor),
+            glass = values.flag(GLASS, defaults.glass),
         )
     }
 
@@ -184,4 +187,10 @@ internal object SettingsCodec {
     )
 
     private fun <K> Map<K, String>.keyFor(value: String): K? = entries.firstOrNull { it.value == value }?.key
+
+    /** A switch's row: "true" or "false", or [default] when there's none or it's something else. */
+    private fun Map<String, String>.flag(
+        key: String,
+        default: Boolean,
+    ): Boolean = this[key]?.toBooleanStrictOrNull() ?: default
 }

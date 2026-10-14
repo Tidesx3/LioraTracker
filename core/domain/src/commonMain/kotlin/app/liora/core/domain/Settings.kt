@@ -15,6 +15,11 @@ data class Settings(
     val restSound: RestSound = RestSound.Chime,
     /** An RPE column in the logger, to rate how hard each set was. Off for those who don't rate their sets. */
     val rpe: Boolean = false,
+    /**
+     * Racing last time: each set done marked ahead of last time's or not, and the score kept, in the logger
+     * and the summary. On for the push it gives; off for those who'd rather train without a score.
+     */
+    val raceLastTime: Boolean = true,
     val units: Units = Units(),
     val oneRepMaxFormula: OneRepMaxFormula = OneRepMaxFormula.Epley,
     /** How long a lift can go without a new best before it counts as stalled. */
