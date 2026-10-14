@@ -7,16 +7,21 @@ import app.liora.core.data.workout.toLoggedSet
 import app.liora.core.database.dao.ExerciseDao
 import app.liora.core.database.dao.WorkoutDao
 import app.liora.core.domain.BigJump
+import app.liora.core.domain.Earned
 import app.liora.core.domain.LastTime
 import app.liora.core.domain.LoadRounding
 import app.liora.core.domain.Progression
 import app.liora.core.domain.ProgressionTarget
 import app.liora.core.domain.Settings
+import app.liora.core.domain.TopOfRange
+import app.liora.core.model.Equipment
 import app.liora.core.model.GymProfile
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.Mass
+import app.liora.core.model.ProgressionRule
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineExercise
+import app.liora.core.model.WorkoutExercise
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -36,6 +41,14 @@ data class ExerciseProgression(
     val bigJump: BigJump? = null,
 )
 
+/** What a workout's sets earned against its routine's rep ranges, by exercise id. */
+data class StepsEarned(
+    /** Exercises with progression whose sets earned a step up, or the top of the stack. */
+    val steps: Map<String, Earned> = emptyMap(),
+    /** Exercises without progression whose working sets reached the top of every range: ready for more weight. */
+    val readyForMore: Set<String> = emptySet(),
+)
+
 /** The next targets of a routine's exercises that have progression, worked out from their history. */
 interface ProgressionRepository {
     /**
@@ -49,6 +62,15 @@ interface ProgressionRepository {
 
     /** [targets] for the routine with [routineId] starting now, again as it or the history changes. */
     fun observeTargets(routineId: String): Flow<Map<String, ExerciseProgression>>
+
+    /**
+     * What [exercises], those of a workout from [routine] (in progress or finished), earned: for each of the
+     * routine's exercises with a rule, the workout's completed sets of it as its next start will read them.
+     */
+    suspend fun earned(
+        routine: Routine,
+        exercises: List<WorkoutExercise>,
+    ): StepsEarned
 }
 
 internal class OfflineProgressionRepository(
@@ -63,7 +85,7 @@ internal class OfflineProgressionRepository(
         routine: Routine,
         at: Instant,
     ): Map<String, ExerciseProgression> {
-        val progressing = routine.exercises.filter { it.progression != null && it.sets.any { set -> set.reps != null } }
+        val progressing = routine.exercises.filter { it.progresses() }
         if (progressing.isEmpty()) return emptyMap()
         val gym = gyms.active.first()
         val preferences = settings.current()
@@ -77,6 +99,43 @@ internal class OfflineProgressionRepository(
         combine(routines.observeRoutine(routineId), workoutDao.observeFinished()) { routine, _ -> routine }
             .mapLatest { routine -> routine?.let { targets(it, clock.now()) }.orEmpty() }
 
+    override suspend fun earned(
+        routine: Routine,
+        exercises: List<WorkoutExercise>,
+    ): StepsEarned {
+        // An exercise in several places of the workout is one session of it, as the engine reads sessions.
+        val sessions = exercises.groupBy { it.exerciseId }.mapValues { (_, places) -> places.flatMap { it.sets } }
+        val planned = routine.exercises.filter { it.exerciseId in sessions }
+        if (planned.isEmpty()) return StepsEarned()
+        val gym = gyms.active.first()
+        val preferences = settings.current()
+        // The first of an exercise's places with a rule speaks for it, as it does for the targets.
+        val ruled = planned.filter { it.progresses() }.distinctBy { it.exerciseId }
+        val steps =
+            ruled
+                .mapNotNull { exercise ->
+                    val entity = exerciseDao.get(exercise.exerciseId) ?: return@mapNotNull null
+                    if (exercise.progression?.fits(entity.trackingType) != true) return@mapNotNull null
+                    val step = stepFor(exercise.exerciseId, entity.equipment, gym)
+                    Progression
+                        .earned(exercise.sets, sessions.getValue(exercise.exerciseId), step, preferences.progression)
+                        ?.let { exercise.exerciseId to it }
+                }.toMap()
+        val ruledIds = ruled.map { it.exerciseId }.toSet()
+        val ready =
+            planned
+                .filter { it.exerciseId !in ruledIds }
+                .distinctBy { it.exerciseId }
+                .filter { exercise ->
+                    val trackingType = exerciseDao.get(exercise.exerciseId)?.trackingType
+                    trackingType != null &&
+                        ProgressionRule.DoubleProgression.fits(trackingType) &&
+                        TopOfRange.readyForMore(exercise.sets, sessions.getValue(exercise.exerciseId))
+                }.map { it.exerciseId }
+                .toSet()
+        return StepsEarned(steps, ready)
+    }
+
     private suspend fun targetFor(
         exercise: RoutineExercise,
         routineId: String,
@@ -86,10 +145,7 @@ internal class OfflineProgressionRepository(
     ): ExerciseProgression? {
         val entity = exerciseDao.get(exercise.exerciseId) ?: return null
         if (exercise.progression?.fits(entity.trackingType) != true) return null
-        val ownStep = exerciseDao.getSettings(exercise.exerciseId)?.takeIf { it.sync.deletedAt == null }?.loadStepKg
-        val step = { from: Mass, up: Boolean ->
-            LoadRounding.step(from, up, entity.equipment, gym, ownStep?.let(::Mass))
-        }
+        val step = stepFor(exercise.exerciseId, entity.equipment, gym)
         // "Last time" from the same routine first, unless Settings say the latest session anywhere.
         val scope = routineId.takeIf { preferences.progression.lastTime == LastTime.SameRoutine }
         val sessions = sessions(exercise.exerciseId, scope, at)
@@ -110,6 +166,19 @@ internal class OfflineProgressionRepository(
                 )
         return ExerciseProgression(target, if (bigJump) BigJump(aimed, heaviest) else null)
     }
+
+    /** One load up or down from a weight, as [gym] loads [equipment], or by the exercise's own step if it has one. */
+    private suspend fun stepFor(
+        exerciseId: String,
+        equipment: Equipment,
+        gym: GymProfile,
+    ): (Mass, Boolean) -> Mass {
+        val ownStep = exerciseDao.getSettings(exerciseId)?.takeIf { it.sync.deletedAt == null }?.loadStepKg
+        return { from, up -> LoadRounding.step(from, up, equipment, gym, ownStep?.let(::Mass)) }
+    }
+
+    /** A rule, and sets with reps for it to aim at. */
+    private fun RoutineExercise.progresses(): Boolean = progression != null && sets.any { it.reps != null }
 
     /**
      * The exercise's latest two sessions in workouts started from [routineId], newest first; without

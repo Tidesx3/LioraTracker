@@ -1,5 +1,6 @@
 package app.liora.feature.logger.done
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,10 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,6 +25,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,6 +38,10 @@ import app.liora.core.designsystem.component.SectionHeader
 import app.liora.core.designsystem.component.Stat
 import app.liora.core.designsystem.component.StatMotion
 import app.liora.core.designsystem.component.StatRow
+import app.liora.core.designsystem.glass.GlassDefaults
+import app.liora.core.designsystem.glass.LocalGlassBackdrop
+import app.liora.core.designsystem.glass.glass
+import app.liora.core.designsystem.glass.glassPane
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.illustration.Illustration
 import app.liora.core.designsystem.illustration.LioraIllustration
@@ -45,6 +51,7 @@ import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.rememberDateFormatter
 import app.liora.core.designsystem.util.rememberNumberFormatter
 import app.liora.core.designsystem.util.workoutDisplayName
+import app.liora.core.domain.Earned
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.RepRange
 import app.liora.core.ui.ExerciseThumbnail
@@ -53,6 +60,10 @@ import app.liora.core.ui.currentLanguage
 import app.liora.core.ui.durationLabel
 import app.liora.core.ui.setSummary
 import app.liora.core.ui.volumeText
+import app.liora.core.ui.weightText
+import app.liora.feature.logger.StepBead
+import app.liora.feature.logger.glassShine
+import app.liora.feature.logger.rememberShine
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.cd_personal_record
 import app.liora.feature.logger.resources.done_best_sets
@@ -60,7 +71,12 @@ import app.liora.feature.logger.resources.done_close
 import app.liora.feature.logger.resources.done_count
 import app.liora.feature.logger.resources.done_date_time
 import app.liora.feature.logger.resources.done_first
+import app.liora.feature.logger.resources.done_maxed_out
+import app.liora.feature.logger.resources.done_ready_alone
+import app.liora.feature.logger.resources.done_ready_also
+import app.liora.feature.logger.resources.done_ready_title
 import app.liora.feature.logger.resources.done_sets
+import app.liora.feature.logger.resources.done_steps
 import app.liora.feature.logger.resources.done_title
 import app.liora.feature.logger.resources.finish_records
 import app.liora.feature.logger.resources.logger_stat_duration
@@ -128,6 +144,11 @@ private fun WorkoutDoneContent(
         ) {
             item(key = "hero") { Hero(state.number, Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) }
             item(key = "summary") { Summary(state, Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) }
+            if (state.steps.isNotEmpty() || state.readyForMore.isNotEmpty()) {
+                item(key = "steps") {
+                    StepsCard(state.steps, state.readyForMore, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                }
+            }
             if (state.recordEntries.isNotEmpty()) {
                 item(key = "records") {
                     RecordsCard(
@@ -223,6 +244,124 @@ private fun Summary(
     }
 }
 
+/**
+ * The steps up the workout earned, each from its weight to the next in a pill of the accent's glass, and,
+ * quieter, the exercises without progression that reached the top of every range. A violet pane, as the records'
+ * card is gold: its arrow pops in on a bead of glass and light sweeps across it once.
+ */
+@Composable
+private fun StepsCard(
+    steps: List<StepEntry>,
+    readyForMore: List<String>,
+    modifier: Modifier = Modifier,
+) {
+    val glass = LioraTheme.glass
+    val colors = MaterialTheme.colorScheme
+    val shape = MaterialTheme.shapes.medium
+    val shine = rememberShine(celebrate = steps.isNotEmpty())
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .then(
+                    if (glass.enabled) {
+                        Modifier.glassPane(shape, fill = glass.accentControl, rim = glass.cardRim)
+                    } else {
+                        Modifier.background(colors.primary.copy(alpha = STEPS_TINT), shape)
+                    },
+                ).glassShine({ shine.value }, shape)
+                .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            StepBead(onViolet = false, burst = false, pop = steps.isNotEmpty())
+            Text(
+                text =
+                    if (steps.isNotEmpty()) {
+                        pluralStringResource(Res.plurals.done_steps, steps.size, steps.size)
+                    } else {
+                        stringResource(Res.string.done_ready_title)
+                    },
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(start = 12.dp),
+            )
+        }
+        steps.forEach { StepRow(it) }
+        if (readyForMore.isNotEmpty()) {
+            val names = readyForMore.joinToString(", ")
+            Text(
+                text =
+                    if (steps.isNotEmpty()) {
+                        stringResource(Res.string.done_ready_also, names)
+                    } else {
+                        stringResource(Res.string.done_ready_alone, names)
+                    },
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/** An exercise's step: its name, and the weight lifted leading to the next, or how far the gym goes. */
+@Composable
+private fun StepRow(step: StepEntry) {
+    val colors = MaterialTheme.colorScheme
+    Row(
+        modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {},
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = step.exerciseName,
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.onSurfaceVariant,
+            modifier = Modifier.weight(1f).padding(end = 4.dp),
+        )
+        when (val earned = step.earned) {
+            is Earned.StepUp -> {
+                Text(
+                    text = weightText(earned.from),
+                    style = MaterialTheme.typography.bodyMedium.tabularNumbers(),
+                    color = colors.onSurfaceVariant,
+                )
+                Icon(
+                    painterResource(LioraIcons.Next),
+                    contentDescription = null,
+                    tint = colors.primary,
+                    modifier = Modifier.size(16.dp),
+                )
+                WeightPill(weightText(earned.to))
+            }
+
+            is Earned.TopOfTheStack -> {
+                WeightPill(stringResource(Res.string.done_maxed_out, weightText(earned.weight)))
+            }
+        }
+    }
+}
+
+/** The weight a step goes to, on a pill of the accent's glass like the app's main buttons. */
+@Composable
+private fun WeightPill(text: String) {
+    val glass = LioraTheme.glass
+    val colors = MaterialTheme.colorScheme
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleSmall.tabularNumbers(),
+        color = if (glass.enabled) glass.onAccent else colors.onPrimary,
+        modifier =
+            Modifier
+                .then(
+                    if (glass.enabled) {
+                        Modifier.glass(LocalGlassBackdrop.current, CircleShape, GlassDefaults.accent())
+                    } else {
+                        Modifier.background(colors.primary, CircleShape)
+                    },
+                ).padding(horizontal = 12.dp, vertical = 4.dp),
+    )
+}
+
 /** A row per exercise: its photo, name and sets, and its best set, with a trophy if it set a record. */
 @Composable
 private fun BestSets(
@@ -279,6 +418,9 @@ private fun BestSet(
 }
 
 private const val NONE = "–"
+
+/** As much violet as the records' card has gold. */
+private const val STEPS_TINT = 0.12f
 
 object WorkoutDoneTags {
     const val CLOSE = "done.close"

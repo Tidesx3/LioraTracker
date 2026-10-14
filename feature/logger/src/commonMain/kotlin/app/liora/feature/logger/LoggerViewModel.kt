@@ -6,6 +6,7 @@ import app.liora.core.data.exercise.ExerciseRepository
 import app.liora.core.data.gym.GymProfileRepository
 import app.liora.core.data.progression.ExerciseProgression
 import app.liora.core.data.progression.ProgressionRepository
+import app.liora.core.data.progression.StepsEarned
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
@@ -20,6 +21,7 @@ import app.liora.core.domain.GymProfiles
 import app.liora.core.domain.LoadRounding
 import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.PlateLoad
+import app.liora.core.domain.RangeTops
 import app.liora.core.domain.RecordKey
 import app.liora.core.domain.RestDefaults
 import app.liora.core.domain.RoutineChange
@@ -29,6 +31,7 @@ import app.liora.core.domain.SetField
 import app.liora.core.domain.SetPlaceholders
 import app.liora.core.domain.SetRef
 import app.liora.core.domain.Settings
+import app.liora.core.domain.TopOfRange
 import app.liora.core.domain.WarmupGenerator
 import app.liora.core.domain.WarmupSet
 import app.liora.core.domain.WorkoutOrder
@@ -124,6 +127,8 @@ sealed interface LoggerUiState {
         val endedAt: Instant? = null,
         /** Why progression set each exercise's targets, by exercise id, for a workout started from a routine. */
         val progression: Map<String, ExerciseProgression> = emptyMap(),
+        /** What today's sets earned so far, by exercise id; null until first worked out. */
+        val earned: StepsEarned? = null,
     ) : LoggerUiState {
         /** A finished workout being corrected: no clock, no rest, and Done instead of Finish. */
         val isFinished: Boolean get() = endedAt != null
@@ -177,6 +182,10 @@ sealed interface LoggerUiState {
 
         fun trackingTypeOf(exerciseId: String): TrackingType =
             exercises[exerciseId]?.trackingType ?: TrackingType.WeightReps
+
+        /** How many of [exerciseId]'s working sets today reached the top of their rep range, in all its places. */
+        fun topsOf(exerciseId: String): RangeTops =
+            TopOfRange.tops(workout.exercises.filter { it.exerciseId == exerciseId }.flatMap { it.sets })
 
         /** The columns a set of [trackingType] has in the logger, left to right. */
         fun fieldsOf(trackingType: TrackingType): List<SetField> = SetField.of(trackingType, withRpe = rpe)
@@ -389,13 +398,31 @@ class LoggerViewModel(
                     .associate { it.exerciseId to targets.getValue(it.id) }
             }.onStart { emit(emptyMap()) }
 
+    /**
+     * What today's sets earned so far, worked out again as sets are ticked off. Null until it first is, so
+     * steps already earned when the logger opens aren't taken for new ones.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val earned: Flow<StepsEarned?> =
+        combine(routine, opened.map { it?.workout?.exercises }.distinctUntilChanged(), ::Pair)
+            .mapLatest<_, StepsEarned?> { (plan, exercises) ->
+                if (plan == null || exercises == null) StepsEarned() else progressionTargets.earned(plan, exercises)
+            }.onStart { emit(null) }
+
     val uiState: StateFlow<LoggerUiState> =
         combine(
             sessions,
             exercises,
             restTimer,
             editing,
-            combine(routine, settings.settings, gymProfiles.active, gymProfiles.profiles, progression, ::Context),
+            combine(
+                routine,
+                settings.settings,
+                gymProfiles.active,
+                gymProfiles.profiles,
+                combine(progression, earned, ::Progressing),
+                ::Context,
+            ),
         ) { session, byId, timer, (cell, error), context ->
             val workout = session.workout?.workout
             if (workout == null) {
@@ -418,7 +445,8 @@ class LoggerViewModel(
                     edit = cell?.takeIf { workout.find(it.cell.setId) != null },
                     invalid = error?.takeIf { workout.find(it.setId) != null },
                     endedAt = session.workout.endedAt,
-                    progression = context.progression,
+                    progression = context.progressing.targets,
+                    earned = context.progressing.earned,
                 )
             }
         }
@@ -444,7 +472,13 @@ class LoggerViewModel(
         val settings: Settings,
         val gym: GymProfile,
         val gyms: List<GymProfile>,
-        val progression: Map<String, ExerciseProgression>,
+        val progressing: Progressing,
+    )
+
+    /** Progression's targets for the workout, and what its sets earned so far. */
+    private data class Progressing(
+        val targets: Map<String, ExerciseProgression>,
+        val earned: StepsEarned?,
     )
 
     private val active: LoggerUiState.Active? get() = uiState.value as? LoggerUiState.Active

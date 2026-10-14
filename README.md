@@ -33,7 +33,9 @@ takes in view. Health Connect gets every finished workout and brings in weight a
 Samsung Health. On the first start, a short walkthrough shows how Liora works, asks kilograms or pounds,
 and offers sync. With Phase 4, a routine's exercises can use double progression, so the next workout
 starts a step heavier once the sets reach the top of their rep ranges, and says why (Settings › Progression
-tunes how). A folder of routines can be a rotation, and the Train tab says which one is next, as does a
+tunes how). The logger marks each set that reaches the top of its range and celebrates the step the moment
+it's earned, and the summary lists the steps up, along with exercises without progression that are ready for
+more weight. A folder of routines can be a rotation, and the Train tab says which one is next, as does a
 home-screen widget, which follows the workout while it runs. On Android 16 the workout is a Live Update: the
 set and the rest in the status bar and on the lock screen. And the release app updates itself from this repo's
 GitHub Releases, saying what's new first. Phase 4 is done. Any AI can write routines for Liora: a program in a

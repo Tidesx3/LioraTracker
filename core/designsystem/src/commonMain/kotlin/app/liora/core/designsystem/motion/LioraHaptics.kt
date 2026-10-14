@@ -39,6 +39,18 @@ class LioraHaptics internal constructor(
             feedback.performHapticFeedback(HapticFeedbackType.Confirm)
         }
     }
+
+    /** A step up earned: light ticks rising to a firm one after the set's own, lighter than a record's beat. */
+    fun stepEarned() {
+        scope.launch {
+            delay(RECORD_DELAY)
+            feedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+            delay(STEP_BEAT)
+            feedback.performHapticFeedback(HapticFeedbackType.SegmentTick)
+            delay(STEP_BEAT)
+            feedback.performHapticFeedback(HapticFeedbackType.Confirm)
+        }
+    }
 }
 
 @Composable
@@ -51,3 +63,6 @@ fun rememberLioraHaptics(): LioraHaptics {
 /** Far enough from the set's tick that the record reads as a beat of its own. */
 private val RECORD_DELAY = 120.milliseconds
 private val RECORD_BEAT = 90.milliseconds
+
+/** Close together, so the three read as one rising gesture. */
+private val STEP_BEAT = 70.milliseconds

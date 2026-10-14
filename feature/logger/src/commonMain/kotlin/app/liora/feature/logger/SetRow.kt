@@ -111,6 +111,8 @@ internal class SetHints(
     val placeholder: LoggedSet,
     /** Whether the set broke a personal record. */
     val isRecord: Boolean = false,
+    /** Whether the set was done at the top of its rep range. */
+    val atTop: Boolean = false,
 )
 
 internal class SetRowActions(
@@ -181,8 +183,10 @@ internal fun SetRow(
     onReveal: (() -> Unit)? = null,
 ) {
     val set = state.set
-    // Records already set when the logger opens just show their trophy; a new one is celebrated.
+    // Records already set when the logger opens just show their trophy; a new one is celebrated. The same
+    // goes for the top of a range.
     val wasRecord = remember { state.hints.isRecord }
+    val wasAtTop = remember { state.hints.atTop }
     val dismiss = rememberSwipeToDismissBoxState()
     val revealer = remember { BringIntoViewRequester() }
     val revealing = onReveal != null
@@ -263,17 +267,27 @@ internal fun SetRow(
             state.columns.fields.forEach { field ->
                 val cell = CellRef(set.id, field)
                 val editing = state.edit?.takeIf { it.cell == cell }
-                ValueCell(
-                    text =
-                        editing?.text?.let { typedText(field, it) }
-                            ?: valueText(set, field, state.columns.trackingType, units, numbers),
-                    placeholder = valueText(state.hints.placeholder, field, state.columns.trackingType, units, numbers),
-                    focused = editing != null,
-                    invalid = state.invalid == field,
-                    completed = set.isCompleted,
-                    width = field.cellWidth,
-                    onClick = { actions.onCellClick(cell) },
-                )
+                Box {
+                    ValueCell(
+                        text =
+                            editing?.text?.let { typedText(field, it) }
+                                ?: valueText(set, field, state.columns.trackingType, units, numbers),
+                        placeholder =
+                            valueText(state.hints.placeholder, field, state.columns.trackingType, units, numbers),
+                        focused = editing != null,
+                        invalid = state.invalid == field,
+                        completed = set.isCompleted,
+                        width = field.cellWidth,
+                        onClick = { actions.onCellClick(cell) },
+                    )
+                    // On the reps' corner, as a record's trophy sits on the set number's.
+                    if (field == SetField.Reps && state.hints.atTop) {
+                        TopMark(
+                            pop = !wasAtTop,
+                            modifier = Modifier.align(Alignment.TopEnd).offset(x = TopOffset, y = -TopOffset),
+                        )
+                    }
+                }
             }
             SetCheck(completed = set.isCompleted, onClick = { actions.onToggleComplete(set.id) })
         }
@@ -413,6 +427,9 @@ private val CellGap = 6.dp
 
 /** How far a record's trophy sits out from the set number's corner. */
 private val RecordOffset = 6.dp
+
+/** How far the top of a range's chevron sits out from the reps cell's corner, inside the gap to the next. */
+private val TopOffset = 4.dp
 private val BadgeWidth = 32.dp
 private const val COMPLETED_ALPHA = 0.14f
 private const val PLACEHOLDER_ALPHA = 0.6f

@@ -10,6 +10,7 @@ import app.liora.core.model.WeightUnit
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
@@ -245,6 +246,39 @@ class ProgressionTest {
         assertTrue(Progression.isBigJump(kg(112.5), heaviest = kg(100.0), oneStepUp = kg(102.5), limitPercent = 10))
         // Nothing lifted lately: nothing to compare with.
         assertFalse(Progression.isBigJump(kg(100.0), heaviest = null, oneStepUp = kg(102.5), limitPercent = 10))
+    }
+
+    @Test
+    fun aStepIsEarnedWhenTheNextStartWouldStepUp() {
+        assertEquals(Earned.StepUp(kg(80.0), kg(85.0)), Progression.earned(plan, session(80.0, 12, 12, 12), machine))
+        // A rep short, or a set still to go.
+        assertNull(Progression.earned(plan, session(80.0, 12, 12, 11), machine))
+        assertNull(Progression.earned(plan, session(80.0, 12, 12), machine))
+        // Sets not ticked off yet don't count.
+        val unfinished = session(80.0, 12, 12) + LoggedSet("s", weight = kg(80.0), reps = 12)
+        assertNull(Progression.earned(plan, unfinished, machine))
+        // Nothing to step from.
+        assertNull(Progression.earned(plan, emptyList(), machine))
+    }
+
+    @Test
+    fun aStepIsEarnedAsSettingsCountTheTop() {
+        val total = ProgressionSettings(stepUp = StepUpWhen.TotalReps)
+        assertEquals(
+            Earned.StepUp(kg(80.0), kg(85.0)),
+            Progression.earned(plan, session(80.0, 13, 12, 11), machine, total),
+        )
+        // The first set at the top is enough, before the others are done.
+        val first = ProgressionSettings(stepUp = StepUpWhen.FirstSetAtTop)
+        assertEquals(Earned.StepUp(kg(80.0), kg(85.0)), Progression.earned(plan, session(80.0, 12), machine, first))
+    }
+
+    @Test
+    fun atTheTopOfTheRackTheTopOfTheStackIsEarned() {
+        val rack = { from: Mass, up: Boolean -> LoadRounding.step(from, up, Equipment.Dumbbell, gym) }
+        val heaviest = gym.dumbbells.maxOf { it.to.kilograms }
+
+        assertEquals(Earned.TopOfTheStack(kg(heaviest)), Progression.earned(plan, session(heaviest, 12, 12, 12), rack))
     }
 
     private fun session(

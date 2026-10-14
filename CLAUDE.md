@@ -156,6 +156,18 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - **Translations:** `verifyTranslations` (part of `check`) fails when a `values/` string has no `values-de/` counterpart, or when a German string is stale. `translatable="false"` opts a string out.
 - **Personal data:** `sample/` and `samples/` hold the user's real exports (e.g. Hevy) and are gitignored, so they exist only on the dev machine. The repo is public: tests use synthetic fixtures only, and no real workout data goes into commits.
 - **Visual polish:** Phase 2 gives the app its character (playful design, motion); the look (Violet, in Liquid Glass since 2026-10-11) is settled, see PLAN.md. Typeface is Sora, bundled in `designsystem` with its OFL licence.
+  - **The bar for anything new (the user's rule):** every new UI or UX piece has to look great, not just work,
+    and speak the same design language as the rest of the app. Plain tinted boxes and stock Material parts
+    aren't finished.
+  - Design it in Liquid Glass first, by the "One language" rule above: what floats bends, what sits on the page
+    is a pane with the rim light, and a highlight is the accent's glass (as `StepEarnedBanner` and the summary's
+    steps card are). Build it from `designsystem` (components, `LioraTheme.glass` tokens, `glass`/`glassPane`)
+    rather than ad hoc colors and shapes. It must still look clean with glass off.
+  - Match what's beside it: when a new card sits next to an older one, they get the same treatment, and the
+    older one is brought up rather than the new one brought down.
+  - Moments worth celebrating get motion and a haptic in the app's way (pop, `ConfettiBurst`, light sweeping
+    across glass), lighter than a record's, and never hold up a tap.
+  - Look at the screenshots before committing: glass in dark and light, the solid look, cover and inner screen.
 - **Foldables:** the Galaxy Z Fold 7 is the reference device. Its cover screen is about 411 dp wide (compact); the inner screen is about 984 × 1092 dp (expanded).
   - Layouts follow window size classes, never device checks. `currentWindowLayout()` (designsystem) holds the breakpoints: navigation rail from 600 dp, two panes from 840 dp.
   - Wide screens get a navigation rail and list-detail panes. Reading-heavy content is capped at about 600 dp with `Modifier.readableWidth()`.

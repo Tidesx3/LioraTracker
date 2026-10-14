@@ -78,6 +78,15 @@
   </plurals>
   <string name="routine_change_order">Übungen in der heutigen Reihenfolge</string>
   <string name="cd_personal_record">Persönlicher Rekord</string>
+  <string name="cd_top_of_range">Oberes Ende erreicht</string>
+  <plurals name="logger_tops">
+    <item quantity="one">%1$d von %2$d Satz am oberen Ende</item>
+    <item quantity="other">%1$d von %2$d Sätzen am oberen Ende</item>
+  </plurals>
+  <string name="logger_step_earned">Eine Stufe rauf!</string>
+  <string name="logger_step_next_time">Nächstes Mal %1$s</string>
+  <string name="logger_maxed_out">Ausgereizt!</string>
+  <string name="logger_maxed_out_body">Schwerer als %1$s geht’s hier nicht</string>
 
   <string name="edit_done">Fertig</string>
   <string name="edit_start">Beginn %1$s</string>
@@ -114,4 +123,12 @@
     <item quantity="other">%1$d Sätze</item>
   </plurals>
   <string name="done_close">Fertig</string>
+  <plurals name="done_steps">
+    <item quantity="one">%1$d Steigerung verdient!</item>
+    <item quantity="other">%1$d Steigerungen verdient!</item>
+  </plurals>
+  <string name="done_maxed_out">Ausgereizt bei %1$s</string>
+  <string name="done_ready_title">Bereit für mehr Gewicht?</string>
+  <string name="done_ready_alone">Jeder Satz am oberen Ende seiner Spanne: %1$s.</string>
+  <string name="done_ready_also">Auch am oberen Ende jeder Spanne: %1$s. Bereit für mehr Gewicht?</string>
 </resources>

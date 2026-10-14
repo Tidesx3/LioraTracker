@@ -5,7 +5,7 @@ Check it when a milestone or phase starts, and keep **Progress** below current w
 
 ## Progress
 
-As of 2026-10-11:
+As of 2026-10-14:
 
 - **Phase 0** is done.
 - **Phase 1**, milestones 1–5 are done: database and seed, domain, exercises and foldables, routines, and the logger
@@ -377,6 +377,62 @@ As of 2026-10-11:
   - **Fixed after 0.4.7:** the tabs' lists ended behind the tabs (Train's last Start, Progress' last best): the
     shell consumes the room the tabs take, so Material left it out of the insets `LioraScaffold` added it to.
     It goes into the content's padding instead (`LiquidGlassTest.theLastRoutinesStartClearsTheTabs`).
+- **On request (2026-10-14): motivation**, worked out with the user, in three parts, each committed on its own.
+  No schema change; part 3 adds one preference row.
+  - **Why:** the streak counts any week with a workout, which says nothing to someone who trains four or five
+    times a week, and only records get celebrated, which come more rarely the longer one trains. In 8–20 rep work on
+    machines and cables, the wins that keep coming are reps and steps up.
+  - **Part 1, a step earned (done):** double progression's reward.
+    - **The rule:** a session's sets earned a step when the engine, given them as last time, steps up.
+      `Progression.earned` runs `Progression.next` on that session alone and reads the reason: `TopReached`,
+      `TotalReached` or `FirstSetReached` give `Earned.StepUp(from, to)`, and `NothingHeavier` gives
+      `Earned.TopOfTheStack`. There's no rule of its own, so the celebration always agrees with what the next
+      start fills in, and follows Settings › Progression.
+    - **Where it's worked out:** `ProgressionRepository.earned(routine, exercises)`. It runs for each of the
+      routine's exercises with a rule (the first of its places speaks for it), on the workout's completed sets of
+      that exercise, as the engine's sessions take them. Exercises without a rule whose working sets reached the
+      top of every range the routine gives them are `readyForMore` (`TopOfRange.readyForMore`; ranges only, not
+      exact counts, and only for weight and reps).
+    - **In the logger:** a set that reaches the top of its range (its `targetReps`, a real range) gets a small
+      violet chevron on its reps cell's corner, whatever the exercise. Under the progression note, "2 of 3 sets
+      at the top" on the way there. When the step is earned, a banner in the exercise's card, under its sets:
+      "Step earned! 32.5 kg next time", or "Maxed out! Nothing heavier than 50 kg here". It comes with a small
+      burst in violet and emerald and a rising haptic, lighter than a record's. Steps already earned when the
+      logger opens just show; when a record and a step come with the same tick, the record's haptic plays.
+    - **In the summary:** a card after the totals with each step earned (from → to, or maxed out), and, quieter,
+      the exercises without progression that reached the top of every range: ready to go heavier.
+    - **Tests:** `earned` in the engine and `TopOfRange` (each step-up mode, a set short or not ticked
+      off, the top of the stack, ranges against exact counts); the repository (on the way, earned and what the
+      next start makes; ready for more without a rule); the logger and the summary in `ProgressionFlowTest`,
+      with screenshots at cover and inner sizes and in German.
+    - **As built:** the logger's `earned` flow asks the repository again whenever the workout's sets change, and
+      is null until it first answers, so the card (`ExerciseCard`) takes the steps there on opening as already
+      shown. The haptic is `LioraHaptics.stepEarned`, skipped within a second of a record's.
+    - **The look, in Liquid Glass** (on request: new parts must look great and speak the app's language, now a
+      rule in CLAUDE.md): the banner (`StepEarnedBanner`, `SetMotion.kt`) is a capsule of the accent's glass,
+      like the main buttons, with its arrow on a bead of lighter glass (`StepBead`) that the burst flies from,
+      and light sweeps across it once (`glassShine`); the chevron (`TopMark`) is a bead of the accent's glass
+      with the rim's light. The summary's steps card is a violet pane with the rim, its arrow on a bead that
+      pops in, the new weight on a pill of the accent's glass. `RecordsCard` (core:ui) became a gold pane
+      with the rim beside it, so the summary, workout detail and monthly report read as one. With glass off,
+      all of it is solid violet (`primaryContainer`, `primary`). `ConfettiBurst` takes other colors.
+  - **Part 2, against last time:** `LastTimeComparison` pairs each completed working set with its counterpart
+    as the Previous column does (`SetPlaceholders.previousFor`). A set is ahead when it's at least as heavy with
+    more reps, or heavier with at least as many; behind the other way round; mixed cases go by e1RM, and time
+    and distance by longer or farther. Only sets done so far count, so a workout isn't behind for being
+    unfinished. The logger's header gets a line ("▲ 7 of 9 sets ahead of last time · +240 kg"), each ticked
+    set's Previous cell an ▲, = or ▼, and the summary's totals card the same line for the whole workout.
+  - **Part 3, a weekly goal and rest weeks:**
+    - **The goal:** training days a week (days, so splitting off a cardio workout doesn't count twice). Its
+      preference row keeps the week each goal starts from, so a change never rewrites past weeks; before any
+      goal, one day a week counts, as today.
+    - **The streak:** `WeeklyGoal.streak` replaces `TrainingCalendar.weekStreak`, counting weeks in a row that met
+      the goal. Every 6 weeks met earn a rest week, at most 2 held; a missed week uses one, which keeps the
+      streak but doesn't add to it. It's worked out from history and never stored.
+    - **Where it shows:** a `WeekProgressRepository` feeds the Train tab's week card (in Next up's list item),
+      the Progress tab (the streak, and rested weeks in the consistency grid), the widget ("3/4") and the
+      summary ("Week goal reached"). The walkthrough asks for the goal (3 suggested); Settings › Workout changes
+      it.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.

@@ -76,6 +76,20 @@ data class BigJump(
     val heaviestLately: Mass,
 )
 
+/** What one session's sets earned under double progression: the moment the logger and the summary celebrate. */
+sealed interface Earned {
+    /** Up a step next time, from [from], the heaviest lifted, to [to]. */
+    data class StepUp(
+        val from: Mass,
+        val to: Mass,
+    ) : Earned
+
+    /** Every set at the top at [weight], and the gym loads nothing heavier for the exercise. */
+    data class TopOfTheStack(
+        val weight: Mass,
+    ) : Earned
+}
+
 /** The next session's targets for one exercise of a routine, and why. */
 data class ProgressionTarget(
     /** One per planned set, in order; null for warm-ups and drop sets, which keep the routine's values. */
@@ -109,14 +123,14 @@ object Progression {
         step: (from: Mass, up: Boolean) -> Mass,
         settings: ProgressionSettings = ProgressionSettings(),
     ): ProgressionTarget {
-        val counted = planned.indices.filter { planned[it].type.counts }
-        val last = sessions.firstOrNull()?.working().orEmpty()
+        val counted = planned.indices.filter { planned[it].type.countsForProgression }
+        val last = sessions.firstOrNull()?.progressionSets().orEmpty()
         if (last.isEmpty()) return firstTime(planned, counted)
         val sets = Pairing(planned, counted, last)
         val below =
             when (settings.belowRange) {
                 BelowRange.TwiceInARow -> {
-                    val before = sessions.getOrNull(1)?.working().orEmpty()
+                    val before = sessions.getOrNull(1)?.progressionSets().orEmpty()
                     sets.anyBelow() && Pairing(planned, counted, before).anyBelow()
                 }
 
@@ -134,6 +148,25 @@ object Progression {
             else -> null
         } ?: keepGoing(sets, settings.repAims)
     }
+
+    /**
+     * What [session], one session's sets of the exercise, earned: the step up the next start makes, or the top
+     * of the stack, or null while it isn't there. It is [next] with the session as last time, so the two always
+     * agree, however Settings count the top.
+     */
+    fun earned(
+        planned: List<RoutineSet>,
+        session: List<LoggedSet>,
+        step: (from: Mass, up: Boolean) -> Mass,
+        settings: ProgressionSettings = ProgressionSettings(),
+    ): Earned? =
+        when (val reason = next(planned, listOf(session), step, settings).reason) {
+            is ProgressionReason.TopReached -> Earned.StepUp(reason.from, reason.to)
+            is ProgressionReason.TotalReached -> Earned.StepUp(reason.from, reason.to)
+            is ProgressionReason.FirstSetReached -> Earned.StepUp(reason.from, reason.to)
+            is ProgressionReason.NothingHeavier -> Earned.TopOfTheStack(reason.weight)
+            else -> null
+        }
 
     /**
      * Whether [target] is a big jump worth a second look: more than [limitPercent] above [heaviest], the
@@ -254,11 +287,6 @@ object Progression {
         )
     }
 
-    /** The sets that count for progression: completed, and neither warm-ups nor drop sets. */
-    private fun List<LoggedSet>.working(): List<LoggedSet> = filter { it.isCompleted && it.type.counts }
-
-    private val SetType.counts: Boolean get() = this != SetType.Warmup && this != SetType.Drop
-
     /** One planned working set and its counterpart last time. */
     private class PairedSet(
         val range: RepRange?,
@@ -350,3 +378,13 @@ object Progression {
     /** A gram: weights round-trip through the gym's unit, which can leave crumbs. */
     private const val TOLERANCE_KG = 0.001
 }
+
+/** The sets that count for progression: completed, and neither warm-ups nor drop sets. */
+internal fun List<LoggedSet>.progressionSets(): List<LoggedSet> =
+    filter {
+        it.isCompleted &&
+            it.type.countsForProgression
+    }
+
+/** Warm-ups and drop sets keep the routine's values and don't count for progression. */
+internal val SetType.countsForProgression: Boolean get() = this != SetType.Warmup && this != SetType.Drop

@@ -92,6 +92,9 @@ import app.liora.feature.logger.resources.logger_stat_volume
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 /** What the logger asks of the app: closing, the summary of a finished workout, and the exercise picker. */
 internal class LoggerNavigationActions(
@@ -587,13 +590,31 @@ private fun LoggerHaptics(
     // logger opens don't count.
     val records = (state as? LoggerUiState.Active)?.newRecords?.keys
     var known by remember { mutableStateOf<Set<String>?>(null) }
+    var lastRecord by remember { mutableStateOf<TimeMark?>(null) }
     LaunchedEffect(records) {
         if (records == null) return@LaunchedEffect
         val before = known
         known = records
-        if (before != null && !before.containsAll(records)) haptics.record()
+        if (before != null && !before.containsAll(records)) {
+            haptics.record()
+            lastRecord = TimeSource.Monotonic.markNow()
+        }
+    }
+    // Steps earned the same way. They're worked out a moment after their set's record, and a record at the same
+    // tick is the bigger moment, so it has the say.
+    val steps = (state as? LoggerUiState.Active)?.earned?.steps?.keys
+    var knownSteps by remember { mutableStateOf<Set<String>?>(null) }
+    LaunchedEffect(steps) {
+        if (steps == null) return@LaunchedEffect
+        val before = knownSteps
+        knownSteps = steps
+        val recordJustNow = lastRecord?.let { it.elapsedNow() < SAME_TICK } == true
+        if (before != null && !before.containsAll(steps) && !recordJustNow) haptics.stepEarned()
     }
 }
+
+/** How close a step comes after a record to belong to the same tick. */
+private val SAME_TICK = 1.seconds
 
 private val FocusPaneWidth = 360.dp
 

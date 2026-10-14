@@ -4,6 +4,20 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
+- **A step earned: check on the phone** (added 2026-10-14). Start a routine with double progression and do
+  every set at the top of its range:
+  - Each set at the top gets its violet chevron on the reps, popping in with the tick, and "2 of 3 sets at the
+    top" counts on under the progression note.
+  - The last set: the banner pops in under the sets with a small violet and emerald burst, and the haptic rises
+    after the set's own tick. It should feel lighter than a record's; when the same set is a record, only the
+    record's plays. Say whether either needs to change.
+  - Close and open the logger: the banner just shows. The summary has "1 step up earned!" with the weights.
+  - A routine without progression, every set at the top: no banner, and the summary says it's ready for more.
+  - With the RPE column on: the chevron stays clear of the RPE cell.
+  - The glass: the banner is violet glass like Finish, light sweeps across it once after the pop, and the
+    chevrons read as little glass beads. In light and dark, with Colors from the wallpaper, and with Liquid
+    Glass off. On the summary the steps and records cards should look like one family.
+
 - **Liquid Glass: check on the phone** (added 2026-10-11). The screenshots come from Robolectric, so the
   phone has the last word, on the release build:
   - Scroll the Train tab and History under the tabs: the glass follows the content as it moves (never a

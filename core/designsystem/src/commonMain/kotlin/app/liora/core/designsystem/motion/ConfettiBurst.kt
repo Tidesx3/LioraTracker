@@ -27,16 +27,18 @@ import kotlin.random.Random
  * Confetti bursting from the middle of its bounds, once, as it first shows: for a personal record. The
  * pieces fly out mostly upwards, tumble and fall, and fade; they're drawn past its bounds, so give it a
  * small spot such as the trophy and keep it above its neighbours. It takes no input and holds nothing
- * up. [seed] picks the pieces, so the same burst looks the same every time (and in screenshots).
+ * up. [seed] picks the pieces, so the same burst looks the same every time (and in screenshots). [colors]
+ * replaces a record's gold for other moments.
  */
 @Composable
 fun ConfettiBurst(
     modifier: Modifier = Modifier,
     seed: Int = 0,
     reach: Dp = DefaultReach,
+    colors: List<Color>? = null,
 ) {
-    val colors =
-        listOf(
+    val palette =
+        colors ?: listOf(
             LioraTheme.colors.personalRecord,
             MaterialTheme.colorScheme.primary,
             LioraTheme.colors.dropSet,
@@ -48,7 +50,7 @@ fun ConfettiBurst(
     Spacer(
         modifier.drawBehind {
             val done = progress.value
-            if (done > 0f && done < 1f) pieces.forEach { drawPiece(it, done, colors, reach.toPx()) }
+            if (done > 0f && done < 1f) pieces.forEach { drawPiece(it, done, palette, reach.toPx()) }
         },
     )
 }

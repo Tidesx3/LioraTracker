@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -31,6 +32,7 @@ import app.liora.core.designsystem.component.LioraIconButton
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.util.NumberFormatter
 import app.liora.core.domain.SetRef
+import app.liora.core.domain.TopOfRange
 import app.liora.core.domain.restAfter
 import app.liora.core.model.Exercise
 import app.liora.core.model.ExerciseSettings
@@ -46,6 +48,7 @@ import app.liora.core.ui.setNumbers
 import app.liora.feature.logger.resources.Res
 import app.liora.feature.logger.resources.cd_more
 import app.liora.feature.logger.resources.logger_add_set
+import app.liora.feature.logger.resources.logger_tops
 import app.liora.feature.logger.resources.menu_add_warmups
 import app.liora.feature.logger.resources.menu_exercise_note
 import app.liora.feature.logger.resources.menu_remove
@@ -58,6 +61,7 @@ import app.liora.feature.logger.resources.menu_workout_note
 import app.liora.feature.logger.resources.superset
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /** What can be done to an exercise in the workout, each taking the workout exercise's id. */
@@ -144,13 +148,10 @@ internal fun ExerciseCard(
                 actions = actions,
             )
         }
-        state.progression[workoutExercise.exerciseId]?.let { progression ->
-            ProgressionNote(
-                reason = progression.target.reason,
-                bigJump = progression.bigJump,
-                modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 2.dp),
-            )
-        }
+        val step = state.earned?.steps?.get(workoutExercise.exerciseId)
+        // Steps already earned when the logger opens just show; one earned now is celebrated.
+        val earnedOnOpen = remember(state.earned != null) { step != null }
+        ProgressionLines(state, workoutExercise.exerciseId, earned = step != null)
         CardNotes(
             exercise = exercise,
             workoutExercise = workoutExercise,
@@ -176,6 +177,7 @@ internal fun ExerciseCard(
                                     previous = state.previousFor(ref),
                                     placeholder = state.placeholderFor(ref),
                                     isRecord = set.id in state.newRecords,
+                                    atTop = TopOfRange.reached(set),
                                 ),
                             isCurrent = state.current == ref,
                             edit = state.edit?.takeIf { it.cell.setId == set.id },
@@ -186,6 +188,13 @@ internal fun ExerciseCard(
                     onReveal = place::opened.takeIf { place.openingSetId == set.id },
                 )
             }
+        }
+        step?.let {
+            StepEarnedBanner(
+                earned = it,
+                celebrate = !earnedOnOpen,
+                modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 8.dp),
+            )
         }
         TextButton(onClick = {
             actions.onAddSets(workoutExercise.id, false)
@@ -205,6 +214,35 @@ internal fun ExerciseCard(
             },
             onDismiss = { choosingRest = false },
         )
+    }
+}
+
+/**
+ * Why progression set the exercise's targets, under its name, and on the way to the step, how many sets are at
+ * the top of their range; once it's [earned], the banner under the sets says so instead.
+ */
+@Composable
+private fun ProgressionLines(
+    state: LoggerUiState.Active,
+    exerciseId: String,
+    earned: Boolean,
+) {
+    val progression = state.progression[exerciseId] ?: return
+    val tops = state.topsOf(exerciseId)
+    Column {
+        ProgressionNote(
+            reason = progression.target.reason,
+            bigJump = progression.bigJump,
+            modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 2.dp),
+        )
+        if (!earned && tops.reached > 0) {
+            Text(
+                text = pluralStringResource(Res.plurals.logger_tops, tops.ranged, tops.reached, tops.ranged),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = NoteTextIndent, end = 12.dp, bottom = 2.dp),
+            )
+        }
     }
 }
 
@@ -343,3 +381,6 @@ internal fun SupersetLabel(modifier: Modifier = Modifier) {
 }
 
 private val ThumbnailSize = 48.dp
+
+/** Where the progression note's text starts, past its arrow: lines under it line up with it. */
+private val NoteTextIndent = 34.dp

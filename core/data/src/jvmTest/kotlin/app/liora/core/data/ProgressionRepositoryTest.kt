@@ -5,6 +5,7 @@ import app.liora.core.common.IdGenerator
 import app.liora.core.data.exercise.OfflineExerciseRepository
 import app.liora.core.data.gym.OfflineGymProfileRepository
 import app.liora.core.data.progression.OfflineProgressionRepository
+import app.liora.core.data.progression.StepsEarned
 import app.liora.core.data.routine.OfflineRoutineRepository
 import app.liora.core.data.settings.OfflineSettingsRepository
 import app.liora.core.data.sync.SyncStamper
@@ -13,6 +14,7 @@ import app.liora.core.data.workout.OfflineActiveWorkoutRepository
 import app.liora.core.database.TransactionRunner
 import app.liora.core.database.inMemoryLioraDatabase
 import app.liora.core.domain.BigJump
+import app.liora.core.domain.Earned
 import app.liora.core.domain.LastTime
 import app.liora.core.domain.ProgressionReason
 import app.liora.core.model.ActiveWorkout
@@ -202,6 +204,52 @@ class ProgressionRepositoryTest {
             assertEquals(List(3) { Mass(40.0) }, sets.map { it.weight })
             assertTrue(sets.all { it.aimReps == null })
         }
+
+    @Test
+    fun aWorkoutEarnsTheStepItsNextStartMakes() =
+        runTest {
+            val press = machine("Chest Press")
+            val push = routine("push", press)
+            val workout = workouts.startFromRoutine(push.id)
+            val working = workout.workingSets()
+            // Two sets at the top: on the way, not there yet.
+            working.take(2).forEach { log(it.id, 60.0, 12) }
+            assertEquals(StepsEarned(), progression.earned(push, workouts.activeWorkout.first()!!.exercises))
+
+            log(working.last().id, 60.0, 12)
+            val earned = progression.earned(push, workouts.activeWorkout.first()!!.exercises)
+            assertEquals(StepsEarned(steps = mapOf(press to Earned.StepUp(Mass(60.0), Mass(65.0)))), earned)
+            // The step is the one the next start makes.
+            workouts.finish()
+            clock.advance(1.days)
+            assertEquals(List(3) { Mass(65.0) }, workouts.startFromRoutine(push.id).workingSets().map { it.weight })
+        }
+
+    @Test
+    fun withoutARuleTheTopOfEveryRangeIsReadyForMore() =
+        runTest {
+            val press = machine("Chest Press")
+            val push = routine("push", press, rule = null)
+            workouts.startFromRoutine(push.id).workingSets().forEach { log(it.id, 60.0, 12) }
+
+            val earned = progression.earned(push, workouts.activeWorkout.first()!!.exercises)
+            assertEquals(StepsEarned(readyForMore = setOf(press)), earned)
+            // Another routine's exercises earn nothing here.
+            assertEquals(
+                StepsEarned(),
+                progression.earned(routine("pull", machine("Row")), workouts.activeWorkout.first()!!.exercises),
+            )
+        }
+
+    private suspend fun log(
+        setId: String,
+        kilograms: Double,
+        reps: Int,
+    ) {
+        workouts.sets.updateSet(setId) { copy(weight = Mass(kilograms), reps = reps) }
+        clock.advance(1.seconds)
+        workouts.sets.completeSet(setId)
+    }
 
     @Test
     fun updatingTheRoutineAtTheEndLeavesProgressionsPlanAlone() =

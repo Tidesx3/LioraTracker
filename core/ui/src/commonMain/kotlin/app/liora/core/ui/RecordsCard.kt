@@ -15,8 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import app.liora.core.designsystem.glass.glassPane
 import app.liora.core.designsystem.icon.LioraIcons
 import app.liora.core.designsystem.motion.ConfettiBurst
 import app.liora.core.designsystem.theme.LioraTheme
@@ -45,10 +47,17 @@ fun RecordsCard(
     modifier: Modifier = Modifier,
     celebrate: Boolean = false,
 ) {
+    val shape = MaterialTheme.shapes.medium
+    val tint = LioraTheme.colors.personalRecord.copy(alpha = BACKGROUND_ALPHA)
+    val glass = LioraTheme.glass
+    // With Liquid Glass, a gold-tinted pane catching the light at its rim, like the cards around it.
     Surface(
-        shape = MaterialTheme.shapes.medium,
-        color = LioraTheme.colors.personalRecord.copy(alpha = BACKGROUND_ALPHA),
-        modifier = modifier.fillMaxWidth(),
+        shape = shape,
+        color = if (glass.enabled) Color.Transparent else tint,
+        modifier =
+            modifier.fillMaxWidth().then(
+                if (glass.enabled) Modifier.glassPane(shape, fill = tint, rim = glass.cardRim) else Modifier,
+            ),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

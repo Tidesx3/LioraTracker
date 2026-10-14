@@ -3,8 +3,12 @@ package app.liora.feature.logger.done
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.liora.core.data.exercise.ExerciseRepository
+import app.liora.core.data.progression.ProgressionRepository
+import app.liora.core.data.progression.StepsEarned
+import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.WorkoutHistoryRepository
+import app.liora.core.domain.Earned
 import app.liora.core.domain.ExerciseProgress
 import app.liora.core.domain.HistoryRecords
 import app.liora.core.domain.OneRepMaxFormula
@@ -23,10 +27,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
 sealed interface WorkoutDoneUiState {
@@ -44,8 +50,22 @@ sealed interface WorkoutDoneUiState {
         val number: Int,
         /** How estimated one-rep maxes are worked out, for the records and the best sets. */
         val formula: OneRepMaxFormula = OneRepMaxFormula.Epley,
+        /** What its sets earned against its routine's rep ranges. */
+        val earned: StepsEarned = StepsEarned(),
     ) : WorkoutDoneUiState {
         val sets: Int = workout.exercises.sumOf { exercise -> exercise.sets.count { it.isCompleted } }
+
+        private val exerciseIds: List<String> = workout.exercises.map { it.exerciseId }.distinct()
+
+        /** The steps up earned, in workout order. */
+        val steps: List<StepEntry> =
+            exerciseIds.mapNotNull { id ->
+                earned.steps[id]?.let { StepEntry(exercises[id]?.name.orEmpty(), it) }
+            }
+
+        /** The names of the exercises without progression that reached the top of every range, in workout order. */
+        val readyForMore: List<String> =
+            exerciseIds.filter { it in earned.readyForMore }.mapNotNull { exercises[it]?.name }
 
         val volumeKg: Double = workout.exercises.sumOf { volumeOf(trackingTypeOf(it.exerciseId), it.sets) }
 
@@ -84,6 +104,12 @@ sealed interface WorkoutDoneUiState {
     }
 }
 
+/** A step up the workout earned: the exercise's name, and the weight it goes to, or the top of the stack. */
+data class StepEntry(
+    val exerciseName: String,
+    val earned: Earned,
+)
+
 /** One exercise of the workout as it went: how many sets, and the best of them. */
 data class ExerciseHighlight(
     val done: WorkoutExercise,
@@ -95,12 +121,17 @@ data class ExerciseHighlight(
     val bestIsRecord: Boolean,
 )
 
-/** The summary of a workout just finished: what it came to, its records and each exercise's best set. */
+/**
+ * The summary of a workout just finished: what it came to, the steps up and records it earned, and each
+ * exercise's best set.
+ */
 class WorkoutDoneViewModel(
     private val workoutId: String,
     history: WorkoutHistoryRepository,
     exerciseRepository: ExerciseRepository,
     settings: SettingsRepository,
+    routines: RoutineRepository,
+    progression: ProgressionRepository,
 ) : ViewModel() {
     private val language = MutableStateFlow<String?>(null)
 
@@ -113,8 +144,25 @@ class WorkoutDoneViewModel(
             .flatMapLatest { exerciseRepository.observeExercises(it) }
             .map { all -> all.associateBy { it.id } }
 
+    /** What the workout earned against its routine's rep ranges; nothing for one not started from a routine. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val earned =
+        history.workouts
+            .map { workouts -> workouts.firstOrNull { it.id == workoutId } }
+            .distinctUntilChanged()
+            .mapLatest { workout ->
+                val routine = workout?.routineId?.let { routines.get(it) }
+                if (workout == null ||
+                    routine == null
+                ) {
+                    StepsEarned()
+                } else {
+                    progression.earned(routine, workout.exercises)
+                }
+            }
+
     val uiState: StateFlow<WorkoutDoneUiState> =
-        combine(history.workouts, exercises, settings.settings) { workouts, exercisesById, chosen ->
+        combine(history.workouts, exercises, settings.settings, earned) { workouts, exercisesById, chosen, steps ->
             val workout = workouts.firstOrNull { it.id == workoutId } ?: return@combine WorkoutDoneUiState.Gone
             val records =
                 HistoryRecords.of(workouts, chosen.oneRepMaxFormula) {
@@ -127,6 +175,7 @@ class WorkoutDoneViewModel(
                 records = records.filterKeys { it in setIds },
                 number = workouts.count { it.startedAt <= workout.startedAt },
                 formula = chosen.oneRepMaxFormula,
+                earned = steps,
             )
         }
             // Records are measured against the whole history; keep that off the main thread.

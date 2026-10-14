@@ -82,6 +82,15 @@
   </plurals>
   <string name="routine_change_order">Takes today’s order</string>
   <string name="cd_personal_record">Personal record</string>
+  <string name="cd_top_of_range">Top of the range</string>
+  <plurals name="logger_tops">
+    <item quantity="one">%1$d of %2$d set at the top</item>
+    <item quantity="other">%1$d of %2$d sets at the top</item>
+  </plurals>
+  <string name="logger_step_earned">Step earned!</string>
+  <string name="logger_step_next_time">%1$s next time</string>
+  <string name="logger_maxed_out">Maxed out!</string>
+  <string name="logger_maxed_out_body">Nothing heavier than %1$s here</string>
 
   <string name="edit_done">Done</string>
   <string name="edit_start">Start %1$s</string>
@@ -119,4 +128,12 @@
     <item quantity="other">%1$d sets</item>
   </plurals>
   <string name="done_close">Done</string>
+  <plurals name="done_steps">
+    <item quantity="one">%1$d step up earned!</item>
+    <item quantity="other">%1$d steps up earned!</item>
+  </plurals>
+  <string name="done_maxed_out">Maxed out at %1$s</string>
+  <string name="done_ready_title">Ready to go heavier?</string>
+  <string name="done_ready_alone">Every set at the top of its range: %1$s.</string>
+  <string name="done_ready_also">Also at the top of every range: %1$s. Ready to go heavier?</string>
 </resources>

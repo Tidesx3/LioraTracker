@@ -65,5 +65,5 @@ val loggerModule =
         viewModel { params ->
             LoggerViewModel(params.getOrNull<String>(), get(), get(), get(), get(), get(), get(), get(), get())
         }
-        viewModel { params -> WorkoutDoneViewModel(params.get(), get(), get(), get()) }
+        viewModel { params -> WorkoutDoneViewModel(params.get(), get(), get(), get(), get(), get()) }
     }

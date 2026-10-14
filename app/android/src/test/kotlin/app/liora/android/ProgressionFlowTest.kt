@@ -4,6 +4,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.hasScrollToKeyAction
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -22,12 +23,15 @@ import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.ActiveWorkoutRepository
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.domain.RepAims
+import app.liora.core.model.ActiveWorkout
 import app.liora.core.model.Mass
 import app.liora.core.model.ProgressionRule
 import app.liora.core.model.RepRange
 import app.liora.core.model.Routine
 import app.liora.core.model.RoutineExercise
 import app.liora.core.model.RoutineSet
+import app.liora.feature.logger.LoggerTags
+import app.liora.feature.logger.done.WorkoutDoneTags
 import com.github.takahirom.roborazzi.captureRoboImage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -44,7 +48,9 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.android.controller.ActivityController
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
 /** Double progression in the app: the editor, the next targets on routine detail and in the logger, a cable's step. */
@@ -56,6 +62,7 @@ class ProgressionFlowTest {
     val composeRule = createEmptyComposeRule()
 
     private val koin get() = GlobalContext.get()
+    private val originalZone = java.util.TimeZone.getDefault()
 
     @Before
     fun seed() =
@@ -87,7 +94,10 @@ class ProgressionFlowTest {
         }
 
     @After
-    fun tearDown() = stopKoin()
+    fun tearDown() {
+        stopKoin()
+        java.util.TimeZone.setDefault(originalZone)
+    }
 
     @Test
     @Config(qualifiers = COVER)
@@ -224,6 +234,176 @@ class ProgressionFlowTest {
     }
 
     @Test
+    @Config(qualifiers = COVER)
+    fun aStepEarnedIsCelebratedThenSummedUp() {
+        earnAStep()
+        composeRule.onNodeWithText("35 kg next time").assertExists()
+        // Every set at the top of its range has its chevron; the count on the way there has made way for the step.
+        composeRule.onAllNodesWithContentDescription("Top of the range").assertCountEquals(3)
+        composeRule.onNodeWithText("3 of 3 sets at the top").assertDoesNotExist()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/progression_step_earned_dark.png")
+
+        finish()
+        waitForText("1 step up earned!")
+        composeRule.onNode(hasText("Triceps Pushdown") and hasText("30 kg") and hasText("35 kg")).assertExists()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/progression_done_step_dark.png")
+        // The next start makes the step the summary named.
+        assertEquals(
+            Mass(35.0),
+            runBlocking { koin.get<ActiveWorkoutRepository>().startFromRoutine("arms") }.heaviest(),
+        )
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun withoutProgressionTheSummarySaysWhatsReadyForMore() {
+        runBlocking {
+            koin.get<RoutineRepository>().save(
+                Routine(
+                    id = "back",
+                    name = "Back",
+                    exercises =
+                        listOf(
+                            RoutineExercise(
+                                id = "back-row",
+                                exerciseId = ROW,
+                                sets = List(3) { RoutineSet("back-$it", weight = Mass(60.0), reps = RepRange(10, 15)) },
+                            ),
+                        ),
+                ),
+            )
+        }
+        launch()
+        openRoutine("Back")
+        waitForText("Start workout")
+        composeRule.onNodeWithText("Start workout").performClick()
+        waitForText("Finish")
+        logToday(reps = 15, complete = 3)
+        // The top of the range shows on each set, but no step: the row has no progression.
+        composeRule.waitUntil(TIMEOUT_MS) {
+            composeRule.onAllNodesWithContentDescription("Top of the range").fetchSemanticsNodes().size == 3
+        }
+        composeRule.onNodeWithText("Step earned!").assertDoesNotExist()
+
+        finish()
+        waitForText("Ready to go heavier?")
+        composeRule.onNodeWithText("Every set at the top of its range: Seated Cable Row.").assertExists()
+    }
+
+    @Test
+    @Config(qualifiers = LIGHT_COVER)
+    fun aStepEarnedInLightGlass() {
+        earnAStep()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/progression_step_earned_light.png")
+
+        finish()
+        waitForText("1 step up earned!")
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/progression_done_step_light.png")
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
+    fun aStepEarnedWithoutGlass() {
+        runBlocking { koin.get<SettingsRepository>().update { it.copy(glass = false) } }
+        earnAStep()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/progression_step_earned_solid_dark.png")
+
+        finish()
+        waitForText("1 step up earned!")
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/progression_done_step_solid_dark.png")
+    }
+
+    @Test
+    @Config(qualifiers = INNER)
+    fun aStepEarnedOnTheInnerScreen() {
+        earnAStep()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/fold_inner_progression_step_earned_dark.png")
+    }
+
+    @Test
+    @Config(qualifiers = "de-$COVER")
+    fun aStepEarnedInGerman() {
+        earnAStep(GERMAN)
+        composeRule.onNodeWithText("Nächstes Mal 35 kg").assertExists()
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/de_progression_step_earned_dark.png")
+
+        finish(duration = "52 Min.")
+        waitForText("1 Steigerung verdient!")
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/de_progression_done_step_dark.png")
+    }
+
+    /**
+     * Starts Arms, whose pushdown reached the top last time and so starts a step heavier, at 30 kg. Two sets
+     * are done at the top, the third ticked off here: the step to 35 kg is earned.
+     */
+    private fun earnAStep(labels: Labels = ENGLISH) {
+        // The summary shows when it was trained: last time a week before the fixed day today's is moved to.
+        java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("Europe/Berlin"))
+        runBlocking {
+            val history = koin.get<WorkoutHistoryRepository>()
+            val last = history.workouts.first().single()
+            history.edit(last.id).setTimes(SHOWN_DAY - 7.days, SHOWN_DAY - 7.days + 1.hours)
+        }
+        launch()
+        openRoutine("Arms")
+        waitForText(labels.start)
+        composeRule.onNodeWithText(labels.start).performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasTestTag(LoggerTags.FINISH)) }
+        logToday(reps = 12, complete = 2)
+        waitForText(labels.onTheWay)
+        composeRule.onAllNodesWithContentDescription(labels.logSet).onFirst().performClick()
+        waitForText(labels.earned)
+    }
+
+    /** What [earnAStep] reads and taps, in the language the test runs in. */
+    private class Labels(
+        val start: String,
+        val logSet: String,
+        val onTheWay: String,
+        val earned: String,
+    )
+
+    /** Today's sets of the workout's one exercise at [reps], as typed in, and the first [complete] ticked off. */
+    private fun logToday(
+        reps: Int,
+        complete: Int,
+    ) = runBlocking {
+        val workouts = koin.get<ActiveWorkoutRepository>()
+        val sets =
+            workouts.activeWorkout
+                .first()!!
+                .exercises
+                .single()
+                .sets
+        sets.forEach { set -> workouts.sets.updateSet(set.id) { copy(reps = reps) } }
+        sets.take(complete).forEach { workouts.sets.completeSet(it.id) }
+    }
+
+    /**
+     * Finishes the workout from the logger and waits for its summary; then moves the workout to the fixed day,
+     * 52 minutes long, so the summary shows the same date and time in every run.
+     */
+    private fun finish(duration: String = "52 min") {
+        composeRule.onNode(hasTestTag(LoggerTags.FINISH)).performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasTestTag(LoggerTags.FINISH_CONFIRM)) }
+        composeRule.onNode(hasTestTag(LoggerTags.FINISH_CONFIRM)).performClick()
+        composeRule.waitUntil(TIMEOUT_MS) { nodeExists(hasTestTag(WorkoutDoneTags.CLOSE)) }
+        runBlocking {
+            val history = koin.get<WorkoutHistoryRepository>()
+            val today = history.workouts.first().maxBy { it.startedAt }
+            history.edit(today.id).setTimes(SHOWN_DAY, SHOWN_DAY + 52.minutes)
+        }
+        waitForText(duration)
+    }
+
+    private fun ActiveWorkout.heaviest(): Mass? =
+        exercises
+            .single()
+            .sets
+            .mapNotNull { it.weight }
+            .maxOrNull()
+
+    @Test
     @Config(qualifiers = INNER)
     fun onTheInnerScreen() {
         launch()
@@ -261,11 +441,15 @@ class ProgressionFlowTest {
     private companion object {
         const val COVER = "w411dp-h960dp-night-xxhdpi"
         const val INNER = "w984dp-h1092dp-night-xhdpi"
+        const val LIGHT_COVER = "w411dp-h960dp-notnight-xxhdpi"
         const val TIMEOUT_MS = 10_000L
         const val PUSHDOWN = "fedb.Triceps_Pushdown"
         const val ROW = "fedb.Seated_Cable_Rows"
         const val TOP_REACHED = "12 reps on all 3 sets at 25 kg last time, so 30 kg"
         const val EDITOR_LABEL = "Double progression: a step heavier at the top of the range, as Settings has it"
+
+        val ENGLISH = Labels("Start workout", "Log set", "2 of 3 sets at the top", "Step earned!")
+        val GERMAN = Labels("Training starten", "Satz abhaken", "2 von 3 Sätzen am oberen Ende", "Eine Stufe rauf!")
 
         /** Midday UTC, so the 1st of October from Hawaii to New Zealand. */
         val SHOWN_DAY = Instant.parse("2026-10-01T12:00:00Z")
