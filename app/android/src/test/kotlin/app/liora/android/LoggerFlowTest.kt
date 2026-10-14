@@ -110,6 +110,32 @@ class LoggerFlowTest {
 
     @Test
     @Config(qualifiers = COVER)
+    fun racingLastTimeScoresEachSetDone() {
+        logLastSession()
+        launch()
+        waitForText("Start")
+        composeRule.onNodeWithText("Start").performClick()
+        waitForText("Finish")
+        // Before the first tick: what there is to beat, so the list doesn't jump when the score starts.
+        waitForDescription("3 sets to beat from last time")
+
+        // A rep more than last time on the first set, the second as last time.
+        runBlocking {
+            val sets = GlobalContext.get().get<SetLogger>()
+            val (first, second) = currentSets()
+            sets.updateSet(first.id) { copy(reps = 11) }
+            sets.completeSet(first.id)
+            sets.completeSet(second.id)
+        }
+        // The pill reads as one sentence; the volume is the first set's extra rep at 80 kg.
+        waitForDescription("1 of 3 sets ahead of last time, +80 kg")
+        composeRule.onAllNodesWithContentDescription("Ahead of last time").assertCountEquals(1)
+        composeRule.onAllNodesWithContentDescription("Same as last time").assertCountEquals(1)
+        composeRule.onRoot().captureRoboImage("src/test/screenshots/logger_race_dark.png")
+    }
+
+    @Test
+    @Config(qualifiers = COVER)
     fun tickingASetPopsTheCheckFillsTheRowAndRollsTheTotals() {
         logLastSession()
         launch()
@@ -581,6 +607,11 @@ class LoggerFlowTest {
 
     private fun nodeExists(matcher: SemanticsMatcher) =
         composeRule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty()
+
+    private fun waitForDescription(description: String) =
+        composeRule.waitUntil(TIMEOUT_MS) {
+            composeRule.onAllNodesWithContentDescription(description).fetchSemanticsNodes().isNotEmpty()
+        }
 
     // Room emits on a background dispatcher that Compose's idling doesn't track, so wait explicitly.
     private fun waitForText(text: String) =

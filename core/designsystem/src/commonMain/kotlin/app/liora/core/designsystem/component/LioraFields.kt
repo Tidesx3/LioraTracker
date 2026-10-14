@@ -1,10 +1,17 @@
 package app.liora.core.designsystem.component
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -14,8 +21,13 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRowScope
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import app.liora.core.designsystem.glass.glassPane
 import app.liora.core.designsystem.theme.LioraTheme
 
 // Liora's chips, segmented buttons and text fields: Material's, as panes of glass with Liquid Glass on,
@@ -80,6 +92,45 @@ fun LioraAssistChip(
             },
         border = if (glass.enabled) glassBorder(glass) else AssistChipDefaults.assistChipBorder(true),
     )
+}
+
+/**
+ * A fact shown as a chip, not an action: nothing happens on a tap, and screen readers read it as text. The
+ * same size and shape as [LioraAssistChip]; with Liquid Glass, a pane of glass with the rim light like it,
+ * without, a tonal pill.
+ */
+@Composable
+fun LioraStatusChip(
+    label: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    leadingIcon: @Composable (() -> Unit)? = null,
+) {
+    val glass = LioraTheme.glass
+    val colors = MaterialTheme.colorScheme
+    val shape = AssistChipDefaults.shape
+    Row(
+        modifier =
+            modifier
+                .heightIn(min = AssistChipDefaults.Height)
+                .then(
+                    if (glass.enabled) {
+                        Modifier.glassPane(shape, fill = glass.control, rim = glass.cardRim)
+                    } else {
+                        Modifier.background(colors.surfaceContainerHigh, shape)
+                    },
+                ).padding(start = if (leadingIcon != null) 8.dp else 12.dp, end = 12.dp)
+                .semantics(mergeDescendants = true) {},
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        CompositionLocalProvider(
+            LocalContentColor provides colors.onSurface,
+            LocalTextStyle provides MaterialTheme.typography.labelLarge,
+        ) {
+            leadingIcon?.invoke()
+            label()
+        }
+    }
 }
 
 /** A suggestion to pick. With Liquid Glass, clear glass. */

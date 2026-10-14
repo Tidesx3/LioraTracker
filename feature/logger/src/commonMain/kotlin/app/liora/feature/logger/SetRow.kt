@@ -65,6 +65,7 @@ import app.liora.core.designsystem.theme.tabularNumbers
 import app.liora.core.designsystem.util.NumberFormatter
 import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.domain.SetField
+import app.liora.core.domain.VersusLastTime
 import app.liora.core.domain.clockDigitsText
 import app.liora.core.model.LoggedSet
 import app.liora.core.model.RepRange
@@ -113,6 +114,8 @@ internal class SetHints(
     val isRecord: Boolean = false,
     /** Whether the set was done at the top of its rep range. */
     val atTop: Boolean = false,
+    /** How the set did against [previous], once it's done. */
+    val versus: VersusLastTime? = null,
 )
 
 internal class SetRowActions(
@@ -187,6 +190,7 @@ internal fun SetRow(
     // goes for the top of a range.
     val wasRecord = remember { state.hints.isRecord }
     val wasAtTop = remember { state.hints.atTop }
+    val wasCompared = remember { state.hints.versus != null }
     val dismiss = rememberSwipeToDismissBoxState()
     val revealer = remember { BringIntoViewRequester() }
     val revealing = onReveal != null
@@ -251,18 +255,25 @@ internal fun SetRow(
                     )
                 }
             }
-            Text(
-                text = previousText(state, numbers),
-                style = MaterialTheme.typography.bodyMedium.tabularNumbers(),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+            // Last time's values, and once the set is done, how it did against them.
+            Row(
                 modifier =
                     Modifier
                         .weight(1f)
                         .clickable(enabled = state.hints.previous != null) { actions.onCopyPrevious(set.id) }
                         .padding(vertical = 8.dp),
-            )
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = previousText(state, numbers),
+                    style = MaterialTheme.typography.bodyMedium.tabularNumbers(),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                state.hints.versus?.let { VersusMark(it, pop = !wasCompared) }
+            }
             val units = LocalUnits.current
             state.columns.fields.forEach { field ->
                 val cell = CellRef(set.id, field)

@@ -4,6 +4,14 @@ Bugs and polish that don't belong to a milestone yet. The roadmap lives in READM
 
 ## Bugs and polish
 
+- **Racing last time: check on the phone** (added 2026-10-14). Start a routine you've done before:
+  - The pill under the totals says how many sets there are to beat, then keeps score as you tick ("Last time
+    ▲ 1 of 3 │ +80 kg"); the figures roll and the list doesn't jump at the first tick.
+  - Each set done gets ▲, = or ▼ after last time's values; on a long weight like "102.5 kg × 12" with the RPE
+    column on, the mark should still show and the values shorten instead.
+  - A lighter day: grey, never alarming. The summary's totals card shows the same score for the workout.
+  - In German, and on the inner screen and in tabletop, where the header has more room.
+
 - **A step earned: check on the phone** (added 2026-10-14). Start a routine with double progression and do
   every set at the top of its range:
   - Each set at the top gets its violet chevron on the reps, popping in with the tick, and "2 of 3 sets at the

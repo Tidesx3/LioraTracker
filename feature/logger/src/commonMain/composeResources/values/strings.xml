@@ -87,6 +87,33 @@
     <item quantity="one">%1$d of %2$d set at the top</item>
     <item quantity="other">%1$d of %2$d sets at the top</item>
   </plurals>
+  <string name="race_label">Last time</string>
+  <string name="race_score">%1$d of %2$d</string>
+  <plurals name="race_to_beat">
+    <item quantity="one">%1$d set to beat</item>
+    <item quantity="other">%1$d sets to beat</item>
+  </plurals>
+  <plurals name="race_to_beat_described">
+    <item quantity="one">%1$d set to beat from last time</item>
+    <item quantity="other">%1$d sets to beat from last time</item>
+  </plurals>
+  <plurals name="race_ahead">
+    <item quantity="one">%1$d of %2$d set ahead of last time</item>
+    <item quantity="other">%1$d of %2$d sets ahead of last time</item>
+  </plurals>
+  <string name="race_volume_more" translatable="false">+%1$s</string>
+  <string name="race_volume_less" translatable="false">−%1$s</string>
+  <plurals name="race_reps_more">
+    <item quantity="one">+%1$d rep</item>
+    <item quantity="other">+%1$d reps</item>
+  </plurals>
+  <plurals name="race_reps_fewer">
+    <item quantity="one">−%1$d rep</item>
+    <item quantity="other">−%1$d reps</item>
+  </plurals>
+  <string name="cd_ahead_of_last_time">Ahead of last time</string>
+  <string name="cd_level_with_last_time">Same as last time</string>
+  <string name="cd_behind_last_time">Behind last time</string>
   <string name="logger_step_earned">Step earned!</string>
   <string name="logger_step_next_time">%1$s next time</string>
   <string name="logger_maxed_out">Maxed out!</string>

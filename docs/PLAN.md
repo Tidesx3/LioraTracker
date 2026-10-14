@@ -416,12 +416,26 @@ As of 2026-10-14:
       pops in, the new weight on a pill of the accent's glass. `RecordsCard` (core:ui) became a gold pane
       with the rim beside it, so the summary, workout detail and monthly report read as one. With glass off,
       all of it is solid violet (`primaryContainer`, `primary`). `ConfettiBurst` takes other colors.
-  - **Part 2, against last time:** `LastTimeComparison` pairs each completed working set with its counterpart
-    as the Previous column does (`SetPlaceholders.previousFor`). A set is ahead when it's at least as heavy with
-    more reps, or heavier with at least as many; behind the other way round; mixed cases go by e1RM, and time
-    and distance by longer or farther. Only sets done so far count, so a workout isn't behind for being
-    unfinished. The logger's header gets a line ("▲ 7 of 9 sets ahead of last time · +240 kg"), each ticked
-    set's Previous cell an ▲, = or ▼, and the summary's totals card the same line for the whole workout.
+  - **Part 2, against last time (done):** racing last time, a small win almost every session.
+    - **The rule** (`LastTimeComparison` in `core/domain`): each working set pairs with its counterpart as the
+      Previous column pairs them (`SetPlaceholders.previousFor`); warm-ups don't count. A set is ahead when it's
+      at least as heavy and at least as long (reps, time or distance) and more of one, behind the other way
+      round, and level when the same. When one went up and the other down, weight and reps go by the e1RM
+      (load times reps past 12 reps, where there's no estimate), other loads by load times length; less
+      assistance is heavier, and a run of the same distance is ahead for being quicker. Only sets done count,
+      so a workout isn't behind for being unfinished. `AgainstLastTime` holds each set's verdict, how many sets
+      have a counterpart, and the volume (or, without load, the reps) the sets done add against theirs.
+    - **In the logger:** a scoreboard pill under the totals, "⟲ Last time ▲ 1 of 3 │ +80 kg" (`RaceChips`,
+      `RaceViews.kt`), on a `LioraStatusChip` (designsystem: a chip that's a fact, not an action, a glass pane
+      like the others). Before the first tick, "3 sets to beat", so the list doesn't jump when the score starts;
+      nothing when nothing has a counterpart. Screen readers hear one sentence ("1 of 3 sets ahead of last
+      time, +80 kg"). After each tick, the Previous cell gets an emerald ▲, a quiet "=" or a quiet ▼, popping
+      in like the check. Ahead is emerald like a set done; level and behind stay grey, never red.
+    - **In the summary:** the same pill in the totals card, against each exercise's session before the workout
+      (`WorkoutHistoryRepository.edit(id).previousSets`, the logger's own query).
+    - **Tests:** the rule for each tracking type and the workout's sums (`LastTimeComparisonTest`), the logger
+      (`LoggerFlowTest.racingLastTimeScoresEachSetDone`) and the summary in English and German
+      (`WorkoutDoneFlowTest`).
   - **Part 3, a weekly goal and rest weeks:**
     - **The goal:** training days a week (days, so splitting off a cardio workout doesn't count twice). Its
       preference row keeps the week each goal starts from, so a change never rewrites past weeks; before any

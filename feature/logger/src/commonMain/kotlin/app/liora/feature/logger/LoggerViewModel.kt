@@ -17,7 +17,9 @@ import app.liora.core.data.workout.SetLogger
 import app.liora.core.data.workout.WorkoutEditor
 import app.liora.core.data.workout.WorkoutHistoryRepository
 import app.liora.core.data.workout.WorkoutSession
+import app.liora.core.domain.AgainstLastTime
 import app.liora.core.domain.GymProfiles
+import app.liora.core.domain.LastTimeComparison
 import app.liora.core.domain.LoadRounding
 import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.PlateLoad
@@ -160,6 +162,9 @@ sealed interface LoggerUiState {
                             formula,
                         ).entries
                 }.associate { it.key to it.value }
+
+        /** Today against last time, set by set as the Previous column pairs them: the sets done so far. */
+        val race: AgainstLastTime = LastTimeComparison.of(workout.exercises, previous, ::trackingTypeOf, formula)
 
         /** What finishing now would keep, and what it would change. */
         fun finishSummary(): FinishSummary {

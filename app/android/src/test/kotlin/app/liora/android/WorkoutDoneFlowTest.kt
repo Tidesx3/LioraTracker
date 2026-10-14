@@ -6,6 +6,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -92,6 +93,8 @@ class WorkoutDoneFlowTest {
         composeRule.onNodeWithText("That’s a wrap").assertExists()
         composeRule.onNodeWithText("2 workouts in the books").assertExists()
         composeRule.onNodeWithText("3 new personal records!").assertExists()
+        // Against last week: the first bench set 5 kg heavier, the rest as then, the skipped one gone.
+        composeRule.onNodeWithContentDescription("1 of 6 sets ahead of last time, +50 kg").assertExists()
         // Each exercise with its sets and its best one; the bench's beat last week, the skipped set is gone.
         composeRule
             .onNode(
@@ -118,6 +121,7 @@ class WorkoutDoneFlowTest {
         finish(duration = "52 Min.")
         composeRule.onNodeWithText("Geschafft").assertExists()
         composeRule.onNodeWithText("2 Trainings im Kasten").assertExists()
+        composeRule.onNodeWithContentDescription("1 von 6 Sätzen besser als letztes Mal, +50 kg").assertExists()
         composeRule.onRoot().captureRoboImage("src/test/screenshots/de_workout_done_dark.png")
     }
 

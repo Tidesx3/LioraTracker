@@ -178,6 +178,7 @@ internal fun ExerciseCard(
                                     placeholder = state.placeholderFor(ref),
                                     isRecord = set.id in state.newRecords,
                                     atTop = TopOfRange.reached(set),
+                                    versus = state.race.sets[set.id],
                                 ),
                             isCurrent = state.current == ref,
                             edit = state.edit?.takeIf { it.cell.setId == set.id },

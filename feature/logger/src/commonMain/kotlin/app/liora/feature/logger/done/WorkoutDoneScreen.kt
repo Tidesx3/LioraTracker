@@ -61,6 +61,7 @@ import app.liora.core.ui.durationLabel
 import app.liora.core.ui.setSummary
 import app.liora.core.ui.volumeText
 import app.liora.core.ui.weightText
+import app.liora.feature.logger.RaceChips
 import app.liora.feature.logger.StepBead
 import app.liora.feature.logger.glassShine
 import app.liora.feature.logger.rememberShine
@@ -240,6 +241,7 @@ private fun Summary(
                 )
                 // The records are counted in their card's title, right below.
             }
+            RaceChips(state.race, Modifier.padding(top = 12.dp))
         }
     }
 }

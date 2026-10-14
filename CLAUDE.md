@@ -117,7 +117,7 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - **Colors:** use `MaterialTheme.colorScheme` for standard roles and `LioraTheme.colors` for set types, PRs and completion. The accent is violet (#5504CF; #A57BFF for text and buttons in dark). Numbers that change live (timers, weights) get `.tabularNumbers()`.
 - **Building blocks:** screens are a `LioraScaffold`, not Material's `Scaffold`; buttons, chips, fields and
   overlays are Liora's (`LioraButton`, `LioraTonalButton`, `LioraOutlinedButton`, `LioraFloatingButton`,
-  `LioraFilterChip`/`AssistChip`/`SuggestionChip`, `LioraSegmentedButton`, `LioraTextField`, `LioraAlertDialog`,
+  `LioraFilterChip`/`AssistChip`/`SuggestionChip`, `LioraStatusChip` (a fact, not an action), `LioraSegmentedButton`, `LioraTextField`, `LioraAlertDialog`,
   `LioraBottomSheet`, `LioraDropdownMenu`, `LioraSnackbarHost`, `LioraBottomBar`), not Material's, so they share
   the glass; Material's `TextButton` and `IconButton`, which have no container, stay. Cards are `LioraCard`; rows of figures are `Stat`s in a `StatRow` (designsystem), never hand-made label/value columns; records are listed with `RecordsCard` (`core:ui`), with values from `RecordHighlights`; empty screens are an `EmptyState` with one of the `Illustration` scenes (designsystem, drawn in code in theme tints; a new one goes into `Scenes.kt` and shows up in `IllustrationsTest`). Avoid sentences that pack data together ("Bench: heaviest, best 1RM"): give each item a row or a chip. Rows of a list sit on one `LioraCard` with `LioraCardDefaults.listItemColors()`.
 - **Liquid Glass** (`designsystem/glass`, on by default; Settings › Appearance turns it off): glass

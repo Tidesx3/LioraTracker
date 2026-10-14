@@ -545,26 +545,30 @@ private fun WorkoutStats(
     val duration = state.endedAt?.let { it - state.workout.startedAt } ?: rememberElapsedTime(state.workout.startedAt)
     val numbers = rememberNumberFormatter()
     // Each figure rolls as it changes: the clock every second, volume and sets with each set logged.
-    StatRow(modifier) {
-        Stat(
-            value = duration.formatAsClock(),
-            label = stringResource(Res.string.logger_stat_duration),
-            modifier = Modifier.weight(1f),
-            highlight = !state.isFinished,
-            motion = StatMotion.Roll,
-        )
-        Stat(
-            value = volumeText(state.volumeKg),
-            label = stringResource(Res.string.logger_stat_volume),
-            modifier = Modifier.weight(1f),
-            motion = StatMotion.Roll,
-        )
-        Stat(
-            value = numbers.format(state.completedSets),
-            label = stringResource(Res.string.logger_stat_sets),
-            modifier = Modifier.weight(1f),
-            motion = StatMotion.Roll,
-        )
+    Column(modifier) {
+        StatRow {
+            Stat(
+                value = duration.formatAsClock(),
+                label = stringResource(Res.string.logger_stat_duration),
+                modifier = Modifier.weight(1f),
+                highlight = !state.isFinished,
+                motion = StatMotion.Roll,
+            )
+            Stat(
+                value = volumeText(state.volumeKg),
+                label = stringResource(Res.string.logger_stat_volume),
+                modifier = Modifier.weight(1f),
+                motion = StatMotion.Roll,
+            )
+            Stat(
+                value = numbers.format(state.completedSets),
+                label = stringResource(Res.string.logger_stat_sets),
+                modifier = Modifier.weight(1f),
+                motion = StatMotion.Roll,
+            )
+        }
+        // From the start when there's a last time to race, so the list doesn't jump at the first tick.
+        RaceChips(state.race, Modifier.padding(top = 10.dp))
     }
 }
 

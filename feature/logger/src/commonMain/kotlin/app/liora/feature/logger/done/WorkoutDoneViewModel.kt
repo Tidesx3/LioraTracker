@@ -8,9 +8,11 @@ import app.liora.core.data.progression.StepsEarned
 import app.liora.core.data.routine.RoutineRepository
 import app.liora.core.data.settings.SettingsRepository
 import app.liora.core.data.workout.WorkoutHistoryRepository
+import app.liora.core.domain.AgainstLastTime
 import app.liora.core.domain.Earned
 import app.liora.core.domain.ExerciseProgress
 import app.liora.core.domain.HistoryRecords
+import app.liora.core.domain.LastTimeComparison
 import app.liora.core.domain.OneRepMaxFormula
 import app.liora.core.domain.RecordHighlights
 import app.liora.core.domain.RecordKey
@@ -52,8 +54,13 @@ sealed interface WorkoutDoneUiState {
         val formula: OneRepMaxFormula = OneRepMaxFormula.Epley,
         /** What its sets earned against its routine's rep ranges. */
         val earned: StepsEarned = StepsEarned(),
+        /** The session before it of each of its exercises: its completed sets, by exercise id. */
+        val previous: Map<String, List<LoggedSet>> = emptyMap(),
     ) : WorkoutDoneUiState {
         val sets: Int = workout.exercises.sumOf { exercise -> exercise.sets.count { it.isCompleted } }
+
+        /** The workout against last time, set by set as the logger raced it. */
+        val race: AgainstLastTime = LastTimeComparison.of(workout.exercises, previous, ::trackingTypeOf, formula)
 
         private val exerciseIds: List<String> = workout.exercises.map { it.exerciseId }.distinct()
 
@@ -161,8 +168,17 @@ class WorkoutDoneViewModel(
                 }
             }
 
+    /** Each exercise's session before this workout, as the logger's Previous column had it. */
+    private val previous = history.edit(workoutId).previousSets
+
     val uiState: StateFlow<WorkoutDoneUiState> =
-        combine(history.workouts, exercises, settings.settings, earned) { workouts, exercisesById, chosen, steps ->
+        combine(
+            history.workouts,
+            exercises,
+            settings.settings,
+            earned,
+            previous,
+        ) { workouts, exercisesById, chosen, steps, lastTime ->
             val workout = workouts.firstOrNull { it.id == workoutId } ?: return@combine WorkoutDoneUiState.Gone
             val records =
                 HistoryRecords.of(workouts, chosen.oneRepMaxFormula) {
@@ -176,6 +192,7 @@ class WorkoutDoneViewModel(
                 number = workouts.count { it.startedAt <= workout.startedAt },
                 formula = chosen.oneRepMaxFormula,
                 earned = steps,
+                previous = lastTime,
             )
         }
             // Records are measured against the whole history; keep that off the main thread.

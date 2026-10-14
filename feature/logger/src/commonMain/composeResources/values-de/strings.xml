@@ -83,6 +83,31 @@
     <item quantity="one">%1$d von %2$d Satz am oberen Ende</item>
     <item quantity="other">%1$d von %2$d Sätzen am oberen Ende</item>
   </plurals>
+  <string name="race_label">Letztes Mal</string>
+  <string name="race_score">%1$d von %2$d</string>
+  <plurals name="race_to_beat">
+    <item quantity="one">%1$d Satz zu schlagen</item>
+    <item quantity="other">%1$d Sätze zu schlagen</item>
+  </plurals>
+  <plurals name="race_to_beat_described">
+    <item quantity="one">%1$d Satz vom letzten Mal zu schlagen</item>
+    <item quantity="other">%1$d Sätze vom letzten Mal zu schlagen</item>
+  </plurals>
+  <plurals name="race_ahead">
+    <item quantity="one">%1$d von %2$d Satz besser als letztes Mal</item>
+    <item quantity="other">%1$d von %2$d Sätzen besser als letztes Mal</item>
+  </plurals>
+  <plurals name="race_reps_more">
+    <item quantity="one">+%1$d Wdh.</item>
+    <item quantity="other">+%1$d Wdh.</item>
+  </plurals>
+  <plurals name="race_reps_fewer">
+    <item quantity="one">−%1$d Wdh.</item>
+    <item quantity="other">−%1$d Wdh.</item>
+  </plurals>
+  <string name="cd_ahead_of_last_time">Besser als letztes Mal</string>
+  <string name="cd_level_with_last_time">Wie letztes Mal</string>
+  <string name="cd_behind_last_time">Schwächer als letztes Mal</string>
   <string name="logger_step_earned">Eine Stufe rauf!</string>
   <string name="logger_step_next_time">Nächstes Mal %1$s</string>
   <string name="logger_maxed_out">Ausgereizt!</string>
