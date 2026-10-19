@@ -10,6 +10,7 @@ import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.os.VibratorManager
 import app.liora.android.workout.RestAlarmReceiver
+import app.liora.android.workout.WorkoutNotificationText
 import app.liora.android.workout.WorkoutNotifications
 import app.liora.android.workout.WorkoutNotifier
 import app.liora.core.data.AppStartup
@@ -169,6 +170,13 @@ class WorkoutNotificationTest {
         }
         waitFor { notifications.activeNotifications.none { it.id == WorkoutNotifications.ID_WORKOUT } }
         assertNull(shadowOf(app.getSystemService(AlarmManager::class.java)).nextScheduledAlarm)
+    }
+
+    /** Android 17 shows its countdown right after the title, so there the title leaves the time out. */
+    @Test
+    fun theRestsTitleHasTheTimeLeftOnlyWhereTheCountdownSitsApart() {
+        assertEquals("Rest 1:30", WorkoutNotificationText(app, timeBesideTitle = false).restTitle("1:30"))
+        assertEquals("Rest", WorkoutNotificationText(app, timeBesideTitle = true).restTitle("1:30"))
     }
 
     /** A finished Push session: every set 80 kg × 10. */

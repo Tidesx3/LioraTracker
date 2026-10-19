@@ -1,6 +1,7 @@
 package app.liora.android.workout
 
 import android.content.Context
+import android.os.Build
 import app.liora.android.R
 import app.liora.core.designsystem.util.formatAsClock
 import app.liora.core.model.LoggedSet
@@ -15,7 +16,21 @@ import java.text.NumberFormat
  */
 internal class WorkoutNotificationText(
     private val context: Context,
+    /** Whether Android puts a notification's time right after its title: Android 17's notifications do. */
+    private val timeBesideTitle: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN,
 ) {
+    /**
+     * The rest's title. Up to Android 16 the system's countdown sits small in the header, so the title says the
+     * time left in big ("Rest 1:30"). From 17 the countdown follows the title itself, so the title only says
+     * "Rest": with the time in it too, the time showed twice, a second apart between updates.
+     */
+    fun restTitle(remaining: String): String =
+        if (timeBesideTitle) {
+            context.getString(R.string.notif_rest_title)
+        } else {
+            context.getString(R.string.notif_rest_remaining, remaining)
+        }
+
     /** "Barbell Bench Press · Set 3 of 4 · 80 kg × 8". */
     fun describe(next: NextSet): String =
         listOfNotNull(

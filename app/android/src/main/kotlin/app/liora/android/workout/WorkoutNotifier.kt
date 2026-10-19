@@ -186,11 +186,11 @@ class WorkoutNotifier(
         val rest = status.rest
         if (rest != null) {
             builder
-                .setContentTitle(context.getString(R.string.notif_rest_remaining, rest.remainingClock(clock.now())))
+                .setContentTitle(text.restTitle(rest.remainingClock(clock.now())))
                 .setContentText(next?.let { context.getString(R.string.notif_next, text.describe(it)) })
-                // Android's countdown in the header (and the Live Update chip) rounds the time left down,
-                // the title and the logger round it up: ending it just under a second later makes it read
-                // the same, flipping on the same whole seconds.
+                // Android's countdown (in the header, beside the title from Android 17, and in the Live
+                // Update chip) rounds the time left down, the title and the logger round it up: ending it just
+                // under a second later makes it read the same, flipping on the same whole seconds.
                 .setWhen(rest.endsAt.toEpochMilliseconds() + COUNTDOWN_ROUNDING_MS)
                 .setChronometerCountDown(true)
                 .setStyle(restProgress(rest))
