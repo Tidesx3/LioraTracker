@@ -9,7 +9,7 @@ complexity:
     ignoreAnnotated: ['Composable']
   TooManyFunctions:
     # DAOs are lists of queries; splitting them would only scatter related SQL.
-    excludes: ['**/dao/**', '**/test/**', '**/commonTest/**', '**/jvmTest/**', '**/androidHostTest/**', '**/androidDeviceTest/**']
+    excludes: ['**/dao/**', '**/test/**', '**/commonTest/**', '**/jvmTest/**', '**/androidHostTest/**', '**/androidDeviceTest/**', '**/benchmark/**']
 
 naming:
   FunctionNaming:
@@ -24,7 +24,8 @@ style:
     ignorePropertyDeclaration: true
     ignoreCompanionObjectPropertyDeclaration: true
     ignoreAnnotated: ['Composable', 'Preview']
-    excludes: ['**/test/**', '**/commonTest/**', '**/jvmTest/**', '**/androidHostTest/**', '**/androidDeviceTest/**', '**/theme/**']
+    # benchmark/: the made-up training and the journeys are tables of numbers, like test fixtures.
+    excludes: ['**/test/**', '**/commonTest/**', '**/jvmTest/**', '**/androidHostTest/**', '**/androidDeviceTest/**', '**/theme/**', '**/benchmark/**']
   UnusedPrivateMember:
     ignoreAnnotated: ['Preview']
   ReturnCount:

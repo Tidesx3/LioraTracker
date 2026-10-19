@@ -5,7 +5,7 @@ Check it when a milestone or phase starts, and keep **Progress** below current w
 
 ## Progress
 
-As of 2026-10-14:
+As of 2026-10-19:
 
 - **Phase 0** is done.
 - **Phase 1**, milestones 1–5 are done: database and seed, domain, exercises and foldables, routines, and the logger
@@ -464,6 +464,30 @@ As of 2026-10-14:
     - **Tests:** the streak, rest weeks, goal changes and days counted once (`WeekStreaksTest`), the goal from
       this week on (`WeekProgressRepositoryTest`), the card, the picker, light, inner screen and German
       (`WeeklyGoalFlowTest`, with a fixed clock), and the walkthrough's choice.
+- **On request (2026-10-19): measuring speed.** No schema change. Speed was judged by eye on the release build;
+  now it's measured on the phone, and the release build ships a baseline profile.
+  - **The benchmark build:** the baseline profile plugin (`androidx.baselineprofile`, benchmark 1.5.0) adds
+    `benchmarkRelease` (R8, to measure) and `nonMinifiedRelease` (to collect the profile from), copied from the
+    release build. Both install as `app.liora.benchmark`, signed with the debug key, never look for updates, and
+    carry `app/android/src/benchmark`: `BenchmarkDataActivity`, which the benchmarks start first. It restores a
+    year of made-up training once (`BenchmarkTraining`: a push/pull/legs rotation on machines and cables four days
+    a week with a bike warm-up and double progression, weeks with two days, two weeks at a holiday gym on its own
+    variations, core and a run monthly, weigh-ins every few days, a goal of 4 days; one seed, dated back from
+    today) through the real restore, then ends a workout left running and turns Liquid Glass on or off.
+    `BenchmarkTrainingTest` restores it in the debug unit tests, which get those sources too.
+  - **Benchmarks** (`benchmark/`, `liora.android.benchmark`, `com.android.test`): `StartupBenchmark`, a cold start to
+    the Train tab with nothing compiled and with the profile; the Train tab reports fully drawn once loaded
+    (`ReportDrawnWhen` in `core:ui`). `FrameBenchmark`, frame times scrolling each tab, switching tabs, opening a
+    workout and an exercise's progress, and ticking five sets, each with glass on and off. They find screens by
+    test tags (`testTagsAsResourceId` on the app's root), so they work in German and on either screen; the set's
+    tick is `logger.check` while open, and a workout starts through the widget's Start.
+  - **The baseline profile** (`BaselineProfileGenerator`): startup (also the startup profile, for dex layout) and
+    the same journeys, collected on the phone by `generateBaselineProfile` and committed under
+    `app/android/src/release/generated/`; release builds never wait for a device. `profileinstaller` installs it,
+    as sideloaded Liora has no store to.
+  - **Results:** `tools/benchmark/results.mjs` prints the medians and frame percentiles, saves a run to
+    `benchmark/results/` and compares against one.
+  - **Not run on the phone yet** (TODO.md): the first profile and the first numbers.
 - **Roadmap reordered (2026-10-09, on request):** programs and progression, the widget and Wear OS move up to
   Phase 4; the self-hosted server and the web GUI move back to Phase 5, as they're not a priority now. AI
   stays Phase 6, since it runs on the server.

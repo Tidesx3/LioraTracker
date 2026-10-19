@@ -47,6 +47,12 @@ glance = "1.2.0"
 # Health Connect: workouts out, weight and body fat in.
 healthConnect = "1.1.0"
 
+# Speed on a real phone (benchmark/): macrobenchmarks, and the baseline profile release builds ship with.
+benchmark = "1.5.0"
+profileinstaller = "1.4.1"
+uiautomator = "2.4.0"
+androidxTestExtJunit = "1.3.0"
+
 # Testing
 junit4 = "4.13.2"
 turbine = "1.2.1"
@@ -123,6 +129,10 @@ glance-material3 = { module = "androidx.glance:glance-material3", version.ref = 
 glance-appwidget-testing = { module = "androidx.glance:glance-appwidget-testing", version.ref = "glance" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "androidxLifecycle" }
 androidx-health-connect = { module = "androidx.health.connect:connect-client", version.ref = "healthConnect" }
+androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
+androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmark" }
+androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
+androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidxTestExtJunit" }
 
 junit4 = { module = "junit:junit", version.ref = "junit4" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
@@ -145,6 +155,8 @@ composeRules-ktlint = { module = "io.nlopez.compose.rules:ktlint", version.ref =
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-kmp-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+android-test = { id = "com.android.test", version.ref = "agp" }
+baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
@@ -160,4 +172,5 @@ liora-kmp-library = { id = "liora.kmp.library" }
 liora-cmp-library = { id = "liora.cmp.library" }
 liora-cmp-feature = { id = "liora.cmp.feature" }
 liora-android-application = { id = "liora.android.application" }
+liora-android-benchmark = { id = "liora.android.benchmark" }
 liora-room = { id = "liora.room" }

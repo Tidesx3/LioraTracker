@@ -20,6 +20,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.liora.core.designsystem.component.EmptyState
@@ -227,7 +228,7 @@ private fun LazyListScope.workoutCards(
             item = item,
             selected = item.id == selectedWorkoutId,
             onClick = { onOpenWorkout(item.id) },
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp).testTag(HistoryTags.WORKOUT),
         )
     }
 }
@@ -258,3 +259,8 @@ private val YearMonthSaver =
 
 private val DaySaver =
     Saver<LocalDate?, String>(save = { it?.toString() }, restore = { LocalDate.parse(it) })
+
+object HistoryTags {
+    /** A finished workout in the list. */
+    const val WORKOUT = "history.workout"
+}

@@ -25,6 +25,8 @@ jobs:
 
       # The routine tool for AIs (tools/routine): no dependencies, the runner's Node is enough.
       - run: node --test tools/routine/test/routine.test.mjs
+      # The benchmarks' results table (tools/benchmark); the benchmarks themselves need the phone.
+      - run: node --test tools/benchmark/test/results.test.mjs
 
       # Unit + Robolectric tests, Spotless, detekt, Android Lint, and a debug APK.
       - run: ./gradlew check :app:android:assembleDebug

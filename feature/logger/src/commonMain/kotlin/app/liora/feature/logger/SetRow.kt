@@ -300,7 +300,11 @@ internal fun SetRow(
                     }
                 }
             }
-            SetCheck(completed = set.isCompleted, onClick = { actions.onToggleComplete(set.id) })
+            SetCheck(
+                completed = set.isCompleted,
+                onClick = { actions.onToggleComplete(set.id) },
+                modifier = Modifier.testTag(if (set.isCompleted) LoggerTags.CHECK_DONE else LoggerTags.CHECK),
+            )
         }
     }
 }

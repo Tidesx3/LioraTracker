@@ -111,6 +111,30 @@ node tools/release/release.mjs             # tags v<version> and publishes liora
 It runs `check`, makes sure the APK is `app.liora` at that version and signed with the release key, then
 tags and publishes with `gh`. Only the release build updates itself; debug builds never look.
 
+### Measuring speed
+
+Speed is measured on the phone, on a release build, by the macrobenchmarks in `benchmark/`. They run against a
+benchmark build (`app.liora.benchmark`, signed with the debug key) that installs beside the real app with a year
+of made-up training: a push/pull/legs rotation, two weeks at a holiday gym, and weigh-ins. The first run restores
+it, which takes a minute, so measuring never touches your own data. Connect the phone over adb and unlock it:
+
+```sh
+./gradlew :app:android:generateBaselineProfile             # collects the baseline profile; commit what it writes
+./gradlew :benchmark:connectedBenchmarkReleaseAndroidTest  # startup and frames, about 20 minutes
+node tools/benchmark/results.mjs                           # the table; --save <name> keeps it, --compare <name> puts one beside it
+```
+
+- **Startup** (`StartupBenchmark`): a cold start until the Train tab shows the week and the routines, with no
+  code compiled ahead (as right after an install) and with the baseline profile (as the release build runs).
+- **Frames** (`FrameBenchmark`): scrolling each tab, switching tabs, opening a workout and an exercise's progress,
+  and ticking off sets, each with Liquid Glass on and off.
+- **The baseline profile** (`BaselineProfileGenerator`) is the code those journeys run, compiled when Liora is
+  installed instead of interpreted the first times. Release builds ship the one committed under
+  `app/android/src/release/generated/`; collect it again when screens change a lot.
+
+One class at a time: add `-Pandroid.testInstrumentationRunnerArguments.class=app.liora.benchmark.StartupBenchmark`.
+Compare runs on the same screen (folded or unfolded), and saved runs are in `benchmark/results/`.
+
 ## Routines from an AI
 
 Ask any AI for a routine, and Liora imports it: Train › the import button, Settings › Your data › Import
@@ -128,6 +152,7 @@ screen copies the format for you to paste into the chat.
 
 ```
 app/android        Android application: shell, navigation host, DI wiring
+benchmark          Speed on the phone: startup and frame benchmarks, and the baseline profile's journeys
 core/model         Pure domain types (KMP, also JVM for the future server)
 core/common        Ids (UUIDv7), shared utilities
 core/domain        Calculators and business rules (PRs, e1RM, volume, imports)
@@ -139,7 +164,8 @@ core/ui            Composables that know the domain: units, labels, records, the
 feature/*          One module per app area: train, logger, history, exercises, progress, body, settings
 sync/gdrive        Sync through the user's Google Drive
 integration/*      Health Connect, and Liora's releases on GitHub
-tools/             Exercise catalog, icons, rest sounds, publishing releases, and the routine tool for AIs
+tools/             Exercise catalog, icons, rest sounds, publishing releases, benchmark results, and the routine
+                   tool for AIs
 build-logic        Gradle convention plugins (liora.kmp.library, liora.cmp.feature, ...)
 ```
 

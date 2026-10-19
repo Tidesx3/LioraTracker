@@ -1,8 +1,10 @@
+import com.android.build.api.variant.HostTestBuilder
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.liora.android.application)
     alias(libs.plugins.roborazzi)
+    alias(libs.plugins.baselineprofile)
 }
 
 // Release signing comes from keystore.properties at the repo root (gitignored, see README).
@@ -80,8 +82,46 @@ roborazzi {
     outputDir.set(file("src/test/screenshots"))
 }
 
+// The baseline profile is collected on the phone (benchmark/, README › Measuring speed) and committed under
+// src/release/generated, so release builds never wait for a device.
+baselineProfile {
+    automaticGenerationDuringBuild = false
+    // Also lays out the dex files so the code startup runs is read first.
+    dexLayoutOptimization = true
+}
+
+// The plugin adds builds to measure (benchmarkRelease) and to collect the profile from (nonMinifiedRelease),
+// copied from the release build. They install as their own app with made-up training (src/benchmark), so
+// measuring never touches the real one, are signed with the debug key and never look for updates.
+val measuringBuildTypes = setOf("benchmarkRelease", "nonMinifiedRelease")
+androidComponents {
+    finalizeDsl { android ->
+        android.buildTypes.filter { it.name in measuringBuildTypes }.forEach { buildType ->
+            buildType.applicationIdSuffix = ".benchmark"
+            buildType.versionNameSuffix = "-benchmark"
+            buildType.signingConfig = android.signingConfigs.getByName("debug")
+            buildType.buildConfigField("boolean", "UPDATES_FROM_GITHUB", "false")
+        }
+    }
+    onVariants(selector().all()) { variant ->
+        if (variant.buildType in measuringBuildTypes) {
+            variant.sources.kotlin?.addStaticSourceDirectory("src/benchmark/kotlin")
+            variant.sources.manifests.addStaticManifestFile("src/benchmark/AndroidManifest.xml")
+        }
+        // Tested with the debug build's unit tests, the only ones there are (BenchmarkTrainingTest).
+        if (variant.buildType == "debug") {
+            variant.hostTests[HostTestBuilder.UNIT_TEST_TYPE]
+                ?.sources
+                ?.kotlin
+                ?.addStaticSourceDirectory("src/benchmark/kotlin")
+        }
+    }
+}
+
 dependencies {
     implementation(projects.core.model)
+    // Ids and HLCs, for the benchmark builds' made-up training (src/benchmark).
+    implementation(projects.core.common)
     implementation(projects.core.data)
     implementation(projects.core.database)
     implementation(projects.core.domain)
@@ -120,6 +160,10 @@ dependencies {
 
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
+
+    // Installs the baseline profile on phones that don't get it from a store, as sideloaded Liora doesn't.
+    implementation(libs.androidx.profileinstaller)
+    baselineProfile(projects.benchmark)
 
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.android)

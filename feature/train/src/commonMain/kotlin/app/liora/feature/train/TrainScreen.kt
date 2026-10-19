@@ -58,6 +58,7 @@ import app.liora.core.navigation.LocalPaneRole
 import app.liora.core.navigation.PaneRole
 import app.liora.core.navigation.SharedKeys
 import app.liora.core.navigation.rememberSharedContainer
+import app.liora.core.ui.ReportDrawnWhen
 import app.liora.core.ui.UpdateCard
 import app.liora.core.ui.WeekCard
 import app.liora.core.ui.WeeklyGoalDialog
@@ -121,6 +122,8 @@ internal fun TrainScreen(
     val firstDayOfWeek = rememberDateFormatter().firstDayOfWeek
     LaunchedEffect(firstDayOfWeek) { viewModel.setFirstDayOfWeek(firstDayOfWeek) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    // Liora opens here: startup is over once the routines and the week show.
+    ReportDrawnWhen { !uiState.loading }
 
     TrainContent(
         uiState = uiState,

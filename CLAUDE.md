@@ -16,7 +16,14 @@ On the Windows dev machine the JDK isn't on PATH in every shell. Export it first
 - `./gradlew check`: all tests plus Spotless, detekt and Android Lint. Run it before committing.
 - `./gradlew spotlessApply`: formats code (ktlint_official style plus compose-rules).
 - `./gradlew :app:android:assembleDebug` or `installDebug`.
-- `./gradlew :app:android:installRelease`: R8-shrunk and signed with the key in the gitignored `keystore.properties` (README › Release builds); unsigned without it. Judge speed on this build, never on debug.
+- `./gradlew :app:android:installRelease`: R8-shrunk and signed with the key in the gitignored `keystore.properties` (README › Release builds); unsigned without it. Try speed on this build, never on debug.
+- **Speed** is measured, not judged by eye (README › Measuring speed; needs the phone over adb):
+  `./gradlew :benchmark:connectedBenchmarkReleaseAndroidTest`, then `node tools/benchmark/results.mjs [--save|--compare <name>]`.
+  `./gradlew :app:android:generateBaselineProfile` collects the baseline profile into `app/android/src/release/generated/`
+  (committed). They run on the benchmark build (`app.liora.benchmark`, its made-up training in
+  `app/android/src/benchmark`, tested by `BenchmarkTrainingTest`) and find screens by test tags, which UI Automator
+  sees as resource ids: renaming a tag that `benchmark/.../Liora.kt` lists breaks them. The table's own tests:
+  `node --test tools/benchmark/test/results.test.mjs` (CI runs them).
 - `node tools/release/release.mjs [--dry-run]`: publishes a GitHub release of the version in `version.properties`, with the notes in `docs/releases/<version>.md` (README › Publishing a release). Publishing is public: only when the user asks.
 - `./gradlew :app:android:recordRoborazziDebug`: re-renders screenshots to `app/android/src/test/screenshots/`. Read the PNGs to review UI changes.
 - `java tools/icons/MakeIcons.java logo.png app/android/src/main/res build/icon-preview.png`: rebuilds the launcher and notification icons from `logo.png` (light artwork on black) and writes a preview sheet to check them by eye.

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- The app it measures: the benchmark build of Liora, installed beside the real one. -->
+    <queries>
+        <package android:name="app.liora.benchmark" />
+    </queries>
+</manifest>

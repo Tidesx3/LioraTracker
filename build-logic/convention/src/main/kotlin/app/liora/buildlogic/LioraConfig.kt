@@ -10,6 +10,9 @@ object LioraConfig {
     const val TARGET_SDK = 37
     const val MIN_SDK = 26
 
+    /** Macrobenchmarks need Android 9, and collecting a baseline profile without root needs 13. */
+    const val BENCHMARK_MIN_SDK = 28
+
     /** Languages every UI string must be translated into (English is the default). */
     val TRANSLATED_LOCALES = listOf("de")
 

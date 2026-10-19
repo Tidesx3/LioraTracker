@@ -627,6 +627,10 @@ object LoggerTags {
     const val CELL = "logger.cell"
     const val PAD = "logger.pad"
 
+    /** A set's tick while it's open, and once it's done: the benchmarks tick the next set by it. */
+    const val CHECK = "logger.check"
+    const val CHECK_DONE = "logger.check.done"
+
     /** The time left in the rest pill. */
     const val REST_TIME = "logger.rest.time"
 

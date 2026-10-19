@@ -13,6 +13,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import app.liora.android.di.ProcessScope
@@ -94,6 +97,8 @@ class MainActivity : ComponentActivity() {
                     LocalHealthConnectScreens provides healthConnectScreens,
                 ) {
                     LioraApp(
+                        // UI Automator finds the screens' test tags as resource ids (benchmark/).
+                        modifier = Modifier.semantics { testTagsAsResourceId = true },
                         showWalkthrough = walkthrough,
                         openLogger = openLogger,
                         onOpenLoggerHandle = { openLogger = false },

@@ -46,6 +46,10 @@ gradlePlugin {
             id = libs.plugins.liora.android.application.get().pluginId
             implementationClass = "AndroidApplicationConventionPlugin"
         }
+        register("androidBenchmark") {
+            id = libs.plugins.liora.android.benchmark.get().pluginId
+            implementationClass = "AndroidBenchmarkConventionPlugin"
+        }
         register("room") {
             id = libs.plugins.liora.room.get().pluginId
             implementationClass = "RoomConventionPlugin"

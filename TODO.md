@@ -7,6 +7,14 @@ this file's history.
 
 ## Bugs and polish
 
+- **Benchmarks: the first run on the phone** (added 2026-10-19). Everything builds and the made-up training
+  restores in tests, but nothing has run on the Fold yet (README › Measuring speed):
+  - `./gradlew :app:android:generateBaselineProfile`, folded, then commit `app/android/src/release/generated/`.
+  - `./gradlew :benchmark:connectedBenchmarkReleaseAndroidTest`, then
+    `node tools/benchmark/results.mjs --save 0.4.10-cover`, and commit `benchmark/results/`.
+  - Check that `assets/dexopt/baseline.prof` is in the next release APK, and see what the numbers say about
+    startup's two blocking reads in `MainActivity` and about Liquid Glass's cost.
+
 - **Strong exports from a German phone are untested.** The parser reads Strong's English column names in
   both layouts, with decimal commas. If Strong localizes its headers, the file is reported as "not from Hevy
   or Strong"; a sample would tell which names to add (`StrongCsv`).

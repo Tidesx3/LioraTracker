@@ -311,6 +311,7 @@ internal fun RecordsBoard(
                 row = row,
                 selected = row.entry.exerciseId == selectedExerciseId,
                 onClick = { onOpenExercise(row.entry.exerciseId) },
+                modifier = Modifier.testTag(ProgressTags.BEST),
             )
         }
         if (!showAll && rows.size > BOARD_ROWS) {
@@ -385,6 +386,9 @@ private fun kotlin.time.Instant.localDate(): LocalDate = toLocalDateTime(TimeZon
 /** Test tags for the Progress tab. */
 object ProgressTags {
     const val CONSISTENCY = "progress.consistency"
+
+    /** An exercise's best on the board. */
+    const val BEST = "progress.best"
 }
 
 private const val WEEKS = 16
